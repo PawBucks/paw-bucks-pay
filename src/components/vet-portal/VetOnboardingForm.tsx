@@ -3,7 +3,7 @@ import { useNavigate } from"react-router-dom";
 import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, Edit, FileText, PartyPopper, Phone, Save, Shield, ShieldCheck, Stethoscope, User, Wallet } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, Edit, FileText, PartyPopper, Phone, Save, Shield, ShieldCheck, Stethoscope, User, Wallet, PawPrint, Home, Citrus, Star, Smile, Dog, Smartphone, Cross, Bluetooth as Tooth, HeartPulse, Bug, Siren, Heart, Microscope, type LucideIcon } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
@@ -105,15 +105,15 @@ const ACCREDITATIONS = [
  { id:"cat-friendly", label:"Cat-Friendly Practice" },
 ];
 
-const INSURANCE_PARTNERS = [
- { id:"trupanion", name:"Trupanion", icon:"🐾" },
- { id:"nationwide", name:"Nationwide", icon:"🏠" },
- { id:"lemonade", name:"Lemonade", icon:"🍋" },
- { id:"pets-best", name:"Pets Best", icon:"⭐" },
- { id:"embrace", name:"Embrace", icon:"🤗" },
- { id:"healthy-paws", name:"Healthy Paws", icon:"🐕" },
- { id:"figo", name:"Figo", icon:"📱" },
- { id:"aspca", name:"ASPCA", icon:"🏥" },
+const INSURANCE_PARTNERS: { id: string; name: string; Icon: LucideIcon }[] = [
+ { id:"trupanion", name:"Trupanion", Icon: PawPrint },
+ { id:"nationwide", name:"Nationwide", Icon: Home },
+ { id:"lemonade", name:"Lemonade", Icon: Citrus },
+ { id:"pets-best", name:"Pets Best", Icon: Star },
+ { id:"embrace", name:"Embrace", Icon: Smile },
+ { id:"healthy-paws", name:"Healthy Paws", Icon: Dog },
+ { id:"figo", name:"Figo", Icon: Smartphone },
+ { id:"aspca", name:"ASPCA", Icon: Building2 },
 ];
 
 const PIMS_OPTIONS = [
@@ -127,15 +127,15 @@ const PIMS_OPTIONS = [
 "Other",
 ];
 
-const SERVICES_PROVIDED = [
- { id:"general", label:"General Wellness", icon:"🩺" },
- { id:"dental", label:"Dental Care", icon:"🦷" },
- { id:"surgery", label:"Surgery", icon:"⚕️" },
- { id:"exotics", label:"Exotic Animals", icon:"🦎" },
- { id:"emergency", label:"Emergency Care", icon:"🚨" },
- { id:"dermatology", label:"Dermatology", icon:"🐾" },
- { id:"cardiology", label:"Cardiology", icon:"❤️" },
- { id:"oncology", label:"Oncology", icon:"🔬" },
+const SERVICES_PROVIDED: { id: string; label: string; Icon: LucideIcon }[] = [
+ { id:"general", label:"General Wellness", Icon: Stethoscope },
+ { id:"dental", label:"Dental Care", Icon: Tooth },
+ { id:"surgery", label:"Surgery", Icon: Cross },
+ { id:"exotics", label:"Exotic Animals", Icon: Bug },
+ { id:"emergency", label:"Emergency Care", Icon: Siren },
+ { id:"dermatology", label:"Dermatology", Icon: PawPrint },
+ { id:"cardiology", label:"Cardiology", Icon: HeartPulse },
+ { id:"oncology", label:"Oncology", Icon: Microscope },
 ];
 
 const US_STATES = [
@@ -1094,7 +1094,7 @@ export const VetOnboardingForm = () => {
  field.onChange(updated);
  }}
  >
- <span className="text-2xl mb-2">{partner.icon}</span>
+                                <partner.Icon className="h-6 w-6 mb-2 text-primary" aria-hidden />
  <FormLabel className="font-medium cursor-pointer text-sm">
  {partner.name}
  </FormLabel>
@@ -1326,7 +1326,7 @@ export const VetOnboardingForm = () => {
  field.onChange(updated);
  }}
  >
- <span className="text-2xl mb-2">{service.icon}</span>
+                                <service.Icon className="h-6 w-6 mb-2 text-primary" aria-hidden />
  <FormLabel className="font-medium cursor-pointer text-sm">
  {service.label}
  </FormLabel>
