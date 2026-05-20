@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { MaximusChat } from "@/components/maximus/MaximusChat";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCards";
 
 const PB_TO_USD = 0.001;
 
