@@ -205,7 +205,7 @@ serve(async (req) => {
         .from('pawbucks_activity')
         .insert({
           user_id: effectiveTargetId,
-          amount: -amount,
+          amount: amount,
           type: 'redeem', // Must use 'redeem' for debits per database constraint
           source: 'admin_debit',
           description: isSharedMember 
