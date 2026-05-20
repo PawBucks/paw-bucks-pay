@@ -12,7 +12,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { AlertTriangle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Dog, Loader2, XCircle } from "lucide-react";
 import { differenceInMonths, parseISO } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
@@ -202,7 +202,7 @@ export function GroomingPetSelector({
  return (
  <div className="space-y-4 p-4 rounded-md bg-muted/30 border">
  <h4 className="text-sm font-medium flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🐕</span>
+ <Dog className="w-4 h-4 text-primary" />
  Pet & Grooming Details
  </h4>
 
@@ -298,7 +298,7 @@ export function GroomingPetSelector({
  {req.vaccine_name}
  </span>
  <span className="text-xs text-muted-foreground">
- {status?.status ==="valid" ?"✓ Up to date" : status?.status ==="expired" ?"⚠ Expired" :"✗ Missing"}
+ {status?.status ==="valid" ?"Up to date" : status?.status ==="expired" ?"Expired" :"Missing"}
  </span>
  {req.enforcement_level ==="required" && (
  <Badge variant="destructive" className="text-[10px] h-4 px-1">Required</Badge>
@@ -311,7 +311,7 @@ export function GroomingPetSelector({
  {groomingData.vaccineWarnings.length > 0 && (
  <div className={`p-3 rounded-lg text-sm ${groomingData.hasBlockingVaccineIssue ?"bg-destructive/10 border border-destructive/20" :"bg-warning/10 border border-warning/20"}`}>
  {groomingData.hasBlockingVaccineIssue ? (
- <p className="font-medium text-destructive mb-1">⚠ Booking cannot proceed:</p>
+ <p className="font-medium text-destructive mb-1 flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Booking cannot proceed:</p>
  ) : (
  <p className="font-medium text-warning mb-1">Heads up:</p>
  )}

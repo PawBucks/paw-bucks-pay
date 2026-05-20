@@ -2,7 +2,7 @@ import { useState } from"react";
 import { useForm, useFieldArray } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { LayoutTemplate, Plus, Search, MoreHorizontal, Edit, Trash2, Copy } from "lucide-react";
+import { Copy, Edit, FileText, LayoutTemplate, MoreHorizontal, Package, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Card, CardContent } from"@/components/ui/card";
@@ -341,7 +341,7 @@ export function TemplateManager({
  </DropdownMenuTrigger>
  <DropdownMenuContent align="end">
  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onUseTemplate(template); }}>
- <span className="h-4 w-4 mr-2" aria-hidden="true">📄</span>
+ <FileText className="h-4 w-4 mr-2" />
  Use Template
  </DropdownMenuItem>
  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openEditDialog(template); }}>
@@ -381,7 +381,7 @@ export function TemplateManager({
  )}
  {itemCount > 0 && (
  <Badge variant="outline">
- <span className="h-3 w-3 mr-1" aria-hidden="true">📦</span>
+ <Package className="h-3 w-3 mr-1" />
  {itemCount} item{itemCount !== 1 ?'s' :''}
  </Badge>
  )}

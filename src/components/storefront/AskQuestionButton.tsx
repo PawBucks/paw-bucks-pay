@@ -4,7 +4,7 @@ import { Button } from"@/components/ui/button";
 import { Textarea } from"@/components/ui/textarea";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
-import { Send, Loader2, Check, CheckCheck, Paperclip } from "lucide-react";
+import { Check, CheckCheck, Loader2, MessageSquare, Paperclip, Send } from "lucide-react";
 import { SecureAttachment } from"@/components/shared/SecureAttachment";
 import { format, parseISO } from"date-fns";
 import { toast } from"sonner";
@@ -200,7 +200,7 @@ export const AskQuestionButton = ({ merchantId, merchantName, trigger, autoOpen 
  <DialogTrigger asChild>
  {trigger || (
  <Button variant="outline" size="sm" className="gap-2">
- <span className="h-4 w-4" aria-hidden="true">💬</span>
+ <MessageSquare className="h-4 w-4" />
  Ask a Question
  </Button>
  )}
@@ -208,7 +208,7 @@ export const AskQuestionButton = ({ merchantId, merchantName, trigger, autoOpen 
  <DialogContent className="sm:max-w-[500px] h-[70vh] flex flex-col">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <span className="w-5 h-5" aria-hidden="true">💬</span>
+ <MessageSquare className="w-5 h-5" />
  Chat with {merchantName}
  </DialogTitle>
  </DialogHeader>
@@ -220,7 +220,7 @@ export const AskQuestionButton = ({ merchantId, merchantName, trigger, autoOpen 
  </div>
  ) : messages.length === 0 ? (
  <div className="text-center py-12 text-muted-foreground">
- <span className="w-10 h-10 mx-auto mb-3 opacity-40" aria-hidden="true">💬</span>
+ <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-40" />
  <p className="text-sm">No messages yet.</p>
  <p className="text-xs mt-1">Ask anything about products, services, or availability!</p>
  </div>

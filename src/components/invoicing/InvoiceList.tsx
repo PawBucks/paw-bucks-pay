@@ -1,6 +1,6 @@
 import { useState, useMemo } from"react";
 import { format, parseISO, isAfter, isBefore, addDays, formatDistanceToNow } from"date-fns";
-import { FileText, Plus, Search, Filter, MoreHorizontal, Send, Eye, EyeOff, Edit, Trash2, Copy, Download, Link, CheckCircle, AlertCircle, XCircle, DollarSign, RefreshCw, Printer } from "lucide-react";
+import { AlertCircle, CheckCircle, Copy, CreditCard, DollarSign, Download, Edit, Eye, EyeOff, FileText, Filter, Link, Mail, MoreHorizontal, Plus, Printer, RefreshCw, Search, Send, Trash2, XCircle } from "lucide-react";
 import { toast } from"sonner";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
@@ -230,7 +230,7 @@ export function InvoiceList({
  <p className="text-2xl font-bold">{stats.draft}</p>
  </div>
  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
- <span className="h-5 w-5 text-muted-foreground" aria-hidden="true">📄</span>
+ <FileText className="h-5 w-5 text-muted-foreground" />
  </div>
  </div>
  </CardContent>
@@ -293,7 +293,7 @@ export function InvoiceList({
  {filteredInvoices.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">📄</span>
+ <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
  <h3 className="text-lg font-semibold mb-2">No invoices found</h3>
  <p className="text-muted-foreground mb-4">
  {searchTerm || statusFilter !=="all" 
@@ -404,7 +404,7 @@ export function InvoiceList({
  )}
  {!['paid','cancelled','refunded','draft'].includes(invoice.status) && (
  <DropdownMenuItem onClick={() => onRecordPayment(invoice)}>
- <span className="h-4 w-4 mr-2" aria-hidden="true">💳</span>
+ <CreditCard className="h-4 w-4 mr-2" />
  Record Payment
  </DropdownMenuItem>
  )}
@@ -416,7 +416,7 @@ export function InvoiceList({
  )}
  {['paid','partially_paid'].includes(invoice.status) && onResendReceipt && (
  <DropdownMenuItem onClick={() => onResendReceipt(invoice)}>
- <span className="h-4 w-4 mr-2" aria-hidden="true">📧</span>
+ <Mail className="h-4 w-4 mr-2" />
  Resend Receipt
  </DropdownMenuItem>
  )}

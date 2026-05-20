@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from"@/components/ui/avatar";
-import { Crown, Medal, Award } from "lucide-react";
+import { Award, Crown, Medal, Store, Trophy } from "lucide-react";
 import { cn } from"@/lib/utils";
 import type { MerchantLeaderboardEntry } from"@/services/api/brandCampaigns.service";
 
@@ -9,9 +9,9 @@ interface MerchantLeaderboardProps {
 }
 
 const RANK_DECOR = [
- { icon: Crown, color:"text-warning", bg:"bg-warning/10 border-warning/30", label:"🥇" },
- { icon: Medal, color:"text-muted-foreground", bg:"bg-muted/40 border-border", label:"🥈" },
- { icon: Award, color:"text-accent", bg:"bg-accent/10 border-accent/30", label:"🥉" },
+ { Icon: Crown, color:"text-warning", bg:"bg-warning/10 border-warning/30" },
+ { Icon: Medal, color:"text-muted-foreground", bg:"bg-muted/40 border-border" },
+ { Icon: Award, color:"text-accent", bg:"bg-accent/10 border-accent/30" },
 ];
 
 export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {
@@ -19,7 +19,7 @@ export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {
  <Card>
  <CardHeader className="pb-2">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="h-4 w-4 text-warning" aria-hidden="true">🏆</span>
+ <Trophy className="h-4 w-4 text-warning" />
  Top Performing Merchants
  </CardTitle>
  <CardDescription>Driving the most check-ins for your campaigns</CardDescription>
@@ -27,7 +27,7 @@ export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {
  <CardContent className="space-y-2">
  {entries.length === 0 ? (
  <div className="py-8 text-center text-sm text-muted-foreground">
- <span className="h-8 w-8 mx-auto mb-2 opacity-40" aria-hidden="true">🏪</span>
+ <Store className="h-8 w-8 mx-auto mb-2 opacity-40" />
  No merchant activity yet
  </div>
  ) : (
@@ -41,8 +41,8 @@ export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {
  decor ? decor.bg :"border-transparent hover:bg-muted"
  )}
  >
- <div className="w-7 h-7 rounded-full bg-background flex items-center justify-center text-xs font-bold flex-shrink-0">
- {decor ? decor.label : `#${idx + 1}`}
+              <div className="w-7 h-7 rounded-full bg-background flex items-center justify-center text-xs font-bold flex-shrink-0">
+ {decor ? <decor.Icon className={cn("h-4 w-4", decor.color)} aria-hidden /> : `#${idx + 1}`}
  </div>
  <Avatar className="h-9 w-9 flex-shrink-0">
  {entry.logo_url && <AvatarImage src={entry.logo_url} alt={entry.business_name} />}

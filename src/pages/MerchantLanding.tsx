@@ -4,6 +4,7 @@ import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
 import logo from"@/assets/logo.png";
 import { PremiumMerchantsBanner } from"@/components/PremiumMerchantsBanner";
+import { CreditCard, Gift, BarChart3, Calendar, Mail, ShoppingBag, Scissors, Store, Bone, type LucideIcon } from "lucide-react";
 
 const styles = `
  .ml-root {
@@ -280,19 +281,19 @@ const styles = `
  }
 `;
 
-const features = [
- { icon:"💳", name:"Payment Processing", desc:"Accept payments online and in-person. Direct Stripe integration with transparent fees." },
- { icon:"🎁", name:"Customer Rewards", desc:"PawBucks loyalty built-in. Customers earn on every purchase, come back more often." },
- { icon:"📊", name:"Real-Time Analytics", desc:"Track sales, customers, and rewards performance in your merchant dashboard." },
- { icon:"📅", name:"Booking & Scheduling", desc:"Manage appointments, grooming, training. Online booking with calendar sync." },
- { icon:"📨", name:"Invoicing & Subscriptions", desc:"Send invoices, run recurring subscriptions, accept tips — all in one place." },
- { icon:"🛍️", name:"Storefront & Catalog", desc:"Sell products online with a built-in cart, inventory, and your own merchant page." },
+const features: { Icon: LucideIcon; name: string; desc: string }[] = [
+ { Icon: CreditCard, name:"Payment Processing", desc:"Accept payments online and in-person. Direct Stripe integration with transparent fees." },
+ { Icon: Gift, name:"Customer Rewards", desc:"PawBucks loyalty built-in. Customers earn on every purchase, come back more often." },
+ { Icon: BarChart3, name:"Real-Time Analytics", desc:"Track sales, customers, and rewards performance in your merchant dashboard." },
+ { Icon: Calendar, name:"Booking & Scheduling", desc:"Manage appointments, grooming, training. Online booking with calendar sync." },
+ { Icon: Mail, name:"Invoicing & Subscriptions", desc:"Send invoices, run recurring subscriptions, accept tips — all in one place." },
+ { Icon: ShoppingBag, name:"Storefront & Catalog", desc:"Sell products online with a built-in cart, inventory, and your own merchant page." },
 ];
 
-const audiences = [
- { emoji:"✂️", type:"Groomers", title:"Build a loyal book", desc:"Bookings, reminders, and rewards that keep clients on schedule and coming back." },
- { emoji:"🏪", type:"Pet Stores", title:"Sell more, retain more", desc:"Storefront, POS, and rewards in one. Customers earn PawBucks on every basket." },
- { emoji:"🦴", type:"Trainers, Sitters & Walkers", title:"Run your service business", desc:"Schedule, invoice, and grow with rewards your clients actually use." },
+const audiences: { Icon: LucideIcon; type: string; title: string; desc: string }[] = [
+ { Icon: Scissors, type:"Groomers", title:"Build a loyal book", desc:"Bookings, reminders, and rewards that keep clients on schedule and coming back." },
+ { Icon: Store, type:"Pet Stores", title:"Sell more, retain more", desc:"Storefront, POS, and rewards in one. Customers earn PawBucks on every basket." },
+ { Icon: Bone, type:"Trainers, Sitters & Walkers", title:"Run your service business", desc:"Schedule, invoice, and grow with rewards your clients actually use." },
 ];
 
 const faqs = [
@@ -406,8 +407,8 @@ const MerchantLanding = () => {
  <p className="ml-section-sub">No add-ons, no upsells. Every feature included from day one.</p>
  <div className="ml-features-grid">
  {features.map((f) => (
- <div className="ml-feature-card" key={f.name}>
- <div className="ml-feature-icon">{f.icon}</div>
+            <div className="ml-feature-card" key={f.name}>
+ <div className="ml-feature-icon"><f.Icon className="w-8 h-8" /></div>
  <div className="ml-feature-name">{f.name}</div>
  <div className="ml-feature-desc">{f.desc}</div>
  </div>
@@ -421,8 +422,8 @@ const MerchantLanding = () => {
  <h2 className="ml-section-title">Built for every kind of pet business.</h2>
  <div className="ml-who-grid">
  {audiences.map((a) => (
- <div className="ml-who-card" key={a.type}>
- <span className="ml-who-emoji">{a.emoji}</span>
+            <div className="ml-who-card" key={a.type}>
+ <span className="ml-who-emoji"><a.Icon className="w-8 h-8" /></span>
  <div className="ml-who-type">{a.type}</div>
  <div className="ml-who-title">{a.title}</div>
  <div className="ml-who-desc">{a.desc}</div>

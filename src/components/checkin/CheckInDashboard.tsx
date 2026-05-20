@@ -6,7 +6,7 @@ import { Badge } from"@/components/ui/badge";
 import { Input } from"@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { QRCodeSVG } from"qrcode.react";
-import { Download, Search } from "lucide-react";
+import { Calendar, Download, Mail, Phone, Search, User, Users } from "lucide-react";
 import { format, subMonths, startOfDay, endOfDay } from"date-fns";
 import { toast } from"sonner";
 
@@ -222,7 +222,7 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
  <GradientCard className="p-6">
  <div className="flex items-center gap-3 mb-4">
  <div className="p-2 bg-primary/10 rounded-lg">
- <span className="w-5 h-5 text-primary" aria-hidden="true">👥</span>
+ <Users className="w-5 h-5 text-primary" />
  </div>
  <div>
  <p className="text-2xl font-bold">{todayCheckins.length}</p>
@@ -238,7 +238,7 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
  <GradientCard className="p-6">
  <div className="flex items-center gap-3 mb-4">
  <div className="p-2 bg-accent/10 rounded-lg">
- <span className="w-5 h-5 text-accent" aria-hidden="true">📅</span>
+ <Calendar className="w-5 h-5 text-accent" />
  </div>
  <div>
  <p className="text-2xl font-bold">{checkins.length}</p>
@@ -304,7 +304,7 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
  if (checkins.length === 0) {
  return (
  <GradientCard className="p-8 text-center">
- <span className="w-10 h-10 mx-auto mb-3 text-muted-foreground" aria-hidden="true">👥</span>
+ <Users className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
  <p className="text-muted-foreground">{emptyMessage}</p>
  </GradientCard>
  );
@@ -320,7 +320,7 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
  {checkin.profile?.avatar_url ? (
  <img src={checkin.profile.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover" />
  ) : (
- <span className="w-5 h-5 text-primary" aria-hidden="true">👤</span>
+ <User className="w-5 h-5 text-primary" />
  )}
  </div>
  <div className="min-w-0">
@@ -330,13 +330,13 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
  {checkin.profile?.email && (
  <span className="flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">📧</span>
+ <Mail className="w-3 h-3" />
  {checkin.profile.email}
  </span>
  )}
  {checkin.profile?.phone && (
  <span className="flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">📞</span>
+ <Phone className="w-3 h-3" />
  {checkin.profile.phone}
  </span>
  )}

@@ -30,12 +30,12 @@ interface DiagnosticOverlayToolProps {
 }
 
 const analysisTypes = [
- { value:"xray", label:"X-Ray", icon:"🩻" },
- { value:"ultrasound", label:"Ultrasound", icon:"📡" },
- { value:"ct", label:"CT Scan", icon:"🔬" },
- { value:"mri", label:"MRI", icon:"🧲" },
- { value:"ecg", label:"ECG/EKG", icon:"💓" },
- { value:"bloodwork", label:"Bloodwork", icon:"🩸" },
+ { value:"xray", label:"X-Ray", icon:"" },
+ { value:"ultrasound", label:"Ultrasound", icon:"" },
+ { value:"ct", label:"CT Scan", icon:"" },
+ { value:"mri", label:"MRI", icon:"" },
+ { value:"ecg", label:"ECG/EKG", icon:"" },
+ { value:"bloodwork", label:"Bloodwork", icon:"" },
 ];
 
 const severityColors: Record<string, string> = {

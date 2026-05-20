@@ -1,6 +1,6 @@
 import { useNavigate } from"react-router-dom";
 import { motion } from"framer-motion";
-import { ChevronRight, AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronRight, Crown, Gift, Trophy, Zap } from "lucide-react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { LoyaltyProgressRing } from"./LoyaltyProgressRing";
@@ -55,9 +55,9 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  animate={{ opacity: 1, scale: 1 }}
  className="p-4 rounded-md bg-gradient-to-r from-primary/20 to-accent/20 border border-primary/30 text-center"
  >
- <span className="w-10 h-10 mx-auto text-primary mb-2" aria-hidden="true">🎁</span>
+ <Gift className="w-10 h-10 mx-auto text-primary mb-2" />
  <p className="text-lg font-bold text-primary mb-1">
- 🎉 Free ${completedMilestone.credit_value} Credit Ready!
+ Free ${completedMilestone.credit_value} Credit Ready!
  </p>
  <p className="text-sm text-muted-foreground">
  Tap to claim your guaranteed reward
@@ -90,7 +90,7 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  </div>
  ) : (
  <div className="text-center py-4">
- <span className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" aria-hidden="true">🏆</span>
+ <Trophy className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" />
  <p className="text-sm text-muted-foreground">
  Start earning rewards with your first purchase!
  </p>
@@ -104,21 +104,21 @@ export const LoyaltyDashboardWidget = ({ userId }: LoyaltyDashboardWidgetProps) 
  <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-border/50">
  <div className="text-center">
  <div className="flex items-center justify-center gap-1 text-primary mb-1">
- <span className="w-4 h-4" aria-hidden="true">🎁</span>
+ <Gift className="w-4 h-4" />
                 <span className="font-bold">{Formatters.currency(summary?.totalCredits || 0)}</span>
  </div>
  <p className="text-[10px] text-muted-foreground">Credits Available</p>
  </div>
  <div className="text-center">
  <div className="flex items-center justify-center gap-1 text-accent mb-1">
- <span className="w-4 h-4" aria-hidden="true">⚡</span>
+ <Zap className="w-4 h-4" />
  <span className="font-bold">{summary?.monthlyStreak || 0}</span>
  </div>
  <p className="text-[10px] text-muted-foreground">Month Streak</p>
  </div>
  <div className="text-center">
  <div className="flex items-center justify-center gap-1 text-secondary mb-1">
- <span className="text-base">👑</span>
+ <Crown className="h-4 w-4 text-warning" aria-hidden />
  <span className="font-bold capitalize">{tier}</span>
  </div>
  <p className="text-[10px] text-muted-foreground">Your Tier</p>

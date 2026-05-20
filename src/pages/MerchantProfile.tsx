@@ -780,7 +780,7 @@ const MerchantProfile = memo(() => {
                             {isBest && (
                               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                                 <Badge className="bg-gold text-ink text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 shadow-md border-0">
-                                  ★ Best Value
+                                  Best Value
                                 </Badge>
                               </div>
                             )}

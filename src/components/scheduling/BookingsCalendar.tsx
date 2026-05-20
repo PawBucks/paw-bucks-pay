@@ -19,7 +19,7 @@ import {
 } from"@/components/ui/dialog";
 import { format, isSameDay, startOfToday } from"date-fns";
 import { parseLocalDate } from'@/utils/formatters';
-import { CheckCircle, XCircle, Calendar as CalendarIcon, AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, Calendar as CalendarIcon, CheckCircle, CreditCard, DollarSign, FileText, Loader2, Mail, Phone, RefreshCw, User, XCircle } from "lucide-react";
 import { type BookingWithDetails, type BookingStatus } from"@/services/api/scheduling.service";
 import { GroomingReportCardForm } from"./GroomingReportCardForm";
 import { RescheduleBookingDialog } from"./RescheduleBookingDialog";
@@ -94,7 +94,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
  return (
  <div className="pt-4 border-t space-y-2">
  <div className="flex items-center gap-2 p-2 rounded-lg bg-warning/10 text-warning text-xs">
- <span className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true">💳</span>
+ <CreditCard className="w-3.5 h-3.5 flex-shrink-0" />
  <span>Card on file available — charge no-show fee</span>
  </div>
  <Button
@@ -106,7 +106,7 @@ function NoShowChargeButton({ booking, onCharged }: { booking: BookingWithDetail
  {charging ? (
  <><Loader2 className="w-4 h-4 animate-spin" /> Charging...</>
  ) : (
- <><span className="w-4 h-4" aria-hidden="true">💵</span> Charge {Formatters.currency(feeAmount)} No-Show Fee</>
+ <><DollarSign className="w-4 h-4" /> Charge {Formatters.currency(feeAmount)} No-Show Fee</>
  )}
  </Button>
  </div>
@@ -226,7 +226,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
  {booking.customer_name && (
  <span className="flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">👤</span>
+ <User className="w-3 h-3" />
  {booking.customer_name}
  </span>
  )}
@@ -298,19 +298,19 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  <div className="space-y-1">
  {selectedBooking.customer_name && (
  <p className="font-medium flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">👤</span>
+ <User className="w-4 h-4" />
  {selectedBooking.customer_name}
  </p>
  )}
  {selectedBooking.customer_phone && (
  <p className="text-sm flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">📞</span>
+ <Phone className="w-4 h-4" />
  {selectedBooking.customer_phone}
  </p>
  )}
  {selectedBooking.customer_email && (
  <p className="text-sm flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">📧</span>
+ <Mail className="w-4 h-4" />
  {selectedBooking.customer_email}
  </p>
  )}
@@ -465,7 +465,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  setSelectedBooking(null);
  }}
  >
- <span className="w-4 h-4" aria-hidden="true">📄</span>
+ <FileText className="w-4 h-4" />
  Grooming Report Card
  </Button>
  </div>

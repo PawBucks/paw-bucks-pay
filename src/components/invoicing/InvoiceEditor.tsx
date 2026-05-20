@@ -4,7 +4,7 @@ import { useForm, useFieldArray } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
 import { format, addDays, parseISO } from"date-fns";
-import { Plus, Trash2, Save, Send, Eye, ArrowLeft, Calendar, Percent, Paperclip } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, Eye, Paperclip, Percent, Plus, Save, Send, Trash2, User } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Textarea } from"@/components/ui/textarea";
@@ -422,7 +422,7 @@ export function InvoiceEditor({
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">👤</span>
+ <User className="h-5 w-5" />
  Client Information
  </CardTitle>
  </CardHeader>
@@ -635,7 +635,7 @@ export function InvoiceEditor({
  <FormLabel className="text-xs">Price</FormLabel>
  <FormControl>
  <div className="relative">
- <span className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
+ <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
  <Input 
  type="number"
  step="0.01"
@@ -783,7 +783,7 @@ export function InvoiceEditor({
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">📅</span>
+ <Calendar className="h-5 w-5" />
  Invoice Details
  </CardTitle>
  </CardHeader>
@@ -818,7 +818,7 @@ export function InvoiceEditor({
  !field.value &&"text-muted-foreground"
  )}
  >
- <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
+ <Calendar className="mr-2 h-4 w-4" />
  {field.value ? format(field.value,"PPP") :"Pick a date"}
  </Button>
  </FormControl>
@@ -876,7 +876,7 @@ export function InvoiceEditor({
  !field.value &&"text-muted-foreground"
  )}
  >
- <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
+ <Calendar className="mr-2 h-4 w-4" />
  {field.value ? format(field.value,"PPP") :"Pick a date"}
  </Button>
  </FormControl>
@@ -981,7 +981,7 @@ export function InvoiceEditor({
  <FormLabel>Shipping / Handling</FormLabel>
  <FormControl>
  <div className="relative">
- <span className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true">💵</span>
+ <DollarSign className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
  <Input
  type="number"
  step="0.01"
@@ -1162,7 +1162,7 @@ export function InvoiceEditor({
  !field.value &&"text-muted-foreground"
  )}
  >
- <span className="mr-2 h-4 w-4" aria-hidden="true">📅</span>
+ <Calendar className="mr-2 h-4 w-4" />
  {field.value ? format(field.value,"PPP") :"No end date"}
  </Button>
  </FormControl>

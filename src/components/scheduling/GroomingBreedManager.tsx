@@ -30,7 +30,7 @@ import {
  AlertDialogHeader,
  AlertDialogTitle,
 } from"@/components/ui/alert-dialog";
-import { Plus, Edit, Trash2, Loader2, Sparkles, Library } from "lucide-react";
+import { Dog, DollarSign, Edit, Library, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { toast } from"sonner";
 import {
   BREED_LIBRARY,
@@ -264,7 +264,7 @@ export function GroomingBreedManager({ merchantId }: GroomingBreedManagerProps) 
  <div className="flex items-center justify-between">
  <div>
  <h3 className="text-lg font-semibold flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🐕</span>
+ <Dog className="w-5 h-5 text-primary" />
  Breed Profiles
  </h3>
  <p className="text-sm text-muted-foreground">
@@ -287,7 +287,7 @@ export function GroomingBreedManager({ merchantId }: GroomingBreedManagerProps) 
  </div>
  ) : breeds.length === 0 ? (
  <GradientCard className="p-8 text-center">
- <span className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" aria-hidden="true">🐕</span>
+ <Dog className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
  <h4 className="font-semibold mb-1">No Breed Profiles Yet</h4>
  <p className="text-sm text-muted-foreground mb-4">
  Add breed-specific grooming times and prices so appointments auto-adjust based on the pet's breed.
@@ -334,7 +334,7 @@ export function GroomingBreedManager({ merchantId }: GroomingBreedManagerProps) 
  )}
  {bp.price_override && (
  <span className="flex items-center gap-1">
- <span className="w-3.5 h-3.5" aria-hidden="true">💵</span> ${bp.price_override}
+ <DollarSign className="w-3.5 h-3.5" /> ${bp.price_override}
  </span>
  )}
  </div>
@@ -502,7 +502,7 @@ export function GroomingBreedManager({ merchantId }: GroomingBreedManagerProps) 
                         <span className="truncate">
                           {b.name}
                           {exists && (
-                            <span className="ml-1 text-[10px] text-success">✓ added</span>
+                            <span className="ml-1 text-[10px] text-success">added</span>
                           )}
                         </span>
                         <span className="text-muted-foreground whitespace-nowrap ml-2">

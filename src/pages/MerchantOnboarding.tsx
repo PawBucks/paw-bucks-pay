@@ -145,19 +145,19 @@ const MerchantOnboarding = () => {
  const hints: string[] = [];
  
  if (workingStyle ==="home_based") {
- hints.push("📍 Home office deduction tracking available");
+ hints.push("Home office deduction tracking available");
  }
  if (workingStyle ==="mobile" || workingStyle ==="mixed") {
- hints.push("🚗 Mileage log and vehicle expense tracking available");
+ hints.push("Mileage log and vehicle expense tracking available");
  }
  if (entityType ==="sole_proprietor" || entityType ==="llc") {
- hints.push("📋 Self-employment tax estimates included");
+ hints.push("Self-employment tax estimates included");
  }
  if (entityType ==="nonprofit") {
- hints.push("📊 Nonprofit-specific reporting available");
+ hints.push("Nonprofit-specific reporting available");
  }
  if (businessType ==="veterinary" || businessType ==="grooming" || businessType ==="mobile_groomer") {
- hints.push("🧴 Equipment & supplies tracking optimized");
+ hints.push("Equipment & supplies tracking optimized");
  }
  
  return hints;

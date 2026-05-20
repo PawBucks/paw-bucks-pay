@@ -1,7 +1,7 @@
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Progress } from"@/components/ui/progress";
-import { DollarSign, Users, Zap, TrendingDown, AlertTriangle } from "lucide-react";
+import { AlertTriangle, DollarSign, Flame, Target, TrendingDown, Users, Zap } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import type { CommandCenterSummary } from"@/services/api/brandCampaigns.service";
 
@@ -28,7 +28,7 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
  <div className="flex items-start justify-between gap-4 flex-wrap">
  <div className="space-y-1">
  <div className="flex items-center gap-2">
- <span className="h-4 w-4 text-primary" aria-hidden="true">🔥</span>
+ <Flame className="h-4 w-4 text-primary" aria-hidden />
  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
  Live Burn Rate
  </span>
@@ -103,7 +103,7 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
  accent="text-accent"
  badge={
  <Badge variant="secondary" className="text-[10px] px-1.5 h-4">
- <span className="h-2.5 w-2.5 mr-0.5" aria-hidden="true">🎯</span>
+ <Target className="h-2.5 w-2.5 mr-0.5" />
  ROI
  </Badge>
  }

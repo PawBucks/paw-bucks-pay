@@ -9,7 +9,7 @@ import { Slider } from"@/components/ui/slider";
 import { Separator } from"@/components/ui/separator";
 import { Progress } from"@/components/ui/progress";
 import { Badge } from"@/components/ui/badge";
-import { Megaphone, DollarSign, Target, Palette, CheckCircle2, ArrowRight, ArrowLeft, Loader2, Eye } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, DollarSign, Eye, Gift, Heart, Loader2, Megaphone, Palette, Repeat, Rocket, Target, Zap } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
 import {
@@ -41,7 +41,7 @@ const STEPS = [
 
 const TEMPLATES: Array<{
  key: string;
- emoji: string;
+ Icon: typeof Rocket;
  name: string;
  description: string;
  preset: {
@@ -55,28 +55,28 @@ const TEMPLATES: Array<{
 }> = [
  {
  key:"new_product_launch",
- emoji:"🚀",
+ Icon: Rocket,
  name:"New Product Launch",
  description:"Drive trial of a new SKU with high reward per check-in.",
  preset: { headline:"Try Our Newest Treat!", subtext:"Earn bonus PawBucks when you check in.", cta:"Claim Bonus", color:"#6366f1", pawbucks_per_checkin: 1000, budget_usd: 2500 },
  },
  {
  key:"seasonal_promo",
- emoji:"🎁",
+ Icon: Gift,
  name:"Seasonal Promotion",
  description:"Holiday or seasonal awareness across many merchants.",
  preset: { headline:"Holiday PawBucks Bonus!", subtext:"Limited-time rewards from your favorite brand.", cta:"Get Bonus PB", color:"#ef4444", pawbucks_per_checkin: 500, budget_usd: 5000 },
  },
  {
  key:"loyalty_winback",
- emoji:"💖",
+ Icon: Heart,
  name:"Loyalty Win-Back",
  description:"Re-engage lapsed pet owners with a generous reward.",
  preset: { headline:"We Miss Your Pet!", subtext:"Welcome back — enjoy bonus PawBucks.", cta:"Welcome Back", color:"#10b981", pawbucks_per_checkin: 2000, budget_usd: 1500 },
  },
  {
  key:"always_on",
- emoji:"🔁",
+ Icon: Repeat,
  name:"Always-On Awareness",
  description:"Steady, low-budget brand presence with auto-replenish.",
  preset: { headline:"Brand Bonus PawBucks", subtext:"Earn extra rewards every visit.", cta:"Earn Now", color:"#0ea5e9", pawbucks_per_checkin: 250, budget_usd: 1000 },
@@ -240,7 +240,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
  }`}
  >
  <div className="flex items-center gap-2 mb-1">
- <span className="text-lg">{t.emoji}</span>
+  <t.Icon className="h-4 w-4 text-primary" aria-hidden />
  <span className="font-semibold text-sm">{t.name}</span>
  </div>
  <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>
@@ -297,7 +297,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
  />
  </div>
  <div className="p-3 rounded-lg bg-muted border text-sm text-muted-foreground">
- 💡 You'll invite specific merchants in the next step (Marketplace tab) — targeting rules apply at the pet-owner level.
+ You'll invite specific merchants in the next step (Marketplace tab) — targeting rules apply at the pet-owner level.
  </div>
  </>
  )}
@@ -382,7 +382,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
  <>
  <div className="space-y-3 p-4 rounded-lg bg-muted border">
  <h3 className="font-semibold flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">⚡</span> When are PawBucks released?
+ <Zap className="h-4 w-4" /> When are PawBucks released?
  </h3>
  <div className="grid grid-cols-3 gap-2">
  {([
@@ -424,7 +424,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
 
  <div className="space-y-4 p-4 rounded-lg bg-muted border">
  <h3 className="font-semibold flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">💵</span> Budget Calculator
+ <DollarSign className="h-4 w-4" /> Budget Calculator
  </h3>
  <div className="space-y-2">
  <Label>Campaign Budget (USD)</Label>
@@ -475,7 +475,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
 
  <div className="space-y-3 p-4 rounded-lg bg-muted border">
  <h3 className="font-semibold flex items-center gap-2">
- <span className="h-4 w-4" aria-hidden="true">⚡</span> Guardrails
+ <Zap className="h-4 w-4" /> Guardrails
  </h3>
  <div className="space-y-2">
  <Label>Daily Spend Cap (USD, 0 = none)</Label>

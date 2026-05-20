@@ -33,7 +33,7 @@ export function MerchantBrandCampaignInbox({ merchantId }: MerchantBrandCampaign
  mutationFn: ({ id, accept }: { id: string; accept: boolean }) =>
  respondToCampaignInvitation(id, accept),
  onSuccess: (_, vars) => {
- toast.success(vars.accept ?"Joined campaign! 🎉" :"Invitation declined");
+ toast.success(vars.accept ?"Joined campaign!" :"Invitation declined");
  queryClient.invalidateQueries({ queryKey: ["merchant-brand-invitations"] });
  },
  onError: (e: Error) => toast.error(e.message),

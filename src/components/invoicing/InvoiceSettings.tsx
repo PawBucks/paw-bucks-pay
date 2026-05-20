@@ -2,7 +2,7 @@ import { useState, useEffect } from"react";
 import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { Settings, Save, Palette, Hash, Send, Loader2 } from "lucide-react";
+import { Bell, CreditCard, DollarSign, FileText, Hash, Loader2, Palette, Save, Send, Settings } from "lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
@@ -205,7 +205,7 @@ export function InvoiceSettingsComponent({
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">📄</span>
+ <FileText className="h-5 w-5" />
  Default Invoice Settings
  </CardTitle>
  <CardDescription>
@@ -329,7 +329,7 @@ export function InvoiceSettingsComponent({
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">💵</span>
+ <DollarSign className="h-5 w-5" />
  Late Fees
  </CardTitle>
  <CardDescription>
@@ -429,7 +429,7 @@ export function InvoiceSettingsComponent({
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">🔔</span>
+ <Bell className="h-5 w-5" />
  Payment Reminders
  </CardTitle>
  <CardDescription>
@@ -550,7 +550,7 @@ export function InvoiceSettingsComponent({
  <Card>
  <CardHeader>
  <CardTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">💳</span>
+ <CreditCard className="h-5 w-5" />
  Payment Information
  </CardTitle>
  <CardDescription>

@@ -1,5 +1,5 @@
 import { useState, useMemo } from"react";
-import { Search, Plus } from "lucide-react";
+import { Package, Plus, Search } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import {
@@ -66,7 +66,7 @@ export function CatalogItemPicker({ items, onSelect, className }: CatalogItemPic
  <Popover open={open} onOpenChange={setOpen}>
  <PopoverTrigger asChild>
  <Button variant="outline" size="sm" className={cn("gap-2", className)}>
- <span className="h-4 w-4" aria-hidden="true">📦</span>
+ <Package className="h-4 w-4" />
  Add from Catalog
  </Button>
  </PopoverTrigger>

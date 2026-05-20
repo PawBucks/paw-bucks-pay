@@ -161,8 +161,8 @@ const MerchantScheduling = () => {
 
  // Create in-app notification for customer
  const title = status ==='confirmed'
- ?'✅ Booking Confirmed!'
- :'❌ Booking Declined';
+ ?'Booking Confirmed!'
+ :'Booking Declined';
  const message = status ==='confirmed'
  ? `Your ${serviceName} appointment on ${bookingDate} has been confirmed!`
  : `Your ${serviceName} appointment request for ${bookingDate} was declined. Please try a different time or contact the business.`;

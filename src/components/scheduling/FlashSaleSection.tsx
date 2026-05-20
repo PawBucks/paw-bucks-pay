@@ -21,7 +21,7 @@ import {
  CollapsibleContent,
  CollapsibleTrigger,
 } from"@/components/ui/collapsible";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Bell, ChevronDown, ChevronUp, TrendingDown, Zap } from "lucide-react";
 import { format } from"date-fns";
 import { 
  type MerchantService,
@@ -106,7 +106,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="p-2 bg-warning/10 rounded-lg">
- <span className="w-5 h-5 text-warning" aria-hidden="true">⚡</span>
+ <Zap className="w-5 h-5 text-warning" />
  </div>
  <div className="text-left">
  <div className="flex items-center gap-2">
@@ -196,7 +196,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  </FormControl>
  {previewSavings > 0 && (
  <div className="flex items-center gap-2 mt-2">
- <span className="w-4 h-4 text-success" aria-hidden="true">📉</span>
+ <TrendingDown className="w-4 h-4 text-success" aria-hidden />
  <span className="text-sm text-success font-medium">
  {previewSavings}% off with PawBucks!
  </span>
@@ -255,7 +255,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
 
  <div className="p-3 rounded-lg bg-info/10 border border-info/20">
  <div className="flex items-start gap-2">
- <span className="w-4 h-4 text-info mt-0.5" aria-hidden="true">🔔</span>
+ <Bell className="w-4 h-4 text-info mt-0.5" />
  <div className="text-sm">
  <p className="font-medium text-info">
  Push Notification
