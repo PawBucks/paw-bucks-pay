@@ -428,6 +428,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <Table>
  <TableHeader className="sticky top-0 bg-card z-10">
  <TableRow>
+                  <TableHead className="w-8"></TableHead>
  <TableHead className="cursor-pointer" onClick={() => handleSort("date")}>
  Date {sortColumn ==="date" && (sortDirection ==="asc" ?"↑" :"↓")}
  </TableHead>
@@ -453,7 +454,21 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  </TableHeader>
  <TableBody>
  {paginatedTransactions.map((transaction) => (
+                  <>
  <TableRow key={transaction.transaction_id} className="hover:bg-muted transition-colors">
+                  <TableCell className="pr-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setExpandedId(expandedId === transaction.transaction_id ? null : transaction.transaction_id)}
+                      aria-label="Toggle details"
+                    >
+                      {expandedId === transaction.transaction_id
+                        ? <ChevronDown className="h-4 w-4" />
+                        : <ChevronRight className="h-4 w-4" />}
+                    </Button>
+                  </TableCell>
  <TableCell>{format(new Date(transaction.date),"MM/dd/yyyy")}</TableCell>
  <TableCell className="font-medium">{transaction.customer_name}</TableCell>
  <TableCell className="text-right font-semibold">{Formatters.currency(transaction.amount)}</TableCell>
@@ -481,6 +496,57 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  )}
  </TableCell>
  </TableRow>
+                  {expandedId === transaction.transaction_id && (
+                    <TableRow className="bg-muted/40">
+                      <TableCell colSpan={10} className="p-0">
+                        <div className="px-6 py-4">
+                          <h4 className="text-sm font-semibold mb-3 text-foreground">Payment Breakdown</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2 text-sm">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Date & Time</p>
+                              <p className="font-medium">{format(new Date(transaction.date), "MMM d, yyyy 'at' h:mm a")}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Customer</p>
+                              <p className="font-medium">{transaction.customer_name}</p>
+                              {transaction.customer_email && (
+                                <p className="text-xs text-muted-foreground">{transaction.customer_email}</p>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Transaction ID</p>
+                              <p className="font-mono text-xs break-all">{transaction.transaction_id}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Payment Method</p>
+                              <p className="font-medium">{transaction.payment_method}</p>
+                              {transaction.stripe_payment_intent_id && (
+                                <p className="font-mono text-xs text-muted-foreground break-all">{transaction.stripe_payment_intent_id}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-4 border-t pt-4 space-y-1.5 text-sm">
+                            <div className="flex justify-between"><span className="text-muted-foreground">Total Charged</span><span className="font-semibold">{Formatters.currency(transaction.amount)}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Paid via Card / Stripe</span><span>{Formatters.currency(transaction.stripe_amount ?? transaction.amount)}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Paid via PawBucks</span><span>{(transaction.pawbucks_used || 0).toLocaleString()} PB ({Formatters.currency(transaction.pawbucks_used_usd || 0)})</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Success Fee (3%)</span><span className="text-destructive">-{Formatters.currency(transaction.platform_fee || 0)}</span></div>
+                            {transaction.repayment_deducted > 0 && (
+                              <div className="flex justify-between"><span className="text-muted-foreground">Funding Repayment</span><span className="text-destructive">-{Formatters.currency(transaction.repayment_deducted)}</span></div>
+                            )}
+                            {(transaction.amount_refunded || 0) > 0 && (
+                              <div className="flex justify-between"><span className="text-muted-foreground">Refunded</span><span className="text-destructive">-{Formatters.currency(transaction.amount_refunded || 0)}</span></div>
+                            )}
+                            <div className="flex justify-between border-t pt-2 mt-2"><span className="font-semibold">Net Payout to Merchant</span><span className="font-semibold text-success">{Formatters.currency(transaction.net_payout)}</span></div>
+                            <div className="flex justify-between"><span className="text-muted-foreground">Rewards Earned by Customer</span><span>{(transaction.cashback_given || 0).toLocaleString()} PB ({Formatters.currency(transaction.cashback_given_usd ?? (transaction.cashback_given || 0) * 0.001)})</span></div>
+                          </div>
+                          {transaction.description && (
+                            <p className="mt-3 text-xs text-muted-foreground"><span className="font-medium text-foreground">Note:</span> {transaction.description}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  </>
  ))}
  </TableBody>
  </Table>
