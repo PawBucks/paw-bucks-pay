@@ -23,7 +23,7 @@ import {
  TableHeader,
  TableRow,
 } from"@/components/ui/table";
-import { Gift, Loader2, Pencil, Plus, Stamp, Trophy, Users } from "lucide-react";
+import { Bone, Coffee, Dog, Gem, Gift, Loader2, PawPrint, Pencil, Plus, Scissors, Stamp, Star, Stethoscope, Trophy, Users } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import { ChevronDown, ChevronUp } from "lucide-react";

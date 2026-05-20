@@ -1,6 +1,6 @@
 import { useNavigate } from"react-router-dom";
 import { motion } from"framer-motion";
-import { AlertCircle, ChevronRight, Gift, Trophy, Zap } from "lucide-react";
+import { AlertCircle, ChevronRight, Crown, Gift, Trophy, Zap } from "lucide-react";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { LoyaltyProgressRing } from"./LoyaltyProgressRing";

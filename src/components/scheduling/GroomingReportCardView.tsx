@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
-import { FileText, Heart, Image, Lightbulb, Loader2, Scissors } from "lucide-react";
+import { Camera, FileText, Heart, Image, Lightbulb, Loader2, Scissors } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import {
   Dialog,
