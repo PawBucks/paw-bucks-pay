@@ -14,7 +14,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { Slider } from"@/components/ui/slider";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Progress } from"@/components/ui/progress";
-import { ArrowRight, BarChart3, Building2, Calendar, Clock, DollarSign, Inbox, LayoutDashboard, Loader2, LogOut, Megaphone, Plus, Store, Target, TrendingUp, Users, Zap } from "lucide-react";
+import { ArrowRight, BarChart3, Building2, Calendar, Clock, DollarSign, Inbox, LayoutDashboard, Loader2, LogOut, Megaphone, Plus, Store, Target, TrendingUp, Users, Zap, FileText, CreditCard, Circle, Pause, CheckCircle2, AlarmClock, Rocket, type LucideIcon } from "lucide-react";
 import { toast } from"sonner";
 import {
  getBrandAccountForUser,
@@ -37,13 +37,13 @@ import { MerchantMarketplace } from"@/components/brand/MerchantMarketplace";
 import { BrandJoinRequestsInbox } from"@/components/brand/BrandJoinRequestsInbox";
 
 import { Formatters } from "@/utils/formatters";
-const statusConfig: Record<string, { color: string; label: string; emoji: string }> = {
- draft: { color:"bg-muted text-muted-foreground", label:"Draft", emoji:"📝" },
- pending_payment: { color:"bg-warning/15 text-warning", label:"Pending Payment", emoji:"💳" },
- active: { color:"bg-success/15 text-success", label:"Active", emoji:"🟢" },
- paused: { color:"bg-warning/15 text-warning", label:"Paused", emoji:"⏸️" },
- completed: { color:"bg-info/15 text-info", label:"Completed", emoji:"✅" },
- expired: { color:"bg-destructive/15 text-destructive", label:"Expired", emoji:"⏰" },
+const statusConfig: Record<string, { color: string; label: string; Icon: LucideIcon }> = {
+ draft: { color:"bg-muted text-muted-foreground", label:"Draft", Icon: FileText },
+ pending_payment: { color:"bg-warning/15 text-warning", label:"Pending Payment", Icon: CreditCard },
+ active: { color:"bg-success/15 text-success", label:"Active", Icon: Circle },
+ paused: { color:"bg-warning/15 text-warning", label:"Paused", Icon: Pause },
+ completed: { color:"bg-info/15 text-info", label:"Completed", Icon: CheckCircle2 },
+ expired: { color:"bg-destructive/15 text-destructive", label:"Expired", Icon: AlarmClock },
 };
 
 const BrandDashboard = () => {
@@ -202,7 +202,7 @@ const BrandDashboard = () => {
  if (fundedId) {
  verifyBrandCampaignPayment(fundedId).then(({ data }) => {
  if ((data as { funded?: boolean })?.funded) {
- toast.success("🚀 Campaign funded and live!");
+ toast.success("Campaign funded and live!");
  queryClient.invalidateQueries({ queryKey: ["brand-campaigns"] });
  }
  });
@@ -286,7 +286,7 @@ const BrandDashboard = () => {
  <div className="flex-1">
  <h1 className="font-bold text-lg">{selectedCampaign.name}</h1>
  </div>
- <Badge className={status.color}>{status.emoji} {status.label}</Badge>
+ <Badge className={status.color}><status.Icon className="inline-block h-3 w-3 mr-1" aria-hidden /> {status.label}</Badge>
  </div>
  </header>
 
@@ -407,8 +407,9 @@ const BrandDashboard = () => {
  <CardContent className="py-3">
  <div className="flex items-center justify-between">
  <div>
- <p className="font-medium text-sm">
- {a.type ==="earn" ?"🟢" :"🔴"} {Math.abs(a.amount).toLocaleString()} PB {a.type ==="earn" ?"distributed" :"redeemed"}
+ <p className="font-medium text-sm flex items-center gap-1.5">
+ <Circle className={`h-2.5 w-2.5 ${a.type ==="earn" ?"text-success fill-success" :"text-destructive fill-destructive"}`} aria-hidden />
+ {Math.abs(a.amount).toLocaleString()} PB {a.type ==="earn" ?"distributed" :"redeemed"}
  </p>
  <p className="text-xs text-muted-foreground">
  at {(a as any).merchants?.business_name ||"Unknown Merchant"}
@@ -560,7 +561,7 @@ const BrandDashboard = () => {
  />
  <h3 className="font-bold">{campaign.name}</h3>
  </div>
- <Badge className={status.color}>{status.emoji} {status.label}</Badge>
+ <Badge className={status.color}><status.Icon className="inline-block h-3 w-3 mr-1" aria-hidden /> {status.label}</Badge>
  </div>
  {campaign.description && (
  <p className="text-sm text-muted-foreground mb-3 line-clamp-1">{campaign.description}</p>
