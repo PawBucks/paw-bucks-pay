@@ -1,5 +1,6 @@
 import { cn } from"@/lib/utils";
 import { motion } from"framer-motion";
+import { Medal, Trophy, Gem, type LucideIcon } from "lucide-react";
 
 interface TierBadgeProps {
  tier:'silver' |'gold' |'platinum';
@@ -8,9 +9,9 @@ interface TierBadgeProps {
  className?: string;
 }
 
-const TIER_CONFIG = {
+const TIER_CONFIG: Record<'silver'|'gold'|'platinum', { Icon: LucideIcon; label: string; gradient: string; border: string; text: string; glow: string }> = {
  silver: {
- emoji:'🥈',
+  Icon: Medal,
  label:'Silver',
  gradient:'from-muted via-muted to-muted',
  border:'border-border',
@@ -18,7 +19,7 @@ const TIER_CONFIG = {
  glow:'shadow-gray-300/50',
  },
  gold: {
- emoji:'🥇',
+  Icon: Trophy,
  label:'Gold',
  gradient:'from-warning via-warning to-warning',
  border:'border-warning/30',
@@ -26,7 +27,7 @@ const TIER_CONFIG = {
  glow:'shadow-yellow-400/50',
  },
  platinum: {
- emoji:'💎',
+  Icon: Gem,
  label:'Platinum',
  gradient:'from-accent via-info to-info',
  border:'border-accent/30',
@@ -36,10 +37,12 @@ const TIER_CONFIG = {
 };
 
 const SIZE_CLASSES = {
- sm:'w-8 h-8 text-lg',
- md:'w-12 h-12 text-2xl',
- lg:'w-16 h-16 text-3xl',
+ sm:'w-8 h-8',
+ md:'w-12 h-12',
+ lg:'w-16 h-16',
 };
+
+const ICON_SIZE = { sm: 'h-4 w-4', md: 'h-6 w-6', lg: 'h-8 w-8' } as const;
 
 export const TierBadge = ({ tier, size ='md', showLabel = false, className }: TierBadgeProps) => {
  const config = TIER_CONFIG[tier];
@@ -58,7 +61,7 @@ export const TierBadge = ({ tier, size ='md', showLabel = false, className }: Ti
  SIZE_CLASSES[size]
  )}
  >
- <span>{config.emoji}</span>
+  <config.Icon className={cn(ICON_SIZE[size], config.text)} aria-hidden />
  </motion.div>
  {showLabel && (
  <span className={cn("font-semibold", config.text)}>
