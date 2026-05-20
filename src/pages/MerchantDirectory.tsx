@@ -25,7 +25,7 @@ import { useSponsoredTracking } from"@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from"@/hooks/useSearchRankingTracking";
 import { DirectoryMerchantCard } from"@/components/directory/DirectoryMerchantCard";
 import { MerchantMap } from"@/components/MerchantMap";
-import { LayoutGrid, LayoutList, Map, MapPin, Search, SlidersHorizontal, Store, X } from "lucide-react";
+import { LayoutGrid, LayoutList, Map, MapPin, Search, SlidersHorizontal, Store, X, Star, Stethoscope, Scissors, Truck, ShoppingBag, Bone, Hotel, School, GraduationCap, Dog, Mountain, PersonStanding, Hand, Brain, Camera, Shield, Plane, Dna, Heart, Puzzle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useUserLocation } from "@/hooks/useUserLocation";
@@ -48,26 +48,26 @@ type MerchantWithRating = {
 };
 
 const businessTypes = [
- { label:"All", value:"all", emoji:"🌟" },
- { label:"Vets", value:"veterinary", emoji:"🩺" },
- { label:"Groomers", value:"grooming", emoji:"✂️" },
- { label:"Mobile Groomers", value:"mobile_groomer", emoji:"🚐" },
- { label:"Pet Stores", value:"pet_store", emoji:"🛍️" },
- { label:"Food & Treats", value:"food", emoji:"🦴" },
- { label:"Boarding", value:"boarding", emoji:"🏨" },
- { label:"Daycare", value:"daycare", emoji:"🏫" },
- { label:"Trainers", value:"training", emoji:"🎓" },
- { label:"Walkers", value:"walker", emoji:"🦮" },
- { label:"Hikers", value:"hiker", emoji:"🏔️" },
- { label:"Runners", value:"runner", emoji:"🏃" },
- { label:"Masseuses", value:"masseuse", emoji:"💆" },
- { label:"Behaviorists", value:"behaviorist", emoji:"🧠" },
- { label:"Photographers", value:"photography", emoji:"📸" },
- { label:"Insurance", value:"insurance", emoji:"🛡️" },
- { label:"Transportation", value:"delivery", emoji:"✈️" },
- { label:"Breeders", value:"breeder", emoji:"🧬" },
- { label:"Rescue / Nonprofit", value:"rescue_nonprofit", emoji:"🧡" },
- { label:"Other", value:"other", emoji:"🧩" },
+ { label:"All", value:"all", Icon: Star },
+ { label:"Vets", value:"veterinary", Icon: Stethoscope },
+ { label:"Groomers", value:"grooming", Icon: Scissors },
+ { label:"Mobile Groomers", value:"mobile_groomer", Icon: Truck },
+ { label:"Pet Stores", value:"pet_store", Icon: ShoppingBag },
+ { label:"Food & Treats", value:"food", Icon: Bone },
+ { label:"Boarding", value:"boarding", Icon: Hotel },
+ { label:"Daycare", value:"daycare", Icon: School },
+ { label:"Trainers", value:"training", Icon: GraduationCap },
+ { label:"Walkers", value:"walker", Icon: Dog },
+ { label:"Hikers", value:"hiker", Icon: Mountain },
+ { label:"Runners", value:"runner", Icon: PersonStanding },
+ { label:"Masseuses", value:"masseuse", Icon: Hand },
+ { label:"Behaviorists", value:"behaviorist", Icon: Brain },
+ { label:"Photographers", value:"photography", Icon: Camera },
+ { label:"Insurance", value:"insurance", Icon: Shield },
+ { label:"Transportation", value:"delivery", Icon: Plane },
+ { label:"Breeders", value:"breeder", Icon: Dna },
+ { label:"Rescue / Nonprofit", value:"rescue_nonprofit", Icon: Heart },
+ { label:"Other", value:"other", Icon: Puzzle },
 ];
 
 const getBusinessIcon = (type: string) => {
@@ -417,7 +417,7 @@ const MerchantDirectory = () => {
  :"bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
  }`}
  >
-                      <span className="text-base leading-none" role="img" aria-hidden="true">{type.emoji}</span>
+                      <type.Icon className="h-3.5 w-3.5" aria-hidden="true" />
  {type.label}
  </button>
  );
