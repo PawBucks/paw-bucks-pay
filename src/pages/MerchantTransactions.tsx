@@ -537,8 +537,32 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
                           </div>
                           <div className="mt-4 border-t pt-4 space-y-1.5 text-sm">
                             <div className="flex justify-between"><span className="text-muted-foreground">Total Charged</span><span className="font-semibold">{Formatters.currency(transaction.amount)}</span></div>
-                            <div className="flex justify-between"><span className="text-muted-foreground">Paid via Card / Stripe</span><span>{Formatters.currency(transaction.stripe_amount ?? transaction.amount)}</span></div>
-                            <div className="flex justify-between"><span className="text-muted-foreground">Paid via PawBucks</span><span>{(transaction.pawbucks_used || 0).toLocaleString()} PB ({Formatters.currency(transaction.pawbucks_used_usd || 0)})</span></div>
+                            {(() => {
+                              const pbUsed = transaction.pawbucks_used || 0;
+                              const stripePortion = transaction.stripe_amount ?? transaction.amount;
+                              const showStripe = pbUsed === 0 || stripePortion > 0;
+                              return (
+                                <>
+                                  {showStripe && (
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">Paid via Card / Stripe</span>
+                                      <span>{Formatters.currency(stripePortion)}</span>
+                                    </div>
+                                  )}
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Paid via PawBucks</span>
+                                    {pbUsed > 0 ? (
+                                      <span className="inline-flex items-center gap-1 font-medium text-primary">
+                                        <PawBucksLogo className="w-3 h-3" />
+                                        {pbUsed.toLocaleString()} PB ({Formatters.currency(transaction.pawbucks_used_usd || 0)})
+                                      </span>
+                                    ) : (
+                                      <span className="text-muted-foreground">—</span>
+                                    )}
+                                  </div>
+                                </>
+                              );
+                            })()}
                             <div className="flex justify-between"><span className="text-muted-foreground">Success Fee (3%)</span><span className="text-destructive">-{Formatters.currency(transaction.platform_fee || 0)}</span></div>
                             {transaction.repayment_deducted > 0 && (
                               <div className="flex justify-between"><span className="text-muted-foreground">Funding Repayment</span><span className="text-destructive">-{Formatters.currency(transaction.repayment_deducted)}</span></div>
