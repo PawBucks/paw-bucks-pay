@@ -358,6 +358,56 @@ async function creditPawBucksToUser(
 // Merchants do NOT earn PawBucks from sales/subscriptions.
 // They only receive PawBucks when a Pet Owner pays them WITH PawBucks.
 
+// Credit merchant's PawBucks wallet when a renewal is paid (partially or fully) with PawBucks.
+// Mirrors the logic used by create-combined-payment / confirm-payment-success so merchants
+// always receive the PawBucks the customer redeemed at their business.
+async function creditMerchantPawBucksFromRedemption(
+  supabase: any,
+  merchantId: string,
+  customerUserId: string,
+  pawbucksUsed: number,
+  productName: string,
+) {
+  if (!merchantId || pawbucksUsed <= 0) return;
+  try {
+    const { data: wallet } = await supabase
+      .from('merchant_pawbucks_wallet')
+      .select('balance')
+      .eq('merchant_id', merchantId)
+      .maybeSingle();
+
+    if (wallet) {
+      await supabase
+        .from('merchant_pawbucks_wallet')
+        .update({ balance: (wallet.balance || 0) + pawbucksUsed })
+        .eq('merchant_id', merchantId);
+    } else {
+      await supabase
+        .from('merchant_pawbucks_wallet')
+        .insert({ merchant_id: merchantId, balance: pawbucksUsed });
+    }
+
+    await supabase.from('merchant_pawbucks_activity').insert({
+      merchant_id: merchantId,
+      type: 'earn',
+      amount: pawbucksUsed,
+      source: 'Customer Payment',
+      customer_user_id: customerUserId,
+      description: `Received ${pawbucksUsed} PawBucks from customer (${productName} renewal)`,
+    });
+
+    logStep('Merchant PawBucks credited from subscription renewal', {
+      merchantId,
+      pawbucksUsed,
+    });
+  } catch (err) {
+    logStep('Error crediting merchant PawBucks from renewal', {
+      merchantId,
+      error: String(err),
+    });
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
