@@ -158,12 +158,15 @@ serve(async (req) => {
       const amount = parseFloat(t.amount || 0);
       const platformFee = parseFloat(t.application_fee || 0); // 3% fee on Stripe portion
       const cashbackGivenPawBucks = parseFloat(t.rewards_earned ?? t.cashback_earned ?? 0); // In PawBucks, for display
-      const stripeAmount = t.stripe_amount !== null && t.stripe_amount !== undefined
-        ? parseFloat(t.stripe_amount)
-        : amount;
       const pawbucksUsed = parseInt(t.pawbucks_used || 0, 10) || 0;
       const pawbucksUsedUsd = pawbucksUsed * 0.001;
+      const stripeAmount = t.stripe_amount !== null && t.stripe_amount !== undefined
+        ? parseFloat(t.stripe_amount)
+        : Math.max(0, amount - pawbucksUsedUsd);
       const repaymentDeducted = (amount * repaymentRate) / 100;
+      const paymentMethod = pawbucksUsed > 0
+        ? (stripeAmount > 0.005 ? 'mixed' : 'pawbucks')
+        : t.payment_method;
       
       // Net payout = amount - platform fee - funding repayment
       const netPayout = amount - platformFee - repaymentDeducted;
@@ -204,7 +207,7 @@ serve(async (req) => {
         platform_fee: platformFee, // Platform's 3% fee
         repayment_deducted: repaymentDeducted,
         net_payout: netPayout,
-        payment_method: formatPaymentMethod(t.payment_method),
+        payment_method: formatPaymentMethod(paymentMethod),
         status: t.status,
         description: t.description || '',
         stripe_payment_intent_id: t.stripe_payment_intent_id || null,
