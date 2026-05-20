@@ -167,6 +167,7 @@ serve(async (req) => {
     const userId = metadata.user_id;
     const merchantId = metadata.merchant_id;
     const pawbucksAmount = parseInt(metadata.pawbucks_amount || "0", 10);
+    const storeLockedPawbucks = parseInt(metadata.store_locked_pawbucks || "0", 10);
     const totalAmount = parseFloat(metadata.total_amount || "0");
 
     // Verify user matches
