@@ -88,6 +88,9 @@ serve(async (req) => {
         created_at,
         amount,
         cashback_earned,
+        rewards_earned,
+        stripe_amount,
+        pawbucks_used,
         application_fee,
         status,
         description,
@@ -154,7 +157,12 @@ serve(async (req) => {
     const formattedTransactions = transactions?.map((t: any) => {
       const amount = parseFloat(t.amount || 0);
       const platformFee = parseFloat(t.application_fee || 0); // 3% fee on Stripe portion
-      const cashbackGivenPawBucks = parseFloat(t.cashback_earned || 0); // In PawBucks, for display
+      const cashbackGivenPawBucks = parseFloat(t.rewards_earned ?? t.cashback_earned ?? 0); // In PawBucks, for display
+      const stripeAmount = t.stripe_amount !== null && t.stripe_amount !== undefined
+        ? parseFloat(t.stripe_amount)
+        : amount;
+      const pawbucksUsed = parseInt(t.pawbucks_used || 0, 10) || 0;
+      const pawbucksUsedUsd = pawbucksUsed * 0.001;
       const repaymentDeducted = (amount * repaymentRate) / 100;
       
       // Net payout = amount - platform fee - funding repayment
@@ -185,14 +193,19 @@ serve(async (req) => {
         customer_name: profile?.full_name || 'Unknown',
         customer_email: profile?.email || '',
         amount: amount,
+        stripe_amount: stripeAmount,
+        pawbucks_used: pawbucksUsed,
+        pawbucks_used_usd: pawbucksUsedUsd,
         amount_refunded: parseFloat(t.amount_refunded || 0),
         cashback_given: cashbackGivenPawBucks, // PawBucks given to customer (for display only)
+        cashback_given_usd: cashbackGivenPawBucks * 0.001,
         platform_fee: platformFee, // Platform's 3% fee
         repayment_deducted: repaymentDeducted,
         net_payout: netPayout,
         payment_method: formatPaymentMethod(t.payment_method),
         status: t.status,
         description: t.description || '',
+        stripe_payment_intent_id: t.stripe_payment_intent_id || null,
       };
     }) || [];
 
