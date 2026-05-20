@@ -10,7 +10,7 @@ import { ServicePurchaseDialog } from "@/components/merchant/ServicePurchaseDial
 import { ConsultationScheduleDialog } from "@/components/merchant/ConsultationScheduleDialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Loader2, AlertTriangle, MapPin, Tag } from "lucide-react";
+import { Loader2, AlertTriangle, MapPin, Tag, Megaphone, TrendingUp, Rocket, Crown, Search, type LucideIcon } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 
@@ -41,11 +41,11 @@ type GeoCellAvailability = {
 
 type Merchant = { id: string; business_name: string };
 
-const CATEGORY_META: Record<ServiceCategory, { label: string; icon: string; desc: string }> = {
-  visibility: { label: "Visibility & Promotion", icon: "📣", desc: "Boost your presence and get discovered by more pet owners" },
-  analytics:  { label: "Analytics & Insights",   icon: "📈", desc: "Data-driven tools to understand and grow your business" },
-  growth:     { label: "Growth & Optimization",  icon: "🚀", desc: "Expert services to accelerate your business growth" },
-  premium:    { label: "Premium & Exclusive",    icon: "👑", desc: "Elite benefits for serious merchants" },
+const CATEGORY_META: Record<ServiceCategory, { label: string; Icon: LucideIcon; desc: string }> = {
+  visibility: { label: "Visibility & Promotion", Icon: Megaphone, desc: "Boost your presence and get discovered by more pet owners" },
+  analytics:  { label: "Analytics & Insights",   Icon: TrendingUp, desc: "Data-driven tools to understand and grow your business" },
+  growth:     { label: "Growth & Optimization",  Icon: Rocket,    desc: "Expert services to accelerate your business growth" },
+  premium:    { label: "Premium & Exclusive",    Icon: Crown,     desc: "Elite benefits for serious merchants" },
 };
 
 const CATEGORY_ORDER: ServiceCategory[] = ["visibility", "analytics", "growth", "premium"];
@@ -284,7 +284,7 @@ const MerchantMarket = () => {
               active={selectedCategory === cat}
               onClick={() => setSelectedCategory(cat)}
             >
-              <span className="mr-1.5" aria-hidden>{CATEGORY_META[cat].icon}</span>
+              {(() => { const I = CATEGORY_META[cat].Icon; return <I className="mr-1.5 inline-block h-4 w-4" aria-hidden />; })()}
               {CATEGORY_META[cat].label}
             </FilterPill>
           ))}
@@ -311,7 +311,7 @@ const MerchantMarket = () => {
                 return (
                   <div key={cat}>
                     <div className="flex items-center gap-3 pb-3 border-b border-border mb-5">
-                      <span className="text-xl" aria-hidden>{meta.icon}</span>
+                      <meta.Icon className="h-5 w-5 text-primary" aria-hidden />
                       <h2 className="font-display text-xl md:text-2xl font-bold text-foreground">{meta.label}</h2>
                       <span className="rounded-full border border-border bg-primary/10 text-primary px-2 py-0.5 text-[0.7rem] font-medium">
                         {items.length}
@@ -387,7 +387,7 @@ const FilterPill = ({ active, onClick, children }: { active: boolean; onClick: (
 
 const EmptyState = ({ onClear }: { onClear: () => void }) => (
   <div className="rounded-md border border-dashed border-border py-16 text-center">
-    <div className="text-4xl mb-3" aria-hidden>🔍</div>
+    <Search className="h-10 w-10 mb-3 mx-auto text-muted-foreground" aria-hidden />
     <h3 className="font-display text-lg text-foreground mb-1">No services match these filters</h3>
     <p className="text-sm text-muted-foreground mb-4">Try clearing filters to see the full marketplace.</p>
     <Button variant="outline" onClick={onClear}>Clear filters</Button>
