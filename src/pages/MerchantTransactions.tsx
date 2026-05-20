@@ -171,6 +171,16 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  };
  }, [sortedTransactions]);
 
+ const getPawBucksUsed = (transaction: Transaction) => Number(transaction.pawbucks_used || 0);
+ const getPawBucksUsedUsd = (transaction: Transaction) => {
+  const pawbucksUsed = getPawBucksUsed(transaction);
+  return transaction.pawbucks_used_usd ?? pawbucksUsed * 0.001;
+ };
+ const getStripePortion = (transaction: Transaction) => {
+  const pawbucksUsd = getPawBucksUsedUsd(transaction);
+  return transaction.stripe_amount ?? Math.max(0, transaction.amount - pawbucksUsd);
+ };
+
  const handleSort = (column: keyof Transaction) => {
  if (sortColumn === column) {
  setSortDirection(sortDirection ==="asc" ?"desc" :"asc");
