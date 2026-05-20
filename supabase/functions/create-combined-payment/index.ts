@@ -220,27 +220,30 @@ serve(async (req) => {
       }
     }
 
-    // Store-locked PawBucks redemption: validate balance & debit BEFORE computing Stripe amount.
-    // These are merchant-specific PB issued via Store Rewards Pro and apply only at the issuing merchant.
+    // Store-locked PawBucks: VALIDATE balance now (no debit yet).
+    // These merchant-specific PB are issued via Store Rewards Pro and apply only
+    // at the issuing merchant. We must NOT debit them until Stripe confirms the
+    // payment (or, in the PawBucks-only branch, when we finalize the transaction).
     if (storeLockedPawbucks > 0) {
-      const { data: redeemResult, error: redeemErr } = await supabaseAdmin.rpc(
-        'redeem_store_locked_pawbucks',
-        {
-          p_merchant_id: merchantId,
-          p_user_id: user.id,
-          p_amount_pb: storeLockedPawbucks,
-          p_transaction_id: null,
-          p_description: `In-store PawBucks redemption at ${merchant.business_name}`,
-        }
-      );
-      if (redeemErr || !(redeemResult as any)?.success) {
-        const msg = (redeemResult as any)?.error || redeemErr?.message || 'Could not redeem in-store PawBucks';
+      const { data: slpbRow, error: slpbErr } = await supabaseAdmin
+        .from('store_locked_pawbucks')
+        .select('balance')
+        .eq('user_id', user.id)
+        .eq('merchant_id', merchantId)
+        .maybeSingle();
+      if (slpbErr) {
+        throw new Error('Could not verify in-store PawBucks balance');
+      }
+      const slpbBalance = Number(slpbRow?.balance || 0);
+      if (slpbBalance < storeLockedPawbucks) {
         return new Response(
-          JSON.stringify({ error: msg }),
+          JSON.stringify({ error: `Insufficient in-store PawBucks. Available: ${slpbBalance}` }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
         );
       }
-      logStep('Store-locked PawBucks redeemed', { storeLockedPawbucks });
+      logStep('Store-locked PawBucks validated (debit deferred until Stripe success)', {
+        storeLockedPawbucks, slpbBalance,
+      });
     }
 
     // Calculate USD value of PawBucks - both regular and store-locked apply to base amount ONLY, not tip
