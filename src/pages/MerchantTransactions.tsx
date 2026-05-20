@@ -475,7 +475,17 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <TableCell className="text-right text-muted-foreground">{Formatters.currency((transaction.platform_fee || 0))}</TableCell>
  <TableCell className="text-right text-muted-foreground">{Formatters.currency(transaction.repayment_deducted)}</TableCell>
  <TableCell className="text-right font-semibold text-success">{Formatters.currency(transaction.net_payout)}</TableCell>
- <TableCell>{transaction.payment_method}</TableCell>
+ <TableCell>
+   <div className="flex flex-col gap-0.5">
+     <span>{transaction.payment_method}</span>
+     {(transaction.pawbucks_used || 0) > 0 && (
+       <span className="inline-flex items-center gap-1 text-xs text-primary font-medium">
+         <PawBucksLogo className="w-3 h-3" />
+         {(transaction.pawbucks_used || 0).toLocaleString()} PB ({Formatters.currency(transaction.pawbucks_used_usd || 0)})
+       </span>
+     )}
+   </div>
+ </TableCell>
  <TableCell>
  <Badge variant="outline" className={getStatusColor(transaction.status)}>
  {transaction.status}
