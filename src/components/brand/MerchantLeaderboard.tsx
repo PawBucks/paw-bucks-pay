@@ -9,9 +9,9 @@ interface MerchantLeaderboardProps {
 }
 
 const RANK_DECOR = [
- { icon: Crown, color:"text-warning", bg:"bg-warning/10 border-warning/30", label:"🥇" },
- { icon: Medal, color:"text-muted-foreground", bg:"bg-muted/40 border-border", label:"🥈" },
- { icon: Award, color:"text-accent", bg:"bg-accent/10 border-accent/30", label:"🥉" },
+ { Icon: Crown, color:"text-warning", bg:"bg-warning/10 border-warning/30" },
+ { Icon: Medal, color:"text-muted-foreground", bg:"bg-muted/40 border-border" },
+ { Icon: Award, color:"text-accent", bg:"bg-accent/10 border-accent/30" },
 ];
 
 export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {
@@ -41,8 +41,8 @@ export function MerchantLeaderboard({ entries }: MerchantLeaderboardProps) {
  decor ? decor.bg :"border-transparent hover:bg-muted"
  )}
  >
- <div className="w-7 h-7 rounded-full bg-background flex items-center justify-center text-xs font-bold flex-shrink-0">
- {decor ? decor.label : `#${idx + 1}`}
+              <div className="w-7 h-7 rounded-full bg-background flex items-center justify-center text-xs font-bold flex-shrink-0">
+ {decor ? <decor.Icon className={cn("h-4 w-4", decor.color)} aria-hidden /> : `#${idx + 1}`}
  </div>
  <Avatar className="h-9 w-9 flex-shrink-0">
  {entry.logo_url && <AvatarImage src={entry.logo_url} alt={entry.business_name} />}
