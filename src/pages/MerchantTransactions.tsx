@@ -454,8 +454,8 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  </TableHeader>
  <TableBody>
  {paginatedTransactions.map((transaction) => (
-                  <>
- <TableRow key={transaction.transaction_id} className="hover:bg-muted transition-colors">
+                  <React.Fragment key={transaction.transaction_id}>
+                  <TableRow className="hover:bg-muted transition-colors">
                   <TableCell className="pr-0">
                     <Button
                       variant="ghost"
@@ -546,7 +546,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
                       </TableCell>
                     </TableRow>
                   )}
-                  </>
+                  </React.Fragment>
  ))}
  </TableBody>
  </Table>
