@@ -832,6 +832,19 @@ async function handlePaymentSuccess(
     logStep("Transaction record created", { transactionId: txRecord?.id, amount: fullAmountDollars, pawbucksUsed });
   }
 
+  // === CREDIT MERCHANT WALLET WITH REDEEMED PAWBUCKS ===
+  // When a customer pays a renewal with PawBucks (in part or full), the merchant
+  // must receive those PawBucks in their wallet — same as any other purchase.
+  if (pawbucksUsed > 0) {
+    await creditMerchantPawBucksFromRedemption(
+      supabase,
+      subscription.merchant_id,
+      subscription.user_id,
+      pawbucksUsed,
+      subscription.product_name,
+    );
+  }
+
   // Send notification to user about renewal and rewards
   const renewalNotice = pawbucksUsed > 0
     ? `Your ${subscription.product_name} subscription renewed. We auto-redeemed ${pawbucksUsed.toLocaleString()} PawBucks ($${pawbucksUsdValue.toFixed(2)}) and charged $${chargedDollars.toFixed(2)}. You earned ${pawbucksEarned} PawBucks.`
