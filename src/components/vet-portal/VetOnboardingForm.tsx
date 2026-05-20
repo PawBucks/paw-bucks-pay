@@ -3,7 +3,7 @@ import { useNavigate } from"react-router-dom";
 import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, Edit, FileText, PartyPopper, Phone, Save, Shield, ShieldCheck, Stethoscope, User, Wallet, PawPrint, Home, Citrus, Star, Smile, Dog, Smartphone, Cross, Bluetooth as Tooth, HeartPulse, Bug, Siren, Heart, Microscope, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, Edit, FileText, PartyPopper, Phone, Save, Shield, ShieldCheck, Stethoscope, User, Wallet, PawPrint, Home, Citrus, Star, Smile, Dog, Smartphone, Cross, Bone, HeartPulse, Bug, Siren, Microscope, type LucideIcon } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
@@ -129,7 +129,7 @@ const PIMS_OPTIONS = [
 
 const SERVICES_PROVIDED: { id: string; label: string; Icon: LucideIcon }[] = [
  { id:"general", label:"General Wellness", Icon: Stethoscope },
- { id:"dental", label:"Dental Care", Icon: Tooth },
+ { id:"dental", label:"Dental Care", Icon: Bone },
  { id:"surgery", label:"Surgery", Icon: Cross },
  { id:"exotics", label:"Exotic Animals", Icon: Bug },
  { id:"emergency", label:"Emergency Care", Icon: Siren },
