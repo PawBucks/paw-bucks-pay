@@ -218,7 +218,7 @@ export function ReviewCampaignWidget() {
  <div>
  <p className="text-sm text-muted-foreground">Avg Rating</p>
  <p className={`text-2xl font-bold ${getRatingColor(metrics.averageRating)}`}>
- {Formatters.decimal(metrics.averageRating, 1)} ★
+ {Formatters.decimal(metrics.averageRating, 1)}
  </p>
  </div>
  </div>
@@ -275,7 +275,7 @@ export function ReviewCampaignWidget() {
  <CardContent className="space-y-3">
  {ratingDistribution.map(item => (
  <div key={item.rating} className="flex items-center gap-3">
- <span className="w-8 text-sm font-medium">{item.rating}★</span>
+ <span className="w-8 text-sm font-medium flex items-center gap-0.5">{item.rating}<Star className="h-3 w-3" aria-hidden /></span>
  <Progress value={item.percentage} className="flex-1 h-3" />
  <span className="w-12 text-sm text-muted-foreground text-right">{item.count}</span>
  </div>

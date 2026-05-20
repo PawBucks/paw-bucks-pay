@@ -310,7 +310,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  <div className="flex items-center justify-between flex-wrap gap-3">
  <div>
  <CardTitle className="flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🧭</span>
+ <Compass className="w-5 h-5 text-primary" aria-hidden />
  Smart Schedule
  </CardTitle>
  <CardDescription>
@@ -371,7 +371,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <span className="w-4 h-4 text-success" aria-hidden="true">📉</span>
+ <TrendingDown className="w-4 h-4 text-success" aria-hidden />
  Time Saved
  </div>
  <p className="text-xl font-bold text-success">
@@ -409,7 +409,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  {optimizing ? (
  <Loader2 className="w-4 h-4 animate-spin mr-2" />
  ) : (
- <span className="w-4 h-4 mr-2" aria-hidden="true">🧭</span>
+ <Compass className="w-4 h-4 mr-2" aria-hidden />
  )}
  {optimizing ?"Optimizing..." :"Optimize Route"}
  </Button>

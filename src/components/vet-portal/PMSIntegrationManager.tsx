@@ -38,12 +38,12 @@ interface PMSIntegrationManagerProps {
 }
 
 const PMS_PROVIDERS = [
- { value:"idexx_cornerstone", label:"IDEXX Cornerstone", logo:"🏥" },
- { value:"idexx_neo", label:"IDEXX Neo", logo:"🔷" },
- { value:"avimark", label:"AVImark", logo:"📊" },
- { value:"evetpractice", label:"eVetPractice", logo:"💻" },
- { value:"vetspire", label:"Vetspire", logo:"✨" },
- { value:"other", label:"Other PMS", logo:"🔧" },
+ { value:"idexx_cornerstone", label:"IDEXX Cornerstone", logo:"" },
+ { value:"idexx_neo", label:"IDEXX Neo", logo:"" },
+ { value:"avimark", label:"AVImark", logo:"" },
+ { value:"evetpractice", label:"eVetPractice", logo:"" },
+ { value:"vetspire", label:"Vetspire", logo:"" },
+ { value:"other", label:"Other PMS", logo:"" },
 ];
 
 export function PMSIntegrationManager({ vetId }: PMSIntegrationManagerProps) {
@@ -348,7 +348,7 @@ export function PMSIntegrationManager({ vetId }: PMSIntegrationManagerProps) {
  >
  <div className="flex items-start justify-between">
  <div className="flex items-center gap-3">
- <div className="text-2xl">{provider?.logo ||"🔧"}</div>
+ <div className="text-2xl">{provider?.logo ||""}</div>
  <div>
  <h4 className="font-medium">{integration.provider_name}</h4>
  <p className="text-xs text-muted-foreground flex items-center gap-1">

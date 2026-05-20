@@ -30,12 +30,12 @@ interface LabIntegrationManagerProps {
 }
 
 const LAB_VENDORS = [
- { value:"idexx", label:"IDEXX Reference Laboratories", logo:"🔬", supportsDicom: true },
- { value:"antech", label:"Antech Diagnostics", logo:"🧪", supportsDicom: true },
- { value:"zoetis", label:"Zoetis Reference Labs", logo:"💊", supportsDicom: false },
- { value:"heska", label:"Heska", logo:"🩺", supportsDicom: false },
- { value:"abaxis", label:"Abaxis/Zoetis VETSCAN", logo:"📊", supportsDicom: false },
- { value:"other", label:"Other Lab", logo:"🔧", supportsDicom: false },
+ { value:"idexx", label:"IDEXX Reference Laboratories", logo:"", supportsDicom: true },
+ { value:"antech", label:"Antech Diagnostics", logo:"", supportsDicom: true },
+ { value:"zoetis", label:"Zoetis Reference Labs", logo:"", supportsDicom: false },
+ { value:"heska", label:"Heska", logo:"", supportsDicom: false },
+ { value:"abaxis", label:"Abaxis/Zoetis VETSCAN", logo:"", supportsDicom: false },
+ { value:"other", label:"Other Lab", logo:"", supportsDicom: false },
 ];
 
 export function LabIntegrationManager({ vetId }: LabIntegrationManagerProps) {
@@ -255,7 +255,7 @@ export function LabIntegrationManager({ vetId }: LabIntegrationManagerProps) {
  <Card key={integration.id} className="p-4">
  <div className="flex items-start justify-between mb-3">
  <div className="flex items-center gap-3">
- <div className="text-2xl">{vendor?.logo ||"🔧"}</div>
+ <div className="text-2xl">{vendor?.logo ||""}</div>
  <div>
  <h4 className="font-medium">{integration.lab_name}</h4>
  <p className="text-xs text-muted-foreground">
