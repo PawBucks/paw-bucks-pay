@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover"
 import { Separator } from"@/components/ui/separator";
 import { toast } from"sonner";
 import { format, startOfDay, isSameDay } from"date-fns";
-import { ArrowRight, Calendar, Car, CheckCircle2, Loader2, MapPin, Play, Route as RouteIcon, SkipForward, Users } from "lucide-react";
+import { ArrowRight, Calendar as CalendarIcon, Car, CheckCircle2, Loader2, MapPin, Play, Route as RouteIcon, SkipForward, Users, Compass, TrendingDown, Home } from "lucide-react";
 import mapboxgl from"mapbox-gl";
 import { Formatters } from "@/utils/formatters";
 import"mapbox-gl/dist/mapbox-gl.css";
@@ -320,7 +320,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  <Popover>
  <PopoverTrigger asChild>
  <Button variant="outline" size="sm">
- <Calendar className="w-4 h-4 mr-2" />
+                  <CalendarIcon className="w-4 h-4 mr-2" />
  {format(selectedDate,"MMM d, yyyy")}
  </Button>
  </PopoverTrigger>
