@@ -267,7 +267,11 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  }
  };
 
- const emojiOptions: string[] = [];
+ const iconOptions = [
+   { key: "star", Icon: Star }, { key: "paw", Icon: PawPrint }, { key: "gift", Icon: Gift },
+   { key: "coffee", Icon: Coffee }, { key: "scissors", Icon: Scissors }, { key: "stethoscope", Icon: Stethoscope },
+   { key: "bone", Icon: Bone }, { key: "dog", Icon: Dog }, { key: "trophy", Icon: Trophy }, { key: "gem", Icon: Gem },
+ ];
 
  if (loading) {
  return (
@@ -317,18 +321,18 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  <div className="space-y-2">
  <Label>Icon</Label>
  <div className="flex flex-wrap gap-2">
- {emojiOptions.map((e) => (
+ {iconOptions.map(({ key, Icon }) => (
  <button
- key={e}
+ key={key}
  type="button"
- onClick={() => setFormEmoji(e)}
+ onClick={() => setFormEmoji(key)}
  className={`w-10 h-10 rounded-lg text-xl flex items-center justify-center border-2 transition-colors ${
- formEmoji === e
+ formEmoji === key
  ?"border-primary bg-primary/10"
  :"border-border hover:border-primary"
  }`}
  >
- {e}
+ <Icon className="h-5 w-5" aria-hidden />
  </button>
  ))}
  </div>
