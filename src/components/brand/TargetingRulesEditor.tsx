@@ -4,7 +4,7 @@ import { Label } from"@/components/ui/label";
 import { Input } from"@/components/ui/input";
 import { Badge } from"@/components/ui/badge";
 import { Checkbox } from"@/components/ui/checkbox";
-import { Crown, Dog, Loader2, MapPin, Target, Users } from "lucide-react";
+import { Cat, Crown, Dog, Loader2, MapPin, Target, Users } from "lucide-react";
 import { supabase } from"@/integrations/supabase/client";
 import type { TargetingRules } from"@/services/api/brandCampaigns.service";
 
@@ -110,7 +110,7 @@ export function TargetingRulesEditor({ value, onChange }: TargetingRulesEditorPr
  className="cursor-pointer capitalize"
  onClick={() => toggleArray("species", sp)}
  >
- {sp ==="cat" ? <span className="h-3 w-3 mr-1" aria-hidden="true">🐈</span> : <Dog className="h-3 w-3 mr-1" />}
+ {sp ==="cat" ? <Cat className="h-3 w-3 mr-1" aria-hidden /> : <Dog className="h-3 w-3 mr-1" />}
  {sp}
  </Badge>
  );

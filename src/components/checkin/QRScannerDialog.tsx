@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { supabase } from"@/integrations/supabase/client";
 import { useAuth } from"@/hooks/useAuth";
 import { Html5Qrcode } from"html5-qrcode";
-import { Camera, CheckCircle2, Loader2, MapPin, Store, XCircle } from "lucide-react";
+import { Camera, CheckCircle2, Compass, Loader2, MapPin, Store, XCircle } from "lucide-react";
 import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";
@@ -365,7 +365,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  {nearbyEntities.length > 0 && (
  <div className="space-y-2">
  <p className="text-sm font-medium flex items-center gap-1.5">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🧭</span>
+ <Compass className="w-4 h-4 text-primary" aria-hidden />
  Nearby Locations
  </p>
  <div className="space-y-1.5 max-h-48 overflow-y-auto">

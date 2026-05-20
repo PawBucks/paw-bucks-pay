@@ -5,7 +5,7 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
-import { ArrowLeft, Check, CreditCard, MapPin, Package, Plus, RefreshCw, Shield, Store } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, MapPin, Package, Plus, RefreshCw, Shield, ShoppingCart, Star, Store } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { SEO } from"@/components/SEO";
 import { useAuth } from"@/hooks/useAuth";
@@ -448,7 +448,7 @@ const Storefront = memo(() => {
        <CreditCard className="h-4 w-4" /> Stripe
       </div>
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-sm">
-       <span className="h-4 w-4" aria-hidden="true">⭐</span> Verified
+       <Star className="h-4 w-4" aria-hidden /> Verified
       </div>
      </div>
     </div>
@@ -602,7 +602,7 @@ const Storefront = memo(() => {
  </>
  ) : (
  <>
- <span className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" aria-hidden="true">🛒</span>
+ <ShoppingCart className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" aria-hidden />
  Add to Cart
  </>
  )}

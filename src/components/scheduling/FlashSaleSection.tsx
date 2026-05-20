@@ -21,7 +21,7 @@ import {
  CollapsibleContent,
  CollapsibleTrigger,
 } from"@/components/ui/collapsible";
-import { Bell, ChevronDown, ChevronUp, Zap } from "lucide-react";
+import { Bell, ChevronDown, ChevronUp, TrendingDown, Zap } from "lucide-react";
 import { format } from"date-fns";
 import { 
  type MerchantService,
@@ -196,7 +196,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  </FormControl>
  {previewSavings > 0 && (
  <div className="flex items-center gap-2 mt-2">
- <span className="w-4 h-4 text-success" aria-hidden="true">📉</span>
+ <TrendingDown className="w-4 h-4 text-success" aria-hidden />
  <span className="text-sm text-success font-medium">
  {previewSavings}% off with PawBucks!
  </span>

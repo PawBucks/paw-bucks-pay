@@ -20,19 +20,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, addDays, isAfter, startOfDay } from "date-fns";
-import {
-  Calendar as CalendarIcon,
-  Loader2,
-  CheckCircle2,
-  ArrowRight,
-  Timer,
-  Clock,
-  MapPin,
-  Users,
-  Zap,
-  PawPrint,
-  AlertCircle,
-} from "lucide-react";
+import { AlertCircle, ArrowRight, Ban, Calendar as CalendarIcon, CheckCircle2, Clock, CreditCard, Loader2, MapPin, PawPrint, Timer, Users, Zap } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { Formatters } from "@/utils/formatters";
@@ -987,7 +975,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
           {(selectedServiceData as any).require_deposit &&
             (merchantAcceptsCards ? (
               <div className="rounded-md bg-info/10 border border-info/30 px-3 py-2.5 flex gap-2 text-xs text-info">
-                <span aria-hidden>💳</span>
+                <CreditCard aria-hidden />
                 <p>
                   This service requires a <strong>card on file</strong> to book.
                   {(selectedServiceData as any).no_show_fee_amount > 0 && (
@@ -1000,7 +988,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
               </div>
             ) : (
               <div className="rounded-md bg-destructive/10 border border-destructive/30 px-3 py-2.5 flex gap-2 text-xs text-destructive">
-                <span aria-hidden>🚫</span>
+                <Ban aria-hidden />
                 <p>
                   <strong>This service can&apos;t be booked online yet.</strong> {merchantName} hasn&apos;t
                   finished setting up payment processing. Please contact them directly to book.

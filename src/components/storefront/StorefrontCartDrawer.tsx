@@ -4,7 +4,7 @@ import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { Slider } from"@/components/ui/slider";
-import { CreditCard, Loader2, Minus, Package, Plus, Trash2 } from "lucide-react";
+import { CreditCard, Loader2, Minus, Package, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
 import type { StorefrontCartItem } from"@/hooks/useStorefrontCart";
@@ -97,7 +97,7 @@ export function StorefrontCartDrawer({
  <SheetContent className="flex flex-col w-full sm:max-w-lg">
  <SheetHeader>
  <SheetTitle className="flex items-center gap-2">
- <span className="h-5 w-5" aria-hidden="true">🛒</span>
+ <ShoppingCart className="h-5 w-5" aria-hidden />
  Shopping Cart
  {items.length > 0 && (
  <Badge variant="secondary" className="ml-1">
