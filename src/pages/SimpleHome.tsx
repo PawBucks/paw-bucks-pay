@@ -170,6 +170,12 @@ const SimpleHome = () => {
           </section>
 
           {/* Pets — desktop */}
+          {user && (
+            <section>
+              <CustomerLoyaltyCards userId={user.id} compact />
+            </section>
+          )}
+
           {pets.length > 0 && (
             <section className="hidden lg:block">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
