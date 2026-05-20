@@ -351,6 +351,28 @@ serve(async (req) => {
     if (stripeAmount <= 0) {
       logStep("Processing full PawBucks payment");
 
+      // Debit store-locked PawBucks now (no Stripe step in this branch).
+      if (storeLockedPawbucks > 0) {
+        const { data: slpbRedeem, error: slpbRedeemErr } = await supabaseAdmin.rpc(
+          'redeem_store_locked_pawbucks',
+          {
+            p_merchant_id: merchantId,
+            p_user_id: user.id,
+            p_amount_pb: storeLockedPawbucks,
+            p_transaction_id: null,
+            p_description: `In-store PawBucks redemption at ${merchant.business_name}`,
+          }
+        );
+        if (slpbRedeemErr || !(slpbRedeem as any)?.success) {
+          const msg = (slpbRedeem as any)?.error || slpbRedeemErr?.message || 'Could not redeem in-store PawBucks';
+          return new Response(
+            JSON.stringify({ error: msg }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+          );
+        }
+        logStep('Store-locked PawBucks redeemed (full-PB branch)', { storeLockedPawbucks });
+      }
+
       // ============================================================
       // IDEMPOTENCY CHECK: Prevent duplicate PawBucks-only transactions
       // If same user+merchant+amount within last 60 seconds, reject as duplicate
@@ -755,6 +777,7 @@ serve(async (req) => {
           description: description || `Payment to ${merchant.business_name}`,
           subscription_tier: subscriptionTier,
           pawbucks_amount: pawbucksAmount.toString(),
+          store_locked_pawbucks: storeLockedPawbucks.toString(),
           total_amount: totalAmount.toString(),
           tip_amount: tipAmount.toString(),
           pawbucks_earned: String(pawbucksEarned),
