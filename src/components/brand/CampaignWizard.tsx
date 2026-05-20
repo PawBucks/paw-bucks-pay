@@ -41,7 +41,7 @@ const STEPS = [
 
 const TEMPLATES: Array<{
  key: string;
- emoji: string;
+ Icon: typeof Rocket;
  name: string;
  description: string;
  preset: {
@@ -240,7 +240,7 @@ export function CampaignWizard({ open, onOpenChange, brandId, brandName, brandLo
  }`}
  >
  <div className="flex items-center gap-2 mb-1">
- <span className="text-lg">{t.emoji}</span>
+  <t.Icon className="h-4 w-4 text-primary" aria-hidden />
  <span className="font-semibold text-sm">{t.name}</span>
  </div>
  <p className="text-xs text-muted-foreground line-clamp-2">{t.description}</p>
