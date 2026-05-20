@@ -171,6 +171,16 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  };
  }, [sortedTransactions]);
 
+ const getPawBucksUsed = (transaction: Transaction) => Number(transaction.pawbucks_used || 0);
+ const getPawBucksUsedUsd = (transaction: Transaction) => {
+  const pawbucksUsed = getPawBucksUsed(transaction);
+  return transaction.pawbucks_used_usd ?? pawbucksUsed * 0.001;
+ };
+ const getStripePortion = (transaction: Transaction) => {
+  const pawbucksUsd = getPawBucksUsedUsd(transaction);
+  return transaction.stripe_amount ?? Math.max(0, transaction.amount - pawbucksUsd);
+ };
+
  const handleSort = (column: keyof Transaction) => {
  if (sortColumn === column) {
  setSortDirection(sortDirection ==="asc" ?"desc" :"asc");
@@ -453,7 +463,12 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  </TableRow>
  </TableHeader>
  <TableBody>
- {paginatedTransactions.map((transaction) => (
+ {paginatedTransactions.map((transaction) => {
+  const pawbucksUsed = getPawBucksUsed(transaction);
+  const pawbucksUsedUsd = getPawBucksUsedUsd(transaction);
+  const stripePortion = getStripePortion(transaction);
+
+  return (
                   <React.Fragment key={transaction.transaction_id}>
                   <TableRow className="hover:bg-muted transition-colors">
                   <TableCell className="pr-0">
@@ -478,10 +493,10 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  <TableCell>
    <div className="flex flex-col gap-0.5">
      <span>{transaction.payment_method}</span>
-     {(transaction.pawbucks_used || 0) > 0 && (
+      {pawbucksUsed > 0 && (
        <span className="inline-flex items-center gap-1 text-xs text-primary font-medium">
          <PawBucksLogo className="w-3 h-3" />
-         {(transaction.pawbucks_used || 0).toLocaleString()} PB ({Formatters.currency(transaction.pawbucks_used_usd || 0)})
+          {pawbucksUsed.toLocaleString()} PB ({Formatters.currency(pawbucksUsedUsd)})
        </span>
      )}
    </div>
@@ -538,8 +553,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
                           <div className="mt-4 border-t pt-4 space-y-1.5 text-sm">
                             <div className="flex justify-between"><span className="text-muted-foreground">Total Charged</span><span className="font-semibold">{Formatters.currency(transaction.amount)}</span></div>
                             {(() => {
-                              const pbUsed = transaction.pawbucks_used || 0;
-                              const stripePortion = transaction.stripe_amount ?? transaction.amount;
+                               const pbUsed = pawbucksUsed;
                               const showStripe = pbUsed === 0 || stripePortion > 0;
                               return (
                                 <>
@@ -554,7 +568,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
                                     {pbUsed > 0 ? (
                                       <span className="inline-flex items-center gap-1 font-medium text-primary">
                                         <PawBucksLogo className="w-3 h-3" />
-                                        {pbUsed.toLocaleString()} PB ({Formatters.currency(transaction.pawbucks_used_usd || 0)})
+                                         {pbUsed.toLocaleString()} PB ({Formatters.currency(pawbucksUsedUsd)})
                                       </span>
                                     ) : (
                                       <span className="text-muted-foreground">—</span>
@@ -580,8 +594,9 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
                       </TableCell>
                     </TableRow>
                   )}
-                  </React.Fragment>
- ))}
+                   </React.Fragment>
+  );
+ })}
  </TableBody>
  </Table>
  </div>
