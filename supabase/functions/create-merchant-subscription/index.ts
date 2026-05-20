@@ -806,7 +806,7 @@ serve(async (req) => {
       // Log debit activity
       await supabaseAdmin.from('pawbucks_activity').insert({
         user_id: user.id,
-        amount: -actualPawbucksUsed,
+        amount: actualPawbucksUsed,
         type: 'redeem',
         source: 'subscription_payment',
         description: `Redeemed ${actualPawbucksUsed} PawBucks for ${productName} subscription at ${merchant.business_name}`,
