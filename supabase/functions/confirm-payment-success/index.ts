@@ -576,6 +576,33 @@ serve(async (req) => {
       logStep("PawBucks deducted and credited to merchant", { pawbucksAmount, walletDeduction, petFundDeduction, welcomeCreditDeduction });
     }
 
+    // 4a. Deduct store-locked (in-store) PawBucks NOW that Stripe has confirmed.
+    // We deliberately defer this debit until after PaymentIntent.status === 'succeeded'
+    // so users never lose in-store PawBucks if the card fails or checkout is abandoned.
+    if (storeLockedPawbucks > 0) {
+      const { data: slpbRedeem, error: slpbRedeemErr } = await supabaseAdmin.rpc(
+        'redeem_store_locked_pawbucks',
+        {
+          p_merchant_id: merchantId,
+          p_user_id: userId,
+          p_amount_pb: storeLockedPawbucks,
+          p_transaction_id: transaction.id,
+          p_description: `In-store PawBucks redemption at ${businessName}`,
+        }
+      );
+      if (slpbRedeemErr || !(slpbRedeem as any)?.success) {
+        // Do NOT fail the transaction — Stripe already charged the card.
+        // Log loudly so it can be reconciled manually.
+        logStep('ERROR: store-locked PawBucks debit failed after Stripe success', {
+          transactionId: transaction.id,
+          storeLockedPawbucks,
+          error: (slpbRedeem as any)?.error || slpbRedeemErr?.message,
+        });
+      } else {
+        logStep('Store-locked PawBucks debited (post-Stripe)', { storeLockedPawbucks });
+      }
+    }
+
     // 4b. Handle referrer bonus activation on first purchase
     // If this is the user's first completed transaction AND they were referred, activate the referrer bonus
     try {
