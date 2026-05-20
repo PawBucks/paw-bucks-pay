@@ -157,7 +157,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  if (routePlan?.start_latitude && routePlan?.start_longitude) {
  new mapboxgl.Marker({ color:"#22c55e" })
  .setLngLat([routePlan.start_longitude, routePlan.start_latitude])
- .setPopup(new mapboxgl.Popup().setHTML("<b>🏠 Start</b><br/>" + (routePlan.start_address ||"Home base")))
+                .setPopup(new mapboxgl.Popup().setHTML("<b>Start</b><br/>" + (routePlan.start_address ||"Home base")))
  .addTo(map);
  bounds.extend([routePlan.start_longitude, routePlan.start_latitude]);
  }
