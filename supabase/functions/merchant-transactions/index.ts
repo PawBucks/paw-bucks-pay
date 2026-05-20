@@ -182,6 +182,8 @@ serve(async (req) => {
           'venmo': 'Venmo',
           'paypal': 'PayPal',
           'zelle': 'Zelle',
+          'pawbucks': 'PawBucks',
+          'mixed': 'Card + PawBucks',
           'other': 'Other',
         };
         return methodMap[method] || method.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
