@@ -26,6 +26,8 @@ import {
 import { Gift, Loader2, Pencil, Plus, Stamp, Trophy, Users } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 type LoyaltyProgram = {
  id: string;
@@ -47,6 +49,16 @@ type ProgramStats = {
  rewards_earned: number;
 };
 
+type CustomerPunchRow = {
+  user_id: string;
+  current_punches: number;
+  total_punches_earned: number;
+  cards_completed: number;
+  updated_at: string;
+  full_name: string | null;
+  email: string | null;
+};
+
 interface MerchantLoyaltyProgramTabProps {
  merchantId: string;
 }
@@ -58,6 +70,9 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  const [dialogOpen, setDialogOpen] = useState(false);
  const [editingProgram, setEditingProgram] = useState<LoyaltyProgram | null>(null);
  const [saving, setSaving] = useState(false);
+  const [expandedProgram, setExpandedProgram] = useState<string | null>(null);
+  const [customersByProgram, setCustomersByProgram] = useState<Record<string, CustomerPunchRow[]>>({});
+  const [loadingCustomers, setLoadingCustomers] = useState<string | null>(null);
 
  // Form state
  const [formName, setFormName] = useState("");
@@ -110,6 +125,57 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  useEffect(() => {
  loadPrograms();
  }, [merchantId]);
+
+  const loadCustomersForProgram = async (program: LoyaltyProgram) => {
+    setLoadingCustomers(program.id);
+    try {
+      const { data: cards, error: cardsErr } = await supabase
+        .from("customer_punch_cards")
+        .select("user_id, current_punches, total_punches_earned, cards_completed, updated_at")
+        .eq("program_id", program.id)
+        .order("current_punches", { ascending: false });
+      if (cardsErr) throw cardsErr;
+
+      const { data: contacts, error: contactsErr } = await supabase.rpc(
+        "get_merchant_customer_contacts",
+        { p_merchant_id: merchantId }
+      );
+      if (contactsErr) throw contactsErr;
+
+      const contactMap = new Map<string, { full_name: string | null; email: string | null }>();
+      (contacts || []).forEach((c: any) => {
+        contactMap.set(c.id, { full_name: c.full_name ?? null, email: c.email ?? null });
+      });
+
+      const rows: CustomerPunchRow[] = (cards || []).map((c) => ({
+        user_id: c.user_id,
+        current_punches: c.current_punches,
+        total_punches_earned: c.total_punches_earned,
+        cards_completed: c.cards_completed,
+        updated_at: c.updated_at,
+        full_name: contactMap.get(c.user_id)?.full_name ?? null,
+        email: contactMap.get(c.user_id)?.email ?? null,
+      }));
+
+      setCustomersByProgram((prev) => ({ ...prev, [program.id]: rows }));
+    } catch (err) {
+      console.error("Error loading customers:", err);
+      toast.error("Failed to load customers for this program");
+    } finally {
+      setLoadingCustomers(null);
+    }
+  };
+
+  const toggleExpanded = (program: LoyaltyProgram) => {
+    if (expandedProgram === program.id) {
+      setExpandedProgram(null);
+      return;
+    }
+    setExpandedProgram(program.id);
+    if (!customersByProgram[program.id]) {
+      loadCustomersForProgram(program);
+    }
+  };
 
  const resetForm = () => {
  setFormName("");
