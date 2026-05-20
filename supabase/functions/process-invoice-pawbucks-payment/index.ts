@@ -141,7 +141,7 @@ serve(async (req) => {
       await supabase.from("pawbucks_activity").insert({
         user_id: userId,
         type: "redeem",
-        amount: -pawbucksUsed,
+        amount: pawbucksUsed,
         description: `Payment for Invoice #${invoice.invoice_number}`,
         merchant_id: merchant.id,
       });
