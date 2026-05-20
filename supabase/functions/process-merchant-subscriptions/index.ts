@@ -358,6 +358,56 @@ async function creditPawBucksToUser(
 // Merchants do NOT earn PawBucks from sales/subscriptions.
 // They only receive PawBucks when a Pet Owner pays them WITH PawBucks.
 
+// Credit merchant's PawBucks wallet when a renewal is paid (partially or fully) with PawBucks.
+// Mirrors the logic used by create-combined-payment / confirm-payment-success so merchants
+// always receive the PawBucks the customer redeemed at their business.
+async function creditMerchantPawBucksFromRedemption(
+  supabase: any,
+  merchantId: string,
+  customerUserId: string,
+  pawbucksUsed: number,
+  productName: string,
+) {
+  if (!merchantId || pawbucksUsed <= 0) return;
+  try {
+    const { data: wallet } = await supabase
+      .from('merchant_pawbucks_wallet')
+      .select('balance')
+      .eq('merchant_id', merchantId)
+      .maybeSingle();
+
+    if (wallet) {
+      await supabase
+        .from('merchant_pawbucks_wallet')
+        .update({ balance: (wallet.balance || 0) + pawbucksUsed })
+        .eq('merchant_id', merchantId);
+    } else {
+      await supabase
+        .from('merchant_pawbucks_wallet')
+        .insert({ merchant_id: merchantId, balance: pawbucksUsed });
+    }
+
+    await supabase.from('merchant_pawbucks_activity').insert({
+      merchant_id: merchantId,
+      type: 'earn',
+      amount: pawbucksUsed,
+      source: 'Customer Payment',
+      customer_user_id: customerUserId,
+      description: `Received ${pawbucksUsed} PawBucks from customer (${productName} renewal)`,
+    });
+
+    logStep('Merchant PawBucks credited from subscription renewal', {
+      merchantId,
+      pawbucksUsed,
+    });
+  } catch (err) {
+    logStep('Error crediting merchant PawBucks from renewal', {
+      merchantId,
+      error: String(err),
+    });
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -782,6 +832,19 @@ async function handlePaymentSuccess(
     logStep("Transaction record created", { transactionId: txRecord?.id, amount: fullAmountDollars, pawbucksUsed });
   }
 
+  // === CREDIT MERCHANT WALLET WITH REDEEMED PAWBUCKS ===
+  // When a customer pays a renewal with PawBucks (in part or full), the merchant
+  // must receive those PawBucks in their wallet — same as any other purchase.
+  if (pawbucksUsed > 0) {
+    await creditMerchantPawBucksFromRedemption(
+      supabase,
+      subscription.merchant_id,
+      subscription.user_id,
+      pawbucksUsed,
+      subscription.product_name,
+    );
+  }
+
   // Send notification to user about renewal and rewards
   const renewalNotice = pawbucksUsed > 0
     ? `Your ${subscription.product_name} subscription renewed. We auto-redeemed ${pawbucksUsed.toLocaleString()} PawBucks ($${pawbucksUsdValue.toFixed(2)}) and charged $${chargedDollars.toFixed(2)}. You earned ${pawbucksEarned} PawBucks.`
@@ -868,11 +931,11 @@ async function handlePaymentSuccess(
             invoiceTitle: `${subscription.product_name} Subscription Renewal`,
             clientName: userProfile?.full_name || 'Customer',
             clientEmail: userProfile?.email || '',
-            amountPaid: amountInDollars,
-            pawbucksUsed: 0,
-            paymentMethod: 'credit_card',
+            amountPaid: fullAmountDollars,
+            pawbucksUsed: pawbucksUsed,
+            paymentMethod: pawbucksUsed > 0 ? 'mixed' : 'credit_card',
             paymentDate: new Date().toISOString(),
-            invoiceTotal: amountInDollars,
+            invoiceTotal: fullAmountDollars,
             amountDue: 0,
           }),
         });
@@ -1068,9 +1131,18 @@ async function handleFullPawBucksRenewal(
     pawbucksUsed, subscription.product_name, `pawbucks-only-${subscription.id}-${now.getTime()}`,
   );
 
+  // Credit merchant wallet
+  await creditMerchantPawBucksFromRedemption(
+    supabase,
+    subscription.merchant_id,
+    subscription.user_id,
+    pawbucksUsed,
+    subscription.product_name,
+  );
+
   // Transaction record (no Stripe charge)
   const fullAmountDollars = subscription.amount / 100;
-  await supabase.from('transactions').insert({
+  const { data: txRow } = await supabase.from('transactions').insert({
     user_id: subscription.user_id,
     merchant_id: subscription.merchant_id,
     amount: fullAmountDollars,
@@ -1082,7 +1154,7 @@ async function handleFullPawBucksRenewal(
     description: `${subscription.product_name} subscription renewal (fully paid with PawBucks)`,
     status: 'completed',
     payment_method: 'pawbucks',
-  });
+  }).select().single();
 
   await supabase.from('notifications').insert({
     user_id: subscription.user_id,
@@ -1090,6 +1162,88 @@ async function handleFullPawBucksRenewal(
     message: `Your ${subscription.product_name} subscription renewed using ${pawbucksUsed.toLocaleString()} PawBucks ($${(pawbucksValueCents / 100).toFixed(2)}). No card charge.`,
     category: 'transactional',
   });
+
+  // Notify merchant + send email with PawBucks amount
+  try {
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', subscription.user_id)
+      .single();
+    const { data: merchantData } = await supabase
+      .from('merchants')
+      .select('business_name, user_id, address')
+      .eq('id', subscription.merchant_id)
+      .single();
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (merchantData?.user_id) {
+      await supabase.from('notifications').insert({
+        user_id: merchantData.user_id,
+        title: '💰 Subscription Renewal (PawBucks)',
+        message: `${userProfile?.full_name || 'A customer'}'s ${subscription.product_name} subscription renewed using ${pawbucksUsed.toLocaleString()} PawBucks ($${(pawbucksValueCents / 100).toFixed(2)}).`,
+        category: 'transactional',
+      });
+
+      const { data: merchantProfile } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', merchantData.user_id)
+        .single();
+
+      if (merchantProfile?.email && supabaseUrl && supabaseAnonKey) {
+        await fetch(`${supabaseUrl}/functions/v1/send-invoice-paid-notification`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({
+            merchantEmail: merchantProfile.email,
+            merchantName: merchantData.business_name || merchantProfile.full_name || 'Merchant',
+            invoiceNumber: `RENEWAL-${Date.now().toString(36).toUpperCase()}`,
+            invoiceTitle: `${subscription.product_name} Subscription Renewal`,
+            clientName: userProfile?.full_name || 'Customer',
+            clientEmail: userProfile?.email || '',
+            amountPaid: fullAmountDollars,
+            pawbucksUsed,
+            paymentMethod: 'pawbucks',
+            paymentDate: new Date().toISOString(),
+            invoiceTotal: fullAmountDollars,
+            amountDue: 0,
+          }),
+        });
+      }
+    }
+
+    // Send receipt email to customer
+    if (userProfile?.email && supabaseUrl && supabaseAnonKey) {
+      await fetch(`${supabaseUrl}/functions/v1/send-receipt-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          email: userProfile.email,
+          customerName: userProfile.full_name || undefined,
+          transactionDate: new Date().toISOString(),
+          receiptId: txRow?.id || subscription.id,
+          merchantName: merchantData?.business_name || subscription.product_name,
+          merchantLocation: merchantData?.address || undefined,
+          items: [{ name: `${subscription.product_name} Subscription (Renewal)`, price: fullAmountDollars }],
+          subtotal: fullAmountDollars,
+          pawbucksApplied: pawbucksUsed,
+          cardAmount: 0,
+          totalPaid: fullAmountDollars,
+          pawbucksEarned: 0,
+        }),
+      });
+    }
+  } catch (emailError) {
+    logStep('Error sending full-PawBucks renewal emails', { error: String(emailError) });
+  }
 
   logStep('Renewal fully covered by PawBucks', { subscriptionId: subscription.id, pawbucksUsed });
 }
