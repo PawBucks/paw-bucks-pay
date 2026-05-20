@@ -8,7 +8,7 @@ import { Switch } from"@/components/ui/switch";
 import { Textarea } from"@/components/ui/textarea";
 import { Checkbox } from"@/components/ui/checkbox";
 import { Badge } from"@/components/ui/badge";
-import { Loader2, RefreshCw, Send, CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2, RefreshCw, Send, TrendingUp } from "lucide-react";
 import { toast } from"sonner";
 
 interface GroomingRebookSettingsProps {
@@ -173,7 +173,7 @@ export function GroomingRebookSettings({ merchantId }: GroomingRebookSettingsPro
  <p className="text-xs text-muted-foreground">Rebooked</p>
  </GradientCard>
  <GradientCard className="p-3 text-center">
- <span className="w-4 h-4 mx-auto text-accent mb-1" aria-hidden="true">📈</span>
+ <TrendingUp className="w-4 h-4 mx-auto text-accent mb-1" />
  <p className="text-xl font-bold">{conversionRate}%</p>
  <p className="text-xs text-muted-foreground">Conversion</p>
  </GradientCard>

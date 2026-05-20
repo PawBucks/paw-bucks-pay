@@ -1,5 +1,5 @@
 import { motion } from"framer-motion";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Gift, Store } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { LoyaltyProgressRing } from"./LoyaltyProgressRing";
 import { Button } from"@/components/ui/button";
@@ -78,7 +78,7 @@ export const MilestoneCard = ({ milestone, onRedeem, compact = false }: Mileston
  {/* Content */}
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 mb-1">
- <span className="w-5 h-5 text-primary" aria-hidden="true">🎁</span>
+ <Gift className="w-5 h-5 text-primary" />
  <h3 className="font-semibold text-lg">Loyal Pet Parent Guarantee</h3>
  </div>
  
@@ -92,7 +92,7 @@ export const MilestoneCard = ({ milestone, onRedeem, compact = false }: Mileston
  />
  ) : (
  <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
- <span className="w-3 h-3 text-muted-foreground" aria-hidden="true">🏪</span>
+ <Store className="w-3 h-3 text-muted-foreground" />
  </div>
  )}
  <span className="text-sm text-muted-foreground">{merchantName}</span>

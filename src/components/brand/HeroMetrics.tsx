@@ -1,7 +1,7 @@
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Progress } from"@/components/ui/progress";
-import { DollarSign, Users, Zap, TrendingDown, AlertTriangle } from "lucide-react";
+import { AlertTriangle, DollarSign, Target, TrendingDown, Users, Zap } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import type { CommandCenterSummary } from"@/services/api/brandCampaigns.service";
 
@@ -103,7 +103,7 @@ export function HeroMetrics({ summary }: HeroMetricsProps) {
  accent="text-accent"
  badge={
  <Badge variant="secondary" className="text-[10px] px-1.5 h-4">
- <span className="h-2.5 w-2.5 mr-0.5" aria-hidden="true">🎯</span>
+ <Target className="h-2.5 w-2.5 mr-0.5" />
  ROI
  </Badge>
  }

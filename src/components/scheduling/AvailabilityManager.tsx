@@ -14,7 +14,7 @@ import {
  DialogTitle,
  DialogFooter,
 } from"@/components/ui/dialog";
-import { Plus, X } from "lucide-react";
+import { Calendar, Plus, X } from "lucide-react";
 import { format } from"date-fns";
 import { parseLocalDate } from'@/utils/formatters';
 import { toast } from"sonner";
@@ -205,7 +205,7 @@ export function AvailabilityManager({
  <GradientCard className="p-4">
  <div className="flex items-center justify-between mb-4">
  <h3 className="font-semibold flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">📅</span>
+ <Calendar className="w-4 h-4" />
  Date Exceptions
  </h3>
  <Button 
@@ -274,7 +274,7 @@ export function AvailabilityManager({
  <Popover>
  <PopoverTrigger asChild>
  <Button variant="outline" className="w-full justify-start">
- <span className="w-4 h-4 mr-2" aria-hidden="true">📅</span>
+ <Calendar className="w-4 h-4 mr-2" />
  {selectedDate ? format(selectedDate,'PPP') :'Pick a date'}
  </Button>
  </PopoverTrigger>

@@ -14,7 +14,7 @@ import {
  DialogTitle,
  DialogFooter,
 } from"@/components/ui/dialog";
-import { Send, Save, X, Loader2 } from "lucide-react";
+import { Camera, FileText, Loader2, Save, Send, X } from "lucide-react";
 import { toast } from"sonner";
 
 interface GroomingReportCardFormProps {
@@ -207,7 +207,7 @@ export function GroomingReportCardForm({
  <div className="flex items-center justify-between">
  <div>
  <h3 className="font-semibold text-lg flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">📄</span>
+ <FileText className="w-5 h-5 text-primary" />
  Grooming Report Card
  </h3>
  <p className="text-sm text-muted-foreground">
@@ -256,7 +256,7 @@ export function GroomingReportCardForm({
  onClick={() => fileInputRef.current?.click()}
  className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
  >
- <span className="w-5 h-5 text-muted-foreground" aria-hidden="true">📸</span>
+ <Camera className="w-5 h-5 text-muted-foreground" />
  <span className="text-xs text-muted-foreground">Add Photo</span>
  </button>
  </div>

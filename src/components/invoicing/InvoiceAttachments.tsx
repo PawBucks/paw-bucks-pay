@@ -1,5 +1,5 @@
 import { useState, useRef } from"react";
-import { Upload, X, Image, Loader2, Download, Eye } from "lucide-react";
+import { Download, Eye, FileText, Image, Loader2, Upload, X } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
 import { supabase } from"@/integrations/supabase/client";
@@ -39,9 +39,9 @@ function formatFileSize(bytes: number): string {
 
 function getFileIcon(type: string) {
  if (type.startsWith("image/")) {
- return <span className="h-5 w-5 text-info" aria-hidden="true">🖼️</span>;
+ return <Image className="h-5 w-5 text-info" />;
  }
- return <span className="h-5 w-5 text-destructive" aria-hidden="true">📄</span>;
+ return <FileText className="h-5 w-5 text-destructive" />;
 }
 
 function getFileName(url: string): string {

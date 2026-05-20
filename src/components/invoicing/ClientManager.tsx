@@ -2,7 +2,7 @@ import { useState } from"react";
 import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { Plus, Search, MoreHorizontal, Edit, Trash2, Phone } from "lucide-react";
+import { Building2, Edit, Mail, MapPin, MoreHorizontal, Phone, Plus, Search, Trash2, Users } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
@@ -208,7 +208,7 @@ export function ClientManager({
  {filteredClients.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <span className="h-12 w-12 mx-auto text-muted-foreground mb-4" aria-hidden="true">👥</span>
+ <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
  <h3 className="text-lg font-semibold mb-2">No clients found</h3>
  <p className="text-muted-foreground mb-4">
  {searchTerm ?"Try adjusting your search" :"Add your first client to get started"}
@@ -231,7 +231,7 @@ export function ClientManager({
  <h3 className="font-semibold truncate">{client.name}</h3>
  {client.company_name && (
  <p className="text-sm text-muted-foreground flex items-center gap-1">
- <span className="h-3 w-3" aria-hidden="true">🏢</span>
+ <Building2 className="h-3 w-3" />
  {client.company_name}
  </p>
  )}
@@ -260,18 +260,18 @@ export function ClientManager({
 
  <div className="mt-4 space-y-2 text-sm">
  <p className="flex items-center gap-2 text-muted-foreground">
- <span className="h-4 w-4" aria-hidden="true">📧</span>
+ <Mail className="h-4 w-4" />
  <span className="truncate">{client.email}</span>
  </p>
  {client.phone && (
  <p className="flex items-center gap-2 text-muted-foreground">
- <span className="h-4 w-4" aria-hidden="true">📞</span>
+ <Phone className="h-4 w-4" />
  {client.phone}
  </p>
  )}
  {(client.city || client.state) && (
  <p className="flex items-center gap-2 text-muted-foreground">
- <span className="h-4 w-4" aria-hidden="true">📍</span>
+ <MapPin className="h-4 w-4" />
  {[client.city, client.state].filter(Boolean).join(",")}
  </p>
  )}

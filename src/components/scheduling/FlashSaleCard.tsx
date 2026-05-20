@@ -9,7 +9,7 @@ import {
  DropdownMenuItem, 
  DropdownMenuTrigger 
 } from"@/components/ui/dropdown-menu";
-import { MoreVertical, Edit, Trash2, Timer } from "lucide-react";
+import { DollarSign, Edit, MoreVertical, Timer, Trash2, Users, Zap } from "lucide-react";
 import { 
  type MerchantService, 
  CATEGORY_LABELS,
@@ -113,7 +113,7 @@ export function FlashSaleCard({
  )}
  {isActive && (
  <Badge className="bg-gradient-to-r from-warning to-warning text-white border-0 text-xs gap-0.5">
- <span className="w-3 h-3" aria-hidden="true">⚡</span>
+ <Zap className="w-3 h-3" />
  Flash Sale
  </Badge>
  )}
@@ -142,7 +142,7 @@ export function FlashSaleCard({
  Edit
  </DropdownMenuItem>
  <DropdownMenuItem onClick={() => onManageFlashSale(service)}>
- <span className="w-4 h-4 mr-2" aria-hidden="true">⚡</span>
+ <Zap className="w-4 h-4 mr-2" />
  Flash Sale
  </DropdownMenuItem>
  <DropdownMenuItem 
@@ -168,12 +168,12 @@ export function FlashSaleCard({
  <span>{formatDuration(service.duration_minutes, service.category)}</span>
  </div>
  <div className="flex items-center gap-1">
- <span className="w-4 h-4" aria-hidden="true">💵</span>
+ <DollarSign className="w-4 h-4" />
  <span>{Formatters.currency(service.price)}</span>
  </div>
  {service.max_capacity > 1 && (
  <div className="flex items-center gap-1">
- <span className="w-4 h-4" aria-hidden="true">👥</span>
+ <Users className="w-4 h-4" />
  <span>Up to {service.max_capacity}</span>
  </div>
  )}

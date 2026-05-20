@@ -4,7 +4,7 @@ import { Button } from"@/components/ui/button";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
-import { X, Receipt, Upload, Eye, Search, Tag, Info } from "lucide-react";
+import { DollarSign, Eye, Info, Receipt, Search, ShoppingBag, Tag, Upload, X } from "lucide-react";
 import { toast } from"sonner";
 import { PartnerReceiptDialog } from"@/components/receipts/PartnerReceiptDialog";
 import { NonPartnerReceiptDialog } from"@/components/receipts/NonPartnerReceiptDialog";
@@ -256,7 +256,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  {followups.map((followup) => (
  <GradientCard key={followup.id} className="p-4 space-y-3">
  <div className="flex items-start gap-3">
- <span className="w-5 h-5 text-primary mt-0.5 shrink-0" aria-hidden="true">🛍️</span>
+ <ShoppingBag className="w-5 h-5 text-primary mt-0.5 shrink-0" />
  <div className="flex-1">
  <p className="text-sm font-medium">
  Did you make a purchase at {followup.entity_name} today?
@@ -274,7 +274,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  <div className="space-y-3 pt-1">
  <Label className="text-sm font-medium">How much did you spend?</Label>
  <div className="relative">
- <span className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true">💵</span>
+ <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
  <Input
  type="number"
  step="0.01"
@@ -323,7 +323,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  disabled={submitting || !spendAmount || parseFloat(spendAmount) <= 0}
  className="flex-1"
  >
- <span className="w-3.5 h-3.5 mr-1" aria-hidden="true">🧾</span>
+ <Receipt className="w-3.5 h-3.5 mr-1" />
  Claim PawBucks
  </Button>
  </div>
@@ -365,7 +365,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  disabled={respondingTo === followup.id}
  className="flex-1"
  >
- <span className="w-3.5 h-3.5 mr-1" aria-hidden="true">🧾</span>
+ <Receipt className="w-3.5 h-3.5 mr-1" />
  Yes
  </Button>
  <Button

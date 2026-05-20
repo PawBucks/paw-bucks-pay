@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from"@/components/ui/popover"
 import { Separator } from"@/components/ui/separator";
 import { toast } from"sonner";
 import { format, startOfDay, isSameDay } from"date-fns";
-import { Route as RouteIcon, Loader2, CheckCircle2, Play, SkipForward, ArrowRight } from "lucide-react";
+import { ArrowRight, Calendar, Car, CheckCircle2, Loader2, MapPin, Play, Route as RouteIcon, SkipForward, Users } from "lucide-react";
 import mapboxgl from"mapbox-gl";
 import { Formatters } from "@/utils/formatters";
 import"mapbox-gl/dist/mapbox-gl.css";
@@ -320,7 +320,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  <Popover>
  <PopoverTrigger asChild>
  <Button variant="outline" size="sm">
- <span className="w-4 h-4 mr-2" aria-hidden="true">📅</span>
+ <Calendar className="w-4 h-4 mr-2" />
  {format(selectedDate,"MMM d, yyyy")}
  </Button>
  </PopoverTrigger>
@@ -343,7 +343,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  ) : stops.length === 0 ? (
  <Card>
  <CardContent className="py-12 text-center">
- <span className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" aria-hidden="true">📍</span>
+ <MapPin className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
  <h3 className="font-semibold text-lg mb-1">No mobile appointments</h3>
  <p className="text-muted-foreground text-sm">
  No confirmed mobile service bookings with client addresses for this date.
@@ -364,7 +364,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <span className="w-4 h-4" aria-hidden="true">🚗</span>
+ <Car className="w-4 h-4" />
  Drive Time
  </div>
  <p className="text-xl font-bold">{routePlan.total_duration_minutes ||"—"} min</p>
@@ -380,7 +380,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  </Card>
  <Card className="p-4">
  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
- <span className="w-4 h-4" aria-hidden="true">👥</span>
+ <Users className="w-4 h-4" />
  Stops
  </div>
  <p className="text-xl font-bold">{stops.length}</p>
@@ -489,7 +489,7 @@ export function SmartScheduleTab({ merchantId }: Props) {
  onClick={() => handleUpdateStopStatus(stop.id,"arrived")}
  title="Arrived"
  >
- <span className="w-3.5 h-3.5" aria-hidden="true">📍</span>
+ <MapPin className="w-3.5 h-3.5" />
  </Button>
  )}
  {stop.status ==="arrived" && (

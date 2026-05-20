@@ -4,7 +4,7 @@ import { Button } from"@/components/ui/button";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
 import { Slider } from"@/components/ui/slider";
-import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
+import { CreditCard, Loader2, Minus, Package, Plus, Trash2 } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
 import type { StorefrontCartItem } from"@/hooks/useStorefrontCart";
@@ -110,7 +110,7 @@ export function StorefrontCartDrawer({
  {items.length === 0 ? (
  <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-4">
  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
- <span className="w-10 h-10 text-muted-foreground" aria-hidden="true">📦</span>
+ <Package className="w-10 h-10 text-muted-foreground" />
  </div>
  <div>
  <h3 className="font-semibold text-lg">Your cart is empty</h3>
@@ -144,7 +144,7 @@ export function StorefrontCartDrawer({
  />
  ) : (
  <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
- <span className="w-6 h-6 text-muted-foreground" aria-hidden="true">📦</span>
+ <Package className="w-6 h-6 text-muted-foreground" />
  </div>
  )}
 
@@ -266,7 +266,7 @@ export function StorefrontCartDrawer({
  {cardCents > 0 && (
  <div className="flex justify-between items-center">
  <span className="text-muted-foreground flex items-center gap-1">
- <span className="h-3.5 w-3.5" aria-hidden="true">💳</span> Card
+ <CreditCard className="h-3.5 w-3.5" /> Card
  </span>
  <span className="font-medium">{Formatters.currency(cardDollars)}</span>
  </div>
@@ -292,12 +292,12 @@ export function StorefrontCartDrawer({
  </>
  ) : getMode() ==="split" ? (
  <>
- <span className="mr-2 h-4 w-4" aria-hidden="true">💳</span>
+ <CreditCard className="mr-2 h-4 w-4" />
  Pay {Formatters.currency(cardDollars)} + {Formatters.number(actualPawbucks)} PB
  </>
  ) : (
  <>
- <span className="mr-2 h-4 w-4" aria-hidden="true">💳</span>
+ <CreditCard className="mr-2 h-4 w-4" />
  Pay {Formatters.currency(totalDollars)} with Card
  </>
  )}

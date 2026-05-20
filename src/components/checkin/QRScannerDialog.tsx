@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { supabase } from"@/integrations/supabase/client";
 import { useAuth } from"@/hooks/useAuth";
 import { Html5Qrcode } from"html5-qrcode";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Camera, CheckCircle2, Loader2, MapPin, Store, XCircle } from "lucide-react";
 import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";
@@ -283,7 +283,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  <DialogContent className="sm:max-w-md">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
- <span className="w-5 h-5" aria-hidden="true">📸</span>
+ <Camera className="w-5 h-5" />
  Check In
  </DialogTitle>
  </DialogHeader>
@@ -321,11 +321,11 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  <Tabs defaultValue="scan" onValueChange={handleTabChange}>
  <TabsList className="grid w-full grid-cols-2">
  <TabsTrigger value="scan" className="gap-1.5">
- <span className="w-4 h-4" aria-hidden="true">📸</span>
+ <Camera className="w-4 h-4" />
  Scan QR
  </TabsTrigger>
  <TabsTrigger value="location" className="gap-1.5">
- <span className="w-4 h-4" aria-hidden="true">📍</span>
+ <MapPin className="w-4 h-4" />
  Find Location
  </TabsTrigger>
  </TabsList>
@@ -342,10 +342,10 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  </div>
  ) : (
  <div className="text-center py-6 space-y-4">
- <span className="w-16 h-16 mx-auto text-muted-foreground" aria-hidden="true">📸</span>
+ <Camera className="w-16 h-16 mx-auto text-muted-foreground" />
  <p className="text-muted-foreground">Scan a merchant or vet's QR code to check in</p>
  <Button onClick={startScanner} className="w-full">
- <span className="w-4 h-4 mr-2" aria-hidden="true">📸</span>
+ <Camera className="w-4 h-4 mr-2" />
  Start Scanner
  </Button>
  </div>
@@ -380,7 +380,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  }`}
  >
  <div className="flex items-center gap-2 min-w-0">
- <span className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true">🏪</span>
+ <Store className="w-4 h-4 text-muted-foreground shrink-0" />
  <span className="truncate font-medium">{entity.name}</span>
  </div>
  {entity.distance != null && (
@@ -397,7 +397,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  {/* Location error or no location */}
  {locationError && (
  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
- <span className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true">📍</span>
+ <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
  <div className="text-xs text-muted-foreground">
  <p>{locationError}. You can select from the list below instead.</p>
  </div>
@@ -434,7 +434,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  disabled={!selectedEntityToken}
  className="w-full"
  >
- <span className="w-4 h-4 mr-2" aria-hidden="true">📍</span>
+ <MapPin className="w-4 h-4 mr-2" />
  Check In
  </Button>
  </>

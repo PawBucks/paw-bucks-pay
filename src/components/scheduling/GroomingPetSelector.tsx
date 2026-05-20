@@ -12,7 +12,7 @@ import {
  SelectTrigger,
  SelectValue,
 } from"@/components/ui/select";
-import { AlertTriangle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Dog, Loader2, XCircle } from "lucide-react";
 import { differenceInMonths, parseISO } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
@@ -202,7 +202,7 @@ export function GroomingPetSelector({
  return (
  <div className="space-y-4 p-4 rounded-md bg-muted/30 border">
  <h4 className="text-sm font-medium flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">🐕</span>
+ <Dog className="w-4 h-4 text-primary" />
  Pet & Grooming Details
  </h4>
 

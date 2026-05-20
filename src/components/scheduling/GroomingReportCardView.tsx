@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
-import { Loader2 } from "lucide-react";
+import { FileText, Heart, Image, Lightbulb, Loader2, Scissors } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import {
   Dialog,
@@ -72,7 +72,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  <Card className="border-primary/20 bg-primary/5">
  <CardHeader className="pb-3">
  <CardTitle className="text-base flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">📄</span>
+ <FileText className="w-4 h-4 text-primary" />
  Grooming Report Card
  {report.pet_name && (
  <Badge variant="outline" className="text-xs gap-1">
@@ -87,7 +87,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {photos.length > 0 && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">🖼️</span> Photos
+ <Image className="w-3 h-3" /> Photos
  </p>
  <div className="grid grid-cols-3 gap-2">
  {photos.map((photo: any) => (
@@ -118,7 +118,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {report.overall_notes && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">✂️</span> Overall
+ <Scissors className="w-3 h-3" /> Overall
  </p>
  <p className="text-sm">{report.overall_notes}</p>
  </div>
@@ -127,7 +127,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {report.behavior_notes && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">❤️</span> Behavior
+ <Heart className="w-3 h-3" /> Behavior
  </p>
  <p className="text-sm">{report.behavior_notes}</p>
  </div>
@@ -145,7 +145,7 @@ export function GroomingReportCardView({ bookingId }: GroomingReportCardViewProp
  {report.recommendations && (
  <div>
  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
- <span className="w-3 h-3" aria-hidden="true">💡</span> Recommendations
+ <Lightbulb className="w-3 h-3" /> Recommendations
  </p>
  <p className="text-sm">{report.recommendations}</p>
  </div>

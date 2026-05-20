@@ -6,7 +6,7 @@ import { Badge } from"@/components/ui/badge";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
-import { Inbox, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, Inbox, Loader2, Store, XCircle } from "lucide-react";
 import { toast } from"sonner";
 import {
  getBrandJoinRequests,
@@ -84,7 +84,7 @@ export function BrandJoinRequestsInbox({ brandId }: BrandJoinRequestsInboxProps)
  </div>
  ) : requests.length === 0 ? (
  <div className="py-8 text-center text-sm text-muted-foreground">
- <span className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true">🏪</span>
+ <Store className="h-10 w-10 mx-auto mb-2 opacity-40" />
  No join requests yet
  </div>
  ) : (

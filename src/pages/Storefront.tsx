@@ -5,7 +5,7 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
-import { Store, ArrowLeft, RefreshCw, Check, Plus } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, MapPin, Package, Plus, RefreshCw, Shield, Store } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { SEO } from"@/components/SEO";
 import { useAuth } from"@/hooks/useAuth";
@@ -366,7 +366,7 @@ const Storefront = memo(() => {
 
    {/* Eyebrow */}
    <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
-    <span className="w-3.5 h-3.5" aria-hidden="true">🏪</span>
+    <Store className="w-3.5 h-3.5" />
     The Storefront
    </div>
 
@@ -376,7 +376,7 @@ const Storefront = memo(() => {
      <Avatar className="h-24 w-24 rounded-md border-4 border-background shadow-xl ring-2 ring-primary/20 shrink-0">
       <AvatarImage src={merchantLogo || undefined} alt={merchantName} className="object-cover" />
       <AvatarFallback className="rounded-md bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-3xl font-bold">
-       {merchantName?.charAt(0) || <span className="h-10 w-10" aria-hidden="true">🏪</span>}
+       {merchantName?.charAt(0) || <Store className="h-10 w-10" />}
       </AvatarFallback>
      </Avatar>
 
@@ -408,7 +408,7 @@ const Storefront = memo(() => {
       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
        {merchantAddress && (
         <div className="flex items-center gap-1.5">
-         <span className="h-4 w-4 text-primary" aria-hidden="true">📍</span>
+         <MapPin className="h-4 w-4 text-primary" />
          <span className="truncate max-w-[220px]">{merchantAddress}</span>
         </div>
        )}
@@ -442,10 +442,10 @@ const Storefront = memo(() => {
 
      <div className="flex flex-wrap gap-3">
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-sm">
-       <span className="h-4 w-4" aria-hidden="true">🛡️</span> Secure
+       <Shield className="h-4 w-4" /> Secure
       </div>
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-info/10 text-info text-sm">
-       <span className="h-4 w-4" aria-hidden="true">💳</span> Stripe
+       <CreditCard className="h-4 w-4" /> Stripe
       </div>
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-sm">
        <span className="h-4 w-4" aria-hidden="true">⭐</span> Verified
@@ -462,7 +462,7 @@ const Storefront = memo(() => {
  <Card className="border-dashed border-2 bg-gradient-to-br from-muted/30 to-muted">
  <CardContent className="flex flex-col items-center justify-center py-20">
  <div className="h-24 w-24 rounded-md bg-gradient-to-br from-muted to-muted/80 flex items-center justify-center mb-8 shadow-inner">
- <span className="h-12 w-12 text-muted-foreground" aria-hidden="true">📦</span>
+ <Package className="h-12 w-12 text-muted-foreground" />
  </div>
  <h3 className="text-2xl font-semibold mb-3">No products available yet</h3>
  <p className="text-muted-foreground text-center max-w-md mb-8">
@@ -540,7 +540,7 @@ const Storefront = memo(() => {
  )}
 
  <Button onClick={() => handleSubscribe(plan)} className="w-full group/btn shadow-lg shadow-primary/20" size="lg">
- <span className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" aria-hidden="true">💳</span> Subscribe
+ <CreditCard className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" /> Subscribe
  </Button>
  </CardContent>
  </Card>
@@ -565,7 +565,7 @@ const Storefront = memo(() => {
  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" width={400} height={400} />
  ) : (
  <div className="w-full h-full flex items-center justify-center">
- <span className="h-16 w-16 text-muted-foreground/50" aria-hidden="true">📦</span>
+ <Package className="h-16 w-16 text-muted-foreground/50" />
  </div>
  )}
  {estimatedPawBucks > 0 && (
@@ -653,9 +653,9 @@ const Storefront = memo(() => {
  )}
 
  <div className="flex items-center gap-6 text-sm text-muted-foreground">
- <span className="flex items-center gap-1.5"><span className="h-4 w-4 text-success" aria-hidden="true">🛡️</span> Secure Payments</span>
+ <span className="flex items-center gap-1.5"><Shield className="h-4 w-4 text-success" /> Secure Payments</span>
  <span className="text-border">•</span>
- <span className="flex items-center gap-1.5"><span className="h-4 w-4 text-info" aria-hidden="true">💳</span> Powered by Stripe</span>
+ <span className="flex items-center gap-1.5"><CreditCard className="h-4 w-4 text-info" /> Powered by Stripe</span>
  </div>
  </div>
  </div>
