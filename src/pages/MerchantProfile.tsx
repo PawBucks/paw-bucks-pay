@@ -670,7 +670,7 @@ const MerchantProfile = memo(() => {
                     <CardContent className="p-4 space-y-2">
                       <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <CreditCard className="w-5 h-5 text-muted-foreground" />
+                          <span className="text-xl leading-none" aria-hidden="true">💳</span>
                           <span className="text-sm font-medium">Credit/Debit Card</span>
                         </div>
                         <Badge variant="outline" className="text-xs">Available</Badge>
@@ -689,7 +689,7 @@ const MerchantProfile = memo(() => {
                       </div>
                       <div className="mt-2 p-3 bg-primary/5 rounded-lg border border-primary/10">
                         <p className="text-sm text-primary font-medium flex items-center gap-2">
-                          <Sparkles className="w-4 h-4" /> Earn {merchant.cashback_rate}x PawBucks on every purchase!
+                          <span className="text-base leading-none" aria-hidden="true">✨</span> Earn {merchant.cashback_rate}x PawBucks on every purchase!
                         </p>
                       </div>
                     </CardContent>
