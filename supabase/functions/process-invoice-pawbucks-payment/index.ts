@@ -280,6 +280,7 @@ serve(async (req) => {
           .single();
 
         await supabase.functions.invoke("send-receipt-email", {
+          headers: { "x-internal-secret": Deno.env.get("INTERNAL_TRIGGER_SECRET") ?? "" },
           body: {
             userEmail: profile?.email || invoice.client_email,
             userName: profile?.full_name || invoice.client_name,
