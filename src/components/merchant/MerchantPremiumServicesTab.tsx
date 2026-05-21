@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Card, CardContent } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
 
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+
 import { ServicePerformanceDashboard } from"./ServicePerformanceDashboard";
 import { SponsoredPlacementDashboard } from"./SponsoredPlacementDashboard";
 import { FeaturedPartnerWidget } from"./FeaturedPartnerWidget";
@@ -18,8 +18,7 @@ import { DemandForecastingReport } from"./DemandForecastingReport";
 import { KeywordPerformanceWidget } from"./KeywordPerformanceWidget";
 import { StrategyConsultationWidget } from"./StrategyConsultationWidget";
 import { PosApiWidget } from"./PosApiWidget";
-import { Store, TrendingUp } from "lucide-react";
-
+import { Store, TrendingUp, Sparkles } from "lucide-react";
 type MerchantPremiumServicesTabProps = {
  merchantId: string;
  hasSponsored: boolean;

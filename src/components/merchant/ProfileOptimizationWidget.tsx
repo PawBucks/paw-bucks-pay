@@ -5,8 +5,8 @@ import { Badge } from'@/components/ui/badge';
 import { Progress } from'@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from'@/components/ui/tabs';
 import { ScrollArea } from'@/components/ui/scroll-area';
-import { AlertTriangle, ArrowDown, ArrowUp, BarChart3, CheckCircle, Download, FileText, Image, Info, Lightbulb, MapPin, Minus, RefreshCw, Star, Target, TrendingUp, Trophy, Users, Zap } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { AlertTriangle, ArrowDown, ArrowUp, BarChart3, CheckCircle, Download, FileText, Image, Info, Lightbulb, MapPin, Minus, RefreshCw, Star, Target, TrendingUp, Trophy, Users, Zap, Sparkles } from "lucide-react";
+
 import { supabase } from'@/integrations/supabase/client';
 import { toast } from'@/hooks/use-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, BarChart, Bar } from'recharts';

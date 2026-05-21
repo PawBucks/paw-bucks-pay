@@ -2,8 +2,8 @@ import { useState, useRef, useCallback } from'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from'@/components/ui/dialog';
 import { Button } from'@/components/ui/button';
 import { Card, CardContent } from'@/components/ui/card';
-import { AlertCircle, Camera, CheckCircle2, Loader2, RotateCcw, Upload } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { AlertCircle, Camera, CheckCircle2, Loader2, RotateCcw, Upload, Sparkles } from "lucide-react";
+
 import { toast } from'sonner';
 import { supabase } from'@/integrations/supabase/client';
 import { TaxExpenseCategory } from'./types';

@@ -12,8 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { toast } from"sonner";
-import { Calendar, DollarSign, Heart, Package, Plus, Trash2, Users } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { Calendar, DollarSign, Heart, Package, Plus, Trash2, Users, Sparkles } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 interface WellnessPlanArchitectProps {

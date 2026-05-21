@@ -7,8 +7,8 @@ import { ScrollArea } from"@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
 import { Input } from"@/components/ui/input";
-import { Calendar, CheckCircle2, Clock, DollarSign, Loader2, Megaphone, Search, Send, XCircle } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { Calendar, CheckCircle2, Clock, DollarSign, Loader2, Megaphone, Search, Send, XCircle, Sparkles } from "lucide-react";
+
 import { toast } from"sonner";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import {

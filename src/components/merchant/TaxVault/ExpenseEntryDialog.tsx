@@ -7,8 +7,8 @@ import { Textarea } from'@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
 import { Calendar } from'@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from'@/components/ui/popover';
-import { Calendar as CalendarIcon, Camera, Info, Loader2, Upload } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { Calendar as CalendarIcon, Camera, Info, Loader2, Upload, Sparkles } from "lucide-react";
+
 import { format, parse } from'date-fns';
 import { cn } from'@/lib/utils';
 import { TaxExpenseCategory, CATEGORY_LABELS, CATEGORY_DESCRIPTIONS, CATEGORY_PRIORITY } from'./types';

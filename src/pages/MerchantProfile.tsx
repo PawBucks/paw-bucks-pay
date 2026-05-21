@@ -31,12 +31,8 @@ import { schedulingService } from "@/services/api/scheduling.service";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Founding50Badge } from "@/components/shared/Founding50Badge";
-import {
-  ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard,
-  Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, MapPin,
-  MessageSquare, Phone, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter,
-} from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard, Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, MapPin, MessageSquare, Phone, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter, Sparkles } from "lucide-react";
+
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 

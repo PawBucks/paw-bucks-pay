@@ -1,5 +1,4 @@
-import { Sparkles } from "@/components/ui/sparkles-emoji";
-
+import { Sparkles } from "lucide-react";
 interface BrandedCheckinPreviewProps {
  brandName: string;
  logoUrl?: string | null;

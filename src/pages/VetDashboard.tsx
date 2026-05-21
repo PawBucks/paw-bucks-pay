@@ -27,8 +27,8 @@ import { SalesReportGenerator } from"@/components/shared/SalesReportGenerator";
 import { MerchantLoyaltyProgramTab } from"@/components/merchant/MerchantLoyaltyProgramTab";
 import { CheckInDashboard } from"@/components/checkin";
 import { PromotionInvitationsInbox } from"@/components/PromotionInvitationsInbox";
-import { ArrowRightLeft, BarChart3, Bell, FileSignature, FileText, Heart, LifeBuoy, Link2, MessageSquare, Pill, QrCode, Scale, Settings, Stamp, Stethoscope, TrendingUp, Users, Wallet, Zap } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { ArrowRightLeft, BarChart3, Bell, FileSignature, FileText, Heart, LifeBuoy, Link2, MessageSquare, Pill, QrCode, Scale, Settings, Stamp, Stethoscope, TrendingUp, Users, Wallet, Zap, Sparkles } from "lucide-react";
+
 import { toast } from"sonner";
 import { PendingApprovalNotice } from"@/components/PendingApprovalNotice";
 import { SupportTab } from"@/components/support/SupportTab";
