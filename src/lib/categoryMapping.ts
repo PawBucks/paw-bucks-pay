@@ -214,6 +214,18 @@ export const BUSINESS_TYPE_MAP: Record<string, string> = {
 'animal shelters':'rescue_nonprofit',
  charity:'rescue_nonprofit',
  charities:'rescue_nonprofit',
+ // Pet Waste Removal
+ pet_waste_removal:'pet_waste_removal',
+'pet waste removal':'pet_waste_removal',
+'pet waste':'pet_waste_removal',
+'poop scoop':'pet_waste_removal',
+'poop scooper':'pet_waste_removal',
+'poop scoopers':'pet_waste_removal',
+'poop scooping':'pet_waste_removal',
+'dog waste removal':'pet_waste_removal',
+'dog poop removal':'pet_waste_removal',
+'yard waste removal':'pet_waste_removal',
+'waste removal':'pet_waste_removal',
 };
 
 // Get normalized category key from business_type
