@@ -70,6 +70,7 @@ async function sendReceiptEmail(params: {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${supabaseAnonKey}`,
+        'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
       },
       body: JSON.stringify(params),
     });
@@ -1968,6 +1969,7 @@ serve(async (req) => {
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
               },
               body: JSON.stringify(budgetCheckPayload),
             }
