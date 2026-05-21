@@ -93,8 +93,19 @@ serve(async (req) => {
     if (!twilioRes.ok) {
       const errText = await twilioRes.text();
       console.error("Twilio error:", twilioRes.status, errText);
-      return new Response(JSON.stringify({ error: "Failed to send verification SMS" }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      let friendly = "Failed to send verification SMS";
+      try {
+        const parsed = JSON.parse(errText);
+        if (parsed?.code === 21608) {
+          friendly = "SMS sending is restricted on this account (Twilio trial). Please verify your number with Twilio or contact support to enable production SMS.";
+        } else if (parsed?.message) {
+          friendly = `SMS error: ${parsed.message}`;
+        }
+      } catch (_) { /* keep default */ }
+      // Return 200 so the Supabase Functions client surfaces our error field
+      // instead of the generic "non-2xx status code" message.
+      return new Response(JSON.stringify({ success: false, error: friendly }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     return new Response(JSON.stringify({ success: true, phone }), {
