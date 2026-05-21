@@ -19,7 +19,7 @@ import {
 } from"@/components/ui/dialog";
 import { format, isSameDay, startOfToday } from"date-fns";
 import { parseLocalDate } from'@/utils/formatters';
-import { AlertCircle, Calendar as CalendarIcon, CheckCircle, CreditCard, DollarSign, FileText, Loader2, Mail, Phone, RefreshCw, User, XCircle } from "lucide-react";
+import { AlertCircle, Calendar as CalendarIcon, CheckCircle, Clock, CreditCard, DollarSign, FileText, Loader2, Mail, Phone, RefreshCw, User, XCircle } from "lucide-react";
 import { type BookingWithDetails, type BookingStatus } from"@/services/api/scheduling.service";
 import { GroomingReportCardForm } from"./GroomingReportCardForm";
 import { RescheduleBookingDialog } from"./RescheduleBookingDialog";
@@ -287,7 +287,7 @@ export function BookingsCalendar({ bookings, merchantId, onUpdateStatus }: Booki
  <div>
  <p className="text-sm text-muted-foreground">Time</p>
  <p className="font-medium flex items-center gap-1">
- <span className="w-4 h-4" aria-hidden="true">⏰</span>
+ <Clock className="w-4 h-4" aria-hidden="true" />
  {formatTime(selectedBooking.start_time)} - {formatTime(selectedBooking.end_time)}
  </p>
  </div>

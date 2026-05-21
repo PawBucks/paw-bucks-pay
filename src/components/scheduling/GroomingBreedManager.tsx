@@ -30,7 +30,7 @@ import {
  AlertDialogHeader,
  AlertDialogTitle,
 } from"@/components/ui/alert-dialog";
-import { Dog, DollarSign, Edit, Library, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Clock, Dog, DollarSign, Edit, Library, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { toast } from"sonner";
 import {
   BREED_LIBRARY,
@@ -329,7 +329,7 @@ export function GroomingBreedManager({ merchantId }: GroomingBreedManagerProps) 
  <div className="flex gap-3 text-sm text-muted-foreground">
  {bp.duration_minutes_override && (
  <span className="flex items-center gap-1">
- <span className="w-3.5 h-3.5" aria-hidden="true">⏰</span> {bp.duration_minutes_override} min
+ <Clock className="w-3.5 h-3.5" aria-hidden="true" /> {bp.duration_minutes_override} min
  </span>
  )}
  {bp.price_override && (

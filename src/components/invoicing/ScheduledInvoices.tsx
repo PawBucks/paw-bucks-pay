@@ -5,7 +5,7 @@ import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from"@/components/ui/dropdown-menu";
-import { CalendarClock, RefreshCw, AlertCircle, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import { AlertCircle, CalendarClock, Clock, Edit, Eye, MoreHorizontal, RefreshCw, Trash2 } from "lucide-react";
 import { type Invoice } from"@/services/api/invoicing.service";
 
 import { Formatters } from "@/utils/formatters";
@@ -162,7 +162,7 @@ export function ScheduledInvoices({ invoices, loading, onEdit, onDelete, onView 
  </Badge>
  ) : (
  <Badge variant="outline" className="gap-1">
- <span className="h-3 w-3" aria-hidden="true">⏰</span>
+ <Clock className="h-3 w-3" aria-hidden="true" />
  Draft
  </Badge>
  )}

@@ -1,3 +1,4 @@
+import { Clock } from "lucide-react";
 import { useQuery } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
 
@@ -51,7 +52,7 @@ export function BusinessHoursDisplay({ merchantId, vetId }: Props) {
  return (
  <div className="rounded-md border bg-card p-4">
  <div className="flex items-center gap-2 mb-3">
- <span className="w-4 h-4 text-primary" aria-hidden="true">⏰</span>
+ <Clock className="w-4 h-4 text-primary" aria-hidden="true" />
  <h3 className="font-semibold text-sm">Hours of Operation</h3>
  </div>
  <div className="space-y-1.5">

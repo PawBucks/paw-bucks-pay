@@ -19,7 +19,7 @@ import {
  AlertDialogHeader,
  AlertDialogTitle,
 } from"@/components/ui/alert-dialog";
-import { DollarSign, Edit, MoreVertical, Timer, Trash2, Users, Zap } from "lucide-react";
+import { Clock, DollarSign, Edit, MoreVertical, Timer, Trash2, Users, Zap } from "lucide-react";
 import { 
  type MerchantService, 
  CATEGORY_LABELS,
@@ -134,7 +134,7 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
  <GradientCard className="p-8 text-center">
  <div className="max-w-md mx-auto">
  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
- <span className="w-8 h-8 text-primary" aria-hidden="true">⏰</span>
+ <Clock className="w-8 h-8 text-primary" aria-hidden="true" />
  </div>
  <h3 className="text-lg font-semibold mb-2">No Services Yet</h3>
  <p className="text-muted-foreground mb-4">
@@ -217,7 +217,7 @@ export function ServicesList({ services, onEdit, onDelete, onToggleActive, onMan
 
  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
  <div className="flex items-center gap-1">
- <span className="w-4 h-4" aria-hidden="true">⏰</span>
+ <Clock className="w-4 h-4" aria-hidden="true" />
  <span>{formatDuration(service.duration_minutes, service.category)}</span>
  </div>
  <div className="flex items-center gap-1">
