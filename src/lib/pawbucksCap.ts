@@ -30,7 +30,7 @@ export type MerchantCapFields = {
 const SERVICES = new Set([
   "grooming","mobile_groomer","boarding","training","walker","daycare",
   "sitter","photography","hiker","runner","masseuse","behaviorist",
-  "breeder","rescue_nonprofit",
+  "breeder","rescue_nonprofit","pet_waste_removal",
 ]);
 const RETAIL = new Set(["pet_store","food","delivery","insurance"]);
 

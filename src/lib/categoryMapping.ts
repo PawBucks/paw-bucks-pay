@@ -1,4 +1,4 @@
-import { Stethoscope, Scissors, ShoppingBag, Bone, Home, MoreHorizontal, Dog, Sun, Truck, Camera, Shield, Mountain, Zap, Hand, Brain, LucideIcon } from "lucide-react";
+import { Stethoscope, Scissors, ShoppingBag, Bone, Home, MoreHorizontal, Dog, Sun, Truck, Camera, Shield, Mountain, Zap, Hand, Brain, Trash2, LucideIcon } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 export type CategoryConfig = {
@@ -29,6 +29,7 @@ export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
  behaviorist: { icon: Brain, color:"hsl(280, 60%, 50%)", label:"Behaviorist", emoji:"🧠" },
  breeder: { icon: Dog, color:"hsl(10, 70%, 55%)", label:"Breeder", emoji:"🧬" },
  rescue_nonprofit: { icon: Shield, color:"hsl(200, 70%, 50%)", label:"Rescue / Nonprofit", emoji:"🧡" },
+ pet_waste_removal: { icon: Trash2, color:"hsl(90, 45%, 40%)", label:"Pet Waste Removal", emoji:"🧹" },
  other: { icon: MoreHorizontal, color:"hsl(var(--muted-foreground))", label:"Other", emoji:"🧩" },
 };
 
@@ -213,6 +214,18 @@ export const BUSINESS_TYPE_MAP: Record<string, string> = {
 'animal shelters':'rescue_nonprofit',
  charity:'rescue_nonprofit',
  charities:'rescue_nonprofit',
+ // Pet Waste Removal
+ pet_waste_removal:'pet_waste_removal',
+'pet waste removal':'pet_waste_removal',
+'pet waste':'pet_waste_removal',
+'poop scoop':'pet_waste_removal',
+'poop scooper':'pet_waste_removal',
+'poop scoopers':'pet_waste_removal',
+'poop scooping':'pet_waste_removal',
+'dog waste removal':'pet_waste_removal',
+'dog poop removal':'pet_waste_removal',
+'yard waste removal':'pet_waste_removal',
+'waste removal':'pet_waste_removal',
 };
 
 // Get normalized category key from business_type
