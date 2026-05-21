@@ -110,6 +110,7 @@ const businessTypes = [
  { label:"Transportation", value:"delivery", emoji:"✈️" },
  { label:"Breeders", value:"breeder", emoji:"🧬" },
  { label:"Rescue / Nonprofit", value:"rescue_nonprofit", emoji:"🧡" },
+ { label:"Pet Waste Removal", value:"pet_waste_removal", emoji:"🧹" },
  { label:"Other", value:"other", emoji:"🧩" },
 ];
 
