@@ -157,7 +157,7 @@ export function ProductImageUpload({
  className="h-8 w-8"
  onClick={() => cameraInputRef.current?.click()}
  >
- <span className="h-4 w-4" aria-hidden="true">📸</span>
+ <Camera className="h-4 w-4" aria-hidden="true" />
  </Button>
  </div>
  <span className="text-[10px] text-muted-foreground">
@@ -191,7 +191,7 @@ export function ProductImageUpload({
  size="sm"
  onClick={() => cameraInputRef.current?.click()}
  >
- <span className="h-4 w-4 mr-1.5" aria-hidden="true">📸</span>
+ <Camera className="h-4 w-4 mr-1.5" aria-hidden="true" />
  Camera
  </Button>
  </div>
