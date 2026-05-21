@@ -37,6 +37,7 @@ const BUSINESS_TYPE_OPTIONS: { key: string; label: string }[] = [
  { key:"behaviorist", label:"Behaviorist" },
  { key:"breeder", label:"Breeder" },
  { key:"rescue_nonprofit", label:"Rescue / Nonprofit" },
+ { key:"pet_waste_removal", label:"Pet Waste Removal" },
  { key:"other", label:"Other" },
 ];
 
