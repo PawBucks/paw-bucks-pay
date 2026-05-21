@@ -7,8 +7,8 @@ import { Badge } from"@/components/ui/badge";
 import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
 import { Skeleton } from"@/components/ui/skeleton";
-import { AlertTriangle, ArrowDown, ArrowUp, Calendar, CheckCircle, Download, Eye, LayoutGrid, Lightbulb, Map, Monitor, MousePointerClick, RefreshCw, Search, ShoppingCart, Smartphone, Tablet, Target, TrendingUp, Trophy } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { AlertTriangle, ArrowDown, ArrowUp, Calendar, CheckCircle, Download, Eye, LayoutGrid, Lightbulb, Map, Monitor, MousePointerClick, RefreshCw, Search, ShoppingCart, Smartphone, Tablet, Target, TrendingUp, Trophy, Sparkles } from "lucide-react";
+
 import {
  LineChart,
  Line,

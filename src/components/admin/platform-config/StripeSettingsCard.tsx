@@ -30,7 +30,7 @@ export function StripeSettingsCard({ payoutSchedule, onPayoutScheduleChange, sav
 
  if (error) throw error;
  setStripeStatus(data?.connected ?'connected' :'error');
- toast.success(data?.connected ?'✅ Stripe connection verified' :'❌ Stripe connection issue detected');
+ toast.success(data?.connected ?'Stripe connection verified' :'Stripe connection issue detected');
  } catch (err) {
  console.error('Stripe verification error:', err);
  setStripeStatus('error');

@@ -20,8 +20,8 @@ import {
  DialogHeader,
  DialogTitle,
 } from"@/components/ui/dialog";
-import { AlertCircle, CheckCircle, Image, Loader2, Scan, ThumbsDown, ThumbsUp, Upload } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { AlertCircle, CheckCircle, Image, Loader2, Scan, ThumbsDown, ThumbsUp, Upload, Sparkles } from "lucide-react";
+
 import { toast } from"sonner";
 import { useQuery, useMutation, useQueryClient } from"@tanstack/react-query";
 

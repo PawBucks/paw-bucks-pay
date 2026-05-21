@@ -177,7 +177,7 @@ export const ReceiptsTab = () => {
 
  await supabase.from("notifications").insert({
  user_id: selectedReceipt.user_id,
- title:"Receipt Approved! 🎉",
+ title:"Receipt Approved",
  message: `Your receipt from ${selectedReceipt.merchant_name} has been approved. ${pbAmount.toLocaleString()} PawBucks have been added to your wallet!`,
  category:"rewards",
  });

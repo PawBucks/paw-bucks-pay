@@ -360,7 +360,7 @@ export function UsersTab() {
  {user.email}
  {user.shared_with_owner && (
  <span className="block text-xs text-warning font-medium">
- 🔗 Shares with {user.shared_with_owner}
+ Shares with {user.shared_with_owner}
  </span>
  )}
  </div>

@@ -233,8 +233,8 @@ export function OverviewTab() {
  </div>
  <div className="flex justify-between text-xs text-muted-foreground">
  <span>0%</span>
- <span className="text-destructive font-medium">50% ⚠️</span>
- <span className="text-success font-medium">70–90% ✓</span>
+ <span className="text-destructive font-medium">50%</span>
+ <span className="text-success font-medium">70–90%</span>
  <span>100%</span>
  </div>
  </div>
@@ -273,12 +273,12 @@ export function OverviewTab() {
  {/* Warning message if below threshold */}
  {stats.pawbucksSpendRate < 50 && stats.totalPawbucksEarned > 0 && (
  <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive">
- <strong>⚠️ Below 50%:</strong> Merchants may start viewing PawBucks as a loss rather than a benefit. Consider promotions or incentives to boost spending.
+ <strong>Below 50%:</strong> Merchants may start viewing PawBucks as a loss rather than a benefit. Consider promotions or incentives to boost spending.
  </div>
  )}
  {stats.pawbucksSpendRate >= 50 && stats.pawbucksSpendRate < 70 && stats.totalPawbucksEarned > 0 && (
  <div className="bg-warning/5 border border-warning/20 rounded-lg p-3 text-sm text-warning">
- <strong>📊 Moderate:</strong> Spend rate is acceptable but below optimal. Target 70–90% for a healthy ecosystem.
+ <strong>Moderate:</strong> Spend rate is acceptable but below optimal. Target 70–90% for a healthy ecosystem.
  </div>
  )}
  </CardContent>
@@ -334,8 +334,8 @@ export function OverviewTab() {
  </div>
  <div className="flex justify-between text-xs text-muted-foreground">
  <span>0%</span>
- <span className="text-destructive font-medium">35% ⚠️</span>
- <span className="text-success font-medium">60%+ ✓</span>
+ <span className="text-destructive font-medium">35%</span>
+ <span className="text-success font-medium">60%+</span>
  <span>100%</span>
  </div>
  </div>
@@ -360,17 +360,17 @@ export function OverviewTab() {
 
  {stats.repeatRedemptionRate < 35 && stats.totalRedeemers > 0 && (
  <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive">
- <strong>⚠️ Below 35%:</strong> PawBucks may only be driving discounted first visits. Consider merchant incentives and follow-up promotions to boost return rates.
+ <strong>Below 35%:</strong> PawBucks may only be driving discounted first visits. Consider merchant incentives and follow-up promotions to boost return rates.
  </div>
  )}
  {stats.repeatRedemptionRate >= 35 && stats.repeatRedemptionRate < 60 && stats.totalRedeemers > 0 && (
  <div className="bg-warning/5 border border-warning/20 rounded-lg p-3 text-sm text-warning">
- <strong>📊 Moderate:</strong> Some redeemers are returning, but there's room to grow. Target 60%+ for strong merchant confidence in PawBucks.
+ <strong>Moderate:</strong> Some redeemers are returning, but there's room to grow. Target 60%+ for strong merchant confidence in PawBucks.
  </div>
  )}
  {stats.repeatRedemptionRate >= 60 && stats.totalRedeemers > 0 && (
  <div className="bg-success/5 border border-success/20 rounded-lg p-3 text-sm text-success">
- <strong>✅ Strong:</strong> PawBucks is successfully driving repeat business. Merchants should see clear value in accepting PawBucks.
+ <strong>Strong:</strong> PawBucks is successfully driving repeat business. Merchants should see clear value in accepting PawBucks.
  </div>
  )}
  </CardContent>

@@ -69,8 +69,8 @@ export function SettingsTab() {
  setWelcomeCreditEnabled(enabled);
  toast.success(
  enabled
- ?'✅ Welcome Credit program restarted — new signups will receive tiered credits (Series A/B/C/Standard)'
- :'⏸️ Welcome Credit program paused — new signups will NOT receive credits'
+ ?'Welcome Credit program restarted — new signups will receive tiered credits (Series A/B/C/Standard)'
+ :'Welcome Credit program paused — new signups will NOT receive credits'
  );
  } catch (err) {
  console.error('Error toggling welcome credit:', err);

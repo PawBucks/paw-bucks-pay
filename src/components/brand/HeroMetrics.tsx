@@ -1,8 +1,8 @@
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Progress } from"@/components/ui/progress";
-import { AlertTriangle, DollarSign, Flame, Target, TrendingDown, Users, Zap } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { AlertTriangle, DollarSign, Flame, Target, TrendingDown, Users, Zap, Sparkles } from "lucide-react";
+
 import type { CommandCenterSummary } from"@/services/api/brandCampaigns.service";
 
 import { Formatters } from "@/utils/formatters";

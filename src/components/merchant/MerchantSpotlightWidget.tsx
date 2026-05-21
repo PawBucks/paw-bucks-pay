@@ -6,8 +6,8 @@ import { GradientCard } from"@/components/ui/gradient-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { Button } from"@/components/ui/button";
 import { Progress } from"@/components/ui/progress";
-import { ArrowUpRight, BarChart3, Bell, CheckCircle, Crown, Eye, Heart, Lightbulb, Loader2, Mail, MapPin, MousePointer, TrendingUp, Users } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { ArrowUpRight, BarChart3, Bell, CheckCircle, Crown, Eye, Heart, Lightbulb, Loader2, Mail, MapPin, MousePointer, TrendingUp, Users, Sparkles } from "lucide-react";
+
 import { 
  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
  Tooltip, ResponsiveContainer, BarChart, Bar

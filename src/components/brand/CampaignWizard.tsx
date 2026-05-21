@@ -9,8 +9,8 @@ import { Slider } from"@/components/ui/slider";
 import { Separator } from"@/components/ui/separator";
 import { Progress } from"@/components/ui/progress";
 import { Badge } from"@/components/ui/badge";
-import { ArrowLeft, ArrowRight, CheckCircle2, DollarSign, Eye, Gift, Heart, Loader2, Megaphone, Palette, Repeat, Rocket, Target, Zap } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { ArrowLeft, ArrowRight, CheckCircle2, DollarSign, Eye, Gift, Heart, Loader2, Megaphone, Palette, Repeat, Rocket, Target, Zap, Sparkles } from "lucide-react";
+
 import { toast } from"sonner";
 import {
  createBrandCampaign,

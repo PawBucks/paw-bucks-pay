@@ -231,7 +231,7 @@ export function PawBucksCreditTool() {
  <p className="text-sm text-muted-foreground">{foundUser.email}</p>
  {foundUser.sharedWithOwner && (
  <p className="text-xs text-warning font-medium mt-1">
- 🔗 Shared account with {foundUser.sharedWithOwner}
+ Shared account with {foundUser.sharedWithOwner}
  </p>
  )}
  </div>

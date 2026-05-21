@@ -228,7 +228,7 @@ export function MerchantMarketplace({ brandId, campaigns }: MerchantMarketplaceP
  {status ==="enrolled" ? (
  <><CheckCircle2 className="h-2.5 w-2.5" /> {c.name}</>
  ) : (
- <><span className="h-2.5 w-2.5" aria-hidden="true">⏰</span> Invited</>
+  <><Clock className="h-2.5 w-2.5" /> Invited</>
  )}
  </Badge>
  );

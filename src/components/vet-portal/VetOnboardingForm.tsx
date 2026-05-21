@@ -3,8 +3,8 @@ import { useNavigate } from"react-router-dom";
 import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, Edit, FileText, PartyPopper, Phone, Save, Shield, ShieldCheck, Stethoscope, User, Wallet, PawPrint, Home, Citrus, Star, Smile, Dog, Smartphone, Cross, Bone, HeartPulse, Bug, Siren, Microscope, type LucideIcon } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, Edit, FileText, PartyPopper, Phone, Save, Shield, ShieldCheck, Stethoscope, User, Wallet, PawPrint, Home, Citrus, Star, Smile, Dog, Smartphone, Cross, Bone, HeartPulse, Bug, Siren, Microscope, type LucideIcon, Sparkles } from "lucide-react";
+
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Textarea } from"@/components/ui/textarea";

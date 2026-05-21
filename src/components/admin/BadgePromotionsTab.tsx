@@ -33,8 +33,8 @@ import { Checkbox } from"@/components/ui/checkbox";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Slider } from"@/components/ui/slider";
 import { toast } from"sonner";
-import { AlertCircle, Clock, Edit, Gift, Package, Plus, Tag, Trash2 } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { AlertCircle, Clock, Edit, Gift, Package, Plus, Tag, Trash2, Sparkles } from "lucide-react";
+
 import { format } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";

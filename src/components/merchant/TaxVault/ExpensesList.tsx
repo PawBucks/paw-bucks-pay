@@ -2,8 +2,8 @@ import { useState } from'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from'@/components/ui/table';
 import { Button } from'@/components/ui/button';
 import { Badge } from'@/components/ui/badge';
-import { ExternalLink, Receipt, Trash2, TrendingDown } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+import { ExternalLink, Receipt, Trash2, TrendingDown, Sparkles } from "lucide-react";
+
 import { TaxExpense, CATEGORY_LABELS } from'./types';
 import { formatLocalDate } from'@/utils/formatters';
 import { supabase } from'@/integrations/supabase/client';

@@ -11,7 +11,7 @@ import { Textarea } from'@/components/ui/textarea';
 import { Separator } from'@/components/ui/separator';
 import { Progress } from'@/components/ui/progress';
 import { toast } from'sonner';
-import { Activity, AlertTriangle, ArrowRight, BadgeCheck, BarChart3, Briefcase, Building2, Calendar, CheckCircle2, ChevronRight, CircleDot, Clock, CreditCard, DollarSign, ExternalLink, FileText, Globe, Landmark, Mail, MapPin, Phone, Shield, ShoppingBag, Star, TrendingUp, Users, XCircle } from "lucide-react";
+import { Activity, AlertTriangle, ArrowRight, ArrowUp, BadgeCheck, BarChart3, Briefcase, Building2, Calendar, CheckCircle2, ChevronRight, CircleDot, Clock, CreditCard, DollarSign, ExternalLink, FileText, Globe, Landmark, Mail, MapPin, Package, Phone, Shield, ShoppingBag, Star, TrendingUp, Users, XCircle } from "lucide-react";
 import { UnderwritingSignalsCard } from'./UnderwritingSignalsCard';
 import { format, formatDistanceToNow, differenceInDays } from'date-fns';
 
@@ -177,11 +177,11 @@ function DealCard({ applicant, selected, onSelect }: {
  </span>
  <span className={`text-xs font-medium ${risk.color}`}>{risk.label}</span>
  </div>
- <div className="grid grid-cols-3 gap-1 text-xs text-muted-foreground">
- <span>⬆ ${Formatters.decimal((applicant.revenue_30d / 1000), 1)}k / 30d</span>
- <span>📦 {applicant.total_transactions} txns</span>
- <span>🕐 {daysSince}d old</span>
- </div>
+  <div className="grid grid-cols-3 gap-1 text-xs text-muted-foreground">
+  <span className="inline-flex items-center gap-1"><ArrowUp className="w-3 h-3" /> ${Formatters.decimal((applicant.revenue_30d / 1000), 1)}k / 30d</span>
+  <span className="inline-flex items-center gap-1"><Package className="w-3 h-3" /> {applicant.total_transactions} txns</span>
+  <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" /> {daysSince}d old</span>
+  </div>
  {selected && (
  <div className="mt-2 flex items-center gap-1 text-xs text-primary font-medium">
  <ChevronRight className="w-3 h-3" /> Reviewing

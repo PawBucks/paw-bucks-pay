@@ -138,7 +138,7 @@ export function PlatformConfigSection() {
  }
 
  setHasChanges(false);
- toast.success('✅ All platform settings saved successfully');
+ toast.success('All platform settings saved successfully');
  } catch (err) {
  console.error('Error saving settings:', err);
  toast.error('Failed to save settings');

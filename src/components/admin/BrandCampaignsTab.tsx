@@ -422,7 +422,7 @@ export const BrandCampaignsTab = () => {
  <div className="flex items-center justify-between">
  <div>
  <p className="font-medium text-sm">
- {a.type ==="earn" ?"🟢 Distributed" :"🔴 Redeemed"} {Math.abs(a.amount).toLocaleString()} PB
+ {a.type ==="earn" ?"Distributed" :"Redeemed"} {Math.abs(a.amount).toLocaleString()} PB
  </p>
  <p className="text-xs text-muted-foreground">
  {a.description} • at {(a as any).merchants?.business_name ||"Unknown"}
