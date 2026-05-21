@@ -562,7 +562,7 @@ export const MerchantMessagesTab = ({ merchantId }: Props) => {
       }
 
       const [{ data: profiles }, tiers] = await Promise.all([
-        supabase.from("profiles").select("id, full_name").in("id", userIds),
+        supabase.rpc("get_customer_profiles_for_merchant", { p_user_ids: userIds }),
         fetchTiers(userIds),
       ]);
 
@@ -726,7 +726,7 @@ export const MerchantMessagesTab = ({ merchantId }: Props) => {
         return;
       }
       const [{ data: profiles }, tiers] = await Promise.all([
-        supabase.from("profiles").select("id, full_name").in("id", unionIds),
+        supabase.rpc("get_customer_profiles_for_merchant", { p_user_ids: unionIds }),
         fetchTiers(unionIds),
       ]);
       const list: PastCustomer[] = (profiles || []).map((p: any) => {

@@ -103,10 +103,10 @@ serve(async (req) => {
 
         // Generate and encrypt webhook secret
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        let rawSecret = "";
-        for (let i = 0; i < 32; i++) {
-          rawSecret += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
+        const secretBytes = crypto.getRandomValues(new Uint8Array(32));
+        const rawSecret = Array.from(secretBytes)
+          .map((b) => chars[b % chars.length])
+          .join("");
 
         const encryptedSecret = await encrypt(rawSecret);
 

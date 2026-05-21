@@ -72,10 +72,7 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
  
  // Fetch profiles and emails in parallel
  const [profilesResult, emailsResult] = await Promise.all([
- supabase
- .from("profiles")
- .select("id, full_name, phone, avatar_url")
- .in("id", userIds),
+        supabase.rpc("get_customer_profiles_for_merchant", { p_user_ids: userIds }),
  supabase.rpc("get_checkin_user_emails", {
  p_user_ids: userIds,
  p_entity_id: entityId,
