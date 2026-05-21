@@ -824,7 +824,6 @@ const Auth = () => {
  </div>
  <div className="space-y-2">
  <Label htmlFor="phone">Phone Number</Label>
-  <div className="flex gap-2">
   <Input
     id="phone"
     name="phone"
@@ -834,47 +833,7 @@ const Auth = () => {
     required
     value={phoneInput}
     onChange={(e) => setPhoneInput(e.target.value)}
-    disabled={!!verifiedPhone}
   />
-  {verifiedPhone === phoneInput && verifiedPhone ? (
-    <Button type="button" variant="secondary" disabled className="shrink-0">
-      <CheckCircle2 className="h-4 w-4 mr-1 text-green-600" /> Verified
-    </Button>
-  ) : (
-    <Button
-      type="button"
-      variant="outline"
-      onClick={handleSendOtp}
-      disabled={sendingOtp || !phoneInput.trim()}
-      className="shrink-0"
-    >
-      {sendingOtp ? <Loader2 className="h-4 w-4 animate-spin" /> : otpSent ? "Resend code" : "Send code"}
-    </Button>
-  )}
-  </div>
-  {otpSent && !verifiedPhone && (
-    <div className="flex gap-2 pt-2">
-      <Input
-        inputMode="numeric"
-        pattern="\d{6}"
-        maxLength={6}
-        placeholder="Enter 6-digit code"
-        value={otpCode}
-        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-      />
-      <Button
-        type="button"
-        onClick={handleVerifyOtp}
-        disabled={verifyingOtp || otpCode.length !== 6}
-        className="shrink-0"
-      >
-        {verifyingOtp ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
-      </Button>
-    </div>
-  )}
-  <p className="text-xs text-muted-foreground">
-    We'll text you a 6-digit code to confirm your number.
-  </p>
  </div>
  <div className="space-y-2">
  <Label htmlFor="signup-password">Password</Label>
