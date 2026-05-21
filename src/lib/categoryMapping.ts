@@ -1,4 +1,4 @@
-import { Stethoscope, Scissors, ShoppingBag, Bone, Home, MoreHorizontal, Dog, Sun, Truck, Camera, Shield, Mountain, Zap, Hand, Brain, LucideIcon } from "lucide-react";
+import { Stethoscope, Scissors, ShoppingBag, Bone, Home, MoreHorizontal, Dog, Sun, Truck, Camera, Shield, Mountain, Zap, Hand, Brain, Trash2, LucideIcon } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
 export type CategoryConfig = {
@@ -29,6 +29,7 @@ export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
  behaviorist: { icon: Brain, color:"hsl(280, 60%, 50%)", label:"Behaviorist", emoji:"🧠" },
  breeder: { icon: Dog, color:"hsl(10, 70%, 55%)", label:"Breeder", emoji:"🧬" },
  rescue_nonprofit: { icon: Shield, color:"hsl(200, 70%, 50%)", label:"Rescue / Nonprofit", emoji:"🧡" },
+ pet_waste_removal: { icon: Trash2, color:"hsl(90, 45%, 40%)", label:"Pet Waste Removal", emoji:"🧹" },
  other: { icon: MoreHorizontal, color:"hsl(var(--muted-foreground))", label:"Other", emoji:"🧩" },
 };
 
