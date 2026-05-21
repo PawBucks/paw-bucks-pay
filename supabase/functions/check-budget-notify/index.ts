@@ -4,7 +4,7 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 };
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -15,6 +15,15 @@ serve(async (req) => {
   }
 
   try {
+    const internalSecret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
+    const provided = req.headers.get("x-internal-secret");
+    if (!internalSecret || provided !== internalSecret) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { user_id, amount, merchant_category } = await req.json();
 
     if (!user_id || !amount) {
