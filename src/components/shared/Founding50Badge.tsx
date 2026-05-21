@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { Star, Trophy } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -64,11 +65,11 @@ const Founding50BadgeComponent = ({ entityType, entityId, size = "md" }: Foundin
               className="pointer-events-none absolute inset-0 animate-shimmer bg-[linear-gradient(110deg,transparent_30%,hsl(0_0%_100%/0.45)_50%,transparent_70%)]"
               style={{ backgroundSize: "200% 100%" }}
             />
-            <span
-              className="relative text-warning-foreground drop-shadow-[0_1px_1px_hsl(32_88%_28%/0.55)]"
-              style={{ fontSize: iconSizes[size] }}
+            <Star
+              className="relative text-warning-foreground drop-shadow-[0_1px_1px_hsl(32_88%_28%/0.55)] fill-current"
+              size={iconSizes[size]}
               aria-hidden="true"
-            >⭐</span>
+            />
             <span className="relative whitespace-nowrap tracking-[0.08em] drop-shadow-[0_1px_1px_hsl(32_88%_28%/0.45)]">
               FOUNDING 50
             </span>
@@ -78,7 +79,7 @@ const Founding50BadgeComponent = ({ entityType, entityId, size = "md" }: Foundin
           </motion.div>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs p-3 text-center">
-          <p className="font-bold text-sm mb-1">🏆 Founding 50 Member</p>
+          <p className="font-bold text-sm mb-1 flex items-center justify-center gap-1.5"><Trophy className="h-4 w-4" aria-hidden="true" /> Founding 50 Member</p>
           <p className="text-xs text-muted-foreground">
             Among the first 50 {entityType === "merchant" ? "merchants" : "veterinarians"} to join PawBucks.
             Badge #{badge.badge_number} of 50.
