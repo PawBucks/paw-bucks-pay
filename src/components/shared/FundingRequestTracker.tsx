@@ -46,7 +46,7 @@ function getStatusBadge(status: string) {
  case"approved":
  return <Badge className="gap-1 bg-success/15 text-success border-success/30 hover:bg-success/20"><CheckCircle2 className="w-3 h-3" /> Approved</Badge>;
  case"funded":
- return <Badge className="gap-1 bg-info/15 text-info border-info/30 hover:bg-info/20"><span className="w-3 h-3" aria-hidden="true">💵</span> Funded</Badge>;
+ return <Badge className="gap-1 bg-info/15 text-info border-info/30 hover:bg-info/20"><DollarSign className="w-3 h-3" aria-hidden="true" /> Funded</Badge>;
  case"denied":
  return <Badge variant="destructive" className="gap-1"><XCircle className="w-3 h-3" /> Denied</Badge>;
  default:
