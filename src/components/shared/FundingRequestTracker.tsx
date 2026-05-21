@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { CheckCircle2, Clock, DollarSign, FileText, Search, XCircle } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, DollarSign, FileText, Search, XCircle } from "lucide-react";
 import { format } from"date-fns";
 import { cn } from"@/lib/utils";
 import { useEffect, useRef } from"react";
@@ -142,14 +142,14 @@ function RequestCard({ request, entityType }: { request: FundingRequest; entityT
  <div className="flex items-start justify-between gap-4">
  <div className="space-y-1 min-w-0">
  <div className="flex items-center gap-2">
- <span className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true">💵</span>
+ <DollarSign className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
  <span className="font-bold text-lg">${request.requested_amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
  {getStatusBadge(request.status)}
  </div>
  <p className="text-sm text-muted-foreground truncate">{reason}</p>
  </div>
  <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-shrink-0">
- <span className="w-3.5 h-3.5" aria-hidden="true">📅</span>
+ <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
  {format(new Date(request.created_at),"MMM d, yyyy")}
  </div>
  </div>
@@ -178,8 +178,8 @@ function RequestCard({ request, entityType }: { request: FundingRequest; entityT
  )}>
  {request.status ==="pending" &&"Your request has been submitted and is waiting to be reviewed by our team."}
  {request.status ==="in_review" &&"Our underwriting team is currently evaluating your request. We'll notify you once a decision is made."}
- {request.status ==="approved" &&"🎉 Congratulations! Your funding request has been approved. Funds will be disbursed shortly."}
- {request.status ==="funded" &&"💰 Your funds have been disbursed! Check your account for the deposited amount."}
+ {request.status ==="approved" &&"Congratulations! Your funding request has been approved. Funds will be disbursed shortly."}
+ {request.status ==="funded" &&"Your funds have been disbursed! Check your account for the deposited amount."}
  {request.status ==="denied" &&"Unfortunately, your funding request was not approved at this time. You may reapply in the future."}
  </p>
  </div>
@@ -206,7 +206,7 @@ export function FundingRequestTracker({ requests, loading, entityType }: Funding
  return (
  <Card>
  <CardContent className="py-12 text-center space-y-2">
- <span className="w-10 h-10 text-muted-foreground/40 mx-auto" aria-hidden="true">📄</span>
+ <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto" aria-hidden="true" />
  <p className="text-muted-foreground font-medium">No Funding Requests</p>
  <p className="text-sm text-muted-foreground">
  {entityType ==="merchant"
