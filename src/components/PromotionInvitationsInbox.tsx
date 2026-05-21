@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Clock, Loader2, XCircle } from "lucide-react";
+import { Calendar, CheckCircle2, Clock, DollarSign, Gift, Loader2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   getMerchantPromotionInvitations,
@@ -52,7 +52,7 @@ export function PromotionInvitationsInbox({ recipientType, recipientId }: Props)
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
-          <span className="h-4 w-4 text-primary" aria-hidden="true">🎁</span>
+          <Gift className="h-4 w-4 text-primary" aria-hidden="true" />
           Platform Promotions
           {pending.length > 0 && <Badge>{pending.length} new</Badge>}
         </CardTitle>
@@ -63,7 +63,7 @@ export function PromotionInvitationsInbox({ recipientType, recipientId }: Props)
           <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
         ) : list.length === 0 ? (
           <div className="py-10 text-center text-sm text-muted-foreground">
-            <span className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true">🎁</span>
+            <Gift className="h-10 w-10 mx-auto mb-2 opacity-40" aria-hidden="true" />
             No promotion invitations yet. We'll notify you when one arrives.
           </div>
         ) : (
@@ -127,10 +127,10 @@ function InvitationCard({
 
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         {p.reward_amount_usd != null && (
-          <span className="flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">💵</span> {Formatters.currency(Number(p.reward_amount_usd))}</span>
+          <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" aria-hidden="true" /> {Formatters.currency(Number(p.reward_amount_usd))}</span>
         )}
         {p.end_date && (
-          <span className="flex items-center gap-1"><span className="h-3 w-3" aria-hidden="true">📅</span> Ends {new Date(p.end_date).toLocaleDateString()}</span>
+          <span className="flex items-center gap-1"><Calendar className="h-3 w-3" aria-hidden="true" /> Ends {new Date(p.end_date).toLocaleDateString()}</span>
         )}
       </div>
 
