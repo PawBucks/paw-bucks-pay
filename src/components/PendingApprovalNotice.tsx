@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { AlertCircle, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, Mail, XCircle } from "lucide-react";
 
 type PendingApprovalNoticeProps = {
  entityType:'merchant' |'vet';
@@ -39,7 +39,7 @@ export function PendingApprovalNotice({ entityType, approvalStatus, denialReason
  </div>
  )}
  <div className="flex items-center gap-2 text-sm text-muted-foreground">
- <span className="w-4 h-4" aria-hidden="true">📧</span>
+ <Mail className="w-4 h-4" aria-hidden="true" />
  <span>Please contact <a href="mailto:support@pawbucks.app" className="text-primary hover:underline">support@pawbucks.app</a> for more information.</span>
  </div>
  </CardContent>

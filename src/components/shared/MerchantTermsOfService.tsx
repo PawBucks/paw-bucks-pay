@@ -3,7 +3,7 @@ import { Checkbox } from"@/components/ui/checkbox";
 import { Label } from"@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { ScrollArea } from"@/components/ui/scroll-area";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, FileText } from "lucide-react";
 import { cn } from"@/lib/utils";
 
 export const MERCHANT_TOS_CONTENT = `PAWBUCKS MERCHANT TERMS OF SERVICE
@@ -268,7 +268,7 @@ export const MerchantTermsOfService = ({
  <Card className="border-border">
  <CardHeader className="pb-3">
  <CardTitle className="text-lg flex items-center gap-2">
- <span className="w-5 h-5 text-primary" aria-hidden="true">📄</span>
+ <FileText className="w-5 h-5 text-primary" aria-hidden="true" />
  Merchant Terms of Service
  </CardTitle>
  </CardHeader>
