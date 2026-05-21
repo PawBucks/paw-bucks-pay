@@ -93,8 +93,8 @@ export function UserDetailPets({ userId }: { userId: string }) {
  </div>
  <div className="grid grid-cols-2 gap-2 text-sm">
  {pet.age != null && (
- <div className="flex items-center gap-1 text-muted-foreground">
- <Calendar className="w-3 h-3" aria-hidden="true" /> {pet.age} years
+ <div className="text-muted-foreground">
+ {pet.age} years
  </div>
  )}
  {pet.weight != null && (
