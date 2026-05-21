@@ -84,8 +84,17 @@ const Auth = () => {
       const { data, error } = await supabase.functions.invoke("send-phone-otp", {
         body: { phone: phoneInput },
       });
-      if (error || (data as any)?.error) {
-        toast.error((data as any)?.error || error?.message || "Could not send code");
+      const payload = data as any;
+      // FunctionsHttpError exposes the response body on .context
+      let serverMessage: string | undefined = payload?.error;
+      if (!serverMessage && error && (error as any).context?.json) {
+        try {
+          const body = await (error as any).context.json();
+          serverMessage = body?.error;
+        } catch (_) { /* ignore */ }
+      }
+      if (error || serverMessage || payload?.success === false) {
+        toast.error(serverMessage || error?.message || "Could not send code");
         return;
       }
       setOtpSent(true);
