@@ -6,7 +6,7 @@ import { Badge } from"@/components/ui/badge";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
-import { CheckCircle2, Inbox, Loader2, Store, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Inbox, Loader2, Store, XCircle } from "lucide-react";
 import { toast } from"sonner";
 import {
  getBrandJoinRequests,
@@ -60,7 +60,7 @@ export function BrandJoinRequestsInbox({ brandId }: BrandJoinRequestsInboxProps)
  if (s ==="approved") return <Badge className="bg-[hsl(var(--success))] text-white">Approved</Badge>;
  if (s ==="declined") return <Badge variant="outline">Declined</Badge>;
  if (s ==="cancelled") return <Badge variant="secondary">Cancelled</Badge>;
- return <Badge><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span>Pending</Badge>;
+  return <Badge><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
  };
 
  return (
