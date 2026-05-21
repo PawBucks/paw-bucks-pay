@@ -1,15 +1,15 @@
 ---
 name: no-emojis-on-business-pages
-description: Pet Owner pages may use emojis; Merchant/Vet/Brand/Admin pages must use Lucide icons only — never emojis
+description: Public pages (any audience) may use emojis; authenticated Merchant/Vet/Brand/Admin pages must use Lucide icons only
 type: constraint
 ---
-**Rule:** Pet Owner–facing pages may use emojis as iconography. Merchant, Vet, Brand, and Admin–facing pages must NEVER use emojis — always use Lucide icons (or other SVG icons) instead.
+**Rule:** Any PUBLIC-facing page (unauthenticated, viewable by anyone) may use high-quality emojis as iconography — including Discover, Directory, Merchant Profile (public), and pet-owner facing pages. AUTHENTICATED Merchant, Vet, Brand, and Admin dashboards/portals must NEVER use emojis — always use Apple-style, tech-inspired Lucide (or SVG) icons instead.
 
-**Applies to:** category chips, badges, empty states, headers, buttons, labels — any visual on a merchant/vet/brand/admin route or component.
+**Applies to:** category chips, badges, empty states, headers, buttons, labels — any visual on an authenticated merchant/vet/brand/admin route or component.
 
-**Why:** Business-facing surfaces require a professional, enterprise aesthetic. Emojis undermine credibility for paying merchants, vets, brands, and admins.
+**Why:** Authenticated business surfaces require a professional, enterprise aesthetic. Public-facing pages benefit from warm, approachable emoji iconography regardless of audience.
 
 **How to apply:**
-- When building or editing any page under merchant/, vet/, admin/, brand/ routes (or shared components rendered only there), use Lucide icons (e.g. `Stethoscope`, `Scissors`, `Truck`, `Sparkles`).
+- Authenticated merchant/, vet/, admin/, brand/ routes (or shared components rendered only there): use Lucide icons (e.g. `Stethoscope`, `Scissors`, `Truck`, `Sparkles`).
 - Never import `getCategoryEmoji` or `@/components/ui/sparkles-emoji` in business-facing surfaces.
-- Pet Owner pages (Discover, Directory, Home, Pet Health, Wallet, etc.) may continue using emojis.
+- Public pages (Discover, Directory, MerchantProfile public view, landing, Home, Pet Health, Wallet, etc.) may use emojis. The Founding 50 badge is public-facing and keeps its ⭐ emoji.
