@@ -323,12 +323,7 @@ const Auth = () => {
  return;
  }
 
-  // Require completed phone verification
-  if (!phoneVerificationToken || verifiedPhone !== phone) {
-    toast.error("Please verify your phone number before continuing");
-    setIsLoading(false);
-    return;
-  }
+   // Phone OTP verification temporarily disabled.
 
  // Validate input
  const validatedData = signUpSchema.parse({
@@ -350,7 +345,6 @@ const Auth = () => {
  full_name: validatedData.fullName,
  user_type: userType,
   phone: validatedData.phone,
-  phone_verification_token: phoneVerificationToken,
  },
  },
  });
