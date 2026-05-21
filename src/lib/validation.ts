@@ -51,7 +51,7 @@ export const PET_BUSINESS_TYPES = [
 "veterinary","grooming","mobile_groomer","training", 
 "walker","runner","hiker","sitter","daycare","boarding",
 "pet_store","food","breeder","rescue_nonprofit",
-"photography","insurance","delivery","masseuse","behaviorist","other"
+"photography","insurance","delivery","masseuse","behaviorist","pet_waste_removal","other"
 ] as const;
 
 export const ENTITY_TYPES = [
