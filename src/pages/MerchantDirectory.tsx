@@ -25,7 +25,7 @@ import { useSponsoredTracking } from"@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from"@/hooks/useSearchRankingTracking";
 import { DirectoryMerchantCard } from"@/components/directory/DirectoryMerchantCard";
 import { MerchantMap } from"@/components/MerchantMap";
-import { LayoutGrid, LayoutList, Map, MapPin, Search, SlidersHorizontal, Store, X, Star, Stethoscope, Scissors, Truck, ShoppingBag, Bone, Hotel, School, GraduationCap, Dog, Mountain, PersonStanding, Hand, Brain, Camera, Shield, Plane, Dna, Heart, Puzzle } from "lucide-react";
+import { LayoutGrid, LayoutList, Map, MapPin, Search, SlidersHorizontal, Store, X, Star, Stethoscope, Scissors, Truck, ShoppingBag, Bone, Hotel, School, GraduationCap, Dog, Mountain, PersonStanding, Hand, Brain, Camera, Shield, Plane, Dna, Heart, Puzzle, Trash2 } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useUserLocation } from "@/hooks/useUserLocation";
@@ -67,6 +67,7 @@ const businessTypes = [
  { label:"Transportation", value:"delivery", Icon: Plane },
  { label:"Breeders", value:"breeder", Icon: Dna },
  { label:"Rescue / Nonprofit", value:"rescue_nonprofit", Icon: Heart },
+ { label:"Pet Waste Removal", value:"pet_waste_removal", Icon: Trash2 },
  { label:"Other", value:"other", Icon: Puzzle },
 ];
 
