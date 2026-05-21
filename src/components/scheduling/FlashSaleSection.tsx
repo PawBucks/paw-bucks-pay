@@ -21,7 +21,7 @@ import {
  CollapsibleContent,
  CollapsibleTrigger,
 } from"@/components/ui/collapsible";
-import { Bell, ChevronDown, ChevronUp, TrendingDown, Zap } from "lucide-react";
+import { Bell, ChevronDown, ChevronUp, Clock, TrendingDown, Zap } from "lucide-react";
 import { format } from"date-fns";
 import { 
  type MerchantService,
@@ -214,7 +214,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  render={({ field }) => (
  <FormItem>
  <FormLabel className="flex items-center gap-1">
- <span className="w-3.5 h-3.5" aria-hidden="true">⏰</span>
+ <Clock className="w-3.5 h-3.5" aria-hidden="true" />
  Start Time
  </FormLabel>
  <FormControl>
@@ -236,7 +236,7 @@ export function FlashSaleSection({ service, onUpdate }: FlashSaleSectionProps) {
  render={({ field }) => (
  <FormItem>
  <FormLabel className="flex items-center gap-1">
- <span className="w-3.5 h-3.5" aria-hidden="true">⏰</span>
+ <Clock className="w-3.5 h-3.5" aria-hidden="true" />
  End Time
  </FormLabel>
  <FormControl>

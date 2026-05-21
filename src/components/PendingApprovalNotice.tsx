@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, XCircle } from "lucide-react";
 
 type PendingApprovalNoticeProps = {
  entityType:'merchant' |'vet';
@@ -53,7 +53,7 @@ export function PendingApprovalNotice({ entityType, approvalStatus, denialReason
  <CardHeader className="pb-3">
  <div className="flex items-center gap-3">
  <div className="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center animate-pulse">
- <span className="w-6 h-6 text-warning" aria-hidden="true">⏰</span>
+ <Clock className="w-6 h-6 text-warning" aria-hidden="true" />
  </div>
  <div className="flex-1">
  <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export function PendingApprovalNotice({ entityType, approvalStatus, denialReason
  </div>
  </div>
  <div className="flex items-start gap-3 p-3 bg-warning/5 rounded-lg border border-warning/30">
- <span className="w-5 h-5 text-warning mt-0.5" aria-hidden="true">⏰</span>
+ <Clock className="w-5 h-5 text-warning mt-0.5" aria-hidden="true" />
  <div>
  <p className="text-sm font-medium text-warning">Admin Review</p>
  <p className="text-xs text-muted-foreground">Typically takes 1-2 business days</p>

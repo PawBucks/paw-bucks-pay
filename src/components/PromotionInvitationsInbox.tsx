@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Loader2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   getMerchantPromotionInvitations,
@@ -105,7 +105,7 @@ function InvitationCard({
   ) : i.status === "declined" ? (
     <Badge variant="outline"><XCircle className="h-3 w-3 mr-1" /> Declined</Badge>
   ) : (
-    <Badge variant="secondary"><span className="h-3 w-3 mr-1" aria-hidden="true">⏰</span> Pending</Badge>
+    <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" aria-hidden="true" /> Pending</Badge>
   );
 
   return (

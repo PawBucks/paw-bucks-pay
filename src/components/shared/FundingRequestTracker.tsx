@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
-import { CheckCircle2, Search, XCircle, FileText, DollarSign } from "lucide-react";
+import { CheckCircle2, Clock, DollarSign, FileText, Search, XCircle } from "lucide-react";
 import { format } from"date-fns";
 import { cn } from"@/lib/utils";
 import { useEffect, useRef } from"react";
@@ -40,7 +40,7 @@ function getStepIndex(status: string): number {
 function getStatusBadge(status: string) {
  switch (status) {
  case"pending":
- return <Badge variant="secondary" className="gap-1"><span className="w-3 h-3" aria-hidden="true">⏰</span> Submitted</Badge>;
+ return <Badge variant="secondary" className="gap-1"><Clock className="w-3 h-3" aria-hidden="true" /> Submitted</Badge>;
  case"in_review":
  return <Badge className="gap-1 bg-warning/15 text-warning border-warning/30 hover:bg-warning/20"><Search className="w-3 h-3" /> In Review</Badge>;
  case"approved":

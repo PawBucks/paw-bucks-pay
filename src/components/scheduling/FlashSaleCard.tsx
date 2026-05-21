@@ -9,7 +9,7 @@ import {
  DropdownMenuItem, 
  DropdownMenuTrigger 
 } from"@/components/ui/dropdown-menu";
-import { DollarSign, Edit, MoreVertical, Timer, Trash2, Users, Zap } from "lucide-react";
+import { Clock, DollarSign, Edit, MoreVertical, Timer, Trash2, Users, Zap } from "lucide-react";
 import { 
  type MerchantService, 
  CATEGORY_LABELS,
@@ -164,7 +164,7 @@ export function FlashSaleCard({
 
  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground mb-3">
  <div className="flex items-center gap-1">
- <span className="w-4 h-4" aria-hidden="true">⏰</span>
+ <Clock className="w-4 h-4" aria-hidden="true" />
  <span>{formatDuration(service.duration_minutes, service.category)}</span>
  </div>
  <div className="flex items-center gap-1">

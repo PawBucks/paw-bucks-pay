@@ -1,6 +1,6 @@
 import { useState, useMemo } from"react";
 import { format, parseISO, isAfter, isBefore, addDays, formatDistanceToNow } from"date-fns";
-import { AlertCircle, CheckCircle, Copy, CreditCard, DollarSign, Download, Edit, Eye, EyeOff, FileText, Filter, Link, Mail, MoreHorizontal, Plus, Printer, RefreshCw, Search, Send, Trash2, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, Copy, CreditCard, DollarSign, Download, Edit, Eye, EyeOff, FileText, Filter, Link, Mail, MoreHorizontal, Plus, Printer, RefreshCw, Search, Send, Trash2, XCircle } from "lucide-react";
 import { toast } from"sonner";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
@@ -191,7 +191,7 @@ export function InvoiceList({
  <p className="text-2xl font-bold">{Formatters.currency(stats.totalOutstanding)}</p>
  </div>
  <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center">
- <span className="h-5 w-5 text-warning" aria-hidden="true">⏰</span>
+ <Clock className="h-5 w-5 text-warning" aria-hidden="true" />
  </div>
  </div>
  </CardContent>

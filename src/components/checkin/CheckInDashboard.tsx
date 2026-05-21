@@ -6,7 +6,7 @@ import { Badge } from"@/components/ui/badge";
 import { Input } from"@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { QRCodeSVG } from"qrcode.react";
-import { Calendar, Download, Mail, Phone, Search, User, Users } from "lucide-react";
+import { Calendar, Clock, Download, Mail, Phone, Search, User, Users } from "lucide-react";
 import { format, subMonths, startOfDay, endOfDay } from"date-fns";
 import { toast } from"sonner";
 
@@ -345,7 +345,7 @@ function CheckInList({ checkins, loading, emptyMessage }: { checkins: CheckIn[];
  </div>
  <div className="text-right flex-shrink-0">
  <Badge variant="outline" className="text-xs">
- <span className="w-3 h-3 mr-1" aria-hidden="true">⏰</span>
+ <Clock className="w-3 h-3 mr-1" aria-hidden="true" />
  {format(new Date(checkin.checked_in_at),"h:mm a")}
  </Badge>
  <p className="text-xs text-muted-foreground mt-1">
