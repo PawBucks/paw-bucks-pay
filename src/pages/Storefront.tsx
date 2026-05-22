@@ -644,9 +644,8 @@ const Storefront = memo(() => {
  </div>
  </div>
 
-  {/* Sticky bottom CTA */}
-  {user && itemCount > 0 && (
-   <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3">
+   {/* Sticky bottom CTA — always visible on storefront */}
+   <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-safe shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]">
     <div className="container mx-auto max-w-4xl flex gap-2.5">
      {merchantId && (
       <AskQuestionButton
@@ -661,11 +660,12 @@ const Storefront = memo(() => {
      )}
      <Button onClick={() => setCartOpen(true)} className="flex-[2]" size="lg">
       <ShoppingCart className="h-4 w-4 mr-2" />
-      View Cart ({itemCount}) · {Formatters.currency(totalCents / 100)}
+       {itemCount > 0
+        ? `View Cart (${itemCount}) · ${Formatters.currency(totalCents / 100)}`
+        : "View Cart"}
      </Button>
     </div>
    </div>
-  )}
 
  {/* Cart Drawer */}
  <StorefrontCartDrawer
