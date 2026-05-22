@@ -106,7 +106,7 @@ const ACCREDITATIONS = [
  { id:"cat-friendly", label:"Cat-Friendly Practice" },
 ];
 
-const INSURANCE_PARTNERS: { id: string; name: string; Icon: LucideIcon }[] = [
+const INSURANCE_PARTNERS: { id: string; name: string; Icon: LucideIcon | React.ComponentType<{ className?: string }> }[] = [
  { id:"trupanion", name:"Trupanion", Icon: PawBucksIcon },
  { id:"nationwide", name:"Nationwide", Icon: Home },
  { id:"lemonade", name:"Lemonade", Icon: Citrus },
@@ -128,7 +128,7 @@ const PIMS_OPTIONS = [
 "Other",
 ];
 
-const SERVICES_PROVIDED: { id: string; label: string; Icon: LucideIcon }[] = [
+const SERVICES_PROVIDED: { id: string; label: string; Icon: LucideIcon | React.ComponentType<{ className?: string }> }[] = [
  { id:"general", label:"General Wellness", Icon: Stethoscope },
  { id:"dental", label:"Dental Care", Icon: Bone },
  { id:"surgery", label:"Surgery", Icon: Cross },
