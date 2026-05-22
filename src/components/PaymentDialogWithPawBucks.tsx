@@ -14,6 +14,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { Elements, PaymentElement, useStripe, useElements } from"@stripe/react-stripe-js";
 import { toast } from"sonner";
 import { Loader2, Check, AlertCircle } from "lucide-react";
+import { Phone, MapPin, Lock, ShieldCheck, BadgeCheck } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from"@/components/ui/alert";
 import { PawBucksInfoTooltip } from"@/components/PawBucksInfoTooltip";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
