@@ -5,7 +5,7 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
-import { ArrowLeft, Check, CreditCard, MapPin, Package, Plus, RefreshCw, Shield, ShoppingCart, Star, Store } from "lucide-react";
+import { ArrowLeft, Check, Clock, CreditCard, MapPin, MessageCircle, Package, Plus, RefreshCw, Shield, ShoppingCart, Star, Store, BadgeCheck, PawPrint, Mountain } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { SEO } from"@/components/SEO";
 import { useAuth } from"@/hooks/useAuth";
@@ -346,117 +346,120 @@ const Storefront = memo(() => {
         } : undefined}
  />
 
- {/* Editorial Hero Header */}
- <div className="relative bg-gradient-to-b from-primary/[0.06] via-primary/[0.02] to-transparent border-b border-border/40 overflow-hidden">
-  <div
-   aria-hidden="true"
-   className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full opacity-60"
-   style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 70%)" }}
-  />
-  <div className="container relative mx-auto px-4 pt-10 pb-8 max-w-4xl">
-   {merchantId && (
-    <Link to={`/merchant/${merchantId}`}>
-     <Button variant="ghost" size="sm" className="mb-6 -ml-2 hover:bg-primary/10 group">
-      <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-      Back to Profile
-     </Button>
-    </Link>
-   )}
-
-   {/* Eyebrow */}
-   <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
-    <Store className="w-3.5 h-3.5" />
-    The Storefront
-   </div>
-
-   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
-    {/* Left: Store Info */}
-    <div className="flex flex-col sm:flex-row gap-6 items-start flex-1 min-w-0">
-     <Avatar className="h-24 w-24 rounded-md border-4 border-background shadow-xl ring-2 ring-primary/20 shrink-0">
-      <AvatarImage src={merchantLogo || undefined} alt={merchantName} className="object-cover" />
-      <AvatarFallback className="rounded-md bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-3xl font-bold">
-       {merchantName?.charAt(0) || <Store className="h-10 w-10" />}
-      </AvatarFallback>
-     </Avatar>
-
-     <div className="space-y-3 min-w-0">
-      <div>
-       <h1
-        className="font-serif font-black leading-[1.05] tracking-[-0.025em] text-foreground mb-2"
-        style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(1.85rem, 4.5vw, 2.75rem)" }}
-       >
-        {merchantName || "Store"}
-       </h1>
-       <div className="flex items-center gap-2 flex-wrap">
-        {merchantBusinessType && (
-         <Badge variant="secondary" className="capitalize">{merchantBusinessType.replace(/_/g, ' ')}</Badge>
-        )}
-        {merchantIdForProducts && (
-         <Founding50Badge entityType="merchant" entityId={merchantIdForProducts} size="md" />
-        )}
-        <span className="text-xs text-muted-foreground">Official Storefront</span>
-       </div>
-      </div>
-
-      {merchantDescription && (
-       <p className="text-[15px] text-muted-foreground max-w-xl leading-relaxed whitespace-pre-line">
-        {merchantDescription}
-       </p>
-      )}
-
-      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-       {merchantAddress && (
-        <div className="flex items-center gap-1.5">
-         <MapPin className="h-4 w-4 text-primary" />
-         <span className="truncate max-w-[220px]">{merchantAddress}</span>
-        </div>
-       )}
-       <div className="flex items-center gap-1.5">
-        <span className="h-4 w-4 text-primary" aria-hidden="true">⏰</span>
-        <span>Usually responds quickly</span>
-       </div>
-      </div>
-
-      {merchantId && (
-       <AskQuestionButton merchantId={merchantId} merchantName={merchantName || "Store"} />
-      )}
-     </div>
-    </div>
-
-    {/* Right: Rewards & Trust + Cart */}
-    <div className="flex flex-col gap-4 sm:items-end">
-     {user && (
-      <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />
-     )}
-
-     <div className="inline-flex items-center gap-3 px-5 py-3 rounded-md bg-gradient-to-r from-warning/15 to-warning/15 border border-warning/30">
-      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-warning to-warning flex items-center justify-center shadow-lg">
-       <Sparkles className="h-5 w-5 text-white" />
-      </div>
-      <div>
-       <p className="text-sm font-medium text-foreground">Earn Rewards</p>
-       <p className="text-lg font-bold text-warning">Up to {cashbackRate * 3}x PawBucks</p>
-      </div>
-     </div>
-
-     <div className="flex flex-wrap gap-3">
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-sm">
-       <Shield className="h-4 w-4" /> Secure
-      </div>
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-info/10 text-info text-sm">
-       <CreditCard className="h-4 w-4" /> Stripe
-      </div>
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-warning/10 text-warning text-sm">
-       <Star className="h-4 w-4" aria-hidden /> Verified
-      </div>
-     </div>
+  {/* Sticky sub-nav */}
+  <div className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border">
+   <div className="container mx-auto px-4 max-w-4xl flex items-center gap-3 py-2.5">
+    {merchantId ? (
+     <Link to={`/merchant/${merchantId}`} className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+      <ArrowLeft className="h-4 w-4" /> Back to Profile
+     </Link>
+    ) : <span />}
+    <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-muted-foreground ml-2 hidden sm:inline">The Storefront</span>
+    <div className="ml-auto">
+     {user && <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />}
     </div>
    </div>
   </div>
- </div>
 
- {/* Products Section */}
- <div className="container py-10 md:py-14">
+  {/* Hero */}
+  <div className="bg-card border-b border-border">
+   <div className="container mx-auto px-4 max-w-4xl pt-5 pb-0">
+    <div className="flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.14em] uppercase text-muted-foreground mb-3.5">
+     <Store className="h-3 w-3" /> The Storefront
+    </div>
+
+    <div className="flex items-start gap-3.5 mb-3.5">
+     <Avatar className="h-[72px] w-[72px] rounded-2xl border border-border shadow-sm shrink-0">
+      <AvatarImage src={merchantLogo || undefined} alt={merchantName} className="object-cover" />
+      <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-2xl font-extrabold">
+       {merchantName?.slice(0, 2).toUpperCase() || <Store className="h-7 w-7" />}
+      </AvatarFallback>
+     </Avatar>
+     <div className="flex-1 min-w-0">
+      <h1 className="text-[22px] font-extrabold tracking-tight text-foreground leading-tight mb-2">
+       {merchantName || "Store"}
+      </h1>
+      <div className="flex items-center gap-1.5 flex-wrap mb-2.5">
+       {merchantBusinessType && (
+        <Badge variant="secondary" className="capitalize text-[11px] font-semibold px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-full">
+         {merchantBusinessType.replace(/_/g, ' ')}
+        </Badge>
+       )}
+       {merchantIdForProducts && (
+        <Founding50Badge entityType="merchant" entityId={merchantIdForProducts} size="sm" />
+       )}
+       <span className="text-[11px] text-muted-foreground">· Official Storefront</span>
+      </div>
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+       <Clock className="h-3.5 w-3.5" />
+       <span>Usually responds quickly</span>
+      </div>
+     </div>
+    </div>
+
+    {/* Earn banner */}
+    <div className="bg-primary/10 border border-primary/20 rounded-xl my-3.5 px-3.5 py-2.5 flex items-center justify-between">
+     <div className="flex items-center gap-2">
+      <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+       <PawPrint className="h-4 w-4 text-primary-foreground" />
+      </div>
+      <div>
+       <div className="text-[11px] text-primary/80">Earn Rewards</div>
+       <div className="text-sm font-extrabold text-primary">Up to {cashbackRate * 3}x PawBucks</div>
+      </div>
+     </div>
+     <div className="text-[10px] text-primary/70 text-right">PawPass+ subscribers earn most</div>
+    </div>
+   </div>
+
+   {/* Trust strip */}
+   <div className="border-t border-border">
+    <div className="container mx-auto px-4 max-w-4xl flex items-center gap-2 overflow-x-auto py-2.5 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
+     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card text-[11px] font-medium text-muted-foreground whitespace-nowrap">
+      <Shield className="h-3 w-3" /> Secure
+     </span>
+     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card text-[11px] font-medium text-muted-foreground whitespace-nowrap">
+      <CreditCard className="h-3 w-3" /> Stripe
+     </span>
+     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-warning/40 bg-card text-[11px] font-semibold text-warning whitespace-nowrap">
+      <BadgeCheck className="h-3 w-3" /> Verified Merchant
+     </span>
+     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card text-[11px] font-medium text-muted-foreground whitespace-nowrap">
+      <PawPrint className="h-3 w-3" /> PawBucks Partner
+     </span>
+    </div>
+   </div>
+  </div>
+
+  {/* About + Ask */}
+  {(merchantDescription || merchantAddress || merchantId) && (
+   <div className="container mx-auto px-4 max-w-4xl pt-6">
+    <div className="text-[10px] font-semibold tracking-[0.14em] uppercase text-muted-foreground mb-2">About</div>
+    {merchantDescription && (
+     <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{merchantDescription}</p>
+    )}
+    {merchantAddress && (
+     <div className="flex items-start gap-1.5 mt-2.5 text-[13px] text-muted-foreground">
+      <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+      <span>{merchantAddress}</span>
+     </div>
+    )}
+    {merchantId && (
+     <div className="mt-3.5">
+      <AskQuestionButton merchantId={merchantId} merchantName={merchantName || "Store"} />
+     </div>
+    )}
+   </div>
+  )}
+
+  {/* Products Section */}
+  <div className="container mx-auto px-4 max-w-4xl py-6 pb-32">
+   <div className="mb-4">
+    <h2 className="text-xl font-extrabold tracking-tight text-foreground">Shop Products &amp; Subscription Plans</h2>
+    <p className="text-[13px] text-muted-foreground mt-0.5">
+     {products.length + subscriptionPlans.length} {(products.length + subscriptionPlans.length) === 1 ? 'item' : 'items'} available
+    </p>
+   </div>
  {products.length === 0 && subscriptionPlans.length === 0 ? (
  <Card className="border-dashed border-2 bg-gradient-to-br from-muted/30 to-muted">
  <CardContent className="flex flex-col items-center justify-center py-20">
@@ -477,69 +480,64 @@ const Storefront = memo(() => {
  </CardContent>
  </Card>
  ) : (
- <>
- <div className="flex items-center justify-between mb-8">
- <div>
- <h2 className="text-2xl font-bold">Shop Products</h2>
- <p className="text-muted-foreground mt-1">
- {products.length + subscriptionPlans.length} {(products.length + subscriptionPlans.length) === 1 ?'item' :'items'} available
- </p>
- </div>
- </div>
-
- <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
  {/* Subscription Plans */}
  {subscriptionPlans.map((plan) => {
  const formattedPrice = `${Formatters.currency((plan.amount / 100))}`;
  const intervalLabel = plan.billing_interval_count === 1 
  ? plan.billing_interval 
  : `${plan.billing_interval_count} ${plan.billing_interval}s`;
- 
+  const estPb = Math.floor((plan.amount / 100) * cashbackRate);
+
  return (
- <Card 
+  <Card
  key={`plan-${plan.id}`}
- className="group overflow-hidden hover:shadow-2xl transition-all duration-300 hover:border-primary/40 hover:-translate-y-1.5 bg-card/80 backdrop-blur-sm border-primary/20"
+  className="group overflow-hidden rounded-2xl border border-border bg-card hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
  >
- <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
- <RefreshCw className="h-16 w-16 text-primary/40" />
- <div className="absolute top-3 left-3">
- <Badge className="bg-primary text-primary-foreground border-0">
- <RefreshCw className="h-3 w-3 mr-1" /> Subscription
- </Badge>
- </div>
+  <div className="relative h-[200px] overflow-hidden bg-gradient-to-br from-primary/15 to-primary/[0.04] flex flex-col items-center justify-center">
+  <Mountain className="h-14 w-14 text-primary/70" />
+  <div className="text-[11px] font-medium text-muted-foreground mt-1.5">{intervalLabel} plan</div>
+  <div className="absolute top-3 left-3">
+  <Badge className="bg-primary text-primary-foreground border-0 rounded-full text-[11px] font-semibold px-2.5 py-0.5 inline-flex items-center gap-1">
+  <RefreshCw className="h-3 w-3" /> Subscription
+  </Badge>
+  </div>
  {plan.trial_days > 0 && (
  <div className="absolute top-3 right-3">
- <Badge variant="outline" className="bg-success/20 text-success border-success/30">
+  <Badge variant="outline" className="bg-success/15 text-success border-success/30 rounded-full text-[11px]">
  {plan.trial_days} day trial
  </Badge>
  </div>
  )}
  </div>
 
- <CardHeader className="pb-2 pt-4">
- <CardTitle className="line-clamp-1 text-lg group-hover:text-primary transition-colors">{plan.name}</CardTitle>
- {plan.description && <CardDescription className="line-clamp-2 text-sm">{plan.description}</CardDescription>}
- </CardHeader>
-
- <CardContent className="space-y-4 pt-2">
- <div className="flex items-baseline gap-1">
- <span className="text-2xl font-bold text-foreground">{formattedPrice}</span>
- <span className="text-muted-foreground">/ {intervalLabel}</span>
- </div>
-
+  <CardContent className="p-4 space-y-3">
+  <div>
+  <h3 className="text-[18px] font-extrabold tracking-tight text-foreground leading-tight">{plan.name}</h3>
+  {plan.description && <p className="text-[13px] text-muted-foreground leading-snug mt-1 line-clamp-3">{plan.description}</p>}
+  </div>
  {plan.features.length > 0 && (
- <ul className="space-y-1">
- {plan.features.slice(0, 3).map((feature, i) => (
- <li key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+  <ul className="space-y-1.5">
+  {plan.features.slice(0, 4).map((feature, i) => (
+  <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
  <Check className="h-3 w-3 text-success flex-shrink-0" />
- <span className="line-clamp-1">{feature}</span>
+  <span className="line-clamp-1">{feature}</span>
  </li>
  ))}
  </ul>
  )}
-
- <Button onClick={() => handleSubscribe(plan)} className="w-full group/btn shadow-lg shadow-primary/20" size="lg">
- <CreditCard className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" /> Subscribe
+  <div className="flex items-end justify-between gap-3 pt-1">
+  <div>
+  <div className="text-[26px] font-extrabold text-foreground leading-none tracking-tight">{formattedPrice} <span className="text-sm font-normal text-muted-foreground">/ {intervalLabel}</span></div>
+  </div>
+  {estPb > 0 && (
+  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[12px] font-bold text-primary whitespace-nowrap">
+  <PawPrint className="h-3 w-3" /> +{Formatters.number(estPb)} PB
+  </span>
+  )}
+  </div>
+  <Button onClick={() => handleSubscribe(plan)} className="w-full" size="lg">
+  <CreditCard className="h-4 w-4 mr-2" /> Subscribe
  </Button>
  </CardContent>
  </Card>
@@ -554,91 +552,78 @@ const Storefront = memo(() => {
  const inCart = cartItems.find((ci) => ci.priceId === product.price?.id);
 
  return (
- <Card 
- key={product.id} 
- className="group overflow-hidden hover:shadow-2xl transition-all duration-300 hover:border-primary/40 hover:-translate-y-1.5 bg-card/80 backdrop-blur-sm"
+  <Card
+  key={product.id}
+  className="group overflow-hidden rounded-2xl border border-border bg-card hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
  >
- {/* Product Image */}
- <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-muted to-muted">
+  <div className="relative h-[200px] overflow-hidden bg-gradient-to-br from-primary/10 to-primary/[0.03]">
  {product.images && product.images.length > 0 ? (
- <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" width={400} height={400} />
+  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
  ) : (
  <div className="w-full h-full flex items-center justify-center">
- <Package className="h-16 w-16 text-muted-foreground/50" />
+  <Package className="h-14 w-14 text-muted-foreground/40" />
  </div>
  )}
  {estimatedPawBucks > 0 && (
- <div className="absolute top-3 right-3">
- <Badge className="bg-gradient-to-r from-warning to-warning text-white border-0 shadow-lg">
- <Sparkles className="h-3 w-3 mr-1" /> +{estimatedPawBucks} PB
- </Badge>
+  <div className="absolute bottom-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-foreground/75 text-background text-[12px] font-bold">
+  <PawPrint className="h-3 w-3" /> +{Formatters.number(estimatedPawBucks)} PB
  </div>
  )}
  </div>
 
- <CardHeader className="pb-2 pt-4">
- <CardTitle className="line-clamp-1 text-lg group-hover:text-primary transition-colors">{product.name}</CardTitle>
- {product.description && <CardDescription className="line-clamp-2 text-sm">{product.description}</CardDescription>}
- </CardHeader>
-
- <CardContent className="space-y-4 pt-2">
- <div className="text-2xl font-bold text-foreground">{product.price?.formatted ||"N/A"}</div>
-
- {/* Add to Cart / In Cart buttons */}
- {user ? (
- <div className="space-y-2">
- <Button
- onClick={() => handleAddToCart(product)}
- disabled={!product.price}
- className="w-full group/btn shadow-lg shadow-primary/20"
- variant={inCart ?"secondary" :"default"}
- size="lg"
- >
- {inCart ? (
- <>
- <Plus className="h-4 w-4 mr-2" />
- Add More ({inCart.quantity} in cart)
- </>
- ) : (
- <>
- <ShoppingCart className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" aria-hidden />
- Add to Cart
- </>
- )}
- </Button>
- </div>
- ) : (
- <Button onClick={() => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`)} className="w-full" size="lg">
- Sign in to Shop
- </Button>
- )}
+  <CardContent className="p-4 space-y-3">
+  <div>
+  <h3 className="text-[18px] font-extrabold tracking-tight text-foreground leading-tight line-clamp-1">{product.name}</h3>
+  {product.description && <p className="text-[13px] text-muted-foreground leading-snug mt-1 line-clamp-2">{product.description}</p>}
+  </div>
+  <div className="text-[26px] font-extrabold text-foreground leading-none tracking-tight">
+  {product.price?.formatted || "N/A"}
+  </div>
+  {user ? (
+  <Button
+  onClick={() => handleAddToCart(product)}
+  disabled={!product.price}
+  className="w-full"
+  variant={inCart ? "secondary" : "default"}
+  size="lg"
+  >
+  {inCart ? (
+  <><Plus className="h-4 w-4 mr-2" /> Add More ({inCart.quantity} in cart)</>
+  ) : (
+  <><ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart</>
+  )}
+  </Button>
+  ) : (
+  <Button onClick={() => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`)} className="w-full" size="lg">
+  Sign in to Shop
+  </Button>
+  )}
  </CardContent>
  </Card>
  );
  })}
- </div>
- </>
+  </div>
  )}
  </div>
 
  {/* Footer */}
- <div className="border-t bg-gradient-to-b from-card/80 to-card py-10 mt-16">
- <div className="container">
+  <div className="border-t border-border bg-card py-7">
+  <div className="container mx-auto px-4 max-w-4xl">
  <div className="flex flex-col items-center gap-6">
- <Avatar className="h-12 w-12 rounded-md border-2 border-primary/20">
+  <Avatar className="h-[52px] w-[52px] rounded-xl border border-border">
  <AvatarImage src={merchantLogo || undefined} alt={merchantName} />
- <AvatarFallback className="rounded-md bg-primary/10 text-primary font-bold">{merchantName?.charAt(0) ||"S"}</AvatarFallback>
+  <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">{merchantName?.slice(0, 2).toUpperCase() || "S"}</AvatarFallback>
  </Avatar>
- 
- <div className="flex flex-col items-center gap-2 text-center">
- <p className="font-medium text-foreground">{merchantName}</p>
- <p className="text-sm text-muted-foreground flex items-center gap-2">
- <Sparkles className="h-4 w-4 text-primary" /> Powered by PawBucks Marketplace
- </p>
- </div>
+
+  <div className="flex flex-col items-center gap-2 text-center">
+  <p className="font-semibold text-foreground">{merchantName}</p>
+  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+  <Sparkles className="h-3.5 w-3.5 text-primary" /> Powered by PawBucks Marketplace
+  </p>
+  </div>
 
  {(merchantData?.tos_url || merchantData?.privacy_policy_url || merchantData?.shipping_returns_policy_url) && (
- <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+  <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
  {merchantData.tos_url && (
  <a href={merchantData.tos_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline">Terms of Service</a>
  )}
@@ -651,7 +636,7 @@ const Storefront = memo(() => {
  </div>
  )}
 
- <div className="flex items-center gap-6 text-sm text-muted-foreground">
+  <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap justify-center">
  <span className="flex items-center gap-1.5"><Shield className="h-4 w-4 text-success" /> Secure Payments</span>
  <span className="text-border">•</span>
  <span className="flex items-center gap-1.5"><CreditCard className="h-4 w-4 text-info" /> Powered by Stripe</span>
@@ -659,6 +644,29 @@ const Storefront = memo(() => {
  </div>
  </div>
  </div>
+
+  {/* Sticky bottom CTA */}
+  {user && itemCount > 0 && (
+   <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3">
+    <div className="container mx-auto max-w-4xl flex gap-2.5">
+     {merchantId && (
+      <AskQuestionButton
+       merchantId={merchantId}
+       merchantName={merchantName || "Store"}
+       trigger={
+        <Button variant="outline" size="lg" className="flex-1">
+         <MessageCircle className="h-4 w-4 mr-2" /> Message
+        </Button>
+       }
+      />
+     )}
+     <Button onClick={() => setCartOpen(true)} className="flex-[2]" size="lg">
+      <ShoppingCart className="h-4 w-4 mr-2" />
+      View Cart ({itemCount}) · {Formatters.currency(totalCents / 100)}
+     </Button>
+    </div>
+   </div>
+  )}
 
  {/* Cart Drawer */}
  <StorefrontCartDrawer
