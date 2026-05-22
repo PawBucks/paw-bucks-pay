@@ -400,9 +400,11 @@ const Storefront = memo(() => {
     {/* Earn banner */}
     <div className="bg-primary/10 border border-primary/20 rounded-xl my-3.5 px-3.5 py-2.5 flex items-center justify-between">
      <div className="flex items-center gap-2">
-      <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-       <PawPrint className="h-4 w-4 text-primary-foreground" />
-      </div>
+      <img
+        src={pawbucksLogo}
+        alt="PawBucks"
+        className="h-8 w-8 rounded-lg object-contain shrink-0"
+      />
       <div>
        <div className="text-[11px] text-primary/80">Earn Rewards</div>
        <div className="text-sm font-extrabold text-primary">Up to {cashbackRate * 3}x PawBucks</div>
