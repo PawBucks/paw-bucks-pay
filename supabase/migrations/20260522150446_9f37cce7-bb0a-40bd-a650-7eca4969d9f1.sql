@@ -1,0 +1,1 @@
+ALTER TABLE public.merchants ALTER COLUMN accepts_pawbucks SET DEFAULT true;
