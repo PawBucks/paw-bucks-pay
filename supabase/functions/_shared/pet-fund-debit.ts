@@ -125,6 +125,7 @@ export async function applyPawBucksDebit(
   supabaseAdmin: any,
   userId: string,
   plan: DebitPlan,
+  context?: { merchantId?: string | null; transactionId?: string | null; transactionTotalCents?: number },
 ): Promise<void> {
   if (plan.walletDeduction > 0) {
     const { data: w } = await supabaseAdmin
@@ -178,13 +179,20 @@ export async function applyPawBucksDebit(
 
   if (plan.legacyCreditDeduction > 0) {
     // Use the dedicated RPC so phase tracking stays correct.
-    try {
-      await supabaseAdmin.rpc("redeem_welcome_credit", {
-        p_user_id: userId,
-        p_amount: plan.legacyCreditDeduction,
-      });
-    } catch (_e) {
-      // Best-effort; ledger row already reflects pawbucks_used in transaction record.
+    if (!context?.merchantId || !context.transactionTotalCents) {
+      throw new Error("Legacy welcome credit debit requires merchant and transaction total context");
+    }
+
+    const { data, error } = await supabaseAdmin.rpc("redeem_welcome_credit", {
+      p_user_id: userId,
+      p_merchant_id: context.merchantId,
+      p_transaction_total_cents: context.transactionTotalCents,
+      p_transaction_id: context.transactionId || null,
+    });
+
+    const redemption = Array.isArray(data) ? data[0] : data;
+    if (error || !redemption?.success) {
+      throw new Error(error?.message || redemption?.message || "Legacy welcome credit redemption failed");
     }
   }
 }
