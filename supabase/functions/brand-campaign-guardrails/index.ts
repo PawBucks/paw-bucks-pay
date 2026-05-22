@@ -13,6 +13,8 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const _authResp = checkInternalSecret(req, corsHeaders);
+  if (_authResp) return _authResp;
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");

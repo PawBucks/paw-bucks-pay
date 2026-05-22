@@ -112,6 +112,8 @@ async function sendSms(to: string, body: string, sid: string, token: string, fro
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const _authResp = checkInternalSecret(req, corsHeaders);
+  if (_authResp) return _authResp;
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
