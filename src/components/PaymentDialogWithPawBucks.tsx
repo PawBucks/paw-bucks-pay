@@ -578,22 +578,82 @@ export const PaymentDialogWithPawBucks = ({
  // Points earned as PawBucks (10x of dollar amount = that many PawBucks)
  const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
 
+  // Merchant initial for logo fallback
+  const merchantInitial = (merchantInfo?.business_name || merchantName || "?")
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+
+  // Branded checkout header — rendered above both form steps
+  const CheckoutHeader = (
+    <div className="-mx-6 -mt-6 px-6 pt-7 pb-5 text-center border-b border-border bg-card">
+      <div className="mx-auto mb-3 h-[72px] w-[72px] rounded-2xl bg-muted border border-border overflow-hidden flex items-center justify-center shadow-[0_2px_12px_rgba(0,0,0,0.07)]">
+        {merchantInfo?.logo_url ? (
+          <img
+            src={merchantInfo.logo_url}
+            alt={`${merchantInfo.business_name || merchantName} logo`}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-extrabold tracking-tight">
+            {merchantInitial}
+          </div>
+        )}
+      </div>
+      <h2 className="text-lg font-extrabold tracking-tight text-foreground mb-2">
+        {merchantInfo?.business_name || merchantName}
+      </h2>
+      <div className="flex flex-col items-center gap-1 text-xs text-muted-foreground">
+        {merchantInfo?.phone && (
+          <div className="flex items-center gap-1.5">
+            <Phone className="w-3 h-3 opacity-60" />
+            <span>{merchantInfo.phone}</span>
+          </div>
+        )}
+        {merchantInfo?.address && (
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-3 h-3 opacity-60" />
+            <span className="line-clamp-1">{merchantInfo.address}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1.5 text-primary/80 mt-0.5">
+          <BadgeCheck className="w-3 h-3" />
+          <span>Earn {cashbackRate}x PawBucks on card payments</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const SecurityFooter = (
+    <div className="flex items-center justify-center gap-3 text-[11px] text-muted-foreground pt-4 flex-wrap">
+      <span className="flex items-center gap-1"><Lock className="w-3 h-3" /> SSL Encrypted</span>
+      <span aria-hidden>·</span>
+      <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Powered by Stripe</span>
+      <span aria-hidden>·</span>
+      <span className="flex items-center gap-1"><BadgeCheck className="w-3 h-3" /> Verified Merchant</span>
+    </div>
+  );
+
  return (
  <Dialog open={open} onOpenChange={(isOpen) => {
  if (!isOpen) handleCancel();
  else onOpenChange(isOpen);
  }}>
- <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
- <DialogHeader>
- <DialogTitle>Pay {merchantName}</DialogTitle>
- <DialogDescription className="flex items-center gap-1">
- Earn {cashbackRate}x points in PawBucks on card payments
- <PawBucksInfoTooltip variant="earning" />
- </DialogDescription>
- </DialogHeader>
+  <DialogContent className="max-w-md max-h-[92vh] overflow-y-auto p-6 bg-[hsl(210,20%,96%)]">
+  <DialogHeader className="sr-only">
+  <DialogTitle>Pay {merchantInfo?.business_name || merchantName}</DialogTitle>
+  <DialogDescription>
+  Secure checkout. Earn {cashbackRate}x PawBucks on card payments.
+  </DialogDescription>
+  </DialogHeader>
+  {CheckoutHeader}
 
  {!showPaymentForm ? (
- <form onSubmit={handleSubmit} className="space-y-4">
+  <form onSubmit={handleSubmit} className="space-y-3 pt-3">
+  <div className="bg-card rounded-2xl shadow-sm p-4 space-y-3">
+    <div className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground -mb-1">
+      Order Details
+    </div>
  <div className="space-y-2">
  <Label htmlFor="amount">Amount ($)</Label>
  <Input
@@ -622,19 +682,22 @@ export const PaymentDialogWithPawBucks = ({
  onChange={(e) => setDescription(e.target.value)}
  />
  </div>
+  </div>
 
  {/* Tip Selector - Tips are always in USD, never PawBucks */}
  {totalAmount > 0 && (
+  <div className="bg-card rounded-2xl shadow-sm p-4">
  <TipSelector
  baseAmount={totalAmount}
  tipAmount={tipAmount}
  onTipChange={setTipAmount}
  />
+  </div>
  )}
 
  {/* Source Selector - when both earned and promotional are available */}
  {hasBothSources && totalAmount > 0 && (
- <>
+  <div className="bg-card rounded-2xl shadow-sm p-4 space-y-2">
  <PawBucksSourceSelector
  earnedBalance={spendableBalance}
  promotionalBalance={petFundCreditBalance}
@@ -653,7 +716,7 @@ export const PaymentDialogWithPawBucks = ({
   {" "}You can switch sources above.
   </div>
   )}
- </>
+  </div>
  )}
 
  {/* Pet Fund Credit Banner - only when sole source */}
@@ -700,18 +763,21 @@ export const PaymentDialogWithPawBucks = ({
 
  {/* PawBucks Section */}
  {acceptsPawbucks && totalAmount > 0 && pawbucksBalance > 0 && (
- <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
+  <div className="bg-card rounded-2xl shadow-sm p-4 space-y-3 border border-primary/15">
+  <div className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground -mb-1">
+    Apply PawBucks
+  </div>
  <div className="flex items-center justify-between">
  <Label className="flex items-center gap-2">
  <PawBucksLogo className="w-4 h-4 text-primary" />
  Use PawBucks
  </Label>
- <span className="text-sm text-muted-foreground">
- Balance: {pawbucksBalance.toLocaleString()} PB
- {pawbucksSource ==="promotional" && (
- <span className="text-success ml-1">(credit)</span>
- )}
- </span>
+  <span className="text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">
+  {pawbucksBalance.toLocaleString()} PB
+  {pawbucksSource ==="promotional" && (
+  <span className="text-success ml-1">(credit)</span>
+  )}
+  </span>
  </div>
 
               {capPct != null && (
@@ -770,7 +836,11 @@ export const PaymentDialogWithPawBucks = ({
 
  {/* Payment Summary */}
  {totalAmount > 0 && (
- <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-2">
+  <div className="bg-card rounded-2xl shadow-sm overflow-hidden">
+    <div className="px-4 pt-4 pb-2 text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
+      Order Summary
+    </div>
+    <div className="px-4 pb-3 space-y-1.5">
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground">Subtotal:</span>
  <span className="font-medium">{Formatters.currency(totalAmount)}</span>
@@ -787,20 +857,25 @@ export const PaymentDialogWithPawBucks = ({
  <span className="text-primary">−{Formatters.currency(pawbucksUsdValue)}</span>
  </div>
  )}
+    </div>
  {stripeAmount > 0 && (
- <>
- <div className="flex justify-between text-sm border-t pt-2">
- <span className="text-muted-foreground">Card Payment:</span>
- <span className="font-bold">{Formatters.currency(stripeAmount)}</span>
- </div>
- <div className="flex justify-between text-sm">
- <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
- <span className="font-bold text-accent">+{cashbackPawBucks} PawBucks</span>
- </div>
- </>
+  <>
+  <div className="flex justify-between items-center px-4 py-3 bg-muted/50 border-t border-border">
+    <span className="text-sm font-bold">Charged to card</span>
+    <span className="text-2xl font-extrabold tracking-tight">{Formatters.currency(stripeAmount)}</span>
+  </div>
+  <div className="flex justify-between items-center px-4 py-2.5 bg-primary/5 border-t border-primary/15">
+    <span className="text-xs font-medium text-primary flex items-center gap-1.5">
+      <PawBucksLogo className="w-3.5 h-3.5" /> PawBucks Earned ({cashbackRate}x)
+    </span>
+    <span className="bg-primary text-primary-foreground text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+      +{cashbackPawBucks} PB
+    </span>
+  </div>
+  </>
  )}
  {stripeAmount <= 0 && pawbucksToUse > 0 && tipAmount <= 0 && (
- <div className="text-sm text-center text-accent font-medium pt-2 border-t">
+  <div className="text-sm text-center text-accent font-medium px-4 py-3 border-t">
  No card payment needed!
  </div>
  )}
@@ -816,20 +891,31 @@ export const PaymentDialogWithPawBucks = ({
    </Alert>
  )}
 
- <div className="flex gap-3">
- <Button type="button" variant="outline" onClick={handleCancel} className="flex-1" disabled={isLoading}>
- Cancel
- </Button>
- <Button type="submit" className="flex-1" disabled={isLoading || !!liveWarning}>
- {isLoading ? (
- <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
- ) : stripeAmount <= 0 && pawbucksToUse > 0 ? (
- `Pay with PawBucks`
- ) : (
-"Proceed to Payment"
- )}
- </Button>
- </div>
+  <div className="pt-1 space-y-2">
+    <Button
+      type="submit"
+      disabled={isLoading || !!liveWarning}
+      className="w-full h-[52px] rounded-2xl text-base font-bold tracking-tight shadow-md"
+    >
+      {isLoading ? (
+        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Loading...</>
+      ) : stripeAmount <= 0 && pawbucksToUse > 0 ? (
+        <><Lock className="w-4 h-4 mr-2" /> Pay with PawBucks</>
+      ) : (
+        <><Lock className="w-4 h-4 mr-2" /> Continue to Payment</>
+      )}
+    </Button>
+    <Button
+      type="button"
+      variant="ghost"
+      onClick={handleCancel}
+      className="w-full"
+      disabled={isLoading}
+    >
+      Cancel
+    </Button>
+  </div>
+  {SecurityFooter}
  </form>
  ) : !connectedAccountId ? (
  // Missing connected account error
@@ -845,11 +931,13 @@ export const PaymentDialogWithPawBucks = ({
  <p className="text-muted-foreground">Preparing secure payment...</p>
  </div>
  ) : (
+  <div className="pt-3 space-y-3">
  <Elements 
  stripe={getStripeForConnectedAccount(connectedAccountId)} 
  options={{ clientSecret }}
  key={`${connectedAccountId}-${clientSecret}`}
  >
+  <div className="bg-card rounded-2xl shadow-sm p-4">
  <StripePaymentForm
  merchantName={merchantName}
  cashbackRate={paymentData?.cashbackRate || cashbackRate}
@@ -861,7 +949,10 @@ export const PaymentDialogWithPawBucks = ({
  onSuccess={handleSuccess}
  onCancel={handleCancel}
  />
+  </div>
  </Elements>
+  {SecurityFooter}
+  </div>
  )}
  </DialogContent>
  </Dialog>
