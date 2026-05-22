@@ -134,7 +134,10 @@ serve(async (req) => {
       const sources = await getSpendableSources(supabase, userId);
       const invoiceTotalUsd = (pawbucksAmountCents + (tipAmountCents || 0)) / 100;
       const debitPlan = planPawBucksDebit(sources, pawbucksUsed, invoiceTotalUsd);
-      await applyPawBucksDebit(supabase, userId, debitPlan);
+      await applyPawBucksDebit(supabase, userId, debitPlan, {
+        merchantId: merchant.id,
+        transactionTotalCents: pawbucksAmountCents + (tipAmountCents || 0),
+      });
       logStep("PawBucks debit applied", debitPlan);
 
       // Log user PawBucks activity
