@@ -309,6 +309,35 @@ serve(async (req) => {
             remainingStripe: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
           });
         }
+      } else {
+        // ============================================================
+        // PROMOTIONAL CREDIT AUTO-APPLY (always-on safety net)
+        // ------------------------------------------------------------
+        // Welcome credits (Pet Fund + legacy) are promotional onboarding
+        // funds designed to be applied automatically. The storefront UI
+        // hides the PawBucks slider until balances finish loading, so a
+        // fast shopper could otherwise pay full price while $20+ in
+        // welcome credit sits unused. We never auto-spend the user's
+        // earned wallet balance here — that still requires the slider /
+        // explicit autoRedeem opt-in.
+        // ============================================================
+        const promoEligible =
+          (petFundEligible ? spendable.petFundAvailable : 0) +
+          spendable.legacyCreditBalance;
+
+        if (promoEligible > 0) {
+          const maxPromoPawBucks = Math.floor(totalAmountDollars * PAWBUCKS_TO_USD);
+          pawbucksUsed = Math.min(promoEligible, maxPromoPawBucks);
+          pawbucksUsdValue = pawbucksUsed / PAWBUCKS_TO_USD;
+          finalStripeAmountCents = Math.round((totalAmountDollars - pawbucksUsdValue) * 100);
+
+          logStep('Promotional credit auto-applied', {
+            petFundApplied: petFundEligible ? Math.min(spendable.petFundAvailable, pawbucksUsed) : 0,
+            legacyApplied: Math.max(0, pawbucksUsed - (petFundEligible ? spendable.petFundAvailable : 0)),
+            usdValue: `$${pawbucksUsdValue.toFixed(2)}`,
+            remainingStripe: `$${(finalStripeAmountCents / 100).toFixed(2)}`,
+          });
+        }
       }
     }
 
@@ -456,7 +485,12 @@ serve(async (req) => {
             }
         }
         
-        logStep('PawBucks deducted for full PawBucks checkout', { pawbucksUsed, walletDeduction, welcomeCreditDeduction: pawbucksUsed - walletDeduction });
+        logStep('PawBucks deducted for full PawBucks checkout', {
+          pawbucksUsed,
+          walletDeduction: debitPlan.walletDeduction,
+          petFundDeduction: debitPlan.petFundDeduction,
+          legacyCreditDeduction: debitPlan.legacyCreditDeduction,
+        });
       }
       
       // Create a transaction record - NO platform fee on PawBucks-only payments
