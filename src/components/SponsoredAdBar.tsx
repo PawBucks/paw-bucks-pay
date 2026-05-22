@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdMerchants } from "@/hooks/useMerchantServices";
-import { ArrowRight, PawPrint, Star, Store } from "lucide-react";
+import { ArrowRight, Star, Store } from "lucide-react";
+import { PawBucksIcon } from "@/components/PawBucksIcon";
 import { useSubscription } from "@/hooks/useSubscription";
 import { getSubscriptionTier } from "@/lib/constants";
 
@@ -85,7 +86,7 @@ export function SponsoredAdBar({ variant }: SponsoredAdBarProps) {
   const fallback: AdContent =
     variant === "top"
       ? {
-          icon: <PawPrint className="w-7 h-7 text-primary" />,
+          icon: <PawBucksIcon className="w-7 h-7" />,
           iconBg: "bg-primary/10 border border-primary/20",
           title: "Discover More Pet Services Near You",
           description: "Find trusted groomers, vets, trainers, and more — all on PawBucks.",

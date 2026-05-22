@@ -3,7 +3,8 @@ import { useNavigate } from"react-router-dom";
 import { useForm } from"react-hook-form";
 import { zodResolver } from"@hookform/resolvers/zod";
 import { z } from"zod";
-import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, Edit, FileText, PartyPopper, Phone, Save, Shield, ShieldCheck, Stethoscope, User, Wallet, PawPrint, Home, Citrus, Star, Smile, Dog, Smartphone, Cross, Bone, HeartPulse, Bug, Siren, Microscope, type LucideIcon, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, Check, CreditCard, Edit, FileText, PartyPopper, Phone, Save, Shield, ShieldCheck, Stethoscope, User, Wallet, Home, Citrus, Star, Smile, Dog, Smartphone, Cross, Bone, HeartPulse, Bug, Siren, Microscope, type LucideIcon, Sparkles } from "lucide-react";
+import { PawBucksIcon } from "@/components/PawBucksIcon";
 
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
@@ -105,8 +106,8 @@ const ACCREDITATIONS = [
  { id:"cat-friendly", label:"Cat-Friendly Practice" },
 ];
 
-const INSURANCE_PARTNERS: { id: string; name: string; Icon: LucideIcon }[] = [
- { id:"trupanion", name:"Trupanion", Icon: PawPrint },
+const INSURANCE_PARTNERS: { id: string; name: string; Icon: LucideIcon | React.ComponentType<{ className?: string }> }[] = [
+ { id:"trupanion", name:"Trupanion", Icon: PawBucksIcon },
  { id:"nationwide", name:"Nationwide", Icon: Home },
  { id:"lemonade", name:"Lemonade", Icon: Citrus },
  { id:"pets-best", name:"Pets Best", Icon: Star },
@@ -127,13 +128,13 @@ const PIMS_OPTIONS = [
 "Other",
 ];
 
-const SERVICES_PROVIDED: { id: string; label: string; Icon: LucideIcon }[] = [
+const SERVICES_PROVIDED: { id: string; label: string; Icon: LucideIcon | React.ComponentType<{ className?: string }> }[] = [
  { id:"general", label:"General Wellness", Icon: Stethoscope },
  { id:"dental", label:"Dental Care", Icon: Bone },
  { id:"surgery", label:"Surgery", Icon: Cross },
  { id:"exotics", label:"Exotic Animals", Icon: Bug },
  { id:"emergency", label:"Emergency Care", Icon: Siren },
- { id:"dermatology", label:"Dermatology", Icon: PawPrint },
+ { id:"dermatology", label:"Dermatology", Icon: PawBucksIcon },
  { id:"cardiology", label:"Cardiology", Icon: HeartPulse },
  { id:"oncology", label:"Oncology", Icon: Microscope },
 ];

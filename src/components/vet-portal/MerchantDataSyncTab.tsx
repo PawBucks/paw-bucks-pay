@@ -20,7 +20,8 @@ import {
  TableHeader,
  TableRow,
 } from"@/components/ui/table";
-import { Activity, AlertTriangle, BarChart3, Calendar, Dog, DollarSign, Heart, PawPrint, Search, TrendingDown, TrendingUp } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Calendar, Dog, DollarSign, Heart, Search, TrendingDown, TrendingUp } from "lucide-react";
+import { PawBucksIcon } from "@/components/PawBucksIcon";
 import { format, subDays, differenceInDays } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
@@ -234,7 +235,7 @@ export function MerchantDataSyncTab({ vetId }: MerchantDataSyncTabProps) {
  <div>
  <p className="text-xs text-muted-foreground">This Week</p>
  <div className="flex items-center gap-1">
- <PawPrint className="h-4 w-4 text-primary" aria-hidden="true" />
+ <PawBucksIcon className="h-4 w-4" aria-hidden="true" />
  <span className="text-lg font-bold">{recentWeek}</span>
  </div>
  </div>

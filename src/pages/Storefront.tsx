@@ -5,7 +5,8 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
-import { ArrowLeft, Check, Clock, CreditCard, MapPin, MessageCircle, Package, Plus, RefreshCw, Shield, ShoppingCart, Star, Store, BadgeCheck, PawPrint, Mountain } from "lucide-react";
+import { ArrowLeft, Check, Clock, CreditCard, MapPin, MessageCircle, Package, Plus, RefreshCw, Shield, ShoppingCart, Star, Store, BadgeCheck, Mountain } from "lucide-react";
+import { PawBucksIcon } from "@/components/PawBucksIcon";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { SEO } from"@/components/SEO";
 import { useAuth } from"@/hooks/useAuth";
@@ -18,7 +19,6 @@ import { AskQuestionButton } from"@/components/storefront/AskQuestionButton";
 import { buildAppUrl } from"@/lib/url";
 import { Founding50Badge } from"@/components/shared/Founding50Badge";
 import { useStorefrontCart } from"@/hooks/useStorefrontCart";
-import pawbucksLogo from"@/assets/pawbucks-logo.png";
 import { StorefrontCartDrawer, type StorefrontCheckoutParams } from"@/components/storefront/StorefrontCartDrawer";
 import { CartIcon } from"@/components/pet-store/CartIcon";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
@@ -401,11 +401,7 @@ const Storefront = memo(() => {
     {/* Earn banner */}
     <div className="bg-primary/10 border border-primary/20 rounded-xl my-3.5 px-3.5 py-2.5 flex items-center justify-between">
      <div className="flex items-center gap-2">
-      <img
-        src={pawbucksLogo}
-        alt="PawBucks"
-        className="h-8 w-8 rounded-lg object-contain shrink-0"
-      />
+      <PawBucksIcon className="h-8 w-8 rounded-lg" />
       <div>
        <div className="text-[11px] text-primary/80">Earn Rewards</div>
        <div className="text-sm font-extrabold text-primary">Up to {cashbackRate * 3}x PawBucks</div>
@@ -428,7 +424,7 @@ const Storefront = memo(() => {
       <BadgeCheck className="h-3 w-3" /> Verified Merchant
      </span>
      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card text-[11px] font-medium text-muted-foreground whitespace-nowrap">
-      <PawPrint className="h-3 w-3" /> PawBucks Partner
+      <PawBucksIcon className="h-3 w-3" /> PawBucks Partner
      </span>
     </div>
    </div>
@@ -535,7 +531,7 @@ const Storefront = memo(() => {
   </div>
   {estPb > 0 && (
   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[12px] font-bold text-primary whitespace-nowrap">
-  <PawPrint className="h-3 w-3" /> +{Formatters.number(estPb)} PB
+  <PawBucksIcon className="h-3 w-3" /> +{Formatters.number(estPb)} PB
   </span>
   )}
   </div>
@@ -569,7 +565,7 @@ const Storefront = memo(() => {
  )}
  {estimatedPawBucks > 0 && (
   <div className="absolute bottom-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-foreground/75 text-background text-[12px] font-bold">
-  <PawPrint className="h-3 w-3" /> +{Formatters.number(estimatedPawBucks)} PB
+  <PawBucksIcon className="h-3 w-3" /> +{Formatters.number(estimatedPawBucks)} PB
  </div>
  )}
  </div>
