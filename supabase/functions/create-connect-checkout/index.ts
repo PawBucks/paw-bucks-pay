@@ -485,7 +485,12 @@ serve(async (req) => {
             }
         }
         
-        logStep('PawBucks deducted for full PawBucks checkout', { pawbucksUsed, walletDeduction, welcomeCreditDeduction: pawbucksUsed - walletDeduction });
+        logStep('PawBucks deducted for full PawBucks checkout', {
+          pawbucksUsed,
+          walletDeduction: debitPlan.walletDeduction,
+          petFundDeduction: debitPlan.petFundDeduction,
+          legacyCreditDeduction: debitPlan.legacyCreditDeduction,
+        });
       }
       
       // Create a transaction record - NO platform fee on PawBucks-only payments
