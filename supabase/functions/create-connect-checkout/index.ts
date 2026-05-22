@@ -400,45 +400,25 @@ serve(async (req) => {
 
       // Deduct PawBucks from user's wallet (and welcome credit if needed)
       if (pawbucksUsed > 0) {
-        const { data: currentWallet } = await supabaseAdmin
-          .from('pawbucks_wallet')
-          .select('balance')
-          .eq('user_id', user.id)
-          .single();
-        
-        const walletBalance = currentWallet?.balance || 0;
-        const walletDeduction = Math.min(walletBalance, pawbucksUsed);
-        const welcomeCreditDeduction = pawbucksUsed - walletDeduction;
+        // Use shared debit helper so wallet → pet fund (welcome credit) → legacy welcome credit
+        // are all spent in the canonical order.
+        const debitSources = await getSpendableSources(supabaseAdmin, user.id);
+        const debitPlan = planPawBucksDebit(debitSources, pawbucksUsed, totalAmountDollars);
+        await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan);
 
-        // Deduct from wallet
-        if (walletDeduction > 0 && walletBalance >= walletDeduction) {
-          await supabaseAdmin
-            .from('pawbucks_wallet')
-            .update({ balance: walletBalance - walletDeduction })
-            .eq('user_id', user.id);
-          
+        if (debitPlan.walletDeduction > 0) {
           await supabaseAdmin
             .from('pawbucks_activity')
             .insert({
               user_id: user.id,
               type: 'redeem',
-              amount: -walletDeduction,
+              amount: -debitPlan.walletDeduction,
               source: 'Purchase',
               partner_id: merchantId || null,
-              description: `Paid ${walletDeduction} PawBucks ($${(walletDeduction * 0.001).toFixed(2)}) at ${merchantName}`,
+              description: `Paid ${debitPlan.walletDeduction} PawBucks ($${(debitPlan.walletDeduction * 0.001).toFixed(2)}) at ${merchantName}`,
             });
         }
-
-        // Redeem welcome credit if needed
-        if (welcomeCreditDeduction > 0 && merchantId) {
-          const totalCents = Math.round(totalAmountDollars * 100);
-          await supabaseAdmin.rpc('redeem_welcome_credit', {
-            p_user_id: user.id,
-            p_merchant_id: merchantId,
-            p_transaction_total_cents: totalCents,
-          });
-          logStep('Welcome credit redeemed in checkout', { amount: welcomeCreditDeduction });
-        }
+        logStep('PawBucks debit plan applied (full PawBucks checkout)', debitPlan);
           
         // Credit merchant's PawBucks wallet
         if (merchantId) {
