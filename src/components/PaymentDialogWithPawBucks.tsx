@@ -312,6 +312,21 @@ export const PaymentDialogWithPawBucks = ({
   const capPct = merchantCap ? effectivePawBucksCapPct(merchantCap) : null;
   const promoActive = merchantCap ? isPromoActive(merchantCap) : false;
 
+  // Merchant header info: logo, phone, address (for the branded checkout header)
+  const { data: merchantInfo } = useQuery({
+    queryKey: ["merchant-checkout-header", merchantId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("merchants_public")
+        .select("business_name, logo_url, phone, address")
+        .eq("id", merchantId)
+        .maybeSingle();
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!merchantId && open,
+  });
+
  const totalAmount = parseFloat(amount) || 0;
 
  // Pet Fund uses dynamic min; Welcome Credit uses fixed $75 min (server-enforced).
