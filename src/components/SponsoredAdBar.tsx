@@ -53,8 +53,12 @@ interface AdContent {
 export function SponsoredAdBar({ variant }: SponsoredAdBarProps) {
   const navigate = useNavigate();
   const { data: adMerchants = [] } = useAdMerchants();
-  const { subscription } = useSubscription();
+  const { subscription, loading: subscriptionLoading } = useSubscription();
   const tick = useAdTick();
+
+  // Don't render anything until subscription status is confirmed —
+  // prevents a flash of ads for PawPass+ subscribers on initial load.
+  if (subscriptionLoading) return null;
 
   const tier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
   // PawPass+ subscribers don't see ads at all

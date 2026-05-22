@@ -13,7 +13,7 @@ type AdPlacementProps = {
 };
 
 const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
- const { subscription } = useSubscription();
+  const { subscription, loading: subscriptionLoading } = useSubscription();
  const [dismissed, setDismissed] = useState(false);
  const [currentAdIndex, setCurrentAdIndex] = useState(0);
  const navigate = useNavigate();
@@ -57,7 +57,8 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  );
 
  // Don't show ads for PawPass+ subscribers or if dismissed
- if (tier ==='pawpass_plus' || dismissed) {
+  // Also hide while subscription status is still loading to avoid a flash for PawPass+ users.
+  if (subscriptionLoading || tier ==='pawpass_plus' || dismissed) {
  return null;
  }
 
