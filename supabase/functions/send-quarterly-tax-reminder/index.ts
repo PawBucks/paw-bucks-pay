@@ -33,10 +33,11 @@ function logStep(step: string, details?: Record<string, unknown>) {
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders }
-  const _authResp = checkInternalSecret(req, corsHeaders);
-  if (_authResp) return _authResp;
 );
   }
+
+  const _authResp = checkInternalSecret(req, corsHeaders);
+  if (_authResp) return _authResp;
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

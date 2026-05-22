@@ -171,10 +171,11 @@ async function sendInvoiceEmail(invoice: any, merchant: any, items: any[]): Prom
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders }
-  const _authResp = checkInternalSecret(req, corsHeaders);
-  if (_authResp) return _authResp;
 );
   }
+
+  const _authResp = checkInternalSecret(req, corsHeaders);
+  if (_authResp) return _authResp;
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
