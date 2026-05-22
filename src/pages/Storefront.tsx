@@ -18,6 +18,7 @@ import { AskQuestionButton } from"@/components/storefront/AskQuestionButton";
 import { buildAppUrl } from"@/lib/url";
 import { Founding50Badge } from"@/components/shared/Founding50Badge";
 import { useStorefrontCart } from"@/hooks/useStorefrontCart";
+import pawbucksLogo from"@/assets/pawbucks-logo.png";
 import { StorefrontCartDrawer, type StorefrontCheckoutParams } from"@/components/storefront/StorefrontCartDrawer";
 import { CartIcon } from"@/components/pet-store/CartIcon";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
