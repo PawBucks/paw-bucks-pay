@@ -20,6 +20,7 @@ import { Founding50Badge } from"@/components/shared/Founding50Badge";
 import { useStorefrontCart } from"@/hooks/useStorefrontCart";
 import { StorefrontCartDrawer, type StorefrontCheckoutParams } from"@/components/storefront/StorefrontCartDrawer";
 import { CartIcon } from"@/components/pet-store/CartIcon";
+import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
 
 import { Formatters } from "@/utils/formatters";
 type Product = {
@@ -170,17 +171,15 @@ const Storefront = memo(() => {
  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
 
- // PawBucks wallet balance
- const { data: walletData } = useQuery({
- queryKey: ["pawbucks-wallet", user?.id],
- queryFn: async () => {
- if (!user?.id) return null;
- const { data } = await supabase.from("pawbucks_wallet").select("balance").eq("user_id", user.id).single();
- return data;
- },
- staleTime: 1000 * 60 * 2,
- enabled: !!user?.id,
- });
+  // PawBucks spendable sources: wallet + Pet Fund (welcome credit) + legacy welcome credit.
+  // Backend (create-connect-checkout) spends in canonical order; we just need to expose the
+  // combined eligible total so the cart slider lets shoppers apply welcome credits at checkout.
+  const {
+  spendableBalance,
+  welcomeCreditBalance,
+  petFundBalance,
+  petFundMinTransactionUsd,
+  } = useSpendablePawBucks(user?.id);
 
  const handleSubscribe = useCallback(async (plan: SubscriptionPlan) => {
  if (!user) {
@@ -672,7 +671,12 @@ const Storefront = memo(() => {
  onClearCart={clearCart}
  onCheckout={handleCartCheckout}
  isCheckingOut={isCheckingOut}
- pawbucksBalance={walletData?.balance || 0}
+  pawbucksBalance={
+  spendableBalance +
+  welcomeCreditBalance +
+  // Only include Pet Fund welcome credit if the cart meets its minimum purchase threshold.
+  ((petFundBalance > 0 && totalCents / 100 >= (petFundMinTransactionUsd || 0)) ? petFundBalance : 0)
+  }
  merchantAcceptsPawBucks={merchantAcceptsPawBucks}
  />
 

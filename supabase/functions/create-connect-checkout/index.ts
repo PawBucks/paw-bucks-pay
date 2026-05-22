@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -211,13 +216,25 @@ serve(async (req) => {
     const hasManualPawBucks = typeof manualPawbucksToUse === 'number' && manualPawbucksToUse > 0;
     
     if (merchantAcceptsPawBucks) {
-      const { data: pawbucksWallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single();
+      // Pull the full spendable picture: wallet + pet fund (welcome credit) + legacy welcome credit.
+      const spendable = await getSpendableSources(supabaseAdmin, user.id);
+      const petFundEligible =
+        spendable.petFundAvailable > 0 &&
+        (!spendable.petFundMinUsd || totalAmountDollars >= spendable.petFundMinUsd);
+      const availablePawBucks =
+        spendable.walletBalance +
+        (petFundEligible ? spendable.petFundAvailable : 0) +
+        spendable.legacyCreditBalance;
 
-      const availablePawBucks = pawbucksWallet?.balance || 0;
+      logStep('Spendable PawBucks sources', {
+        wallet: spendable.walletBalance,
+        petFundAvailable: spendable.petFundAvailable,
+        petFundMinUsd: spendable.petFundMinUsd,
+        petFundEligible,
+        legacy: spendable.legacyCreditBalance,
+        availableTotal: availablePawBucks,
+        totalAmountDollars,
+      });
 
       if (hasManualPawBucks) {
         // Manual PawBucks selection
@@ -383,45 +400,25 @@ serve(async (req) => {
 
       // Deduct PawBucks from user's wallet (and welcome credit if needed)
       if (pawbucksUsed > 0) {
-        const { data: currentWallet } = await supabaseAdmin
-          .from('pawbucks_wallet')
-          .select('balance')
-          .eq('user_id', user.id)
-          .single();
-        
-        const walletBalance = currentWallet?.balance || 0;
-        const walletDeduction = Math.min(walletBalance, pawbucksUsed);
-        const welcomeCreditDeduction = pawbucksUsed - walletDeduction;
+        // Use shared debit helper so wallet → pet fund (welcome credit) → legacy welcome credit
+        // are all spent in the canonical order.
+        const debitSources = await getSpendableSources(supabaseAdmin, user.id);
+        const debitPlan = planPawBucksDebit(debitSources, pawbucksUsed, totalAmountDollars);
+        await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan);
 
-        // Deduct from wallet
-        if (walletDeduction > 0 && walletBalance >= walletDeduction) {
-          await supabaseAdmin
-            .from('pawbucks_wallet')
-            .update({ balance: walletBalance - walletDeduction })
-            .eq('user_id', user.id);
-          
+        if (debitPlan.walletDeduction > 0) {
           await supabaseAdmin
             .from('pawbucks_activity')
             .insert({
               user_id: user.id,
               type: 'redeem',
-              amount: -walletDeduction,
+              amount: -debitPlan.walletDeduction,
               source: 'Purchase',
               partner_id: merchantId || null,
-              description: `Paid ${walletDeduction} PawBucks ($${(walletDeduction * 0.001).toFixed(2)}) at ${merchantName}`,
+              description: `Paid ${debitPlan.walletDeduction} PawBucks ($${(debitPlan.walletDeduction * 0.001).toFixed(2)}) at ${merchantName}`,
             });
         }
-
-        // Redeem welcome credit if needed
-        if (welcomeCreditDeduction > 0 && merchantId) {
-          const totalCents = Math.round(totalAmountDollars * 100);
-          await supabaseAdmin.rpc('redeem_welcome_credit', {
-            p_user_id: user.id,
-            p_merchant_id: merchantId,
-            p_transaction_total_cents: totalCents,
-          });
-          logStep('Welcome credit redeemed in checkout', { amount: welcomeCreditDeduction });
-        }
+        logStep('PawBucks debit plan applied (full PawBucks checkout)', debitPlan);
           
         // Credit merchant's PawBucks wallet
         if (merchantId) {
@@ -575,31 +572,34 @@ serve(async (req) => {
 
     // If using PawBucks, deduct now (we'll refund if checkout is abandoned)
     if (pawbucksUsed > 0) {
-      const { data: currentWallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (currentWallet && currentWallet.balance >= pawbucksUsed) {
-        await supabaseAdmin
-          .from('pawbucks_wallet')
-          .update({ balance: currentWallet.balance - pawbucksUsed })
-          .eq('user_id', user.id);
-        
-        await supabaseAdmin
-          .from('pawbucks_activity')
-          .insert({
-            user_id: user.id,
-            type: 'redeem',
-            amount: -pawbucksUsed,
-            source: 'Checkout',
-            partner_id: merchantId || null,
-            description: `PawBucks reserved for checkout at ${merchantName} (session: ${session.id})`,
-            pawbucks_status: 'pending', // Mark as pending until checkout completes
-          });
-        
-        logStep('PawBucks deducted for checkout', { pawbucksUsed, sessionId: session.id });
+      // Spend across wallet → pet fund (welcome credit) → legacy welcome credit so that
+      // split (card + PawBucks) checkouts can apply welcome credits too.
+      try {
+        const debitSources = await getSpendableSources(supabaseAdmin, user.id);
+        const debitPlan = planPawBucksDebit(debitSources, pawbucksUsed, totalAmountDollars);
+        await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan);
+
+        if (debitPlan.walletDeduction > 0) {
+          await supabaseAdmin
+            .from('pawbucks_activity')
+            .insert({
+              user_id: user.id,
+              type: 'redeem',
+              amount: -debitPlan.walletDeduction,
+              source: 'Checkout',
+              partner_id: merchantId || null,
+              description: `PawBucks reserved for checkout at ${merchantName} (session: ${session.id})`,
+              pawbucks_status: 'pending',
+            });
+        }
+
+        logStep('PawBucks debit plan applied (split checkout)', { sessionId: session.id, ...debitPlan });
+      } catch (e) {
+        logStep('Failed to apply PawBucks debit for split checkout', {
+          error: (e as Error).message,
+          pawbucksUsed,
+          sessionId: session.id,
+        });
       }
     }
 
