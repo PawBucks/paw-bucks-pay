@@ -650,7 +650,17 @@ const Storefront = memo(() => {
    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3">
     <div className="container mx-auto max-w-4xl flex gap-2.5">
      {merchantId && (
-      <AskQuestionButton merchantId={merchantId} merchantName={merchantName || "Store"} variant="cta" />
+      <Button
+       variant="outline"
+       size="lg"
+       className="flex-1"
+       onClick={() => {
+        const btn = document.getElementById("storefront-ask-question-btn");
+        btn?.click();
+       }}
+      >
+       <MessageCircle className="h-4 w-4 mr-2" /> Message
+      </Button>
      )}
      <Button onClick={() => setCartOpen(true)} className="flex-[2]" size="lg">
       <ShoppingCart className="h-4 w-4 mr-2" />
