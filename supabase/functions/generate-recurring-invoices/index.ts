@@ -1,9 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { addDays, addWeeks, addMonths, addYears, format } from "https://esm.sh/date-fns@3.6.0";
+import { checkInternalSecret } from "../_shared/internal-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -169,8 +170,12 @@ async function sendInvoiceEmail(invoice: any, merchant: any, items: any[]): Prom
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders }
+);
   }
+
+  const _authResp = checkInternalSecret(req, corsHeaders);
+  if (_authResp) return _authResp;
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
