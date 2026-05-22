@@ -23,7 +23,8 @@ import {
  TableHeader,
  TableRow,
 } from"@/components/ui/table";
-import { Bone, Coffee, Dog, Gem, Gift, Loader2, PawPrint, Pencil, Plus, Scissors, Stamp, Star, Stethoscope, Trophy, Users } from "lucide-react";
+import { Bone, Coffee, Dog, Gem, Gift, Loader2, Pencil, Plus, Scissors, Stamp, Star, Stethoscope, Trophy, Users } from "lucide-react";
+import { PawBucksIcon } from "@/components/PawBucksIcon";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -268,7 +269,7 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  };
 
  const iconOptions = [
-   { key: "star", Icon: Star }, { key: "paw", Icon: PawPrint }, { key: "gift", Icon: Gift },
+   { key: "star", Icon: Star }, { key: "paw", Icon: PawBucksIcon }, { key: "gift", Icon: Gift },
    { key: "coffee", Icon: Coffee }, { key: "scissors", Icon: Scissors }, { key: "stethoscope", Icon: Stethoscope },
    { key: "bone", Icon: Bone }, { key: "dog", Icon: Dog }, { key: "trophy", Icon: Trophy }, { key: "gem", Icon: Gem },
  ];

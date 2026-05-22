@@ -13,7 +13,8 @@ import { Textarea } from"@/components/ui/textarea";
 import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
-import { AlertCircle, Bone, Brain, Building2, Camera, Car, Dog, Hand, Heart, Home, Info, Loader2, Mountain, PawPrint, Scissors, Shield, ShoppingBag, Stethoscope, Store, Sun, Trash2, Truck, Users, Zap, Sparkles } from "lucide-react";
+import { AlertCircle, Bone, Brain, Building2, Camera, Car, Dog, Hand, Heart, Home, Info, Loader2, Mountain, Scissors, Shield, ShoppingBag, Stethoscope, Store, Sun, Trash2, Truck, Users, Zap, Sparkles } from "lucide-react";
+import { PawBucksIcon } from "@/components/PawBucksIcon";
 
 import { merchantOnboardingSchema, PET_BUSINESS_TYPES, ENTITY_TYPES, WORKING_STYLES } from"@/lib/validation";
 import { MerchantTermsOfService } from"@/components/shared/MerchantTermsOfService";
@@ -40,7 +41,7 @@ const BUSINESS_TYPE_CONFIG: Record<string, { icon: React.ElementType; label: str
  masseuse: { icon: Hand, label:"Pet Masseuse", description:"Massage and wellness therapies" },
  behaviorist: { icon: Brain, label:"Behaviorist", description:"Advanced behavior consultation" },
  pet_waste_removal: { icon: Trash2, label:"Pet Waste Removal", description:"Yard cleanup and waste pickup services" },
- other: { icon: PawPrint, label:"Other", description:"Other pet-related business" },
+ other: { icon: PawBucksIcon, label:"Other", description:"Other pet-related business" },
 };
 
 // Entity type configuration

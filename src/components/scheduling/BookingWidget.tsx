@@ -20,7 +20,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, addDays, isAfter, startOfDay } from "date-fns";
-import { AlertCircle, ArrowRight, Ban, Calendar as CalendarIcon, CheckCircle2, Clock, CreditCard, Loader2, MapPin, PawPrint, Timer, Users, Zap } from "lucide-react";
+import { AlertCircle, ArrowRight, Ban, Calendar as CalendarIcon, CheckCircle2, Clock, CreditCard, Loader2, MapPin, Timer, Users, Zap } from "lucide-react";
+import { PawBucksIcon } from "@/components/PawBucksIcon";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { Formatters } from "@/utils/formatters";
@@ -1026,7 +1027,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
                 </>
               ) : (
                 <>
-                  <PawPrint className="w-4 h-4 mr-2" />
+                  <PawBucksIcon className="w-4 h-4 mr-2" />
                   Book & Earn PawBucks
                 </>
               )}
