@@ -760,7 +760,11 @@ serve(async (req) => {
             try {
               const debitSources = await getSpendableSources(supabaseAdmin, userId);
               const debitPlan = planPawBucksDebit(debitSources, pawbucksAmount, totalAmount > 0 ? totalAmount : amountInDollars);
-              await applyPawBucksDebit(supabaseAdmin, userId, debitPlan);
+              await applyPawBucksDebit(supabaseAdmin, userId, debitPlan, {
+                merchantId,
+                transactionId: transaction.id,
+                transactionTotalCents: Math.round((totalAmount > 0 ? totalAmount : amountInDollars) * 100),
+              });
 
               if (debitPlan.walletDeduction > 0) {
                 await supabaseAdmin.from("pawbucks_activity").insert({
