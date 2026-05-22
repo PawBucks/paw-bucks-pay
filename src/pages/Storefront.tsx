@@ -7,7 +7,7 @@ import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
 import { ArrowLeft, Check, Clock, CreditCard, MapPin, MessageCircle, Package, Plus, RefreshCw, Shield, ShoppingCart, Star, Store, BadgeCheck, Mountain } from "lucide-react";
 import { PawBucksIcon } from "@/components/PawBucksIcon";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+
 import { SEO } from"@/components/SEO";
 import { useAuth } from"@/hooks/useAuth";
 import { Skeleton } from"@/components/ui/skeleton";
@@ -617,7 +617,7 @@ const Storefront = memo(() => {
   <div className="flex flex-col items-center gap-2 text-center">
   <p className="font-semibold text-foreground">{merchantName}</p>
   <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-  <Sparkles className="h-3.5 w-3.5 text-primary" /> Powered by PawBucks Marketplace
+  <PawBucksIcon className="h-3.5 w-3.5" /> Powered by PawBucks Marketplace
   </p>
   </div>
 
