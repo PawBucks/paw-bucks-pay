@@ -214,7 +214,11 @@ serve(async (req) => {
       // Plan + apply debit across wallet → Pet Fund → legacy welcome credit
       const sources = await getSpendableSources(supabaseAdmin, userId);
       const plan = planPawBucksDebit(sources, pawbucksUsedInSplit, amountInDollars);
-      await applyPawBucksDebit(supabaseAdmin, userId, plan);
+      await applyPawBucksDebit(supabaseAdmin, userId, plan, {
+        merchantId: item?.merchant_id || null,
+        transactionId: transaction.id,
+        transactionTotalCents: Math.round(amountInDollars * 100),
+      });
       logStep("Split PawBucks debit applied", plan);
 
       await supabaseAdmin.from('pawbucks_activity').insert({
