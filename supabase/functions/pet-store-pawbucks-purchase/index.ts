@@ -139,7 +139,10 @@ serve(async (req) => {
     }
 
     // Apply the debit across all sources
-    await applyPawBucksDebit(supabaseAdmin, effectiveUserId, debitPlan);
+    await applyPawBucksDebit(supabaseAdmin, effectiveUserId, debitPlan, {
+      merchantId: validatedItems[0]?.dbItem?.merchant_id || null,
+      transactionTotalCents: Math.round(totalUsdEquivalent * 100),
+    });
 
     // Get user profile for notifications
     const { data: userProfile } = await supabaseAdmin

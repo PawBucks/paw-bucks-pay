@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -580,9 +585,8 @@ serve(async (req) => {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
                 'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
-              }`,
               },
               body: JSON.stringify({
                 transaction_id: transaction.id,
@@ -596,9 +600,8 @@ serve(async (req) => {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
                 'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
-              }`,
               },
               body: JSON.stringify({
                 transaction_id: transaction.id,
@@ -655,8 +658,11 @@ serve(async (req) => {
         const businessName = metadata.business_name || "Merchant";
         const description = metadata.description || `Payment to ${businessName}`;
         const chargeType = metadata.charge_type || "direct";
-        const pawbucksAmount = parseInt(metadata.pawbucks_amount || "0", 10);
-        const totalAmount = parseFloat(metadata.total_amount || "0");
+        const pawbucksAmount = parseInt(metadata.pawbucks_amount || metadata.pawbucks_used || "0", 10);
+        const totalAmount = parseFloat(
+          metadata.total_amount ||
+            (metadata.original_amount_cents ? (parseInt(metadata.original_amount_cents, 10) / 100).toFixed(2) : "0")
+        );
 
         // Update direct_payments status
         const { error: updateError } = await supabaseAdmin
@@ -744,6 +750,44 @@ serve(async (req) => {
             logStep("Error creating transaction", { error: txError.message });
           } else {
             logStep("Transaction created", { transactionId: transaction?.id, pawbucksEarned });
+          }
+
+          // Debit storefront PawBucks only after Stripe has confirmed payment.
+          // Never reserve/debit during Checkout Session creation: abandoned sessions must not consume PB.
+          if (pawbucksAmount > 0 && transaction?.id) {
+            try {
+              const debitSources = await getSpendableSources(supabaseAdmin, userId);
+              const debitPlan = planPawBucksDebit(debitSources, pawbucksAmount, totalAmount > 0 ? totalAmount : amountInDollars);
+              await applyPawBucksDebit(supabaseAdmin, userId, debitPlan, {
+                merchantId,
+                transactionId: transaction.id,
+                transactionTotalCents: Math.round((totalAmount > 0 ? totalAmount : amountInDollars) * 100),
+              });
+
+              if (debitPlan.walletDeduction > 0) {
+                await supabaseAdmin.from("pawbucks_activity").insert({
+                  user_id: userId,
+                  amount: debitPlan.walletDeduction,
+                  type: "redeem",
+                  source: "merchant_payment",
+                  description: `Payment to ${businessName}`,
+                  partner_id: merchantId,
+                  transaction_id: transaction.id,
+                });
+              }
+
+              logStep("PawBucks debited after Stripe confirmation", {
+                transactionId: transaction.id,
+                pawbucksAmount,
+                ...debitPlan,
+              });
+            } catch (debitError) {
+              logStep("ERROR: PawBucks debit failed after Stripe confirmation", {
+                transactionId: transaction.id,
+                pawbucksAmount,
+                error: (debitError as Error).message,
+              });
+            }
           }
 
           // Award PawBucks to user
@@ -1013,9 +1057,8 @@ serve(async (req) => {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
                 'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
-              }`,
               },
               body: JSON.stringify({
                 transaction_id: transaction.id,
@@ -1029,9 +1072,8 @@ serve(async (req) => {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
                 'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
-              }`,
               },
               body: JSON.stringify({
                 transaction_id: transaction.id,
@@ -1105,9 +1147,8 @@ serve(async (req) => {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
-                  "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+                  "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
                   'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
-                }`,
                 },
                 body: JSON.stringify({
                   userId,

@@ -433,7 +433,10 @@ serve(async (req) => {
         // are all spent in the canonical order.
         const debitSources = await getSpendableSources(supabaseAdmin, user.id);
         const debitPlan = planPawBucksDebit(debitSources, pawbucksUsed, totalAmountDollars);
-        await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan);
+        await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan, {
+          merchantId,
+          transactionTotalCents: totalAmountCents,
+        });
 
         if (debitPlan.walletDeduction > 0) {
           await supabaseAdmin
@@ -441,7 +444,7 @@ serve(async (req) => {
             .insert({
               user_id: user.id,
               type: 'redeem',
-              amount: -debitPlan.walletDeduction,
+              amount: debitPlan.walletDeduction,
               source: 'Purchase',
               partner_id: merchantId || null,
               description: `Paid ${debitPlan.walletDeduction} PawBucks ($${(debitPlan.walletDeduction * 0.001).toFixed(2)}) at ${merchantName}`,
@@ -540,12 +543,16 @@ serve(async (req) => {
       platform_fee_percentage: (PLATFORM_FEE_PERCENTAGE * 100).toString(),
       user_id: user.id,
       merchant_id: merchantId || '',
+      business_name: merchantName,
       source: 'merchant_storefront',
       product_name: itemNames || productName || merchantName,
       description: `Purchase from ${merchantName}`,
       original_amount_cents: totalAmountCents.toString(),
+      total_amount: totalAmountDollars.toFixed(2),
+      pawbucks_amount: pawbucksUsed.toString(),
       pawbucks_used: pawbucksUsed.toString(),
       pawbucks_usd_value: pawbucksUsdValue.toFixed(2),
+      debit_timing: 'post_payment',
       charge_type: 'direct',
       item_count: lineItemsToProcess.length.toString(),
     };
@@ -604,38 +611,9 @@ serve(async (req) => {
 
     logStep('Direct Charge checkout session created', { sessionId: session.id, connectedAccount: accountId });
 
-    // If using PawBucks, deduct now (we'll refund if checkout is abandoned)
-    if (pawbucksUsed > 0) {
-      // Spend across wallet → pet fund (welcome credit) → legacy welcome credit so that
-      // split (card + PawBucks) checkouts can apply welcome credits too.
-      try {
-        const debitSources = await getSpendableSources(supabaseAdmin, user.id);
-        const debitPlan = planPawBucksDebit(debitSources, pawbucksUsed, totalAmountDollars);
-        await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan);
-
-        if (debitPlan.walletDeduction > 0) {
-          await supabaseAdmin
-            .from('pawbucks_activity')
-            .insert({
-              user_id: user.id,
-              type: 'redeem',
-              amount: -debitPlan.walletDeduction,
-              source: 'Checkout',
-              partner_id: merchantId || null,
-              description: `PawBucks reserved for checkout at ${merchantName} (session: ${session.id})`,
-              pawbucks_status: 'pending',
-            });
-        }
-
-        logStep('PawBucks debit plan applied (split checkout)', { sessionId: session.id, ...debitPlan });
-      } catch (e) {
-        logStep('Failed to apply PawBucks debit for split checkout', {
-          error: (e as Error).message,
-          pawbucksUsed,
-          sessionId: session.id,
-        });
-      }
-    }
+    // PawBucks are intentionally NOT debited here. For card + PawBucks storefront
+    // checkouts, the debit happens only after Stripe confirms payment in connect-webhook.
+    // This prevents abandoned or failed Stripe sessions from consuming a shopper's balance.
 
     return new Response(
       JSON.stringify({
