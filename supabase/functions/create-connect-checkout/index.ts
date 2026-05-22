@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -211,13 +216,25 @@ serve(async (req) => {
     const hasManualPawBucks = typeof manualPawbucksToUse === 'number' && manualPawbucksToUse > 0;
     
     if (merchantAcceptsPawBucks) {
-      const { data: pawbucksWallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single();
+      // Pull the full spendable picture: wallet + pet fund (welcome credit) + legacy welcome credit.
+      const spendable = await getSpendableSources(supabaseAdmin, user.id);
+      const petFundEligible =
+        spendable.petFundAvailable > 0 &&
+        (!spendable.petFundMinUsd || totalAmountDollars >= spendable.petFundMinUsd);
+      const availablePawBucks =
+        spendable.walletBalance +
+        (petFundEligible ? spendable.petFundAvailable : 0) +
+        spendable.legacyCreditBalance;
 
-      const availablePawBucks = pawbucksWallet?.balance || 0;
+      logStep('Spendable PawBucks sources', {
+        wallet: spendable.walletBalance,
+        petFundAvailable: spendable.petFundAvailable,
+        petFundMinUsd: spendable.petFundMinUsd,
+        petFundEligible,
+        legacy: spendable.legacyCreditBalance,
+        availableTotal: availablePawBucks,
+        totalAmountDollars,
+      });
 
       if (hasManualPawBucks) {
         // Manual PawBucks selection
