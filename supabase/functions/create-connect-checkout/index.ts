@@ -572,31 +572,34 @@ serve(async (req) => {
 
     // If using PawBucks, deduct now (we'll refund if checkout is abandoned)
     if (pawbucksUsed > 0) {
-      const { data: currentWallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (currentWallet && currentWallet.balance >= pawbucksUsed) {
-        await supabaseAdmin
-          .from('pawbucks_wallet')
-          .update({ balance: currentWallet.balance - pawbucksUsed })
-          .eq('user_id', user.id);
-        
-        await supabaseAdmin
-          .from('pawbucks_activity')
-          .insert({
-            user_id: user.id,
-            type: 'redeem',
-            amount: -pawbucksUsed,
-            source: 'Checkout',
-            partner_id: merchantId || null,
-            description: `PawBucks reserved for checkout at ${merchantName} (session: ${session.id})`,
-            pawbucks_status: 'pending', // Mark as pending until checkout completes
-          });
-        
-        logStep('PawBucks deducted for checkout', { pawbucksUsed, sessionId: session.id });
+      // Spend across wallet → pet fund (welcome credit) → legacy welcome credit so that
+      // split (card + PawBucks) checkouts can apply welcome credits too.
+      try {
+        const debitSources = await getSpendableSources(supabaseAdmin, user.id);
+        const debitPlan = planPawBucksDebit(debitSources, pawbucksUsed, totalAmountDollars);
+        await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan);
+
+        if (debitPlan.walletDeduction > 0) {
+          await supabaseAdmin
+            .from('pawbucks_activity')
+            .insert({
+              user_id: user.id,
+              type: 'redeem',
+              amount: -debitPlan.walletDeduction,
+              source: 'Checkout',
+              partner_id: merchantId || null,
+              description: `PawBucks reserved for checkout at ${merchantName} (session: ${session.id})`,
+              pawbucks_status: 'pending',
+            });
+        }
+
+        logStep('PawBucks debit plan applied (split checkout)', { sessionId: session.id, ...debitPlan });
+      } catch (e) {
+        logStep('Failed to apply PawBucks debit for split checkout', {
+          error: (e as Error).message,
+          pawbucksUsed,
+          sessionId: session.id,
+        });
       }
     }
 
