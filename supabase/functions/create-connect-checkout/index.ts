@@ -433,7 +433,10 @@ serve(async (req) => {
         // are all spent in the canonical order.
         const debitSources = await getSpendableSources(supabaseAdmin, user.id);
         const debitPlan = planPawBucksDebit(debitSources, pawbucksUsed, totalAmountDollars);
-        await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan);
+        await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan, {
+          merchantId,
+          transactionTotalCents: totalAmountCents,
+        });
 
         if (debitPlan.walletDeduction > 0) {
           await supabaseAdmin
