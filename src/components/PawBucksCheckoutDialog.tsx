@@ -26,6 +26,7 @@ import { PawBucksCapBreakdown } from"@/components/checkout/PawBucksCapBreakdown"
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { useUserEarnRate } from "@/hooks/useUserEarnRate";
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum Stripe charge for subscriptions
@@ -67,6 +68,10 @@ export const PawBucksCheckoutDialog = ({
  const [pawbucksToUse, setPawbucksToUse] = useState(0);
  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
  const [autoSelected, setAutoSelected] = useState(false);
+
+  // Display the user's tier earn rate (matches what backend will credit).
+  const { rate: userEarnRate, tierLabel: userTierLabel } = useUserEarnRate();
+  const effectiveEarnRate = Math.max(userEarnRate, cashbackRate || 0);
 
  // Use the spendable PawBucks hook to get available balance + welcome credit
  const { 
