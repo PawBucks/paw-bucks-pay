@@ -265,6 +265,14 @@ export const PaymentDialogWithPawBucks = ({
  const [paymentData, setPaymentData] = useState<any>(null);
  const [redemptionError, setRedemptionError] = useState<{ title: string; message: string } | null>(null);
 
+  // The backend credits PawBucks based on the USER's subscription tier
+  // (Free 10x / PawPass 20x / PawPass+ 30x), NOT the merchant's cashback_rate.
+  // Use the user's tier rate for all earn-rate displays so the preview matches
+  // what will actually be credited. Fall back to the merchant rate only if it
+  // is somehow higher (defensive — should never happen in current logic).
+  const { rate: userEarnRate, tierLabel: userTierLabel } = useUserEarnRate();
+  const effectiveEarnRate = Math.max(userEarnRate, cashbackRate || 0);
+
  // Use the spendable PawBucks hook which includes Pet Fund
  const {
  spendableBalance,
