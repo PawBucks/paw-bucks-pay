@@ -1170,15 +1170,41 @@ serve(async (req) => {
 
       case "payment_intent.payment_failed": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        logStep("Payment failed", { 
+        const errorMessage =
+          paymentIntent.last_payment_error?.message ||
+          paymentIntent.last_payment_error?.code ||
+          "Card was declined. Please try a different payment method.";
+
+        logStep("Payment failed", {
           paymentIntentId: paymentIntent.id,
-          error: paymentIntent.last_payment_error?.message 
+          error: errorMessage,
         });
 
-        await supabaseAdmin
+        // Persist the failure reason so the /pay UI (which polls direct_payments)
+        // and the merchant dashboard can show the user why the card was declined.
+        const { data: failedRow } = await supabaseAdmin
           .from("direct_payments")
-          .update({ status: "failed" })
-          .eq("stripe_payment_intent_id", paymentIntent.id);
+          .update({ status: "failed", last_error: errorMessage })
+          .eq("stripe_payment_intent_id", paymentIntent.id)
+          .select("user_id, merchant_id")
+          .maybeSingle();
+
+        // Best-effort user notification — never throw if this fails.
+        const failedUserId = failedRow?.user_id || paymentIntent.metadata?.user_id;
+        if (failedUserId) {
+          try {
+            await supabaseAdmin.from("notifications").insert({
+              user_id: failedUserId,
+              title: "Payment didn't go through",
+              message: `${errorMessage} No PawBucks were used and your card was not charged.`,
+              category: "general",
+            });
+          } catch (notifyErr) {
+            logStep("Failed to insert payment_failed notification", {
+              error: (notifyErr as Error).message,
+            });
+          }
+        }
 
         break;
       }

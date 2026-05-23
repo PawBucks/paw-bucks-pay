@@ -2358,6 +2358,7 @@ export type Database = {
           currency: string
           description: string | null
           id: string
+          last_error: string | null
           merchant_id: string | null
           metadata: Json | null
           pawbucks_earned: number | null
@@ -2374,6 +2375,7 @@ export type Database = {
           currency?: string
           description?: string | null
           id?: string
+          last_error?: string | null
           merchant_id?: string | null
           metadata?: Json | null
           pawbucks_earned?: number | null
@@ -2390,6 +2392,7 @@ export type Database = {
           currency?: string
           description?: string | null
           id?: string
+          last_error?: string | null
           merchant_id?: string | null
           metadata?: Json | null
           pawbucks_earned?: number | null
