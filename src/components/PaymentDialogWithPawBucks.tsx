@@ -35,6 +35,44 @@ import { PawBucksCapBreakdown } from"@/components/checkout/PawBucksCapBreakdown"
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useUserEarnRate } from "@/hooks/useUserEarnRate";
+
+/**
+ * Poll the `direct_payments` row (written by `create-combined-payment` and
+ * updated by the `connect-webhook` Stripe webhook) for the authoritative
+ * payment outcome. We trust this row over the synchronous confirm because the
+ * webhook fires even when the user closes the tab or our edge function
+ * timed out, and it only writes `status = succeeded` AFTER PawBucks have
+ * been credited.
+ *
+ * Returns within ~20s. Resolves to `{status:'pending'}` if Stripe accepted
+ * the charge but the webhook hasn't caught up yet (rare); callers should
+ * treat that as soft success — credits will arrive once the webhook lands.
+ */
+async function pollDirectPaymentStatus(paymentIntentId: string): Promise<{
+  status: 'succeeded' | 'failed' | 'pending';
+  pawbucksEarned?: number;
+  lastError?: string;
+}> {
+  const deadline = Date.now() + 20_000;
+  let delay = 600;
+  while (Date.now() < deadline) {
+    const { data } = await supabase
+      .from('direct_payments')
+      .select('status, pawbucks_earned, last_error')
+      .eq('stripe_payment_intent_id', paymentIntentId)
+      .maybeSingle();
+    if (data?.status === 'succeeded') {
+      return { status: 'succeeded', pawbucksEarned: data.pawbucks_earned ?? undefined };
+    }
+    if (data?.status === 'failed') {
+      return { status: 'failed', lastError: data.last_error ?? undefined };
+    }
+    await new Promise((r) => setTimeout(r, delay));
+    delay = Math.min(delay + 400, 2_000);
+  }
+  return { status: 'pending' };
+}
+
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum transaction for Pet Fund credits (dynamic, but defaults)
