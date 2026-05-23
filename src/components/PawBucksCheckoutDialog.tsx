@@ -162,7 +162,7 @@ export const PawBucksCheckoutDialog = ({
  }, [open, loadingBalance, maxPawBucks, pawbucksSource]);
  
  const stripeAmount = Math.max(minStripeForSubscription, priceAmount - pawbucksUsdValue);
- const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
+ const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * effectiveEarnRate) : 0;
 
  const handleProceed = () => {
  onProceed(pawbucksToUse);
@@ -424,7 +424,7 @@ export const PawBucksCheckoutDialog = ({
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground flex items-center gap-1">
  <Sparkles className="w-3 h-3 text-warning" />
- Cashback ({cashbackRate}x):
+ Cashback ({effectiveEarnRate}x){userTierLabel !== "Free" ? ` · ${userTierLabel}` : ""}:
  </span>
  <span className="font-bold text-warning">
  +{cashbackPawBucks.toLocaleString()} PawBucks
