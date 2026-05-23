@@ -68,7 +68,7 @@ const PaymentForm = ({
  }
 
  const paymentAmount = parseFloat(amount);
- const cashbackPawBucks = Math.round(paymentAmount * cashbackRate);
+  const cashbackPawBucks = Math.round(paymentAmount * cashbackRate);
  const rewardsEarned = cashbackPawBucks;
 
  toast.success(
