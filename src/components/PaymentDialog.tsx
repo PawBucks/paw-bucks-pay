@@ -18,6 +18,7 @@ import { TipSelector } from"@/components/checkout/TipSelector";
 import { buildAppUrl } from"@/lib/url";
 
 import { Formatters } from "@/utils/formatters";
+import { useUserEarnRate } from "@/hooks/useUserEarnRate";
 type PaymentFormProps = {
  merchantId: string;
  merchantName: string;
@@ -169,6 +170,10 @@ export const PaymentDialog = ({
  const [isCreatingIntent, setIsCreatingIntent] = useState(false);
  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
+  // Backend credits PawBucks by USER tier (10/20/30x), not merchant rate.
+  const { rate: userEarnRate, tierLabel: userTierLabel } = useUserEarnRate();
+  const effectiveEarnRate = Math.max(userEarnRate, cashbackRate || 0);
+
  const handleAmountSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
  setIsCreatingIntent(true);
@@ -246,7 +251,7 @@ export const PaymentDialog = ({
  };
 
  const cashbackPreview = amount && !isNaN(parseFloat(amount))
- ? Math.round(parseFloat(amount) * cashbackRate)
+    ? Math.round(parseFloat(amount) * effectiveEarnRate)
  : 0;
 
  return (
@@ -255,7 +260,10 @@ export const PaymentDialog = ({
  <DialogHeader>
  <DialogTitle>Pay {merchantName}</DialogTitle>
  <DialogDescription>
- Earn {cashbackRate}x points on your purchase
+        Earn {effectiveEarnRate}x points on your purchase
+        {userTierLabel !== "Free" && (
+          <span className="ml-1 opacity-80">({userTierLabel} bonus)</span>
+        )}
  </DialogDescription>
  </DialogHeader>
  
@@ -311,7 +319,7 @@ export const PaymentDialog = ({
  </div>
  )}
  <div className="flex justify-between text-sm">
- <span className="text-muted-foreground">Points Earned ({cashbackRate}x):</span>
+    <span className="text-muted-foreground">Points Earned ({effectiveEarnRate}x):</span>
  <span className="font-bold text-accent">+{cashbackPreview} PawBucks</span>
  </div>
  </div>
@@ -348,7 +356,7 @@ export const PaymentDialog = ({
  <PaymentForm
  merchantId={merchantId}
  merchantName={merchantName}
- cashbackRate={cashbackRate}
+  cashbackRate={effectiveEarnRate}
  userId={userId}
  amount={amount}
  description={description}
