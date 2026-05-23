@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, MapPin, Phone, Mail } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
 import { useAuth } from "@/hooks/useAuth";
 import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
-import { PawBucksLogo } from "@/components/PawBucksLogo";
 
 interface Merchant {
   id: string;
@@ -29,11 +28,23 @@ interface Merchant {
 export default function DirectCheckout() {
   const { merchantId } = useParams<{ merchantId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const [merchant, setMerchant] = useState<Merchant | null>(null);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // Amount/tip can be prefilled from SimplePay (`/pay?...`) so the user
+  // doesn't have to retype it on this page.
+  const prefilledAmount = (() => {
+    const v = parseFloat(searchParams.get("amount") || "");
+    return Number.isFinite(v) && v > 0 ? v : undefined;
+  })();
+  const prefilledTip = (() => {
+    const v = parseFloat(searchParams.get("tip") || "");
+    return Number.isFinite(v) && v > 0 ? v : undefined;
+  })();
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -151,53 +162,23 @@ export default function DirectCheckout() {
         noIndex
       />
 
-      <Card className="w-full max-w-md">
-        <CardContent className="pt-6 text-center space-y-4">
-          {merchant.logo_url && (
-            <img
-              src={merchant.logo_url}
-              alt={merchant.business_name}
-              className="h-20 w-20 object-cover rounded-full mx-auto"
-            />
-          )}
-          <div>
-            <h1 className="text-2xl font-bold">{merchant.business_name}</h1>
-            {merchant.description && (
-              <p className="text-sm text-muted-foreground mt-1">{merchant.description}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5 text-sm text-muted-foreground text-left">
-            {merchant.address && (
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                <span className="break-words">{merchant.address}</span>
-              </div>
-            )}
-            {merchant.phone && (
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0" />
-                <a href={`tel:${merchant.phone}`} className="hover:text-foreground break-all">
-                  {merchant.phone}
-                </a>
-              </div>
-            )}
-            {merchant.email && (
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0" />
-                <a href={`mailto:${merchant.email}`} className="hover:text-foreground break-all">
-                  {merchant.email}
-                </a>
-              </div>
-            )}
-          </div>
-
-          <Button className="w-full" size="lg" onClick={() => setDialogOpen(true)}>
-            <PawBucksLogo className="w-4 h-4 mr-2" />
-            Pay & Earn PawBucks
-          </Button>
-        </CardContent>
-      </Card>
+      {/*
+        The PaymentDialogWithPawBucks already renders a branded header with
+        logo / phone / address. Showing a duplicate merchant card behind the
+        dialog created the impression of two checkout pages. We render only a
+        light backdrop here and let the dialog handle the entire flow.
+      */}
+      {!dialogOpen && (
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center space-y-3">
+            <h1 className="text-xl font-semibold">{merchant.business_name}</h1>
+            <p className="text-sm text-muted-foreground">Opening secure checkout…</p>
+            <Button className="w-full" onClick={() => setDialogOpen(true)}>
+              Open Checkout
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {user && (
         <PaymentDialogWithPawBucks
@@ -208,6 +189,8 @@ export default function DirectCheckout() {
           cashbackRate={merchant.cashback_rate}
           acceptsPawbucks={merchant.accepts_pawbucks}
           userId={user.id}
+          initialAmount={prefilledAmount}
+          initialTip={prefilledTip}
           onSuccess={() => {
             setDialogOpen(false);
             setSuccess(true);

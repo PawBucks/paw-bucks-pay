@@ -240,6 +240,10 @@ type PaymentDialogWithPawBucksProps = {
  acceptsPawbucks: boolean;
  userId: string;
  onSuccess: () => void;
+ /** Optional prefilled bill amount (USD). When set, the user does not need to retype it. */
+ initialAmount?: number;
+ /** Optional prefilled tip (USD). */
+ initialTip?: number;
 };
 
 export const PaymentDialogWithPawBucks = ({
@@ -251,10 +255,14 @@ export const PaymentDialogWithPawBucks = ({
  acceptsPawbucks,
  userId,
  onSuccess,
+ initialAmount,
+ initialTip,
 }: PaymentDialogWithPawBucksProps) => {
- const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(
+    initialAmount && initialAmount > 0 ? initialAmount.toFixed(2) : ""
+  );
  const [description, setDescription] = useState("");
- const [tipAmount, setTipAmount] = useState(0);
+  const [tipAmount, setTipAmount] = useState(initialTip && initialTip > 0 ? initialTip : 0);
  const [pawbucksToUse, setPawbucksToUse] = useState(0);
  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
  const [autoSelected, setAutoSelected] = useState(false);
@@ -264,6 +272,18 @@ export const PaymentDialogWithPawBucks = ({
  const [showPaymentForm, setShowPaymentForm] = useState(false);
  const [paymentData, setPaymentData] = useState<any>(null);
  const [redemptionError, setRedemptionError] = useState<{ title: string; message: string } | null>(null);
+
+  // Keep prefilled values in sync if the dialog is reopened with new params.
+  useEffect(() => {
+    if (!open) return;
+    if (initialAmount && initialAmount > 0) {
+      setAmount(initialAmount.toFixed(2));
+    }
+    if (initialTip && initialTip > 0) {
+      setTipAmount(initialTip);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initialAmount, initialTip]);
 
   // The backend credits PawBucks based on the USER's subscription tier
   // (Free 10x / PawPass 20x / PawPass+ 30x), NOT the merchant's cashback_rate.
