@@ -86,13 +86,29 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  try {
  const { data, error: fetchError } = await supabase
  .from("merchant_subscriptions")
- .select("*, profiles!merchant_subscriptions_user_id_fkey(full_name, email)")
+  .select("*")
  .eq("merchant_id", merchantId)
  .in("status", ["active","past_due"])
  .order("created_at", { ascending: false });
 
  if (fetchError) throw fetchError;
- setSubscribers((data as Subscriber[]) || []);
+  const rows = (data || []) as any[];
+  const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter(Boolean)));
+  const profileById = new Map<string, { full_name: string; email: string }>();
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase.rpc(
+      "get_customer_profiles_for_merchant",
+      { p_user_ids: userIds }
+    );
+    (profiles || []).forEach((p: any) => {
+      if (p?.id) profileById.set(p.id, { full_name: p.full_name || "", email: p.email || "" });
+    });
+  }
+  const enriched: Subscriber[] = rows.map((r) => ({
+    ...r,
+    profiles: profileById.get(r.user_id) || null,
+  })) as Subscriber[];
+  setSubscribers(enriched);
  } catch (err: any) {
  console.error("Error fetching subscribers:", err);
  setError(err.message ||"Failed to load subscribers");
