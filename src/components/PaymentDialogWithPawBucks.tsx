@@ -34,6 +34,7 @@ import { PawBucksCapBreakdown } from"@/components/checkout/PawBucksCapBreakdown"
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { useUserEarnRate } from "@/hooks/useUserEarnRate";
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum transaction for Pet Fund credits (dynamic, but defaults)
@@ -263,6 +264,14 @@ export const PaymentDialogWithPawBucks = ({
  const [showPaymentForm, setShowPaymentForm] = useState(false);
  const [paymentData, setPaymentData] = useState<any>(null);
  const [redemptionError, setRedemptionError] = useState<{ title: string; message: string } | null>(null);
+
+  // The backend credits PawBucks based on the USER's subscription tier
+  // (Free 10x / PawPass 20x / PawPass+ 30x), NOT the merchant's cashback_rate.
+  // Use the user's tier rate for all earn-rate displays so the preview matches
+  // what will actually be credited. Fall back to the merchant rate only if it
+  // is somehow higher (defensive — should never happen in current logic).
+  const { rate: userEarnRate, tierLabel: userTierLabel } = useUserEarnRate();
+  const effectiveEarnRate = Math.max(userEarnRate, cashbackRate || 0);
 
  // Use the spendable PawBucks hook which includes Pet Fund
  const {
@@ -576,7 +585,7 @@ export const PaymentDialogWithPawBucks = ({
  };
 
  // Points earned as PawBucks (10x of dollar amount = that many PawBucks)
- const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
+  const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * effectiveEarnRate) : 0;
 
   // Merchant initial for logo fallback
   const merchantInitial = (merchantInfo?.business_name || merchantName || "?")
@@ -618,7 +627,12 @@ export const PaymentDialogWithPawBucks = ({
         )}
         <div className="flex items-center gap-1.5 text-primary/80 mt-0.5">
           <BadgeCheck className="w-3 h-3" />
-          <span>Earn {cashbackRate}x PawBucks on card payments</span>
+          <span>
+            Earn {effectiveEarnRate}x PawBucks on card payments
+            {userTierLabel !== "Free" && (
+              <span className="ml-1 opacity-80">({userTierLabel} bonus)</span>
+            )}
+          </span>
         </div>
       </div>
     </div>
@@ -643,7 +657,7 @@ export const PaymentDialogWithPawBucks = ({
   <DialogHeader className="sr-only">
   <DialogTitle>Pay {merchantInfo?.business_name || merchantName}</DialogTitle>
   <DialogDescription>
-  Secure checkout. Earn {cashbackRate}x PawBucks on card payments.
+        Secure checkout. Earn {effectiveEarnRate}x PawBucks on card payments.
   </DialogDescription>
   </DialogHeader>
   {CheckoutHeader}
@@ -866,7 +880,7 @@ export const PaymentDialogWithPawBucks = ({
   </div>
   <div className="flex justify-between items-center px-4 py-2.5 bg-primary/5 border-t border-primary/15">
     <span className="text-xs font-medium text-primary flex items-center gap-1.5">
-      <PawBucksLogo className="w-3.5 h-3.5" /> PawBucks Earned ({cashbackRate}x)
+      <PawBucksLogo className="w-3.5 h-3.5" /> PawBucks Earned ({effectiveEarnRate}x)
     </span>
     <span className="bg-primary text-primary-foreground text-[11px] font-bold px-2.5 py-0.5 rounded-full">
       +{cashbackPawBucks} PB
@@ -940,7 +954,7 @@ export const PaymentDialogWithPawBucks = ({
   <div className="bg-card rounded-2xl shadow-sm p-4">
  <StripePaymentForm
  merchantName={merchantName}
- cashbackRate={paymentData?.cashbackRate || cashbackRate}
+  cashbackRate={paymentData?.cashbackRate || effectiveEarnRate}
  stripeAmount={paymentData?.stripeAmount || stripeAmount}
  pawbucksAmount={paymentData?.pawbucksAmount || pawbucksToUse}
  totalAmount={totalAmount}

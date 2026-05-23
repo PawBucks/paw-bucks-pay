@@ -26,6 +26,7 @@ import { PawBucksCapBreakdown } from"@/components/checkout/PawBucksCapBreakdown"
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { useUserEarnRate } from "@/hooks/useUserEarnRate";
 // Pet Owner conversion rate: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
 // Minimum Stripe charge for subscriptions
@@ -67,6 +68,10 @@ export const PawBucksCheckoutDialog = ({
  const [pawbucksToUse, setPawbucksToUse] = useState(0);
  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
  const [autoSelected, setAutoSelected] = useState(false);
+
+  // Display the user's tier earn rate (matches what backend will credit).
+  const { rate: userEarnRate, tierLabel: userTierLabel } = useUserEarnRate();
+  const effectiveEarnRate = Math.max(userEarnRate, cashbackRate || 0);
 
  // Use the spendable PawBucks hook to get available balance + welcome credit
  const { 
@@ -157,7 +162,7 @@ export const PawBucksCheckoutDialog = ({
  }, [open, loadingBalance, maxPawBucks, pawbucksSource]);
  
  const stripeAmount = Math.max(minStripeForSubscription, priceAmount - pawbucksUsdValue);
- const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * cashbackRate) : 0;
+ const cashbackPawBucks = stripeAmount > 0 ? Math.round(stripeAmount * effectiveEarnRate) : 0;
 
  const handleProceed = () => {
  onProceed(pawbucksToUse);
@@ -419,7 +424,7 @@ export const PawBucksCheckoutDialog = ({
  <div className="flex justify-between text-sm">
  <span className="text-muted-foreground flex items-center gap-1">
  <Sparkles className="w-3 h-3 text-warning" />
- Cashback ({cashbackRate}x):
+ Cashback ({effectiveEarnRate}x){userTierLabel !== "Free" ? ` · ${userTierLabel}` : ""}:
  </span>
  <span className="font-bold text-warning">
  +{cashbackPawBucks.toLocaleString()} PawBucks
