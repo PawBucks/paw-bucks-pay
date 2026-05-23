@@ -80,7 +80,7 @@ const StripePaymentForm = ({
  setIsLoading(true);
 
  try {
- const { error, paymentIntent } = await stripe.confirmPayment({
+ const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
  elements,
  confirmParams: {
  return_url: buildAppUrl("/wallet"),
@@ -88,7 +88,10 @@ const StripePaymentForm = ({
  redirect:'if_required',
  });
 
- if (error) throw error;
+ // Hard client-side errors from Stripe (e.g. card declined synchronously) —
+ // the webhook will also fire `payment_intent.payment_failed` and persist
+ // last_error, but we surface the message immediately here.
+ if (stripeError) throw stripeError;
 
  // Payment succeeded on Stripe - now call our backend to process rewards/transaction
  console.log('[PAYMENT] Stripe payment confirmed, calling confirm-payment-success...', {
@@ -97,51 +100,52 @@ const StripePaymentForm = ({
  stripePaymentStatus: paymentIntent?.status,
  });
  
- // Retry logic for backend confirmation - critical for transaction recording
- let confirmSuccess = false;
- let confirmData = null;
- let lastError = null;
- 
- for (let attempt = 1; attempt <= 3; attempt++) {
- console.log(`[PAYMENT] Backend confirmation attempt ${attempt}/3`);
- 
- const { data, error: confirmError } = await supabase.functions.invoke(
-'confirm-payment-success',
- {
- body: { paymentIntentId, connectedAccountId },
- }
- );
-
- if (!confirmError && data?.success) {
- confirmSuccess = true;
- confirmData = data;
- console.log('[PAYMENT] confirm-payment-success succeeded:', data);
- break;
- }
- 
- lastError = confirmError;
- console.error(`[PAYMENT] Attempt ${attempt} failed:`, confirmError);
- 
- // Wait before retry (exponential backoff)
- if (attempt < 3) {
- await new Promise(resolve => setTimeout(resolve, attempt * 1000));
- }
+ // Fast path: try the synchronous backend confirm once. If it works, great —
+ // the user sees rewards immediately. If it fails, the Stripe Connect webhook
+ // (`connect-webhook` → payment_intent.succeeded) is the authoritative
+ // source that will credit PawBucks and create the transaction row.
+ let confirmData: any = null;
+ try {
+   const { data, error: confirmError } = await supabase.functions.invoke(
+     'confirm-payment-success',
+     { body: { paymentIntentId, connectedAccountId } }
+   );
+   if (!confirmError && data?.success) {
+     confirmData = data;
+     console.log('[PAYMENT] confirm-payment-success succeeded (fast path)');
+   } else {
+     console.warn('[PAYMENT] confirm-payment-success failed, falling back to webhook poll:', confirmError);
+   }
+ } catch (e) {
+   console.warn('[PAYMENT] confirm-payment-success threw, falling back to webhook poll:', e);
  }
 
- if (!confirmSuccess) {
- console.error('[PAYMENT] All backend confirmation attempts failed:', lastError);
- // Payment went through but backend processing failed - still show success but warn
- toast.warning("Payment successful! Rewards may take a moment to appear.", {
- description:"If rewards don't appear within a few minutes, please contact support.",
- duration: 8000,
+ // Authoritative path: poll `direct_payments` (RLS allows owner SELECT). The
+ // webhook writes status=succeeded after PawBucks have been credited, so a
+ // succeeded row here means wallet credit is guaranteed.
+ const finalStatus = await pollDirectPaymentStatus(paymentIntentId);
+
+ if (finalStatus.status === 'failed') {
+   toast.error(finalStatus.lastError || 'Payment failed. Please try again.');
+   return; // keep the form open so the user can retry
+ }
+
+ if (finalStatus.status === 'succeeded' || confirmData) {
+   const cashbackPawBucks =
+     confirmData?.pawbucksEarned ??
+     finalStatus.pawbucksEarned ??
+     Math.round(stripeAmount * cashbackRate);
+   toast.success(`Payment successful! You earned ${cashbackPawBucks} PawBucks!`);
+   onSuccess();
+   return;
+ }
+
+ // Still pending after polling timeout: Stripe accepted the charge but our
+ // webhook hasn't processed it yet. Close the dialog with a soft notice;
+ // the webhook will credit PawBucks asynchronously.
+ toast.success('Payment received! Your PawBucks will appear in a moment.', {
+   duration: 6000,
  });
- } else {
- const cashbackPawBucks = confirmData?.pawbucksEarned || Math.round(stripeAmount * cashbackRate);
- toast.success(
- `Payment successful! You earned ${cashbackPawBucks} PawBucks!`
- );
- }
-
  onSuccess();
  } catch (error: any) {
  console.error("Payment error:", error);
