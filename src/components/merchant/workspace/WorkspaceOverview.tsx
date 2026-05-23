@@ -250,14 +250,29 @@ export function WorkspaceOverview() {
         const { data: latest } = await supabase
           .from("transactions")
           .select(
-            "id, amount, rewards_earned, cashback_earned, pawbucks_used, created_at, status, profiles!transactions_user_id_fkey(full_name)"
+            "id, user_id, amount, rewards_earned, cashback_earned, pawbucks_used, created_at, status"
           )
           .eq("merchant_id", merchant.id)
           .order("created_at", { ascending: false })
           .limit(5);
         if (cancelled) return;
+        // Fetch customer names via security-definer RPC (profiles RLS blocks merchant reads)
+        const userIds = Array.from(
+          new Set(((latest || []) as any[]).map((t) => t.user_id).filter(Boolean))
+        );
+        const nameById = new Map<string, string>();
+        if (userIds.length > 0) {
+          const { data: customerProfiles } = await supabase.rpc(
+            "get_customer_profiles_for_merchant",
+            { p_user_ids: userIds }
+          );
+          (customerProfiles || []).forEach((p: any) => {
+            if (p?.id) nameById.set(p.id, p.full_name || p.email || "Guest");
+          });
+        }
+        if (cancelled) return;
         const mapped: RecentTx[] = (latest || []).map((t: any) => {
-          const name = t.profiles?.full_name || "Guest";
+          const name = (t.user_id && nameById.get(t.user_id)) || "Guest";
           const usd = Number(t.amount) || 0;
           const pb = Number(t.pawbucks_used) || 0;
           const rewardsPB =
