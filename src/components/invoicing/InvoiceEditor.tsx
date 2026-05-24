@@ -1064,18 +1064,7 @@ export function InvoiceEditor({
  </FormItem>
  )}
  />
- <FormField
- control={form.control}
- name="accept_pawbucks"
- render={({ field }) => (
- <FormItem className="flex items-center justify-between">
- <FormLabel className="text-sm">Accept PawBucks</FormLabel>
- <FormControl>
- <Switch checked={field.value} onCheckedChange={field.onChange} />
- </FormControl>
- </FormItem>
- )}
- />
+  {/* PawBucks is always accepted on every invoice (platform requirement) */}
  <FormField
  control={form.control}
  name="allow_partial_payments"
