@@ -63,7 +63,7 @@ const invoiceSchema = z.object({
  allow_tips: z.boolean(),
  accept_credit_card: z.boolean(),
  accept_bank_transfer: z.boolean(),
- accept_pawbucks: z.boolean(),
+ accept_pawbucks: z.boolean().default(true),
  is_recurring: z.boolean(),
  recurring_interval: z.string().optional(),
  recurring_end_date: z.date().optional(),
