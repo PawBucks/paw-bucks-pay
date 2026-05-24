@@ -3,8 +3,6 @@ import { useNavigate, useParams, useSearchParams } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
 import { Header } from"@/components/Header";
-import { SEO } from"@/components/SEO";
-import { Card } from"@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { MedicalRecordUpload } from"@/components/MedicalRecordUpload";
 import { MedicalRecordsList } from"@/components/MedicalRecordsList";
@@ -13,7 +11,7 @@ import { VetCommunication } from"@/components/VetCommunication";
 import { PetProfileCard } from"@/components/PetProfileCard";
 import { ShareHealthRecordsDialog } from"@/components/ShareHealthRecordsDialog";
 import { PetEmailInbox } from"@/components/pet-health/PetEmailInbox";
-import { ArrowLeft, FileHeart } from "lucide-react";
+import { ArrowLeft, FileHeart, Mail, MessageSquare, Users } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { toast } from"sonner";
 
@@ -106,8 +104,8 @@ export default function PetHealth() {
  return (
  <div className="min-h-screen bg-background">
  <Header />
- <div className="container max-w-4xl lg:max-w-6xl mx-auto px-4 py-8">
- <div className="text-center">Loading...</div>
+        <div className="container max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center text-muted-foreground">Loading...</div>
  </div>
  </div>
  );
@@ -120,11 +118,11 @@ export default function PetHealth() {
  return (
  <div className="min-h-screen bg-background">
  <Header />
- <div className="container max-w-4xl lg:max-w-6xl mx-auto px-4 py-8 space-y-6">
+      <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
  <Button
  variant="ghost"
  onClick={() => navigate("/home")}
- className="mb-4"
+          className="-ml-2 text-muted-foreground hover:text-foreground"
  >
  <ArrowLeft className="w-4 h-4 mr-2" />
  Back to Dashboard
@@ -132,72 +130,90 @@ export default function PetHealth() {
 
  {/* Shared Account Banner */}
  {sharedAccount.isSharedMember && sharedAccount.ownerName && (
- <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-2">
- <span className="w-4 h-4 text-primary" aria-hidden="true">👥</span>
+          <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
  <span className="text-sm">
  Viewing shared account with <strong>{sharedAccount.ownerName}</strong>
  </span>
  </div>
  )}
 
- <div>
- <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
- <FileHeart className="w-8 h-8 text-primary" />
- Pet Health Records
- </h1>
- <p className="text-muted-foreground">
- Manage medical records and communicate with vets for {pet.name}
- </p>
- </div>
+        {/* Hero header */}
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+            <FileHeart className="w-6 h-6 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pet Health Records</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage medical records and communicate with vets for {pet.name}
+            </p>
+          </div>
+        </div>
 
- <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
- <div className="flex-1 w-full">
- <PetProfileCard pet={pet} onUpdate={loadPet} />
- </div>
- <ShareHealthRecordsDialog petId={pet.id} petName={pet.name} />
- </div>
+        {/* Pet profile card */}
+        <PetProfileCard pet={pet} onUpdate={loadPet} />
 
- <Tabs defaultValue={defaultTab} className="space-y-4">
- <TabsList className="grid w-full grid-cols-3">
- <TabsTrigger value="records" className="flex items-center gap-2">
- <FileHeart className="w-4 h-4" />
- Medical Records
- </TabsTrigger>
- <TabsTrigger value="inbox" className="flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">📧</span>
- Email Inbox
- </TabsTrigger>
- <TabsTrigger value="vets" className="flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">💬</span>
- Vet Messages
- </TabsTrigger>
- </TabsList>
+        {/* Quick actions */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex-1">
+            <ShareHealthRecordsDialog petId={pet.id} petName={pet.name} />
+          </div>
+          <div className="flex-1">
+            <ScanVetPaperwork
+              petId={pet.id}
+              petName={pet.name}
+              petType={pet.type}
+              petBreed={pet.breed}
+              onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+            />
+          </div>
+        </div>
 
- <TabsContent value="records" className="space-y-4">
- <div className="flex justify-end gap-2 flex-wrap">
- <ScanVetPaperwork
- petId={pet.id}
- petName={pet.name}
- petType={pet.type}
- petBreed={pet.breed}
- onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
- />
- <MedicalRecordUpload
- petId={pet.id}
- onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
- />
- </div>
- <MedicalRecordsList petId={pet.id} refreshTrigger={refreshTrigger} />
- </TabsContent>
+        {/* Tabs */}
+        <Tabs defaultValue={defaultTab} className="space-y-4">
+          <TabsList className="w-full h-auto bg-transparent border-b border-border rounded-none p-0 justify-start gap-0">
+            <TabsTrigger
+              value="records"
+              className="flex-1 sm:flex-none flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-4 py-3 text-sm font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              <FileHeart className="w-4 h-4" />
+              Medical Records
+            </TabsTrigger>
+            <TabsTrigger
+              value="inbox"
+              className="flex-1 sm:flex-none flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-4 py-3 text-sm font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              <Mail className="w-4 h-4" />
+              Email Inbox
+            </TabsTrigger>
+            <TabsTrigger
+              value="vets"
+              className="flex-1 sm:flex-none flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-4 py-3 text-sm font-medium text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Vet Messages
+            </TabsTrigger>
+          </TabsList>
 
- <TabsContent value="inbox" className="space-y-4">
- <PetEmailInbox petId={pet.id} petName={pet.name} />
- </TabsContent>
+          <TabsContent value="records" className="space-y-4 mt-4">
+            <div className="flex justify-end">
+              <MedicalRecordUpload
+                petId={pet.id}
+                onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+              />
+            </div>
+            <MedicalRecordsList petId={pet.id} refreshTrigger={refreshTrigger} />
+          </TabsContent>
 
- <TabsContent value="vets">
- <VetCommunication petId={pet.id} />
- </TabsContent>
- </Tabs>
+          <TabsContent value="inbox" className="space-y-4 mt-4">
+            <PetEmailInbox petId={pet.id} petName={pet.name} />
+          </TabsContent>
+
+          <TabsContent value="vets" className="mt-4">
+            <VetCommunication petId={pet.id} />
+          </TabsContent>
+        </Tabs>
  </div>
  </div>
  );
