@@ -63,7 +63,7 @@ const invoiceSchema = z.object({
  allow_tips: z.boolean(),
  accept_credit_card: z.boolean(),
  accept_bank_transfer: z.boolean(),
- accept_pawbucks: z.boolean(),
+ accept_pawbucks: z.boolean().default(true),
  is_recurring: z.boolean(),
  recurring_interval: z.string().optional(),
  recurring_end_date: z.date().optional(),
@@ -138,7 +138,7 @@ export function InvoiceEditor({
  allow_tips: invoice?.allow_tips ?? false,
  accept_credit_card: invoice?.accept_credit_card ?? true,
  accept_bank_transfer: invoice?.accept_bank_transfer ?? false,
- accept_pawbucks: invoice?.accept_pawbucks ?? false,
+ accept_pawbucks: true,
  is_recurring: invoice?.is_recurring ?? false,
  recurring_interval: invoice?.recurring_interval ||"monthly",
  recurring_end_date: invoice?.recurring_end_date ? parseISO(invoice.recurring_end_date) : undefined,
@@ -190,7 +190,7 @@ export function InvoiceEditor({
  allow_tips: invoice?.allow_tips ?? false,
  accept_credit_card: invoice?.accept_credit_card ?? true,
  accept_bank_transfer: invoice?.accept_bank_transfer ?? false,
- accept_pawbucks: invoice?.accept_pawbucks ?? false,
+ accept_pawbucks: true,
  is_recurring: invoice?.is_recurring ?? false,
  recurring_interval: invoice?.recurring_interval ||"monthly",
  recurring_end_date: invoice?.recurring_end_date ? parseISO(invoice.recurring_end_date) : undefined,
@@ -1064,18 +1064,7 @@ export function InvoiceEditor({
  </FormItem>
  )}
  />
- <FormField
- control={form.control}
- name="accept_pawbucks"
- render={({ field }) => (
- <FormItem className="flex items-center justify-between">
- <FormLabel className="text-sm">Accept PawBucks</FormLabel>
- <FormControl>
- <Switch checked={field.value} onCheckedChange={field.onChange} />
- </FormControl>
- </FormItem>
- )}
- />
+  {/* PawBucks is always accepted on every invoice (platform requirement) */}
  <FormField
  control={form.control}
  name="allow_partial_payments"

@@ -131,52 +131,35 @@ export function MerchantOverviewTab({
  </GradientCard>
  )}
 
- {/* PawBucks Acceptance Settings */}
- {merchant.stripe_account_id && (
- <GradientCard>
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-4">
- <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
- <PawBucksLogo className="w-6 h-6 text-primary" />
- </div>
- <div>
- <h3 className="font-semibold">Accept PawBucks</h3>
- <p className="text-sm text-muted-foreground">
- Allow customers to pay with PawBucks (1000 PawBucks = $1.00)
- </p>
- </div>
- </div>
- <Switch
- checked={merchant.accepts_pawbucks ?? false}
- onCheckedChange={onTogglePawbucks}
- disabled={togglingPawbucks}
- />
- </div>
- {merchant.accepts_pawbucks && (
- <div className="mt-4 pt-4 border-t flex items-center justify-between">
- <p className="flex items-center gap-2 text-sm text-muted-foreground">
- <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
- Customers can now pay using their PawBucks balance
- </p>
- <Button 
- variant="outline" 
- size="sm" 
- onClick={onViewWallet}
- >
- <PawBucksLogo className="w-4 h-4 mr-2" />
- View Wallet
- </Button>
- </div>
- )}
- </GradientCard>
- )}
+  {/* PawBucks acceptance is now mandatory platform-wide */}
+  {merchant.stripe_account_id && (
+  <GradientCard>
+  <div className="flex items-center justify-between gap-4">
+  <div className="flex items-center gap-4">
+  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+  <PawBucksLogo className="w-6 h-6 text-primary" />
+  </div>
+  <div>
+  <h3 className="font-semibold">PawBucks Accepted</h3>
+  <p className="text-sm text-muted-foreground">
+  All PawBucks platform accounts accept PawBucks (1,000 PawBucks = $1.00).
+  </p>
+  </div>
+  </div>
+  <Button variant="outline" size="sm" onClick={onViewWallet}>
+  <PawBucksLogo className="w-4 h-4 mr-2" />
+  View Wallet
+  </Button>
+  </div>
+  </GradientCard>
+  )}
 
-      {/* PawBucks Acceptance Cap */}
-      {merchant.stripe_account_id && merchant.accepts_pawbucks && (
+       {/* PawBucks Acceptance Cap */}
+       {merchant.stripe_account_id && (
         <PawBucksCapCard
           merchantId={merchant.id}
           businessType={merchant.business_type}
-          acceptsPawbucks={!!merchant.accepts_pawbucks}
+           acceptsPawbucks={true}
           capEnabled={!!merchant.pawbucks_cap_enabled}
           capPct={merchant.pawbucks_cap_pct ?? null}
           promoCapPct={merchant.pawbucks_promo_cap_pct ?? null}
