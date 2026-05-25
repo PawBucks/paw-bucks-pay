@@ -7,15 +7,13 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
-import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import { SEO } from "@/components/SEO";
 import { seoMeta } from "@/lib/seoMeta";
 import { PullToRefresh } from "@/components/PullToRefresh";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
+import { getSubscriptionTier } from "@/lib/constants";
+import { useSubscription } from "@/hooks/useSubscription";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
 import { searchMatchesAnyCategory, merchantMatchesCategory, getCategoryEmoji } from "@/lib/categoryMapping";
@@ -25,20 +23,19 @@ import {
   useFeaturedPartnerMerchants,
   usePremiumAdMerchants,
   useSearchBoostedMerchantSet,
+  useAdMerchants,
   isVerifiedPro,
   isSponsored,
 } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
-import { DirectoryMerchantCard } from "@/components/directory/DirectoryMerchantCard";
 import { MerchantMap } from "@/components/MerchantMap";
 import {
-  LayoutGrid, LayoutList, Map, MapPin, Search, SlidersHorizontal, Store, X, Star,
+  LayoutList, Map as MapIcon, MapPin, Search, Store, X, Star, BadgeCheck, ChevronRight, Sparkles, Crown,
   Stethoscope, Scissors, Truck, ShoppingBag, Bone, Hotel, School, GraduationCap, Dog,
   Mountain, PersonStanding, Hand, Brain, Camera, Shield, Plane, Dna, Heart, Puzzle, Trash2,
 } from "lucide-react";
-import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
 
