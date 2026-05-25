@@ -298,7 +298,7 @@ const MerchantDirectory = () => {
     [navigate]
   );
 
-  if (isLoading) return <PageLoader message="Discovering pet care near you..." />;
+  if (isLoading) return <PageLoader message="Loading merchant directory..." />;
 
   const sponsoredList = filteredMerchants.filter(
     (m) => sponsoredIdSet.has(m.id) || featuredIdSet.has(m.id) || premiumIdSet.has(m.id)
