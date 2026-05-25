@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
 );
   }
 
-  const _authResp = checkInternalSecret(req, corsHeaders);
+  const _authResp = await checkInternalSecret(req, corsHeaders);
   if (_authResp) return _authResp;
 
   try {

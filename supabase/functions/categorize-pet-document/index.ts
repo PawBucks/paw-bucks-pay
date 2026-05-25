@@ -29,7 +29,7 @@ serve(async (req) => {
   // records, visits, and notifications for any pet. It must only be invoked
   // server-to-server (e.g. from `receive-pet-email`) — never directly from
   // unauthenticated clients. Enforce the shared internal-secret guard.
-  const authResp = checkInternalSecret(req, corsHeaders);
+  const authResp = await checkInternalSecret(req, corsHeaders);
   if (authResp) return authResp;
 
   try {
