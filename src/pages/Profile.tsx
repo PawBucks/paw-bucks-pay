@@ -43,7 +43,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
+import { DEFAULT_MERCHANT_TZ } from "@/lib/timezone";
+import { Formatters } from "@/utils/formatters";
 
 type ProfileRow = {
   full_name: string;
@@ -202,6 +204,7 @@ const Profile = () => {
   const ts = tierStyles[currentTier];
   const isUpgradeable = currentTier !== "PawPass+";
   const pbBalance = pawbucksWallet?.balance ?? 0;
+  const pbBalanceUsd = `${Formatters.pawBucksToUSD(pbBalance)} USD`;
   const earnRateMap = { Free: "10x", PawPass: "20x", "PawPass+": "30x" } as const;
 
   return (
@@ -259,11 +262,11 @@ const Profile = () => {
               {/* Stats strip */}
               <div className="mt-5 grid grid-cols-3 divide-x divide-border border-t border-border pt-4">
                 {[
-                  { label: "PawBucks", value: pbBalance.toLocaleString() },
+                  { label: "Wallet", value: pbBalanceUsd },
                   { label: "Earn Rate", value: earnRateMap[currentTier] },
                   {
                     label: "Member Since",
-                    value: format(new Date(profile.created_at), "yyyy"),
+                    value: formatInTimeZone(new Date(profile.created_at), DEFAULT_MERCHANT_TZ, "yyyy"),
                   },
                 ].map((s) => (
                   <div key={s.label} className="px-2 text-center">
@@ -294,7 +297,7 @@ const Profile = () => {
                   {
                     icon: Calendar,
                     label: "Member Since",
-                    value: format(new Date(profile.created_at), "MMMM d, yyyy"),
+                    value: formatInTimeZone(new Date(profile.created_at), DEFAULT_MERCHANT_TZ, "MMMM d, yyyy"),
                   },
                 ].map((row) => {
                   const Icon = row.icon;
@@ -341,7 +344,7 @@ const Profile = () => {
                   <div className="flex justify-between text-sm bg-muted/40 rounded-lg px-3 py-2 mb-4">
                     <span className="text-muted-foreground">Renews on</span>
                     <span className="font-medium">
-                      {format(new Date(subscription.subscription_end), "MMMM d, yyyy")}
+                      {formatInTimeZone(new Date(subscription.subscription_end), DEFAULT_MERCHANT_TZ, "MMMM d, yyyy 'ET'")}
                     </span>
                   </div>
                 )}
