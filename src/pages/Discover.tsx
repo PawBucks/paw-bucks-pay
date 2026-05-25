@@ -106,6 +106,11 @@ const Discover = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { subscription, loading: subLoading } = useSubscription();
+  const tier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
+  const showAds = !subLoading && tier !== "pawpass_plus";
+  const { data: adMerchants = [] } = useAdMerchants();
+  const adMerchant = adMerchants[0];
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>("discover-category", "all");
