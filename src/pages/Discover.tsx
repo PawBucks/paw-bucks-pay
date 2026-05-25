@@ -7,15 +7,13 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { PageLoader } from "@/components/PageLoader";
-import { SponsoredAdBar } from "@/components/SponsoredAdBar";
 import { SEO } from "@/components/SEO";
 import { seoMeta } from "@/lib/seoMeta";
 import { PullToRefresh } from "@/components/PullToRefresh";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { ROUTES, QUERY_STALE_TIMES } from "@/lib/constants";
+import { getSubscriptionTier } from "@/lib/constants";
+import { useSubscription } from "@/hooks/useSubscription";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { supabase } from "@/integrations/supabase/client";
 import { searchMatchesAnyCategory, merchantMatchesCategory, getCategoryEmoji } from "@/lib/categoryMapping";
@@ -25,20 +23,19 @@ import {
   useFeaturedPartnerMerchants,
   usePremiumAdMerchants,
   useSearchBoostedMerchantSet,
+  useAdMerchants,
   isVerifiedPro,
   isSponsored,
 } from "@/hooks/useMerchantServices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
-import { DirectoryMerchantCard } from "@/components/directory/DirectoryMerchantCard";
 import { MerchantMap } from "@/components/MerchantMap";
 import {
-  LayoutGrid, LayoutList, Map, MapPin, Search, SlidersHorizontal, Store, X, Star,
+  LayoutList, Map as MapIcon, MapPin, Search, Store, X, Star, BadgeCheck, ChevronRight, Sparkles, Crown,
   Stethoscope, Scissors, Truck, ShoppingBag, Bone, Hotel, School, GraduationCap, Dog,
   Mountain, PersonStanding, Hand, Brain, Camera, Shield, Plane, Dna, Heart, Puzzle, Trash2,
 } from "lucide-react";
-import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
 
@@ -109,6 +106,11 @@ const Discover = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { subscription, loading: subLoading } = useSubscription();
+  const tier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
+  const showAds = !subLoading && tier !== "pawpass_plus";
+  const { data: adMerchants = [] } = useAdMerchants();
+  const adMerchant = adMerchants[0];
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>("discover-category", "all");
@@ -298,6 +300,55 @@ const Discover = () => {
 
   if (isLoading) return <PageLoader message="Discovering pet care near you..." />;
 
+  const sponsoredList = filteredMerchants.filter(
+    (m) => sponsoredIdSet.has(m.id) || featuredIdSet.has(m.id) || premiumIdSet.has(m.id)
+  );
+  const organicList = filteredMerchants.filter(
+    (m) => !sponsoredIdSet.has(m.id) && !featuredIdSet.has(m.id) && !premiumIdSet.has(m.id)
+  );
+
+  // Interleave inline ads after every 5 organic results
+  type ListEntry =
+    | { kind: "merchant"; m: typeof filteredMerchants[number]; index: number }
+    | { kind: "ad"; key: string };
+  const interleaved: ListEntry[] = [];
+  organicList.forEach((m, i) => {
+    interleaved.push({ kind: "merchant", m, index: sponsoredList.length + i });
+    if (showAds && adMerchant && (i + 1) % 5 === 0) {
+      interleaved.push({ kind: "ad", key: `ad-${i}` });
+    }
+  });
+
+  const renderMerchantCard = (
+    merchant: typeof filteredMerchants[number],
+    index: number
+  ) => {
+    const merchantIsVerified = isVerifiedPro(merchant.id, verifiedProIds);
+    const merchantIsSponsored = isSponsored(merchant.id, sponsoredMerchantsList);
+    const merchantIsFeatured = featuredIdSet.has(merchant.id);
+    const merchantIsBoosted = searchBoostedIds.has(merchant.id);
+    const handleClick = () => {
+      if (merchantIsSponsored)
+        trackClick(merchant.id, index + 1, debouncedSearch || undefined);
+      if (merchantIsBoosted)
+        trackSearchClick(merchant.id, index + 1, "discover", {
+          searchTerm: debouncedSearch || undefined,
+          isBoosted: true,
+        });
+      navigate(`/merchant/${merchant.id}`);
+    };
+    return (
+      <MerchantListItem
+        key={merchant.id}
+        merchant={merchant}
+        isVerified={merchantIsVerified}
+        isSponsored={merchantIsSponsored}
+        isFeatured={merchantIsFeatured}
+        onClick={handleClick}
+      />
+    );
+  };
+
   return (
     <>
       <SEO
@@ -320,271 +371,459 @@ const Discover = () => {
         isRefreshing={isRefreshing}
         pullDistance={pullDistance}
         progress={progress}
-        className="min-h-screen bg-background pb-24 md:pb-12 overflow-auto"
+        className="min-h-screen bg-background pb-24 md:pb-12 overflow-auto flex flex-col"
       >
-        {/* Premium Ads (top) */}
-        <div className="container mx-auto px-4 pt-4 max-w-7xl">
-          <SponsoredAdBar variant="top" />
-        </div>
-
-        {/* Hero + Search */}
-        <div className="relative bg-gradient-to-b from-primary/[0.06] via-primary/[0.02] to-transparent border-b border-border/40 overflow-hidden">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full opacity-60"
-            style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 70%)" }}
-          />
-          <div className="container mx-auto px-4 pt-10 pb-6 max-w-7xl relative">
-            <div className="text-[0.7rem] font-medium tracking-[0.18em] uppercase text-primary mb-3 flex items-center gap-2">
-              <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
-              Discover
-            </div>
-            <h1
-              className="font-serif font-black leading-[1.05] tracking-[-0.025em] text-foreground mb-4"
-              style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(2rem, 5vw, 3.25rem)" }}
-            >
-              Discover pet services <em className="italic text-primary font-black">worth loving</em>.
-            </h1>
-            <p className="text-base text-muted-foreground mb-6 max-w-3xl leading-relaxed">
-              {merchants.length} hand-picked pet care professionals. Real reviews. Rewards on every visit.
-            </p>
-
-            <div className="relative max-w-3xl ml-0">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by name, service, or location…"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-10 h-11 bg-background/80 backdrop-blur-sm border-border/60 shadow-sm rounded-md focus-visible:ring-primary/30"
-              />
-              {searchTerm && (
+        {/* Top nav: title + view toggles + search */}
+        <div className="bg-card border-b border-border px-4 py-3 sticky top-0 z-20">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-3">
+              <h1 className="text-lg font-extrabold tracking-tight">Discover</h1>
+              <div className="flex gap-1.5">
                 <button
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted transition-colors"
-                  aria-label="Clear search"
+                  onClick={() => { setViewMode("list"); setShowMobileMap(false); }}
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center border transition-colors ${
+                    viewMode !== "map" && !showMobileMap
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground hover:text-foreground"
+                  }`}
+                  aria-label="List view"
                 >
-                  <X className="w-4 h-4 text-muted-foreground" />
+                  <LayoutList className="w-4 h-4" />
                 </button>
-              )}
+                <button
+                  onClick={() => { setViewMode("map"); setShowMobileMap(true); }}
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center border transition-colors ${
+                    viewMode === "map" || showMobileMap
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground hover:text-foreground"
+                  }`}
+                  aria-label="Map view"
+                >
+                  <MapIcon className="w-4 h-4" />
+                </button>
+              </div>
             </div>
+
+            {viewMode !== "map" && !showMobileMap && (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name, service, or location..."
+                  className="w-full pl-9 pr-9 h-10 text-sm rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Category Pills */}
-        <div className="border-b border-border/30 bg-background/80 backdrop-blur-sm sticky top-0 z-20">
-          <div className="container mx-auto px-4 max-w-7xl">
-            <div className="flex gap-1.5 overflow-x-auto py-3 scrollbar-hide -mx-1 px-1">
-              {businessTypes.map((type) => {
-                const isSelected = selectedCategory === type.value;
-                return (
-                  <button
-                    key={type.value}
-                    onClick={() => setSelectedCategory(type.value)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                      isSelected
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
-                  >
-                    <type.Icon className="h-3.5 w-3.5" aria-hidden="true" />
-                    {type.label}
-                  </button>
-                );
-              })}
+        {viewMode === "map" || showMobileMap ? (
+          /* Map View */
+          <div className="flex-1 relative">
+            <div className="absolute inset-0">
+              <MerchantMap
+                merchants={mapMerchants}
+                onMerchantClick={handleMapMerchantClick}
+                featuredIds={featuredIdSet}
+                premiumIds={premiumIdSet}
+                sponsoredIds={sponsoredIdSet}
+              />
             </div>
-          </div>
-        </div>
-
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
-          {/* Toolbar */}
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1">
-              {sortOptions.map((opt) => {
-                const isDistance = opt.value === "distance";
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => {
-                      setSortBy(opt.value);
-                      if (isDistance && !userLocation) requestLocation();
-                    }}
-                    className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
-                      sortBy === opt.value
-                        ? "bg-foreground text-background"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    {isDistance && <MapPin className={`w-3 h-3 ${locationLoading ? "animate-pulse" : ""}`} />}
-                    {isDistance && locationLoading ? "Locating…" : opt.label}
-                  </button>
-                );
-              })}
-              <Separator orientation="vertical" className="h-4 mx-1" />
-              <button
-                onClick={() => setPawbucksOnly(!pawbucksOnly)}
-                className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap transition-colors ${
-                  pawbucksOnly
-                    ? "bg-primary/10 text-primary border border-primary/20"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                <PawBucksLogo className="w-3 h-3" />
-                PawBucks
-              </button>
-            </div>
-
-            <div className="flex items-center border border-border/60 rounded-lg overflow-hidden">
-              <button
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+              <Button
+                variant="outline"
+                className="gap-2 bg-card shadow-lg"
                 onClick={() => { setViewMode("list"); setShowMobileMap(false); }}
-                className={`p-1.5 transition-colors ${viewMode === "list" && !showMobileMap ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                aria-label="List view"
               >
                 <LayoutList className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => { setViewMode("grid"); setShowMobileMap(false); }}
-                className={`p-1.5 transition-colors hidden sm:block ${viewMode === "grid" && !showMobileMap ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                aria-label="Grid view"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => { setViewMode("map"); setShowMobileMap(true); }}
-                className={`p-1.5 transition-colors ${viewMode === "map" || showMobileMap ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                aria-label="Map view"
-              >
-                <Map className="w-4 h-4" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-
-          {activeFilterCount > 0 && (
-            <div className="flex items-center gap-2 mb-4 text-xs text-muted-foreground">
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>{filteredMerchants.length} result{filteredMerchants.length !== 1 ? "s" : ""}</span>
-              {selectedCategory !== "all" && (
-                <Badge variant="secondary" className="text-[10px] h-5 gap-1 cursor-pointer" onClick={() => setSelectedCategory("all")}>
-                  {selectedCategory.replace(/_/g, " ")}
-                  <X className="w-2.5 h-2.5" />
-                </Badge>
-              )}
-              {pawbucksOnly && (
-                <Badge variant="secondary" className="text-[10px] h-5 gap-1 cursor-pointer" onClick={() => setPawbucksOnly(false)}>
-                  PawBucks
-                  <X className="w-2.5 h-2.5" />
-                </Badge>
-              )}
-              {debouncedSearch && (
-                <Badge variant="secondary" className="text-[10px] h-5 gap-1 cursor-pointer" onClick={() => setSearchTerm("")}>
-                  "{debouncedSearch}"
-                  <X className="w-2.5 h-2.5" />
-                </Badge>
-              )}
-            </div>
-          )}
-
-          {filteredMerchants.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
-                <Store className="w-8 h-8 text-muted-foreground/40" aria-hidden="true" />
-              </div>
-              <h3 className="text-lg font-semibold mb-1">No merchants found</h3>
-              <p className="text-sm text-muted-foreground mb-4">Try adjusting your search or filters</p>
-              <Button variant="outline" size="sm" onClick={() => { setSearchTerm(""); setSelectedCategory("all"); setPawbucksOnly(false); }}>
-                Clear All Filters
+                Show List
               </Button>
             </div>
-          ) : viewMode === "map" || showMobileMap ? (
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="w-full lg:w-1/2 lg:sticky lg:top-16 lg:self-start">
-                <div className="rounded-md overflow-hidden border border-border/60 shadow-sm" style={{ height: "min(70vh, 600px)" }}>
-                  <MerchantMap
-                    merchants={mapMerchants}
-                    onMerchantClick={handleMapMerchantClick}
-                    featuredIds={featuredIdSet}
-                    premiumIds={premiumIdSet}
-                    sponsoredIds={sponsoredIdSet}
-                  />
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto">
+            {/* Hero + category pills */}
+            <div className="bg-card border-b border-border">
+              <div className="max-w-4xl mx-auto px-4 pt-5">
+                <div className="text-[10px] font-semibold tracking-[0.18em] uppercase text-primary mb-1.5 flex items-center gap-1.5">
+                  <MapPin className="w-3 h-3" /> The Directory
                 </div>
-                <div className="lg:hidden mt-3 text-center">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => { setViewMode("list"); setShowMobileMap(false); }}
-                  >
-                    <LayoutList className="w-4 h-4" />
-                    Show List
-                  </Button>
+                <h2
+                  className="text-2xl font-extrabold tracking-tight leading-tight mb-1.5"
+                  style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
+                >
+                  Find pet services{" "}
+                  <em className="not-italic text-primary italic font-extrabold">worth loving.</em>
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {merchants.length} hand-picked pet care professionals. Real reviews. Rewards on every visit.
+                </p>
+
+                {/* Category pills */}
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 -mx-1 px-1">
+                  {businessTypes.map((type) => {
+                    const isSelected = selectedCategory === type.value;
+                    return (
+                      <button
+                        key={type.value}
+                        onClick={() => setSelectedCategory(type.value)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0 transition-colors ${
+                          isSelected
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "bg-card text-muted-foreground ring-1 ring-inset ring-border hover:text-foreground"
+                        }`}
+                      >
+                        <type.Icon className="w-3.5 h-3.5" />
+                        {type.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <div className="hidden lg:flex flex-col gap-3 flex-1 min-w-0">
-                {filteredMerchants.map((merchant, index) => {
-                  const Icon = getBusinessIcon(merchant.business_type);
-                  const merchantIsVerified = isVerifiedPro(merchant.id, verifiedProIds);
-                  const merchantIsSponsored = isSponsored(merchant.id, sponsoredMerchantsList);
-                  const merchantIsBoosted = searchBoostedIds.has(merchant.id);
-                  const handleCardClick = () => {
-                    if (merchantIsSponsored) trackClick(merchant.id, index + 1, debouncedSearch || undefined);
-                    if (merchantIsBoosted)
-                      trackSearchClick(merchant.id, index + 1, "discover", {
-                        searchTerm: debouncedSearch || undefined,
-                        isBoosted: true,
-                      });
-                  };
+            </div>
+
+            {/* Sort bar */}
+            <div className="bg-card border-b border-border px-4">
+              <div className="max-w-4xl mx-auto flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                {sortOptions.map((opt) => {
+                  const isActive = sortBy === opt.value;
+                  const isDistance = opt.value === "distance";
                   return (
-                    <DirectoryMerchantCard
-                      key={merchant.id}
-                      merchant={merchant}
-                      index={index}
-                      isVerified={merchantIsVerified}
-                      isSponsored={merchantIsSponsored}
-                      isBoosted={merchantIsBoosted}
-                      onClick={handleCardClick}
-                      Icon={Icon}
-                    />
+                    <button
+                      key={opt.value}
+                      onClick={() => {
+                        setSortBy(opt.value);
+                        if (isDistance && !userLocation) requestLocation();
+                      }}
+                      className={`py-2.5 px-2 text-xs font-medium whitespace-nowrap border-b-2 transition-colors ${
+                        isActive
+                          ? "border-primary text-primary font-semibold"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {isDistance && (
+                        <MapPin
+                          className={`w-3 h-3 inline-block mr-1 ${locationLoading ? "animate-pulse" : ""}`}
+                        />
+                      )}
+                      {isDistance && locationLoading ? "Locating…" : opt.label}
+                    </button>
                   );
                 })}
+                <button
+                  onClick={() => setPawbucksOnly(!pawbucksOnly)}
+                  className={`ml-auto py-2.5 px-2 text-xs font-medium whitespace-nowrap transition-colors ${
+                    pawbucksOnly ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  PawBucks only
+                </button>
               </div>
             </div>
-          ) : (
-            <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : "flex flex-col gap-3"}>
-              {filteredMerchants.map((merchant, index) => {
-                const Icon = getBusinessIcon(merchant.business_type);
-                const merchantIsVerified = isVerifiedPro(merchant.id, verifiedProIds);
-                const merchantIsSponsored = isSponsored(merchant.id, sponsoredMerchantsList);
-                const merchantIsBoosted = searchBoostedIds.has(merchant.id);
-                const handleCardClick = () => {
-                  if (merchantIsSponsored) trackClick(merchant.id, index + 1, debouncedSearch || undefined);
-                  if (merchantIsBoosted)
-                    trackSearchClick(merchant.id, index + 1, "discover", {
-                      searchTerm: debouncedSearch || undefined,
-                      isBoosted: true,
-                    });
-                };
-                return (
-                  <DirectoryMerchantCard
-                    key={merchant.id}
-                    merchant={merchant}
-                    index={index}
-                    isVerified={merchantIsVerified}
-                    isSponsored={merchantIsSponsored}
-                    isBoosted={merchantIsBoosted}
-                    onClick={handleCardClick}
-                    Icon={Icon}
-                  />
-                );
-              })}
+
+            {/* List body */}
+            <div className="max-w-4xl mx-auto px-4 pt-3 pb-6">
+              <div className="text-[11px] text-muted-foreground mb-3">
+                {filteredMerchants.length} result{filteredMerchants.length !== 1 ? "s" : ""}
+                {selectedCategory !== "all" &&
+                  ` · ${businessTypes.find((c) => c.value === selectedCategory)?.label}`}
+              </div>
+
+              {filteredMerchants.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-14 h-14 rounded-full bg-muted mx-auto flex items-center justify-center mb-3">
+                    <Store className="w-7 h-7 text-muted-foreground/50" />
+                  </div>
+                  <h3 className="text-base font-semibold mb-1">No results found</h3>
+                  <p className="text-sm text-muted-foreground mb-4">Try a different search or category</p>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSelectedCategory("all");
+                      setPawbucksOnly(false);
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  {sponsoredList.map((m, i) => renderMerchantCard(m, i))}
+                  {interleaved.map((entry) =>
+                    entry.kind === "ad" ? (
+                      <InlineAdBanner key={entry.key} merchant={adMerchant!} />
+                    ) : (
+                      renderMerchantCard(entry.m, entry.index)
+                    )
+                  )}
+                </div>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
-          <SponsoredAdBar variant="bottom" authed={!!user} />
-        </div>
-
+        {/* Sticky footer ad — Free + PawPass only */}
+        {showAds && adMerchant && viewMode !== "map" && !showMobileMap && (
+          <div className="sticky bottom-0 left-0 right-0 z-30 bg-card border-t border-border shadow-[0_-4px_16px_hsl(var(--foreground)/0.07)]">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-between px-4 pt-1 pb-0.5">
+                <span className="text-[9px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
+                  Advertisement
+                </span>
+                <button
+                  type="button"
+                  onClick={() => navigate("/profile")}
+                  className="text-[10px] font-medium text-primary hover:underline"
+                >
+                  Remove Ads with PawPass+ →
+                </button>
+              </div>
+              <div className="flex items-center gap-3 px-4 pb-3 pt-1">
+                <div className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-lg overflow-hidden flex-shrink-0">
+                  {adMerchant.logo_url ? (
+                    <img src={adMerchant.logo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <span aria-hidden="true">{getCategoryEmoji(adMerchant.business_type)}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-foreground truncate">
+                    {adMerchant.business_name}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {adMerchant.description || `Earn ${adMerchant.cashback_rate}x PawBucks at ${adMerchant.business_name}.`}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/merchant/${adMerchant.id}`)}
+                  className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0"
+                >
+                  Visit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {user && <BottomNav />}
       </PullToRefresh>
     </>
+  );
+};
+
+// ── Merchant list item ─────────────────────────────────────────────────────────
+type MerchantListItemProps = {
+  merchant: {
+    id: string;
+    business_name: string;
+    business_type: string;
+    description?: string;
+    address?: string;
+    cashback_rate: number;
+    accepts_pawbucks?: boolean;
+    price_range?: number;
+    average_rating: number;
+    review_count: number;
+    logo_url?: string;
+    distance?: number;
+  };
+  isVerified: boolean;
+  isSponsored: boolean;
+  isFeatured: boolean;
+  onClick: () => void;
+};
+
+const MerchantListItem = ({ merchant, isVerified, isSponsored, isFeatured, onClick }: MerchantListItemProps) => {
+  const emoji = getCategoryEmoji(merchant.business_type);
+  const distance = (merchant as any).distance as number | undefined;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="bg-card border border-border rounded-xl overflow-hidden text-left transition-all hover:border-primary hover:shadow-md flex"
+    >
+      {/* Image / icon block */}
+      <div
+        className={`w-24 flex-shrink-0 flex items-center justify-center text-4xl relative ${
+          isFeatured
+            ? "bg-gradient-to-br from-foreground to-foreground/80"
+            : "bg-primary/10"
+        }`}
+        aria-hidden="true"
+      >
+        {merchant.logo_url ? (
+          <img src={merchant.logo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <span>{emoji}</span>
+        )}
+        {isFeatured && (
+          <div className="absolute top-2 left-2 w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center text-sm shadow-sm">
+            <Crown className="w-3.5 h-3.5 text-background" />
+          </div>
+        )}
+        {isSponsored && !isFeatured && (
+          <span className="absolute top-2 left-2 bg-foreground text-background text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5">
+            <Sparkles className="w-2.5 h-2.5" /> Ad
+          </span>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 p-3 min-w-0">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+            <span className="text-sm font-bold tracking-tight text-foreground truncate">
+              {merchant.business_name}
+            </span>
+            {isVerified && <BadgeCheck className="w-3.5 h-3.5 text-info flex-shrink-0" />}
+          </div>
+          <ChevronRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
+        </div>
+
+        {/* Rating + price */}
+        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+          {merchant.review_count > 0 ? (
+            <>
+              <span className="inline-flex items-center gap-0.5 text-[11px]">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star
+                    key={i}
+                    className={`w-3 h-3 ${
+                      i <= Math.round(merchant.average_rating)
+                        ? "fill-amber-400 text-amber-400"
+                        : "fill-muted text-muted"
+                    }`}
+                  />
+                ))}
+                <span className="font-semibold text-foreground ml-0.5">
+                  {merchant.average_rating.toFixed(1)}
+                </span>
+                <span className="text-muted-foreground">({merchant.review_count})</span>
+              </span>
+              {merchant.price_range ? (
+                <>
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-[11px]">
+                    {[1, 2, 3, 4].map((lvl) => (
+                      <span
+                        key={lvl}
+                        className={
+                          lvl <= (merchant.price_range || 0)
+                            ? "text-foreground font-semibold"
+                            : "text-muted-foreground/40"
+                        }
+                      >
+                        $
+                      </span>
+                    ))}
+                  </span>
+                </>
+              ) : null}
+            </>
+          ) : (
+            <span className="text-[11px] italic text-muted-foreground">No reviews yet</span>
+          )}
+        </div>
+
+        {/* Tags */}
+        <div className="flex gap-1.5 flex-wrap items-center mb-1.5">
+          <span className="bg-muted text-muted-foreground px-2 py-0.5 rounded-full text-[10px] font-medium">
+            {merchant.business_type.replace(/_/g, " ")}
+          </span>
+          {merchant.accepts_pawbucks && merchant.cashback_rate > 0 ? (
+            <span className="bg-primary/10 text-primary ring-1 ring-inset ring-primary/20 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+              {merchant.cashback_rate}x PB
+            </span>
+          ) : (
+            <span className="bg-muted text-muted-foreground/70 px-2 py-0.5 rounded-full text-[10px]">
+              No PawBucks
+            </span>
+          )}
+        </div>
+
+        {/* Description */}
+        {merchant.description && (
+          <p className="text-[11px] text-muted-foreground leading-snug line-clamp-2 mb-1.5">
+            {merchant.description}
+          </p>
+        )}
+
+        {/* Address / distance */}
+        <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <MapPin className="w-3 h-3 flex-shrink-0" />
+          <span className="truncate">
+            {distance != null ? `${distance.toFixed(1)} mi away` : merchant.address || "Location not available"}
+          </span>
+        </div>
+      </div>
+    </button>
+  );
+};
+
+// ── Inline ad banner ───────────────────────────────────────────────────────────
+const InlineAdBanner = ({
+  merchant,
+}: {
+  merchant: {
+    id: string;
+    business_name: string;
+    business_type: string;
+    description?: string | null;
+    cashback_rate: number;
+    logo_url?: string | null;
+  };
+}) => {
+  const navigate = useNavigate();
+  return (
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-muted/40 border-b border-border">
+        <span className="text-[9px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
+          Advertisement
+        </span>
+        <button
+          type="button"
+          onClick={() => navigate("/profile")}
+          className="text-[10px] font-medium text-primary hover:underline"
+        >
+          Remove Ads with PawPass+ →
+        </button>
+      </div>
+      <div className="flex items-center gap-3 px-3.5 py-3">
+        <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-xl overflow-hidden flex-shrink-0">
+          {merchant.logo_url ? (
+            <img src={merchant.logo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+          ) : (
+            <span aria-hidden="true">{getCategoryEmoji(merchant.business_type)}</span>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold text-foreground truncate">{merchant.business_name}</div>
+          <div className="text-xs text-muted-foreground truncate">
+            {merchant.description || `Earn ${merchant.cashback_rate}x PawBucks at ${merchant.business_name}.`}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate(`/merchant/${merchant.id}`)}
+          className="bg-primary text-primary-foreground px-3.5 py-1.5 rounded-lg text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0"
+        >
+          Visit
+        </button>
+      </div>
+    </div>
   );
 };
 
