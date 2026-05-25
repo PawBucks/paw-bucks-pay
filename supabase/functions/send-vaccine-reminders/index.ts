@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
+import { currentHourInTz } from "../_shared/tz.ts";
+
+const TARGET_LOCAL_HOUR = 9; // 9 AM in each recipient's timezone
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -163,9 +166,15 @@ serve(async (req: Request) => {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("email, phone, full_name")
+      .select("email, phone, full_name, timezone")
       .eq("id", pet.user_id)
       .maybeSingle();
+
+    // Per-user timezone gate: only fire at TARGET_LOCAL_HOUR in the
+    // recipient's local time. Cron fires hourly, so each user gets exactly
+    // one window per day. Defaults to ET if no timezone is set.
+    const userHour = currentHourInTz(profile?.timezone);
+    if (userHour !== TARGET_LOCAL_HOUR) { skipped++; continue; }
 
     const { data: prefs } = await supabase
       .from("notification_preferences")

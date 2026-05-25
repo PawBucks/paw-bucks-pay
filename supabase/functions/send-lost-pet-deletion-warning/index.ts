@@ -1,6 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
+import { currentHourInTz } from "../_shared/tz.ts";
+
+const TARGET_LOCAL_HOUR = 9; // 9 AM in each pet owner's timezone
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,7 +89,7 @@ Deno.serve(async (req) => {
     
     const { data: profiles, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, email, full_name")
+      .select("id, email, full_name, timezone")
       .in("id", userIds);
 
     if (profilesError) {
@@ -94,7 +97,7 @@ Deno.serve(async (req) => {
       throw profilesError;
     }
 
-    const profileMap = new Map(profiles?.map((p: { id: string; email: string; full_name: string | null }) => [p.id, { email: p.email, full_name: p.full_name }]) || []);
+    const profileMap = new Map(profiles?.map((p: { id: string; email: string; full_name: string | null; timezone: string | null }) => [p.id, { email: p.email, full_name: p.full_name, timezone: p.timezone }]) || []);
 
     let emailsSent = 0;
     let emailsFailed = 0;
@@ -102,12 +105,17 @@ Deno.serve(async (req) => {
 
     // Send warning emails for each post
     for (const post of postsToWarn as LostPetPost[]) {
-      const profile = profileMap.get(post.user_id) as Profile | undefined;
+      const profile = profileMap.get(post.user_id) as (Profile & { timezone: string | null }) | undefined;
       
       if (!profile?.email) {
         console.warn(`[send-lost-pet-deletion-warning] No email found for user ${post.user_id}`);
         results.push({ postId: post.id, petName: post.pet_name, success: false, error: "No email found" });
         emailsFailed++;
+        continue;
+      }
+
+      // Per-user timezone gate: only fire at 9 AM local for this owner.
+      if (currentHourInTz(profile.timezone) !== TARGET_LOCAL_HOUR) {
         continue;
       }
 

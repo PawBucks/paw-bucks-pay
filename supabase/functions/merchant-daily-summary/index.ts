@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { currentHourInTz } from "../_shared/tz.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,11 +42,26 @@ serve(async (req: Request) => {
 
     // Check if a specific merchant_id was provided (on-demand trigger)
     let singleMerchantId: string | null = null;
+    let forceRun = false;
     try {
       const body = await req.json();
       singleMerchantId = body?.merchant_id || null;
+      forceRun = body?.force === true || body?.manual === true;
     } catch {
       // No body or invalid JSON — run for all merchants (cron mode)
+    }
+
+    // Platform rule: this digest must arrive at 9:00 PM Eastern, regardless
+    // of DST. The cron fires hourly in UTC; only proceed when ET hour == 21.
+    // On-demand calls (with merchant_id, or force/manual flag) bypass the gate.
+    if (!singleMerchantId && !forceRun) {
+      const etHour = currentHourInTz("America/New_York");
+      if (etHour !== 21) {
+        return new Response(
+          JSON.stringify({ skipped: true, reason: "outside_9pm_et_window", et_hour: etHour }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
     // Calculate "today" in Eastern Time (America/New_York) with correct offset
