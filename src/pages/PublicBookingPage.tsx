@@ -24,12 +24,12 @@ export default function PublicBookingPage() {
  queryKey: ["merchant-by-slug", slug],
  queryFn: async () => {
  if (!slug) throw new Error("No slug");
- const { data, error } = await (supabase
- .from("merchants") as any)
- .select("id, business_name, logo_url, address, phone, website_url, business_type, cashback_rate, storefront_slug, price_range, accepts_pawbucks, description")
- .eq("storefront_slug", slug)
- .eq("is_active", true)
- .single();
+      const { data, error } = await (supabase
+        .from("merchants_public") as any)
+        .select("id, business_name, logo_url, address, phone, website_url, business_type, cashback_rate, storefront_slug, price_range, accepts_pawbucks, description")
+        .eq("storefront_slug", slug)
+        .eq("is_paused", false)
+        .maybeSingle();
  if (error) throw error;
  return data;
  },

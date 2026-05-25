@@ -50,15 +50,31 @@ export default function DirectCheckout() {
     const fetchMerchant = async () => {
       if (!merchantId) return;
       try {
-        const { data, error } = await supabase
-          .from("merchants")
+        // Display fields come from the safe public view.
+        const { data: publicData, error: publicError } = await supabase
+          .from("merchants_public")
           .select(
-            "id, business_name, description, logo_url, business_type, onboarding_complete, stripe_account_id, address, phone, email, cashback_rate, accepts_pawbucks"
+            "id, business_name, description, logo_url, business_type, address, phone, email, cashback_rate, accepts_pawbucks"
           )
           .eq("id", merchantId)
-          .single();
-        if (error) throw error;
-        setMerchant(data as Merchant);
+          .maybeSingle();
+        if (publicError) throw publicError;
+        if (!publicData) {
+          toast.error("Merchant not found");
+          return;
+        }
+        // Stripe account id + onboarding flag come from a secure RPC.
+        const { data: ctx, error: ctxError } = await (supabase.rpc as any)(
+          "get_merchant_checkout_context",
+          { p_merchant_id: merchantId }
+        );
+        if (ctxError) throw ctxError;
+        const ctxRow = Array.isArray(ctx) ? ctx[0] : ctx;
+        setMerchant({
+          ...(publicData as any),
+          onboarding_complete: ctxRow?.onboarding_complete ?? false,
+          stripe_account_id: ctxRow?.stripe_account_id ?? null,
+        } as Merchant);
       } catch (err) {
         console.error("Error fetching merchant:", err);
         toast.error("Merchant not found");

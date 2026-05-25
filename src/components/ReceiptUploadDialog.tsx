@@ -65,12 +65,11 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
  const loadPlatformMerchants = async () => {
  setMerchantsLoading(true);
  try {
- const { data, error } = await supabase
- .from("merchants")
- .select("id, business_name, logo_url")
- .eq("approval_status","approved")
- .eq("is_paused", false)
- .order("business_name");
+      const { data, error } = await supabase
+        .from("merchants_public")
+        .select("id, business_name, logo_url")
+        .eq("is_paused", false)
+        .order("business_name");
 
  if (!error && data) {
  setPlatformMerchants(data);
