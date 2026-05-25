@@ -102,7 +102,7 @@ const sortOptions = [
   { value: "name", label: "A – Z" },
 ];
 
-const Discover = () => {
+const MerchantDirectory = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -113,10 +113,10 @@ const Discover = () => {
   const adMerchant = adMerchants[0];
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearch = useDebounce(searchTerm, 300);
-  const [selectedCategory, setSelectedCategory] = usePersistentState<string>("discover-category", "all");
-  const [sortBy, setSortBy] = usePersistentState<string>("discover-sort", "rating");
-  const [pawbucksOnly, setPawbucksOnly] = usePersistentState<boolean>("discover-pawbucks", false);
-  const [viewMode, setViewMode] = usePersistentState<"list" | "grid" | "map">("discover-view", "list");
+  const [selectedCategory, setSelectedCategory] = usePersistentState<string>("directory-category", "all");
+  const [sortBy, setSortBy] = usePersistentState<string>("directory-sort", "rating");
+  const [pawbucksOnly, setPawbucksOnly] = usePersistentState<boolean>("directory-pawbucks", false);
+  const [viewMode, setViewMode] = usePersistentState<"list" | "grid" | "map">("directory-view", "list");
   const [showMobileMap, setShowMobileMap] = useState(false);
 
   const { userLocation, locationLoading, locationError, requestLocation } = useUserLocation();
@@ -133,7 +133,7 @@ const Discover = () => {
   const { data: premiumAdsList = [] } = usePremiumAdMerchants();
   const { data: searchBoostedIds = new Set<string>() } = useSearchBoostedMerchantSet();
 
-  const { trackImpression, trackClick } = useSponsoredTracking("discover");
+  const { trackImpression, trackClick } = useSponsoredTracking("directory");
   const { trackBatchImpressions, trackSearchClick } = useSearchRankingTracking();
 
   useEffect(() => {
@@ -253,7 +253,7 @@ const Discover = () => {
           localMatch: false,
         }));
       if (boostedMerchants.length > 0) {
-        trackBatchImpressions(boostedMerchants, "discover", debouncedSearch || undefined);
+        trackBatchImpressions(boostedMerchants, "directory", debouncedSearch || undefined);
       }
     }
   }, [filteredMerchants, searchBoostedIds, trackBatchImpressions, debouncedSearch, selectedCategory]);
@@ -331,7 +331,7 @@ const Discover = () => {
       if (merchantIsSponsored)
         trackClick(merchant.id, index + 1, debouncedSearch || undefined);
       if (merchantIsBoosted)
-        trackSearchClick(merchant.id, index + 1, "discover", {
+        trackSearchClick(merchant.id, index + 1, "directory", {
           searchTerm: debouncedSearch || undefined,
           isBoosted: true,
         });
@@ -352,16 +352,16 @@ const Discover = () => {
   return (
     <>
       <SEO
-        title={seoMeta.discover.title}
-        description={seoMeta.discover.description}
-        keywords={[...seoMeta.discover.keywords]}
-        canonical={seoMeta.discover.canonical}
+        title={seoMeta.directory.title}
+        description={seoMeta.directory.description}
+        keywords={[...seoMeta.directory.keywords]}
+        canonical={seoMeta.directory.canonical}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: seoMeta.discover.title,
-          description: seoMeta.discover.description,
-          url: `https://pawbucks.app${seoMeta.discover.canonical}`,
+          name: seoMeta.directory.title,
+          description: seoMeta.directory.description,
+          url: `https://pawbucks.app${seoMeta.directory.canonical}`,
         }}
       />
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
@@ -377,7 +377,7 @@ const Discover = () => {
         <div className="bg-card border-b border-border px-4 py-3 sticky top-0 z-20">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-3">
-              <h1 className="text-lg font-extrabold tracking-tight">Discover</h1>
+              <h1 className="text-lg font-extrabold tracking-tight">Directory</h1>
               <div className="flex gap-1.5">
                 <button
                   onClick={() => { setViewMode("list"); setShowMobileMap(false); }}
@@ -827,4 +827,4 @@ const InlineAdBanner = ({
   );
 };
 
-export default Discover;
+export default MerchantDirectory;
