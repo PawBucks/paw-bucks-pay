@@ -110,7 +110,20 @@ const MerchantDirectory = () => {
   const tier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
   const showAds = !subLoading && tier !== "pawpass_plus";
   const { data: adMerchants = [] } = useAdMerchants();
-  const adMerchant = adMerchants[0];
+  // Rotate sponsored ads every 15s, and make sure the top and inline
+  // placements show different merchants whenever possible.
+  const [adTick, setAdTick] = useState(0);
+  useEffect(() => {
+    if (adMerchants.length <= 1) return;
+    const id = setInterval(() => setAdTick((t) => t + 1), 15000);
+    return () => clearInterval(id);
+  }, [adMerchants.length]);
+  const adCount = adMerchants.length;
+  const topAdMerchant = adCount > 0 ? adMerchants[adTick % adCount] : undefined;
+  const inlineOffset = adCount > 1 ? Math.max(1, Math.floor(adCount / 2)) : 0;
+  const inlineAdMerchant =
+    adCount > 0 ? adMerchants[(adTick + inlineOffset) % adCount] : undefined;
+  const adMerchant = topAdMerchant; // back-compat alias for existing checks
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>("directory-category", "all");
@@ -314,7 +327,7 @@ const MerchantDirectory = () => {
   const interleaved: ListEntry[] = [];
   organicList.forEach((m, i) => {
     interleaved.push({ kind: "merchant", m, index: sponsoredList.length + i });
-    if (showAds && adMerchant && (i + 1) % 5 === 0) {
+    if (showAds && inlineAdMerchant && (i + 1) % 5 === 0) {
       interleaved.push({ kind: "ad", key: `ad-${i}` });
     }
   });
@@ -563,7 +576,7 @@ const MerchantDirectory = () => {
                   {sponsoredList.map((m, i) => renderMerchantCard(m, i))}
                   {interleaved.map((entry) =>
                     entry.kind === "ad" ? (
-                      <InlineAdBanner key={entry.key} merchant={adMerchant!} />
+                      <InlineAdBanner key={entry.key} merchant={inlineAdMerchant!} />
                     ) : (
                       renderMerchantCard(entry.m, entry.index)
                     )
