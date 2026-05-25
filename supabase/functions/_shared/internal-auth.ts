@@ -15,14 +15,9 @@ export async function checkInternalSecret(req: Request, corsHeaders: Record<stri
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (provided && supabaseUrl && serviceRoleKey) {
     const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
-    const { data } = await supabase
-      .schema("private")
-      .from("system_config")
-      .select("value")
-      .eq("key", "internal_trigger_secret")
-      .maybeSingle();
+    const { data } = await supabase.rpc("verify_internal_trigger_secret", { _provided: provided });
 
-    if (data?.value && provided === data.value) {
+    if (data === true) {
       return null;
     }
   }
