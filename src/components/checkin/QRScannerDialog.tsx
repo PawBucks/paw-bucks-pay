@@ -397,9 +397,9 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  {nearbyEntities.map((entity) => (
  <button
  key={`${entity.type}-${entity.id}`}
- onClick={() => setSelectedEntityToken(entity.checkin_qr_token)}
+										onClick={() => setSelectedEntity({ type: entity.type, id: entity.id })}
  className={`w-full flex items-center justify-between gap-2 p-3 rounded-lg border text-left text-sm transition-colors ${
- selectedEntityToken === entity.checkin_qr_token
+											selectedEntity?.type === entity.type && selectedEntity?.id === entity.id
  ?"border-primary bg-primary/5"
  :"border-border hover:bg-muted"
  }`}
@@ -439,13 +439,21 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  <p className="text-sm font-medium">
  {nearbyEntities.length > 0 ?"Or select from all locations" :"Select a location"}
  </p>
- <Select value={selectedEntityToken} onValueChange={setSelectedEntityToken}>
+							<Select
+								value={selectedEntity ? `${selectedEntity.type}:${selectedEntity.id}` : ""}
+								onValueChange={(v) => {
+									const [type, id] = v.split(":");
+									if ((type === "merchant" || type === "vet") && id) {
+										setSelectedEntity({ type, id });
+									}
+								}}
+							>
  <SelectTrigger>
  <SelectValue placeholder="Choose a merchant or vet..." />
  </SelectTrigger>
  <SelectContent className="max-h-60">
  {allEntities.map((entity) => (
- <SelectItem key={`${entity.type}-${entity.id}`} value={entity.checkin_qr_token}>
+										<SelectItem key={`${entity.type}-${entity.id}`} value={`${entity.type}:${entity.id}`}>
  {entity.name}
  {entity.distance != null ? ` (${formatDistance(entity.distance)})` :""}
  </SelectItem>
@@ -456,7 +464,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
 
  <Button
  onClick={handleLocationCheckin}
- disabled={!selectedEntityToken}
+							disabled={!selectedEntity}
  className="w-full"
  >
  <MapPin className="w-4 h-4 mr-2" />
