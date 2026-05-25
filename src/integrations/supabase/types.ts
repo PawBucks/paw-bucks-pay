@@ -15599,6 +15599,10 @@ export type Database = {
         Args: { invoice_id: string; token: string }
         Returns: boolean
       }
+      verify_internal_trigger_secret: {
+        Args: { _provided: string }
+        Returns: boolean
+      }
       vest_pending_pawbucks: { Args: never; Returns: number }
       vet_can_view_pet: {
         Args: { pet_id: string; vet_user_id: string }
