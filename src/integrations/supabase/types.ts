@@ -15579,6 +15579,14 @@ export type Database = {
           vet_id: string
         }[]
       }
+      process_checkin_by_entity: {
+        Args: { p_entity_id: string; p_entity_type: string; p_user_id: string }
+        Returns: {
+          entity_name: string
+          message: string
+          success: boolean
+        }[]
+      }
       redeem_branded_pawbucks: {
         Args: {
           p_amount: number
