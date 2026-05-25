@@ -410,6 +410,7 @@ serve(async (req) => {
           headers: {
             Authorization: `Bearer ${serviceRoleKey}`,
             "Content-Type": "application/json",
+            "x-internal-secret": Deno.env.get("INTERNAL_TRIGGER_SECRET") ?? "",
           },
           body: JSON.stringify({
             documents: documents.map((d) => ({
