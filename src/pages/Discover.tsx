@@ -110,7 +110,20 @@ const Discover = () => {
   const tier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
   const showAds = !subLoading && tier !== "pawpass_plus";
   const { data: adMerchants = [] } = useAdMerchants();
-  const adMerchant = adMerchants[0];
+  // Rotate sponsored ads every 15s, and make sure the top and inline
+  // placements show different merchants whenever possible.
+  const [adTick, setAdTick] = useState(0);
+  useEffect(() => {
+    if (adMerchants.length <= 1) return;
+    const id = setInterval(() => setAdTick((t) => t + 1), 15000);
+    return () => clearInterval(id);
+  }, [adMerchants.length]);
+  const adCount = adMerchants.length;
+  const topAdMerchant = adCount > 0 ? adMerchants[adTick % adCount] : undefined;
+  const inlineOffset = adCount > 1 ? Math.max(1, Math.floor(adCount / 2)) : 0;
+  const inlineAdMerchant =
+    adCount > 0 ? adMerchants[(adTick + inlineOffset) % adCount] : undefined;
+  const adMerchant = topAdMerchant; // back-compat alias for existing checks
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearch = useDebounce(searchTerm, 300);
   const [selectedCategory, setSelectedCategory] = usePersistentState<string>("discover-category", "all");
@@ -314,7 +327,7 @@ const Discover = () => {
   const interleaved: ListEntry[] = [];
   organicList.forEach((m, i) => {
     interleaved.push({ kind: "merchant", m, index: sponsoredList.length + i });
-    if (showAds && adMerchant && (i + 1) % 5 === 0) {
+    if (showAds && inlineAdMerchant && (i + 1) % 5 === 0) {
       interleaved.push({ kind: "ad", key: `ad-${i}` });
     }
   });
@@ -453,6 +466,50 @@ const Discover = () => {
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto">
+            {/* Top sponsored ad — Free + PawPass only */}
+            {showAds && topAdMerchant && (
+              <div className="bg-card border-b border-border">
+                <div className="max-w-4xl mx-auto">
+                  <div className="flex items-center justify-between px-4 pt-2 pb-0.5">
+                    <span className="text-[9px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
+                      Advertisement
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/profile")}
+                      className="text-[10px] font-medium text-primary hover:underline"
+                    >
+                      Remove Ads with PawPass+ →
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3 px-4 pb-3 pt-1">
+                    <div className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-lg overflow-hidden flex-shrink-0">
+                      {topAdMerchant.logo_url ? (
+                        <img src={topAdMerchant.logo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <span aria-hidden="true">{getCategoryEmoji(topAdMerchant.business_type)}</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-foreground truncate">
+                        {topAdMerchant.business_name}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {topAdMerchant.description || `Earn ${topAdMerchant.cashback_rate}x PawBucks at ${topAdMerchant.business_name}.`}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/merchant/${topAdMerchant.id}`)}
+                      className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0"
+                    >
+                      Visit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Hero + category pills */}
             <div className="bg-card border-b border-border">
               <div className="max-w-4xl mx-auto px-4 pt-5">
@@ -563,57 +620,13 @@ const Discover = () => {
                   {sponsoredList.map((m, i) => renderMerchantCard(m, i))}
                   {interleaved.map((entry) =>
                     entry.kind === "ad" ? (
-                      <InlineAdBanner key={entry.key} merchant={adMerchant!} />
+                      <InlineAdBanner key={entry.key} merchant={inlineAdMerchant!} />
                     ) : (
                       renderMerchantCard(entry.m, entry.index)
                     )
                   )}
                 </div>
               )}
-            </div>
-          </div>
-        )}
-
-        {/* Sticky footer ad — Free + PawPass only */}
-        {showAds && adMerchant && viewMode !== "map" && !showMobileMap && (
-          <div className="sticky bottom-0 left-0 right-0 z-30 bg-card border-t border-border shadow-[0_-4px_16px_hsl(var(--foreground)/0.07)]">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-between px-4 pt-1 pb-0.5">
-                <span className="text-[9px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
-                  Advertisement
-                </span>
-                <button
-                  type="button"
-                  onClick={() => navigate("/profile")}
-                  className="text-[10px] font-medium text-primary hover:underline"
-                >
-                  Remove Ads with PawPass+ →
-                </button>
-              </div>
-              <div className="flex items-center gap-3 px-4 pb-3 pt-1">
-                <div className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-lg overflow-hidden flex-shrink-0">
-                  {adMerchant.logo_url ? (
-                    <img src={adMerchant.logo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
-                  ) : (
-                    <span aria-hidden="true">{getCategoryEmoji(adMerchant.business_type)}</span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-foreground truncate">
-                    {adMerchant.business_name}
-                  </div>
-                  <div className="text-xs text-muted-foreground truncate">
-                    {adMerchant.description || `Earn ${adMerchant.cashback_rate}x PawBucks at ${adMerchant.business_name}.`}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/merchant/${adMerchant.id}`)}
-                  className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0"
-                >
-                  Visit
-                </button>
-              </div>
             </div>
           </div>
         )}
