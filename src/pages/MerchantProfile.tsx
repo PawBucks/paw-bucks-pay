@@ -750,7 +750,6 @@ const MerchantProfile = memo(() => {
                     />
 
                     <div className="flex items-center gap-2 mb-1">
-                      <Sparkles className="w-4 h-4 text-gold" />
                       <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/70">
                         Premium Memberships
                       </span>
