@@ -576,7 +576,7 @@ const Discover = () => {
                   {sponsoredList.map((m, i) => renderMerchantCard(m, i))}
                   {interleaved.map((entry) =>
                     entry.kind === "ad" ? (
-                      <InlineAdBanner key={entry.key} merchant={adMerchant!} />
+                      <InlineAdBanner key={entry.key} merchant={inlineAdMerchant!} />
                     ) : (
                       renderMerchantCard(entry.m, entry.index)
                     )
