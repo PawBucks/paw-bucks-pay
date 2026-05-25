@@ -702,14 +702,14 @@ const MerchantListItem = ({ merchant, isVerified, isSponsored, isFeatured, onCli
                   <Star
                     key={i}
                     className={`w-3 h-3 ${
-                      i <= Math.round(merchant.average_rating)
+                      i <= Math.round(merchant.average_rating ?? 0)
                         ? "fill-amber-400 text-amber-400"
                         : "fill-muted text-muted"
                     }`}
                   />
                 ))}
                 <span className="font-semibold text-foreground ml-0.5">
-                  {merchant.average_rating.toFixed(1)}
+                  {(merchant.average_rating ?? 0).toFixed(1)}
                 </span>
                 <span className="text-muted-foreground">({merchant.review_count})</span>
               </span>
