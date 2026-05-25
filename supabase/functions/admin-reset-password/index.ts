@@ -76,9 +76,13 @@ serve(async (req) => {
       );
     }
 
-    // Send password reset email via Supabase Auth
+    // Send password reset email via Supabase Auth.
+    // SECURITY: The redirect URL must NEVER come from caller-controlled
+    // headers (e.g. Origin) — that would let an attacker phish the reset
+    // token. Always use a server-side configured base URL.
+    const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://pawbucks.app";
     const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
-      redirectTo: `${req.headers.get("origin") || Deno.env.get("SUPABASE_URL")}/admin/reset-password`,
+      redirectTo: `${APP_BASE_URL}/admin/reset-password`,
     });
 
     if (resetError) {
