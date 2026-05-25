@@ -185,13 +185,15 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const { data: merchantPaymentInfo } = useQuery({
     queryKey: ["merchant-payment-info", merchantId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("merchants")
-        .select("stripe_account_id, timezone")
-        .eq("id", merchantId)
-        .maybeSingle();
+      const { data, error } = await (supabase.rpc as any)(
+        "get_merchant_checkout_context",
+        { p_merchant_id: merchantId }
+      );
       if (error) throw error;
-      return data;
+      const row = Array.isArray(data) ? data[0] : data;
+      return row
+        ? { stripe_account_id: row.stripe_account_id, timezone: row.timezone }
+        : null;
     },
   });
   const merchantAcceptsCards = !!merchantPaymentInfo?.stripe_account_id;

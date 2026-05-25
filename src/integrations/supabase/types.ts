@@ -14918,20 +14918,30 @@ export type Database = {
       merchants_public: {
         Row: {
           accepts_pawbucks: boolean | null
+          accepts_welcome_credit: boolean | null
           address: string | null
+          approval_status: Database["public"]["Enums"]["approval_status"] | null
           business_categories: string[] | null
           business_name: string | null
           business_type: string | null
           cashback_rate: number | null
+          contact_person: string | null
+          country: string | null
+          created_at: string | null
           description: string | null
+          email: string | null
+          entity_type: string | null
           facebook_url: string | null
           id: string | null
           instagram_url: string | null
+          is_paused: boolean | null
           is_sponsored: boolean | null
           latitude: number | null
           linkedin_url: string | null
           logo_url: string | null
           longitude: number | null
+          onboarding_complete: boolean | null
+          owner_name: string | null
           pawbucks_cap_enabled: boolean | null
           pawbucks_cap_pct: number | null
           pawbucks_promo_cap_pct: number | null
@@ -14940,29 +14950,50 @@ export type Database = {
           phone: string | null
           price_range: number | null
           privacy_policy_url: string | null
+          search_keywords: string[] | null
+          service_area_radius_miles: number | null
           shipping_returns_policy_url: string | null
           sponsored_until: string | null
+          state_of_incorporation: string | null
           storefront_slug: string | null
+          stripe_account_status: string | null
+          timezone: string | null
           tos_url: string | null
           twitter_url: string | null
+          updated_at: string | null
+          user_id: string | null
           website_url: string | null
+          welcome_credit_opted_in_at: string | null
+          working_style: string | null
         }
         Insert: {
           accepts_pawbucks?: boolean | null
+          accepts_welcome_credit?: boolean | null
           address?: string | null
+          approval_status?:
+            | Database["public"]["Enums"]["approval_status"]
+            | null
           business_categories?: string[] | null
           business_name?: string | null
           business_type?: string | null
           cashback_rate?: number | null
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string | null
           description?: string | null
+          email?: string | null
+          entity_type?: string | null
           facebook_url?: string | null
           id?: string | null
           instagram_url?: string | null
+          is_paused?: boolean | null
           is_sponsored?: boolean | null
           latitude?: number | null
           linkedin_url?: string | null
           logo_url?: string | null
           longitude?: number | null
+          onboarding_complete?: boolean | null
+          owner_name?: string | null
           pawbucks_cap_enabled?: boolean | null
           pawbucks_cap_pct?: number | null
           pawbucks_promo_cap_pct?: number | null
@@ -14971,29 +15002,50 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
+          search_keywords?: string[] | null
+          service_area_radius_miles?: number | null
           shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
+          state_of_incorporation?: string | null
           storefront_slug?: string | null
+          stripe_account_status?: string | null
+          timezone?: string | null
           tos_url?: string | null
           twitter_url?: string | null
+          updated_at?: string | null
+          user_id?: string | null
           website_url?: string | null
+          welcome_credit_opted_in_at?: string | null
+          working_style?: string | null
         }
         Update: {
           accepts_pawbucks?: boolean | null
+          accepts_welcome_credit?: boolean | null
           address?: string | null
+          approval_status?:
+            | Database["public"]["Enums"]["approval_status"]
+            | null
           business_categories?: string[] | null
           business_name?: string | null
           business_type?: string | null
           cashback_rate?: number | null
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string | null
           description?: string | null
+          email?: string | null
+          entity_type?: string | null
           facebook_url?: string | null
           id?: string | null
           instagram_url?: string | null
+          is_paused?: boolean | null
           is_sponsored?: boolean | null
           latitude?: number | null
           linkedin_url?: string | null
           logo_url?: string | null
           longitude?: number | null
+          onboarding_complete?: boolean | null
+          owner_name?: string | null
           pawbucks_cap_enabled?: boolean | null
           pawbucks_cap_pct?: number | null
           pawbucks_promo_cap_pct?: number | null
@@ -15002,14 +15054,38 @@ export type Database = {
           phone?: string | null
           price_range?: number | null
           privacy_policy_url?: string | null
+          search_keywords?: string[] | null
+          service_area_radius_miles?: number | null
           shipping_returns_policy_url?: string | null
           sponsored_until?: string | null
+          state_of_incorporation?: string | null
           storefront_slug?: string | null
+          stripe_account_status?: string | null
+          timezone?: string | null
           tos_url?: string | null
           twitter_url?: string | null
+          updated_at?: string | null
+          user_id?: string | null
           website_url?: string | null
+          welcome_credit_opted_in_at?: string | null
+          working_style?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "merchants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partner_vets_public: {
         Row: {
@@ -15177,6 +15253,15 @@ export type Database = {
       }
       expire_pawbucks: { Args: never; Returns: number }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
+      find_merchant_by_qr_token: {
+        Args: { p_token: string }
+        Returns: {
+          business_name: string
+          id: string
+          latitude: number
+          longitude: number
+        }[]
+      }
       generate_admin_invoice_number: { Args: never; Returns: string }
       generate_checkin_qr_token: { Args: never; Returns: string }
       generate_claim_number: { Args: never; Returns: string }
@@ -15342,6 +15427,19 @@ export type Database = {
           transaction_count: number
         }[]
       }
+      get_merchant_checkout_context: {
+        Args: { p_merchant_id: string }
+        Returns: {
+          accepts_pawbucks: boolean
+          business_name: string
+          cashback_rate: number
+          id: string
+          onboarding_complete: boolean
+          stripe_account_id: string
+          stripe_account_status: string
+          timezone: string
+        }[]
+      }
       get_merchant_customer_contacts: {
         Args: { p_merchant_id: string }
         Returns: {
@@ -15479,6 +15577,14 @@ export type Database = {
           message: string
           success: boolean
           vet_id: string
+        }[]
+      }
+      process_checkin_by_entity: {
+        Args: { p_entity_id: string; p_entity_type: string; p_user_id: string }
+        Returns: {
+          entity_name: string
+          message: string
+          success: boolean
         }[]
       }
       redeem_branded_pawbucks: {

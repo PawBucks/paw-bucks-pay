@@ -62,12 +62,11 @@ export const PartnerReceiptDialog = ({ open, onOpenChange, userId }: PartnerRece
  const loadPlatformMerchants = async () => {
  setMerchantsLoading(true);
  try {
- const { data } = await supabase
- .from("merchants")
- .select("id, business_name, logo_url")
- .eq("approval_status","approved")
- .eq("is_paused", false)
- .order("business_name");
+      const { data } = await supabase
+        .from("merchants_public")
+        .select("id, business_name, logo_url")
+        .eq("is_paused", false)
+        .order("business_name");
  if (data) setPlatformMerchants(data);
  } finally {
  setMerchantsLoading(false);

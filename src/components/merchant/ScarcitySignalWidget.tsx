@@ -151,11 +151,10 @@ export function ScarcitySignalWidget({ merchantId, businessType }: ScarcitySigna
  }
 
  // Count competing merchants
- const { count: competitorCount } = await supabase
- .from("merchants")
- .select("id", { count:"exact", head: true })
- .eq("business_type", businessType)
- .eq("approval_status","approved");
+      const { count: competitorCount } = await supabase
+        .from("merchants_public")
+        .select("id", { count:"exact", head: true })
+        .eq("business_type", businessType);
 
  return {
  cellName: cellInfo?.name ??"Your Area",

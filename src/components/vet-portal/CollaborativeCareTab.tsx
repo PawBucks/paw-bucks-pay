@@ -102,9 +102,9 @@ export function CollaborativeCareTab({ vetId }: CollaborativeCareTabProps) {
  const { data: merchants } = useQuery({
  queryKey: ["care-merchants"],
  queryFn: async () => {
- const { data, error } = await supabase
- .from("merchants")
- .select("id, business_name, business_type");
+      const { data, error } = await supabase
+        .from("merchants_public")
+        .select("id, business_name, business_type");
 
  if (error) throw error;
  

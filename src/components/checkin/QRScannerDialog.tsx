@@ -26,7 +26,7 @@ type NearbyEntity = {
  name: string;
  type:"merchant" |"vet";
  distance: number | null;
- checkin_qr_token: string;
+	checkin_qr_token?: string;
 };
 
 export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
@@ -43,6 +43,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  const [locationLoading, setLocationLoading] = useState(false);
  const [locationError, setLocationError] = useState<string | null>(null);
  const [selectedEntityToken, setSelectedEntityToken] = useState<string>("");
+	const [selectedEntity, setSelectedEntity] = useState<{ type: "merchant" | "vet"; id: string } | null>(null);
  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
  const [entitiesLoaded, setEntitiesLoaded] = useState(false);
 
@@ -97,6 +98,34 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  }
  }, [user, processing, stopScanner]);
 
+	const processEntityCheckin = useCallback(
+		async (entityType: "merchant" | "vet", entityId: string) => {
+			if (!user || processing) return;
+			setProcessing(true);
+			try {
+				await stopScanner();
+				const { data, error } = await (supabase.rpc as any)(
+					"process_checkin_by_entity",
+					{ p_entity_type: entityType, p_entity_id: entityId, p_user_id: user.id }
+				);
+				if (error) throw error;
+				const row = Array.isArray(data) ? data[0] : data;
+				if (row) {
+					setResult({ success: row.success, entityName: row.entity_name, message: row.message });
+					if (row.success) toast.success(`Checked in at ${row.entity_name}!`);
+					else toast.info(row.message);
+				}
+			} catch (err) {
+				console.error("Check-in error:", err);
+				setResult({ success: false, entityName: null, message: "Failed to process check-in" });
+				toast.error("Failed to check in");
+			} finally {
+				setProcessing(false);
+			}
+		},
+		[user, processing, stopScanner]
+	);
+
  const startScanner = useCallback(async () => {
  setResult(null);
  setScanning(true);
@@ -147,18 +176,15 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  try {
  // Fetch merchants and vets with QR tokens in parallel
  const [merchantsRes, vetsRes] = await Promise.all([
- supabase
- .from("merchants")
- .select("id, business_name, latitude, longitude, checkin_qr_token")
- .eq("approval_status","approved")
- .eq("is_paused", false)
- .not("checkin_qr_token","is", null)
- .order("business_name"),
+				supabase
+					.from("merchants_public")
+					.select("id, business_name, latitude, longitude")
+					.eq("is_paused", false)
+					.order("business_name"),
  supabase
  .from("partner_vets")
- .select("id, clinic_name, checkin_qr_token")
+					.select("id, clinic_name")
  .eq("is_verified", true)
- .not("checkin_qr_token","is", null)
  .order("clinic_name"),
  ]);
 
@@ -167,14 +193,13 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  for (const m of merchantsRes.data || []) {
  const dist =
  lat != null && lng != null && m.latitude && m.longitude
- ? getDistance(lat, lng, m.latitude, m.longitude)
+						? getDistance(lat, lng, Number(m.latitude), Number(m.longitude))
  : null;
  entities.push({
  id: m.id,
  name: m.business_name,
  type:"merchant",
  distance: dist,
- checkin_qr_token: m.checkin_qr_token!,
  });
  }
 
@@ -184,7 +209,6 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  name: v.clinic_name ||"Veterinary Clinic",
  type:"vet",
  distance: null,
- checkin_qr_token: v.checkin_qr_token!,
  });
  }
 
@@ -241,11 +265,11 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  };
 
  const handleLocationCheckin = () => {
- if (!selectedEntityToken) {
+		if (!selectedEntity) {
  toast.error("Please select a location");
  return;
  }
- processToken(selectedEntityToken);
+		processEntityCheckin(selectedEntity.type, selectedEntity.id);
  };
 
  useEffect(() => {
@@ -263,7 +287,8 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  if (!mountedRef.current) return;
  setResult(null);
  setProcessing(false);
- setSelectedEntityToken("");
+			setSelectedEntityToken("");
+			setSelectedEntity(null);
  setEntitiesLoaded(false);
  setNearbyEntities([]);
  setAllEntities([]);
@@ -372,9 +397,9 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  {nearbyEntities.map((entity) => (
  <button
  key={`${entity.type}-${entity.id}`}
- onClick={() => setSelectedEntityToken(entity.checkin_qr_token)}
+										onClick={() => setSelectedEntity({ type: entity.type, id: entity.id })}
  className={`w-full flex items-center justify-between gap-2 p-3 rounded-lg border text-left text-sm transition-colors ${
- selectedEntityToken === entity.checkin_qr_token
+											selectedEntity?.type === entity.type && selectedEntity?.id === entity.id
  ?"border-primary bg-primary/5"
  :"border-border hover:bg-muted"
  }`}
@@ -414,13 +439,21 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
  <p className="text-sm font-medium">
  {nearbyEntities.length > 0 ?"Or select from all locations" :"Select a location"}
  </p>
- <Select value={selectedEntityToken} onValueChange={setSelectedEntityToken}>
+							<Select
+								value={selectedEntity ? `${selectedEntity.type}:${selectedEntity.id}` : ""}
+								onValueChange={(v) => {
+									const [type, id] = v.split(":");
+									if ((type === "merchant" || type === "vet") && id) {
+										setSelectedEntity({ type, id });
+									}
+								}}
+							>
  <SelectTrigger>
  <SelectValue placeholder="Choose a merchant or vet..." />
  </SelectTrigger>
  <SelectContent className="max-h-60">
  {allEntities.map((entity) => (
- <SelectItem key={`${entity.type}-${entity.id}`} value={entity.checkin_qr_token}>
+										<SelectItem key={`${entity.type}-${entity.id}`} value={`${entity.type}:${entity.id}`}>
  {entity.name}
  {entity.distance != null ? ` (${formatDistance(entity.distance)})` :""}
  </SelectItem>
@@ -431,7 +464,7 @@ export function QRScannerDialog({ open, onOpenChange }: QRScannerDialogProps) {
 
  <Button
  onClick={handleLocationCheckin}
- disabled={!selectedEntityToken}
+							disabled={!selectedEntity}
  className="w-full"
  >
  <MapPin className="w-4 h-4 mr-2" />

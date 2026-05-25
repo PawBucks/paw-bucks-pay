@@ -240,11 +240,11 @@ export function SmartScheduleTab({ merchantId }: Props) {
 
  if (!startLocation) {
  // Use merchant's own coordinates
- const { data: merchant } = await supabase
- .from("merchants")
- .select("latitude, longitude, address")
- .eq("id", merchantId)
- .single();
+          const { data: merchant } = await supabase
+            .from("merchants_public")
+            .select("latitude, longitude, address")
+            .eq("id", merchantId)
+            .maybeSingle();
 
  if (merchant?.latitude) {
  startLocation = { latitude: merchant.latitude, longitude: merchant.longitude, address: merchant.address };
