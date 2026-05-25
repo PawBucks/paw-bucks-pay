@@ -327,9 +327,6 @@ const MerchantDirectory = () => {
   const interleaved: ListEntry[] = [];
   organicList.forEach((m, i) => {
     interleaved.push({ kind: "merchant", m, index: sponsoredList.length + i });
-    if (showAds && inlineAdMerchant && (i + 1) % 5 === 0) {
-      interleaved.push({ kind: "ad", key: `ad-${i}` });
-    }
   });
 
   const renderMerchantCard = (
@@ -627,6 +624,50 @@ const MerchantDirectory = () => {
                   )}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Sticky footer ad — Free + PawPass only. Uses a different merchant from the top ad. */}
+        {showAds && inlineAdMerchant && viewMode !== "map" && !showMobileMap && (
+          <div className="sticky bottom-0 left-0 right-0 z-30 bg-card border-t border-border shadow-[0_-4px_16px_hsl(var(--foreground)/0.07)]">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-between px-4 pt-1 pb-0.5">
+                <span className="text-[9px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
+                  Advertisement
+                </span>
+                <button
+                  type="button"
+                  onClick={() => navigate("/profile")}
+                  className="text-[10px] font-medium text-primary hover:underline"
+                >
+                  Remove Ads with PawPass+ →
+                </button>
+              </div>
+              <div className="flex items-center gap-3 px-4 pb-3 pt-1">
+                <div className="w-11 h-11 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-lg overflow-hidden flex-shrink-0">
+                  {inlineAdMerchant.logo_url ? (
+                    <img src={inlineAdMerchant.logo_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <span aria-hidden="true">{getCategoryEmoji(inlineAdMerchant.business_type)}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-foreground truncate">
+                    {inlineAdMerchant.business_name}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {inlineAdMerchant.description || `Earn ${inlineAdMerchant.cashback_rate}x PawBucks at ${inlineAdMerchant.business_name}.`}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/merchant/${inlineAdMerchant.id}`)}
+                  className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0"
+                >
+                  Visit
+                </button>
+              </div>
             </div>
           </div>
         )}
