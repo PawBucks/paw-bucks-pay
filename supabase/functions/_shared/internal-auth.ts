@@ -1,14 +1,34 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+
 // Shared guard for cron / internal-only edge functions.
 // Returns a 401 Response if the caller did not present the configured
 // x-internal-secret header. Returns null when the request is authorized.
-export function checkInternalSecret(req: Request, corsHeaders: Record<string, string>): Response | null {
-  const expected = Deno.env.get("INTERNAL_TRIGGER_SECRET");
+export async function checkInternalSecret(req: Request, corsHeaders: Record<string, string>): Promise<Response | null> {
   const provided = req.headers.get("x-internal-secret");
-  if (!expected || provided !== expected) {
-    return new Response(JSON.stringify({ error: "unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  const runtimeSecret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
+
+  if (provided && runtimeSecret && provided === runtimeSecret) {
+    return null;
   }
-  return null;
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (provided && supabaseUrl && serviceRoleKey) {
+    const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
+    const { data } = await supabase
+      .schema("private")
+      .from("system_config")
+      .select("value")
+      .eq("key", "internal_trigger_secret")
+      .maybeSingle();
+
+    if (data?.value && provided === data.value) {
+      return null;
+    }
+  }
+
+  return new Response(JSON.stringify({ error: "unauthorized" }), {
+    status: 401,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }
