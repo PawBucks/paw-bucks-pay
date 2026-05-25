@@ -2,6 +2,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
+import { currentHourInTz } from "../_shared/tz.ts";
+
+const TARGET_LOCAL_HOUR = 9; // 9 AM in each merchant's timezone
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -246,13 +249,23 @@ serve(async (req) => {
     // Get merchant details
     const { data: merchants, error: merchantsError } = await supabase
       .from("merchants")
-      .select("id, business_name, email, phone")
+      .select("id, business_name, email, phone, user_id")
       .in("id", merchantIds);
 
     if (merchantsError) {
       console.error("Error fetching merchants:", merchantsError);
       throw merchantsError;
     }
+
+    // Resolve each merchant's owner timezone for per-merchant local-hour gating.
+    const merchantUserIds = (merchants || []).map((m) => m.user_id).filter(Boolean);
+    const { data: ownerProfiles } = merchantUserIds.length > 0
+      ? await supabase.from("profiles").select("id, timezone").in("id", merchantUserIds)
+      : { data: [] as { id: string; timezone: string | null }[] };
+    const tzByUserId = new Map<string, string | null>();
+    for (const p of ownerProfiles || []) tzByUserId.set(p.id, p.timezone);
+    const merchantTz = new Map<string, string | null>();
+    for (const m of merchants || []) merchantTz.set(m.id, tzByUserId.get(m.user_id) ?? null);
 
     // Get invoice settings for each merchant
     const { data: allSettings, error: settingsError } = await supabase
@@ -276,6 +289,12 @@ serve(async (req) => {
         console.log(`Merchant not found for invoice ${invoice.invoice_number}`);
         continue;
       }
+
+      // Per-merchant timezone gate: only fire at 9 AM local for the merchant.
+      // (Invoice clients aren't always registered users, so we anchor on the
+      // sending merchant's timezone instead of the recipient's.)
+      const tz = merchantTz.get(invoice.merchant_id);
+      if (currentHourInTz(tz) !== TARGET_LOCAL_HOUR) continue;
 
       // Get settings or use defaults
       const settings = settingsMap.get(invoice.merchant_id) || {
