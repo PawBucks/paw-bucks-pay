@@ -15253,6 +15253,15 @@ export type Database = {
       }
       expire_pawbucks: { Args: never; Returns: number }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
+      find_merchant_by_qr_token: {
+        Args: { p_token: string }
+        Returns: {
+          business_name: string
+          id: string
+          latitude: number
+          longitude: number
+        }[]
+      }
       generate_admin_invoice_number: { Args: never; Returns: string }
       generate_checkin_qr_token: { Args: never; Returns: string }
       generate_claim_number: { Args: never; Returns: string }
