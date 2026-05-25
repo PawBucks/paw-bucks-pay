@@ -327,7 +327,7 @@ const Discover = () => {
   const interleaved: ListEntry[] = [];
   organicList.forEach((m, i) => {
     interleaved.push({ kind: "merchant", m, index: sponsoredList.length + i });
-    if (showAds && adMerchant && (i + 1) % 5 === 0) {
+    if (showAds && inlineAdMerchant && (i + 1) % 5 === 0) {
       interleaved.push({ kind: "ad", key: `ad-${i}` });
     }
   });
