@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.0";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
+import { currentHourInTz } from "../_shared/tz.ts";
+
+const TARGET_LOCAL_HOUR = 10; // 10 AM in each customer's timezone
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -82,6 +85,14 @@ serve(async (req) => {
       }
 
       for (const [userId, lastBooking] of latestByUser) {
+        // Per-user timezone gate: only fire at 10 AM local for the customer.
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("timezone")
+          .eq("id", userId)
+          .maybeSingle();
+        if (currentHourInTz(userProfile?.timezone) !== TARGET_LOCAL_HOUR) continue;
+
         // Check if user has a future booking with this merchant already
         const today = new Date().toISOString().split("T")[0];
         const { data: futureBooking } = await supabase
