@@ -19,6 +19,11 @@ import { format } from "date-fns";
 import { MaximusChat } from "@/components/maximus/MaximusChat";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { CustomerLoyaltyCards } from "@/components/dashboard/CustomerLoyaltyCards";
+import { ConfettiCanvas } from "@/components/birthday/ConfettiCanvas";
+import { BirthdayOverlay } from "@/components/birthday/BirthdayOverlay";
+import { BirthdayBanner } from "@/components/birthday/BirthdayBanner";
+import { getTodayBirthdays } from "@/components/birthday/birthdayUtils";
+import { useState } from "react";
 
 const PB_TO_USD = 0.001;
 
@@ -31,6 +36,27 @@ const SimpleHome = () => {
 
   const { spendableBalance, petFundBalance, welcomeCreditBalance } =
     useSpendablePawBucks(user?.id);
+
+  // Birthday detection
+  const birthdayPets = useMemo(() => getTodayBirthdays(pets as any), [pets]);
+  const hasBirthday = birthdayPets.length > 0;
+  const sessionKey = `pb_bday_shown_${new Date().toDateString()}`;
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showBanner, setShowBanner] = useState(false);
+
+  useEffect(() => {
+    if (!hasBirthday) return;
+    const alreadyShown = sessionStorage.getItem(sessionKey);
+    if (alreadyShown) {
+      setShowBanner(true);
+      return;
+    }
+    sessionStorage.setItem(sessionKey, "1");
+    setShowConfetti(true);
+    setShowOverlay(true);
+    setShowBanner(true);
+  }, [hasBirthday, sessionKey]);
 
   // Total $ available = earned + promotional, displayed in USD only
   const availableUsd = useMemo(
@@ -67,6 +93,10 @@ const SimpleHome = () => {
     <>
       <SEO title="Home — PawBucks" description="Pay for pet care and save automatically." noIndex />
       <div className="min-h-[100dvh] bg-background flex flex-col">
+        <ConfettiCanvas active={showConfetti} onDone={() => setShowConfetti(false)} />
+        {showOverlay && (
+          <BirthdayOverlay pets={birthdayPets as any} onDismiss={() => setShowOverlay(false)} />
+        )}
         <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
         <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-12 pb-28 md:pb-10 max-w-6xl">
@@ -81,6 +111,13 @@ const SimpleHome = () => {
               Pay for pet care. Save automatically.
             </h1>
           </motion.div>
+
+          {/* Birthday banner */}
+          {hasBirthday && showBanner && (
+            <div className="mb-6">
+              <BirthdayBanner pets={birthdayPets as any} onDismiss={() => setShowBanner(false)} />
+            </div>
+          )}
 
       <div className="grid gap-6 lg:gap-10 lg:grid-cols-5">
         {/* Left column — hero + actions */}
