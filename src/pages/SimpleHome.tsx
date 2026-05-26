@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,7 +23,6 @@ import { ConfettiCanvas } from "@/components/birthday/ConfettiCanvas";
 import { BirthdayOverlay } from "@/components/birthday/BirthdayOverlay";
 import { BirthdayBanner } from "@/components/birthday/BirthdayBanner";
 import { getTodayBirthdays } from "@/components/birthday/birthdayUtils";
-import { useState } from "react";
 
 const PB_TO_USD = 0.001;
 
