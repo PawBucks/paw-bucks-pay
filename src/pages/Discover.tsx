@@ -749,25 +749,29 @@ const MerchantListItem = ({ merchant, isVerified, isSponsored, isFeatured, onCli
 
         {/* Rating + price */}
         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-          {merchant.review_count > 0 ? (
-            <>
-              <span className="inline-flex items-center gap-0.5 text-[11px]">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star
-                    key={i}
-                    className={`w-3 h-3 ${
-                      i <= Math.round(merchant.average_rating ?? 0)
-                        ? "fill-amber-400 text-amber-400"
-                        : "fill-muted text-muted"
-                    }`}
-                  />
-                ))}
+          <span className="inline-flex items-center gap-0.5 text-[11px]">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star
+                key={i}
+                className={`w-3 h-3 ${
+                  i <= Math.round(merchant.average_rating ?? 0)
+                    ? "fill-amber-400 text-amber-400"
+                    : "fill-muted text-muted"
+                }`}
+              />
+            ))}
+            {merchant.review_count > 0 ? (
+              <>
                 <span className="font-semibold text-foreground ml-0.5">
                   {(merchant.average_rating ?? 0).toFixed(1)}
                 </span>
                 <span className="text-muted-foreground">({merchant.review_count})</span>
-              </span>
-              {merchant.price_range ? (
+              </>
+            ) : (
+              <span className="text-muted-foreground ml-0.5 italic">No reviews yet</span>
+            )}
+          </span>
+          {merchant.price_range ? (
                 <>
                   <span className="text-muted-foreground/40">·</span>
                   <span className="text-[11px]">
@@ -786,10 +790,6 @@ const MerchantListItem = ({ merchant, isVerified, isSponsored, isFeatured, onCli
                   </span>
                 </>
               ) : null}
-            </>
-          ) : (
-            <span className="text-[11px] italic text-muted-foreground">No reviews yet</span>
-          )}
         </div>
 
         {/* Tags */}
