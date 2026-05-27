@@ -122,7 +122,13 @@ const SimpleHome = () => {
           {/* Birthday banner */}
           {hasBirthday && showBanner && (
             <div className="mb-6">
-              <BirthdayBanner pets={birthdayPets as any} onDismiss={() => setShowBanner(false)} />
+              <BirthdayBanner
+                pets={birthdayPets as any}
+                onDismiss={() => {
+                  setShowBanner(false);
+                  localStorage.setItem(bannerKey, "dismissed");
+                }}
+              />
             </div>
           )}
 
