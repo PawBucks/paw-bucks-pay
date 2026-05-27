@@ -48,10 +48,13 @@ export const useDataPrefetch = () => {
 
  return merchantsResult.data.map(merchant => {
  const ratings = ratingsByMerchant.get(merchant.id);
+        const avg = ratings ? ratings.total / ratings.count : 0;
+        const count = ratings?.count || 0;
  return {
  ...merchant,
- avg_rating: ratings ? ratings.total / ratings.count : 0,
- review_count: ratings?.count || 0
+          avg_rating: avg,
+          average_rating: avg,
+          review_count: count,
  };
  });
  },
