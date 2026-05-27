@@ -40,22 +40,30 @@ const SimpleHome = () => {
   const birthdayPets = useMemo(() => getTodayBirthdays(pets as any), [pets]);
   const hasBirthday = birthdayPets.length > 0;
   const sessionKey = `pb_bday_shown_${new Date().toDateString()}`;
+  const bannerKey = `pb_bday_banner_${new Date().toDateString()}`;
+
   const [showOverlay, setShowOverlay] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [showBanner, setShowBanner] = useState(false);
+  const [showBanner, setShowBanner] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(bannerKey) !== "dismissed";
+  });
 
   useEffect(() => {
     if (!hasBirthday) return;
     const alreadyShown = sessionStorage.getItem(sessionKey);
+    const bannerDismissed = localStorage.getItem(bannerKey) === "dismissed";
     if (alreadyShown) {
-      setShowBanner(true);
+      if (!bannerDismissed) setShowBanner(true);
       return;
     }
     sessionStorage.setItem(sessionKey, "1");
-    setShowConfetti(true);
-    setShowOverlay(true);
-    setShowBanner(true);
-  }, [hasBirthday, sessionKey]);
+    if (!bannerDismissed) {
+      setShowConfetti(true);
+      setShowOverlay(true);
+      setShowBanner(true);
+    }
+  }, [hasBirthday, sessionKey, bannerKey]);
 
   // Total $ available = earned + promotional, displayed in USD only
   const availableUsd = useMemo(
