@@ -32,7 +32,7 @@ import { useSponsoredTracking } from "@/hooks/useSponsoredTracking";
 import { useSearchRankingTracking } from "@/hooks/useSearchRankingTracking";
 import { MerchantMap } from "@/components/MerchantMap";
 import {
-  LayoutList, Map as MapIcon, MapPin, Search, Store, X, Star, BadgeCheck, ChevronRight, Sparkles, Crown,
+  LayoutList, Map as MapIcon, MapPin, Search, Store, X, Star, BadgeCheck, ChevronRight, Crown,
   Stethoscope, Scissors, Truck, ShoppingBag, Bone, Hotel, School, GraduationCap, Dog,
   Mountain, PersonStanding, Hand, Brain, Camera, Shield, Plane, Dna, Heart, Puzzle, Trash2,
 } from "lucide-react";
@@ -730,7 +730,7 @@ const MerchantListItem = ({ merchant, isVerified, isSponsored, isFeatured, onCli
         )}
         {isSponsored && !isFeatured && (
           <span className="absolute top-2 left-2 bg-foreground text-background text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5">
-            <Sparkles className="w-2.5 h-2.5" /> Ad
+            ✨ Ad
           </span>
         )}
       </div>
