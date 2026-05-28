@@ -145,11 +145,87 @@ serve(async (req) => {
       .update({ deposit_status: "charged_no_show" })
       .eq("id", bookingId);
 
+    // Award PawBucks to the customer on the USD no-show charge (tier-based).
+    // Idempotent on the payment intent id via pawbucks_activity uniqueness check.
+    let pawbucksEarned = 0;
+    if (paymentIntent.status === "succeeded" && booking.user_id) {
+      try {
+        const { data: existingEarn } = await adminClient
+          .from("pawbucks_activity")
+          .select("id")
+          .eq("user_id", booking.user_id)
+          .eq("source", "no_show_fee")
+          .eq("description", `no_show_pi:${paymentIntent.id}`)
+          .maybeSingle();
+
+        if (!existingEarn) {
+          // Determine tier multiplier (mirrors connect-webhook logic)
+          let multiplier = 10;
+          let tierName = "Free";
+          const { data: platformSub } = await adminClient
+            .from("subscriptions")
+            .select("stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at")
+            .eq("user_id", booking.user_id)
+            .in("status", ["active", "trialing"])
+            .maybeSingle();
+
+          if (platformSub?.is_manual_upgrade && platformSub?.subscription_tier) {
+            const expiresAt = platformSub.expires_at ? new Date(platformSub.expires_at) : null;
+            if (!expiresAt || expiresAt > new Date()) {
+              if (platformSub.subscription_tier === "pawpass_plus") { multiplier = 30; tierName = "PawPass+"; }
+              else if (platformSub.subscription_tier === "pawpass") { multiplier = 20; tierName = "PawPass"; }
+            }
+          } else if (platformSub?.stripe_subscription_id) {
+            try {
+              const sub = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
+              const productId = sub.items.data[0]?.price?.product;
+              if (productId === "prod_TQyZjYzt9DwoIK") { multiplier = 30; tierName = "PawPass+"; }
+              else if (productId === "prod_TJVK9ZhLiJnnpm") { multiplier = 20; tierName = "PawPass"; }
+            } catch (_) { /* ignore */ }
+          }
+
+          pawbucksEarned = Math.floor(feeAmount * multiplier);
+
+          if (pawbucksEarned > 0) {
+            await adminClient.from("pawbucks_activity").insert({
+              user_id: booking.user_id,
+              amount: pawbucksEarned,
+              type: "earn",
+              source: "no_show_fee",
+              description: `no_show_pi:${paymentIntent.id}`,
+              pawbucks_status: "available",
+              partner_id: booking.merchant_id,
+            });
+
+            const { data: wallet } = await adminClient
+              .from("pawbucks_wallet")
+              .select("balance")
+              .eq("user_id", booking.user_id)
+              .maybeSingle();
+            if (wallet) {
+              await adminClient
+                .from("pawbucks_wallet")
+                .update({ balance: (wallet.balance || 0) + pawbucksEarned })
+                .eq("user_id", booking.user_id);
+            } else {
+              await adminClient
+                .from("pawbucks_wallet")
+                .insert({ user_id: booking.user_id, balance: pawbucksEarned });
+            }
+            console.log(`Awarded ${pawbucksEarned} PB (${tierName} ${multiplier}x) on $${feeAmount} no-show fee`);
+          }
+        }
+      } catch (earnErr) {
+        console.error("Failed to award PB on no-show fee:", earnErr);
+        // Non-fatal: charge succeeded, earn can be reconciled manually
+      }
+    }
+
     // Notify the customer
     await adminClient.from("notifications").insert({
       user_id: booking.user_id,
       title: "💳 No-Show Fee Charged",
-      message: `A $${feeAmount.toFixed(2)} no-show fee was charged for your missed ${booking.merchant_services?.name || "appointment"} on ${booking.booking_date}. Contact ${merchant.business_name} if you believe this is an error.`,
+      message: `A $${feeAmount.toFixed(2)} no-show fee was charged for your missed ${booking.merchant_services?.name || "appointment"} on ${booking.booking_date}.${pawbucksEarned > 0 ? ` You earned ${pawbucksEarned.toLocaleString()} PawBucks back.` : ""} Contact ${merchant.business_name} if you believe this is an error.`,
       category: "transactional",
     });
 
@@ -159,6 +235,7 @@ serve(async (req) => {
         chargeAmount: feeAmount,
         paymentIntentId: paymentIntent.id,
         status: paymentIntent.status,
+        pawbucksEarned,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
