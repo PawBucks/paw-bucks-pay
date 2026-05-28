@@ -122,8 +122,14 @@ export function EditVetProfileDialog({ open, onOpenChange, vet, userId, onSaved 
               <Input id="name" name="name" defaultValue={vet.name} required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input id="location" name="location" defaultValue={vet.location} required />
+              <Label htmlFor="location">Business Address</Label>
+              <Input
+                id="location"
+                name="location"
+                placeholder="123 Main St, City, State ZIP"
+                defaultValue={vet.location}
+                required
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
