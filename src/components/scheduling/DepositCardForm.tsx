@@ -73,7 +73,6 @@ function CardFormInner({
  {noShowFeeAmount > 0 
  ? `A ${Formatters.currency(noShowFeeAmount)} no-show fee will be charged if you miss your appointment without canceling.` 
  :"Your card will be saved on file. You will only be charged if you miss your appointment."}
- {depositAmount > 0 && ` A ${Formatters.currency(depositAmount)} deposit will be collected now.`}
  </p>
  </div>
  </div>
