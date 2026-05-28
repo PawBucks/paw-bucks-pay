@@ -76,14 +76,31 @@ const SimpleHome = () => {
     queryKey: ["simple-recent-saves", walletId],
     queryFn: async () => {
       if (!walletId) return [];
-      const { data } = await supabase
+      const { data: txs } = await supabase
         .from("transactions")
-        .select("id, amount, cashback_earned, created_at, merchants(business_name)")
+        .select("id, amount, cashback_earned, created_at, merchant_id")
         .eq("user_id", walletId)
         .eq("status", "completed")
         .order("created_at", { ascending: false })
         .limit(4);
-      return data ?? [];
+      const rows = txs ?? [];
+      const ids = Array.from(
+        new Set(rows.map((r: any) => r.merchant_id).filter(Boolean)),
+      );
+      let nameById = new Map<string, string>();
+      if (ids.length) {
+        const { data: merchants } = await supabase
+          .from("merchants_public")
+          .select("id, business_name")
+          .in("id", ids);
+        nameById = new Map(
+          (merchants ?? []).map((m: any) => [m.id, m.business_name]),
+        );
+      }
+      return rows.map((r: any) => ({
+        ...r,
+        merchants: { business_name: nameById.get(r.merchant_id) ?? null },
+      }));
     },
     enabled: !!walletId,
     staleTime: 60_000,
