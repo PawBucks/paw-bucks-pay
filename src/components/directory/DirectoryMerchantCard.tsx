@@ -4,7 +4,7 @@ import { motion } from"framer-motion";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Star, ChevronRight, Store, BadgeCheck } from "lucide-react";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
+
 import { OpenStatusBadge } from"@/components/merchant/OpenStatusBadge";
 
 import { Formatters } from "@/utils/formatters";
@@ -93,12 +93,11 @@ const DirectoryMerchantCardComponent = ({
  <div className="flex items-start justify-between gap-2 mb-1">
  <div className="min-w-0 flex-1">
  <div className="flex items-center gap-1.5 flex-wrap">
- {sponsored && (
- <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] gap-0.5 px-1.5 py-0">
- <Sparkles className="w-2.5 h-2.5" />
- Ad
- </Badge>
- )}
+                 {sponsored && (
+                 <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] gap-0.5 px-1.5 py-0">
+                 ✨ Ad
+                 </Badge>
+                 )}
  <h3 className="font-bold text-[15px] leading-tight line-clamp-1 group-hover:text-primary transition-colors">
  {merchant.business_name}
  </h3>
