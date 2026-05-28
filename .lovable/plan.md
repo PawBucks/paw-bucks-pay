@@ -1,61 +1,107 @@
 ## Goal
 
-Remove broad authenticated SELECT access to the `merchants` table so internal fields (`stripe_account_id`, `fee_model`, `acquisition_fee_rate`, `funding_status`, `denial_reason`, `pause_reason`, `checkin_qr_token`, `last_notified_status`, etc.) are no longer readable by any logged-in user. Only the merchant owner and admins/superadmins keep full-row access.
+Guarantee a frictionless Pet Owner payment experience across all four surfaces, with PawBucks **always** earned on the USD portion of every successful charge — no shape mismatches, no race conditions, no silent failures.
 
-## Already done in this session
+## Scope (confirmed)
 
-- `merchants_public` view exists with safe columns and is already used in some places.
-- Storage policy gaps for `vet-imaging` and `vet-invoices` are fixed.
+1. In-person Pay flow — `PaymentDialog` → `create-payment-intent` / `create-combined-payment` → `confirm-payment-success`
+2. Booking deposits & no-show capture — `DepositCardForm` → `create-booking-setup-intent` → `charge-no-show-fee`
+3. Invoice payments — public + admin invoices, `create-invoice-payment`, `create-admin-invoice-payment`, `verify-invoice-payment`, `process-invoice-pawbucks-payment`, `RecordPaymentDialog`
+4. Merchant Storefront / Pet Store cart — `create-pet-store-payment`, `confirm-pet-store-payment`, `pet-store-pawbucks-purchase`, `StorefrontCartDrawer`
 
-## Plan
+Total surface: ~4,300+ LOC of edge functions plus the React payment UIs.
 
-### 1. Extend `merchants_public` view
+## Reality check
 
-Add these columns the app currently reads cross-merchant from the base table:
-`user_id, contact_person, owner_name, email, search_keywords, service_area_radius_miles, country, state_of_incorporation, timezone, working_style, entity_type, accepts_welcome_credit, welcome_credit_opted_in_at, is_paused, approval_status, stripe_account_status, onboarding_complete`.
+A single-pass "fix everything" across this much payment code is high risk — these flows touch money, Stripe Connect Direct Charges, the wallet, the pet fund, legacy welcome credit, idempotency, and webhooks. I'm proposing a **phased** sweep so each phase can be reviewed and shipped independently before moving on. Each phase ends with a verification step.
 
-Excluded (kept owner/admin-only): `stripe_account_id, fee_model, acquisition_fee_rate, funding_status, denial_reason, pause_reason, paused_at, paused_by, approved_at, approved_by, checkin_qr_token, last_notified_status, submission_email_sent_at`.
+## Phase 0 — Audit (no code changes)
 
-### 2. Add SECURITY DEFINER RPCs for the two flows that need `stripe_account_id` cross-merchant
+Read every file in scope and produce an inline issue list grouped by:
 
-- `public.get_merchant_checkout_context(p_merchant_id uuid)` — returns `{ stripe_account_id, business_name, onboarding_complete, accepts_pawbucks, cashback_rate }`. Used by `DirectCheckout.tsx` and `BookingWidget.tsx`. Only returns data for approved, non-paused merchants.
+- **Friction** — extra clicks, confusing copy, missing loading/disabled states, retry traps, double-submit risk
+- **Correctness** — PB earn missing/duplicated, success-fee math, tip handling (USD-only), min $0.50, USD/PB split rounding
+- **Reliability** — idempotency keys, race conditions between `confirm` and webhooks, error swallowing, missing CORS, partial-failure rollback
+- **Consistency** — query-cache shape mismatches (the bug pattern we just hit with `avg_rating`), formatter usage, EST/PST timezone, terminology ("Success Fee")
+- **Security** — JWT verification, Zod validation, service-role boundaries
 
-### 3. Refactor cross-merchant frontend reads
+Deliverable: a structured report posted in chat. No files touched.
 
-Files reading `merchants` for a merchant they don't own → switch to `merchants_public` or the RPC:
+## Phase 1 — PawBucks earn guarantee (highest priority)
 
-- `src/pages/DirectCheckout.tsx` → RPC for stripe_account_id; `merchants_public` for display fields.
-- `src/components/scheduling/BookingWidget.tsx` → RPC for stripe_account_id.
-- `src/pages/PublicBookingPage.tsx` → `merchants_public`.
-- `src/pages/MerchantProfile.tsx` → `merchants_public`.
-- `src/components/ReceiptUploadDialog.tsx` → `merchants_public`.
-- `src/components/receipts/PartnerReceiptDialog.tsx` → `merchants_public`.
-- `src/components/FeaturedMerchants.tsx`, `MerchantCard.tsx`, `FeedbackButton.tsx`, `PremiumMerchantsBanner.tsx`, discovery components → `merchants_public`.
-- `src/components/scheduling/SmartScheduleTab.tsx` cross-merchant lat/lng → `merchants_public`.
-- `src/services/api/platformPromotions.service.ts` cross-merchant search → `merchants_public`.
-- Any other call site that reads a merchant by id/slug/keyword for a non-owner context.
+For each of the 4 surfaces, verify in the confirm/verify edge function that:
 
-Owner-scoped reads (`.eq("user_id", user.id)`) and admin tabs remain on `merchants` — their existing RLS policies cover them.
+- Successful USD charge → `pawbucks_activity` row with `type='earn'` is written exactly once
+- Earn rate respects user tier (10/20/30 PB per $1 via `useUserEarnRate` server equivalent)
+- Earn is computed on **USD portion only** (never on PB-funded portion, never on tip-only? — confirm policy)
+- Earn write is idempotent (keyed off `payment_intent_id` / `transaction_id`)
+- Earn happens even when the user closes the tab before `confirm-*` returns (webhook fallback)
 
-### 4. Drop the broad policy
+Fix any surface where earn is conditional, missing, or duplicated. Add the missing webhook-side earn write where the client-side confirm is the only path today.
 
-Drop `"Authenticated users can view approved merchants"` on `public.merchants`. Keep:
-- `Merchants can view their own full record` (owner)
-- `Admins can view all merchants` (admin/superadmin)
-- INSERT/UPDATE policies unchanged
+## Phase 2 — Frictionless UX pass
 
-### 5. Verify
+Per surface, normalize:
 
-- Run linter and security scan, confirm `merchants_stripe_fee_model_exposed` is resolved.
-- Smoke-test: owner can still load their workspace; pet owner can still load a merchant profile page, checkout, and booking widget; admin can still see everything.
+- Single source of truth for "amount due" / "split" / "tip" / "fee" (no drift between client and server)
+- Disable submit during in-flight Stripe calls; show spinner; prevent double-tap
+- Friendly, actionable error messages (map Stripe decline codes to plain English)
+- Auto-retry transient network errors once, then surface a clear retry button
+- Success screen shows: USD charged, PB redeemed, PB earned, new balance — consistently across all 4 surfaces
+- Respect the `max-w-4xl` / Premium Consumer aesthetic and Pet-Owner emoji policy
 
-## Technical notes
+## Phase 3 — Reliability hardening
 
-- The view uses `security_invoker=false` (definer mode) so it bypasses base-table RLS. This is intentional and is what lets us drop the broad policy. The Supabase linter currently flags this pattern as a warning for views; the warning is accepted here because the view exposes only safe columns and only approved merchants — the access control is enforced in the view definition itself.
-- RPC is `SECURITY DEFINER` with `SET search_path = public` and `REVOKE ALL FROM public; GRANT EXECUTE TO authenticated`. It validates that the merchant is approved and not paused before returning the Stripe account id.
-- TypeScript types (`src/integrations/supabase/types.ts`) regenerate automatically; cross-merchant call sites switching to `merchants_public` will need a manual cast or just `(supabase.from as any)` only where typings lag.
+- Idempotency keys on every Stripe create call (payment intent, refund, setup intent)
+- Wrap multi-step DB writes in a single RPC or careful try/catch with compensating actions
+- Confirm webhook (`connect-webhook`) handles `payment_intent.succeeded` for **all 4** surfaces and is the authoritative earn writer; client confirms become best-effort UX accelerators
+- Add structured logging tags (`[surface=pay|booking|invoice|store]`) for traceability
 
-## Out of scope
+## Phase 4 — Verification
 
-- Column-level grants on `merchants` (the user already rejected this path).
-- Refactoring owner/admin merchant reads (they stay on the base table).
+- Re-read each touched file
+- `bun run test` for any covered paths (totals-invariants etc.)
+- Manual trace of one synthetic transaction per surface in the report (PB-only, USD-only, split, tip)
+- Edge function logs spot-check
+
+## Technical details
+
+Key files I'll touch (non-exhaustive, finalized after Phase 0):
+
+```text
+src/components/PaymentDialog.tsx
+src/components/scheduling/DepositCardForm.tsx
+src/components/invoicing/RecordPaymentDialog.tsx
+src/components/storefront/StorefrontCartDrawer.tsx
+src/hooks/useShoppingCart.ts, useStorefrontCart.ts
+src/hooks/useSpendablePawBucks.tsx, useUserEarnRate.tsx
+
+supabase/functions/create-payment-intent
+supabase/functions/create-combined-payment
+supabase/functions/confirm-payment-success
+supabase/functions/create-booking-setup-intent
+supabase/functions/charge-no-show-fee
+supabase/functions/create-invoice-payment
+supabase/functions/verify-invoice-payment
+supabase/functions/process-invoice-pawbucks-payment
+supabase/functions/create-admin-invoice-payment
+supabase/functions/create-pet-store-payment
+supabase/functions/confirm-pet-store-payment
+supabase/functions/pet-store-pawbucks-purchase
+supabase/functions/connect-webhook
+supabase/functions/_shared/pet-fund-debit.ts
+```
+
+Invariants enforced everywhere:
+
+- Min charge $0.50 USD (DB constraint already)
+- Success Fee = 3% on USD portion only; label "Success Fee"
+- Tipping = USD only
+- PB earn on USD portion only, at user tier multiplier
+- `pawbucks_activity.type ∈ {'earn','redeem'}`
+- All dates rendered in America/New_York
+- Spend order: wallet → pet fund → legacy welcome credit (via `_shared/pet-fund-debit.ts`)
+
+## How we proceed
+
+I'll execute **Phase 0 first** and post the issue report in chat. You then tell me which fixes to ship and in what order — that way you keep control over what changes in the payment money path, and we avoid a 30-file diff landing all at once.
