@@ -185,7 +185,22 @@ export const startBuildVersionPolling = () => {
       const res = await fetch('/index.html', { cache: 'no-store' });
       if (!res.ok) return;
       const text = await res.text();
-      const hash = await hashString(text);
+      // Only hash STABLE markers — the built bundle URLs. The full HTML
+      // contains per-request nonces / injected scripts in production, so
+      // hashing it would trigger a false "new build" reload loop.
+      const scriptMatches = Array.from(
+        text.matchAll(/<(?:script|link)[^>]+(?:src|href)=["']([^"']+)["'][^>]*>/gi)
+      )
+        .map((m) => m[1])
+        .filter((src) =>
+          /\/(assets|src)\/.+\.(js|mjs|css)(\?|$)/i.test(src) ||
+          /main\.tsx/i.test(src)
+        )
+        .sort();
+      // If we couldn't find any bundle markers, skip this check rather than
+      // fall back to hashing the whole document (which loops).
+      if (scriptMatches.length === 0) return;
+      const hash = await hashString(scriptMatches.join('|'));
       if (lastHash && lastHash !== hash) {
         console.log('[PWA] New build detected via index.html hash, reloading...');
         stopped = true;
