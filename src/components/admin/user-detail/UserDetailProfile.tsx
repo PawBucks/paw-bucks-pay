@@ -32,6 +32,14 @@ type WelcomeCreditData = {
  phase_2_amount: number;
  phase_2_unlocked: boolean;
 };
+type SubscriptionData = {
+ subscription_tier: string | null;
+ status: string;
+ current_period_end: string | null;
+ expires_at: string | null;
+ is_manual_upgrade: boolean | null;
+ stripe_subscription_id: string | null;
+};
 type SharedAccountData = {
  owner_id: string;
  member_id: string;
@@ -42,6 +50,7 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  const [profile, setProfile] = useState<ProfileData | null>(null);
  const [roles, setRoles] = useState<RoleData[]>([]);
  const [welcomeCredit, setWelcomeCredit] = useState<WelcomeCreditData | null>(null);
+ const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
  const [sharedWith, setSharedWith] = useState<string | null>(null);
  const [sharedMembers, setSharedMembers] = useState<string[]>([]);
  const [loading, setLoading] = useState(true);
@@ -50,20 +59,46 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  loadProfile();
  }, [userId]);
 
+ // Realtime: keep welcome credit + subscription fresh
+ useEffect(() => {
+  if (!userId) return;
+  const channel = supabase
+   .channel(`admin-user-detail-${userId}`)
+   .on('postgres_changes', { event: '*', schema: 'public', table: 'user_welcome_credits', filter: `user_id=eq.${userId}` }, () => loadProfile())
+   .on('postgres_changes', { event: '*', schema: 'public', table: 'subscriptions', filter: `user_id=eq.${userId}` }, () => loadProfile())
+   .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${userId}` }, () => loadProfile())
+   .subscribe();
+
+  const onFocus = () => loadProfile();
+  window.addEventListener('focus', onFocus);
+  return () => {
+   supabase.removeChannel(channel);
+   window.removeEventListener('focus', onFocus);
+  };
+ }, [userId]);
+
  const loadProfile = async () => {
  setLoading(true);
  try {
- const [profileRes, rolesRes, creditRes, memberOfRes, ownerOfRes] = await Promise.all([
+  const [profileRes, rolesRes, creditRes, subRes, memberOfRes, ownerOfRes] = await Promise.all([
  supabase.from("profiles").select("*").eq("id", userId).single(),
  supabase.from("user_roles").select("role").eq("user_id", userId),
  supabase.from("user_welcome_credits").select("*").eq("user_id", userId).maybeSingle(),
+   supabase
+    .from("subscriptions")
+    .select("subscription_tier,status,current_period_end,expires_at,is_manual_upgrade,stripe_subscription_id")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle(),
  supabase.from("shared_account_members").select("owner_id").eq("member_id", userId).eq("status","accepted"),
  supabase.from("shared_account_members").select("member_id").eq("owner_id", userId).eq("status","accepted"),
  ]);
 
  if (profileRes.data) setProfile(profileRes.data as unknown as ProfileData);
  if (rolesRes.data) setRoles(rolesRes.data);
- if (creditRes.data) setWelcomeCredit(creditRes.data as WelcomeCreditData);
+  setWelcomeCredit((creditRes.data as WelcomeCreditData) ?? null);
+  setSubscription((subRes.data as SubscriptionData) ?? null);
 
  // Resolve shared account owner email
  if (memberOfRes.data && memberOfRes.data.length > 0) {
@@ -149,9 +184,39 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  </div>
  </InfoItem>
 
- {profile.subscription_tier && (
- <InfoItem icon={<Crown className="w-4 h-4" aria-hidden="true" />} label="Subscription" value={profile.subscription_tier} />
- )}
+  <InfoItem icon={<Crown className="w-4 h-4" aria-hidden="true" />} label="Subscription">
+   {subscription ? (
+    <div className="space-y-1">
+     <Badge
+      variant="outline"
+      className={
+       subscription.status === "active" || subscription.status === "trialing"
+        ? "bg-success/10 text-success border-success/30"
+        : subscription.status === "canceled"
+        ? "bg-muted text-muted-foreground"
+        : "bg-warning/10 text-warning border-warning/30"
+      }
+     >
+      {(subscription.subscription_tier || "free").toUpperCase()} · {subscription.status}
+     </Badge>
+     {(subscription.current_period_end || subscription.expires_at) && (
+      <p className="text-xs text-muted-foreground">
+       {subscription.status === "canceled" ? "Ended" : "Renews"}{" "}
+       {new Date(
+        (subscription.current_period_end || subscription.expires_at) as string
+       ).toLocaleDateString()}
+      </p>
+     )}
+     {subscription.is_manual_upgrade && (
+      <p className="text-xs text-muted-foreground">Manual upgrade</p>
+     )}
+    </div>
+   ) : profile.subscription_tier ? (
+    <Badge variant="outline">{profile.subscription_tier}</Badge>
+   ) : (
+    <Badge variant="outline" className="bg-muted text-muted-foreground">Free</Badge>
+   )}
+  </InfoItem>
 
  {profile.referral_code && (
  <InfoItem icon={<Mail className="w-4 h-4" aria-hidden="true" />} label="Referral Code" value={profile.referral_code} />
