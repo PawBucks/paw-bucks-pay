@@ -1507,17 +1507,81 @@ serve(async (req) => {
 
       const amount = paymentIntent.amount / 100; // Convert from cents
       
+      // ========================================
+      // ENRICHMENT: Subscription payments (PawPass / PawPass+) don't carry
+      // merchant_id / user_id metadata. When metadata is missing but a
+      // Stripe customer is attached, look up the user via the active
+      // subscription so the transaction is never recorded as orphaned
+      // "Stripe payment" with NULL user/merchant.
+      // ========================================
+      let enrichedUserId: string | null = user_id ?? null;
+      let enrichedDescription: string | null = description ?? null;
+      let subscriptionTierLabel: string | null = null;
+
+      if (!enrichedUserId && paymentIntent.customer) {
+        try {
+          const customerId = typeof paymentIntent.customer === 'string'
+            ? paymentIntent.customer
+            : paymentIntent.customer.id;
+
+          const subs = await stripe.subscriptions.list({ customer: customerId, limit: 1 });
+          const sub = subs.data[0];
+          if (sub) {
+            const subUserId = sub.metadata?.user_id || null;
+            const subTier = (sub.metadata?.tier || '').toLowerCase();
+            if (subTier === 'plus' || subTier === 'pawpass+') {
+              subscriptionTierLabel = 'PawPass+';
+            } else if (subTier === 'basic' || subTier === 'pawpass') {
+              subscriptionTierLabel = 'PawPass';
+            } else {
+              // Fall back to product ID matching
+              const productId = sub.items.data[0]?.price?.product;
+              if (productId === 'prod_TQyZjYzt9DwoIK') subscriptionTierLabel = 'PawPass+';
+              else if (productId === 'prod_TJVK9ZhLiJnnpm') subscriptionTierLabel = 'PawPass';
+              else subscriptionTierLabel = 'Subscription';
+            }
+            if (subUserId) {
+              enrichedUserId = subUserId;
+              console.log('[PAYMENT_INTENT] Enriched orphan PI with subscription user_id', { paymentIntentId: paymentIntent.id, customerId, subUserId, subscriptionTierLabel });
+            } else {
+              // Last resort: look up profile by Stripe customer's email
+              try {
+                const cust = await stripe.customers.retrieve(customerId);
+                if (cust && !(cust as any).deleted && (cust as any).email) {
+                  const { data: profile } = await supabaseAdmin
+                    .from('profiles')
+                    .select('id')
+                    .eq('email', (cust as any).email)
+                    .maybeSingle();
+                  if (profile?.id) {
+                    enrichedUserId = profile.id;
+                    console.log('[PAYMENT_INTENT] Enriched orphan PI via customer email lookup', { paymentIntentId: paymentIntent.id, email: (cust as any).email });
+                  }
+                }
+              } catch (e) {
+                console.error('[PAYMENT_INTENT] Customer email lookup failed:', e);
+              }
+            }
+            if (!enrichedDescription || enrichedDescription === 'Stripe payment') {
+              enrichedDescription = `${subscriptionTierLabel} subscription payment`;
+            }
+          }
+        } catch (e) {
+          console.error('[PAYMENT_INTENT] Subscription enrichment failed:', e);
+        }
+      }
+
       // Determine PawBucks multiplier based on subscription tier
       // Free: 10x, PawPass: 20x, PawPass+: 30x
       let pawbucksMultiplier = 10; // Default 10x for free accounts
       let tierName = 'Free';
       
-      if (user_id) {
+      if (enrichedUserId) {
         // Check user's subscription tier
         const { data: subscription } = await supabaseAdmin
           .from('subscriptions')
           .select('stripe_subscription_id')
-          .eq('user_id', user_id)
+          .eq('user_id', enrichedUserId)
           .in('status', ['active', 'trialing'])
           .maybeSingle();
 
@@ -1548,8 +1612,8 @@ serve(async (req) => {
       // $10 × 20 = 200 PawBucks for PawPass
       // $10 × 30 = 300 PawBucks for PawPass+
       let pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
-      if (await shouldSuppressPawBucksForAcquisitionOnly(supabaseAdmin, user_id, merchant_id)) {
-        console.log('[PAYMENT_INTENT] Acquisition-Only + returning customer → suppressing PawBucks', { user_id, merchant_id });
+      if (await shouldSuppressPawBucksForAcquisitionOnly(supabaseAdmin, enrichedUserId, merchant_id)) {
+        console.log('[PAYMENT_INTENT] Acquisition-Only + returning customer → suppressing PawBucks', { user_id: enrichedUserId, merchant_id });
         pawbucksEarned = 0;
       }
 
@@ -1564,12 +1628,12 @@ serve(async (req) => {
       const { data: transaction, error: transactionError } = await supabaseAdmin
         .from('transactions')
         .insert({
-          user_id: user_id,
+          user_id: enrichedUserId,
           merchant_id: merchant_id,
           amount: amount,
           cashback_earned: pawbucksEarned, // Store PawBucks earned
           rewards_earned: pawbucksEarned,
-          description: description || 'Stripe payment',
+          description: enrichedDescription || description || 'Stripe payment',
           status: 'completed',
           stripe_payment_intent_id: paymentIntent.id,
         })
