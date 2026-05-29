@@ -328,7 +328,7 @@ export function TransactionsTab() {
  <DetailRow icon={Hash} label="Transaction ID" value={
  <span className="font-mono text-xs">{transaction.id?.slice(0, 8) ??'—'}...{transaction.id?.slice(-4) ??''}</span>
  } />
- <DetailRow icon={Store} label="Merchant" value={transaction.merchants?.business_name ||'N/A'} />
+                                <DetailRow icon={Store} label="Merchant" value={transaction.merchants?.business_name || 'PawBucks Platform'} />
  <DetailRow icon={Hash} label="Merchant ID" value={
  <span className="font-mono text-xs">{transaction.merchant_id?.slice(0, 8) ??'—'}...</span>
  } />
