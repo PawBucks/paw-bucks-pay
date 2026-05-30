@@ -122,6 +122,33 @@ serve(async (req) => {
     const { messages } = await req.json();
     if (!messages || !Array.isArray(messages)) throw new Error('Messages array required');
 
+    // Input validation: cap count, role, and per-message size to prevent cost abuse and role spoofing
+    const MAX_MESSAGES = 50;
+    const MAX_CONTENT_BYTES = 8 * 1024;
+    if (messages.length === 0 || messages.length > MAX_MESSAGES) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid request' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const encoder = new TextEncoder();
+    const sanitizedMessages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+    for (const m of messages) {
+      if (!m || typeof m !== 'object') {
+        return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      if (m.role !== 'user' && m.role !== 'assistant') {
+        return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      if (typeof m.content !== 'string' || m.content.length === 0) {
+        return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      if (encoder.encode(m.content).byteLength > MAX_CONTENT_BYTES) {
+        return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      sanitizedMessages.push({ role: m.role, content: m.content });
+    }
+
     const { data: sharedMembership } = await platformClient
       .from('shared_account_members')
       .select('owner_id')
@@ -564,7 +591,7 @@ RULES
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          ...messages,
+          ...sanitizedMessages,
         ],
         stream: true,
       }),
