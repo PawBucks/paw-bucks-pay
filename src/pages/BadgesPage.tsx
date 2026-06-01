@@ -134,7 +134,7 @@ const BadgesPage = () => {
  <div className="min-h-[100dvh] bg-background flex flex-col">
  <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
  
- <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-4xl lg:max-w-6xl">
+ <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-7xl lg:max-w-7xl">
  {/* Back Button & Title */}
  <div className="mb-6">
  <Button

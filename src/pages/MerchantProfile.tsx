@@ -324,7 +324,7 @@ const MerchantProfile = memo(() => {
       <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
 
       <div className="min-h-screen bg-muted/30">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* ══════ Sticky top bar ══════ */}
           <div className="sticky top-0 z-30 bg-card border-b border-border px-3 py-3 flex items-center justify-between gap-2">
             <div className="flex items-center gap-1 min-w-0 flex-1">
@@ -929,7 +929,7 @@ const MerchantProfile = memo(() => {
             user ? "bottom-[64px] md:bottom-0" : "bottom-0"
           }`}
         >
-          <div className="max-w-4xl mx-auto flex gap-2">
+          <div className="max-w-7xl mx-auto flex gap-2">
             <AskQuestionButton
               merchantId={merchant.id}
               merchantName={merchant.business_name}

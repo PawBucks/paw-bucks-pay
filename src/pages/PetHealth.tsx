@@ -104,7 +104,7 @@ export default function PetHealth() {
  return (
  <div className="min-h-screen bg-background">
  <Header />
-        <div className="container max-w-4xl mx-auto px-4 py-8">
+        <div className="container max-w-7xl mx-auto px-4 py-8">
           <div className="text-center text-muted-foreground">Loading...</div>
  </div>
  </div>
@@ -118,7 +118,7 @@ export default function PetHealth() {
  return (
  <div className="min-h-screen bg-background">
  <Header />
-      <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+      <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
  <Button
  variant="ghost"
  onClick={() => navigate("/home")}

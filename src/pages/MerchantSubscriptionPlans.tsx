@@ -276,7 +276,7 @@ const MerchantSubscriptionPlans = () => {
  return (
  <MerchantWorkspaceLayout>
    <WorkspacePageHeader section="Catalog & Services" title="Subscription Plans" subtitle="Create recurring billing plans" />
-   <div className="p-4 md:p-6 max-w-5xl lg:max-w-6xl mx-auto w-full">
+   <div className="p-4 md:p-6 max-w-5xl lg:max-w-7xl mx-auto w-full">
      <div className="grid gap-4">
        {[1, 2, 3].map(i => (
          <Skeleton key={i} className="h-40 w-full" />
@@ -307,7 +307,7 @@ const MerchantSubscriptionPlans = () => {
        </Button>
      }
    />
-   <main className="p-4 md:p-6 max-w-5xl lg:max-w-6xl mx-auto w-full">
+   <main className="p-4 md:p-6 max-w-5xl lg:max-w-7xl mx-auto w-full">
  {plans.length === 0 ? (
  <Card className="border-dashed">
  <CardContent className="flex flex-col items-center justify-center py-16">

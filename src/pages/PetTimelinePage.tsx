@@ -91,7 +91,7 @@ const PetTimelinePage = () => {
  <div className="min-h-[100dvh] bg-background flex flex-col">
  <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
  
- <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-3xl lg:max-w-5xl">
+ <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-5xl lg:max-w-5xl">
  {/* Header */}
  <motion.div
  initial={{ opacity: 0, y: -20 }}

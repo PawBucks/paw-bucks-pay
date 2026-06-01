@@ -110,7 +110,7 @@ export default function MerchantStoreRewards() {
     return (
       <MerchantWorkspaceLayout>
         <WorkspacePageHeader section="Wallet" title="Store Rewards Pro" subtitle="In-store PawBucks rewards program" />
-        <div className="container max-w-4xl mx-auto p-6">
+        <div className="container max-w-7xl mx-auto p-6">
           <Button variant="ghost" onClick={() => navigate("/merchant/market")} className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" /> Back to Merchant Market
           </Button>
@@ -151,7 +151,7 @@ export default function MerchantStoreRewards() {
         title="Store Rewards Pro"
         subtitle="Issue in-store PawBucks to your customers — redeemable only at your business."
       />
-      <div className="container max-w-4xl mx-auto p-6 space-y-6">
+      <div className="container max-w-7xl mx-auto p-6 space-y-6">
 
         {/* Funding balance */}
         <Card className={isLowBalance ? "border-destructive" : undefined}>

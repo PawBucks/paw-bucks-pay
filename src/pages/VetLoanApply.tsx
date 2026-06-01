@@ -216,7 +216,7 @@ const VetLoanApply = () => { const { user, loading, signOut } = useAuth();
  <div className="min-h-screen bg-background">
  <Header isAuthenticated={true} onLogout={handleSignOut} />
  
- <div className="container max-w-3xl mx-auto px-4 py-8">
+ <div className="container max-w-5xl mx-auto px-4 py-8">
  {/* Header Section */}
  <div className="text-center mb-8 space-y-2">
  <h1 className="text-4xl font-bold text-foreground">Vet Bill Financing</h1>

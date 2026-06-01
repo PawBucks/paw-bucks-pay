@@ -118,7 +118,7 @@ export function InvoicePreview({
  )}
 
  {/* Invoice Document */}
- <Card className="max-w-4xl mx-auto print:shadow-none print:border-none">
+ <Card className="max-w-7xl mx-auto print:shadow-none print:border-none">
  <CardContent className="p-8 print:p-0">
  {/* Header */}
  <div className="flex justify-between items-start mb-8">

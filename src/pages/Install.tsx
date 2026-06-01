@@ -89,7 +89,7 @@ export default function Install() {
  />
  
  <div className="min-h-screen bg-gradient-to-b from-background via-primary/5 to-background">
- <div className="container mx-auto px-4 py-12 max-w-4xl">
+ <div className="container mx-auto px-4 py-12 max-w-7xl">
  {/* Hero Section */}
  <div className="text-center mb-12 animate-fade-in">
  <div className="flex justify-center mb-6">

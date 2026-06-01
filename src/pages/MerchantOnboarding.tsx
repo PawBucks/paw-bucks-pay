@@ -375,7 +375,7 @@ const MerchantOnboarding = () => {
  description="Create your merchant profile and start accepting payments from pet owners"
  />
  
- <div className="max-w-3xl mx-auto space-y-6">
+ <div className="max-w-5xl mx-auto space-y-6">
  {/* Header Card */}
  <Card>
  <CardHeader className="text-center pb-4">

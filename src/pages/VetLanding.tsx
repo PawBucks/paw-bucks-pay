@@ -133,12 +133,12 @@ const VetLanding = () => {
  </span>
  </h1>
  
- <p className="text-xl sm:text-2xl lg:text-3xl text-foreground/90 max-w-3xl mx-auto leading-relaxed font-medium">
+ <p className="text-xl sm:text-2xl lg:text-3xl text-foreground/90 max-w-5xl mx-auto leading-relaxed font-medium">
  EMR, AI tools, insurance automation, and practice growth — 
  all in one platform with PawBucks rewards built in.
  </p>
 
- <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+ <p className="text-lg sm:text-xl text-muted-foreground max-w-5xl mx-auto leading-relaxed">
  Stop losing revenue to missed appointments and online pharmacies. 
  The PawBucks Vet Portal helps you retain patients, streamline workflows, 
  and build recurring revenue — while your clients earn rewards they love.
@@ -167,7 +167,7 @@ const VetLanding = () => {
 
  {/* Stats Section */}
  <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
- <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+ <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-7xl mx-auto">
  <div className="text-center p-6 rounded-md bg-card/50 backdrop-blur-sm border border-border/50">
  <p className="text-3xl sm:text-4xl font-bold text-primary">10x-30x</p>
  <p className="text-muted-foreground mt-1">PawBucks Rewards</p>
@@ -534,7 +534,7 @@ const VetLanding = () => {
  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
  Join a Community of Caring Professionals
  </h2>
- <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+ <p className="text-lg sm:text-xl text-muted-foreground max-w-5xl mx-auto">
  Partner with thousands of veterinary teams who trust PawBucks to grow their practice while delivering exceptional pet care.
  </p>
  </div>
@@ -555,7 +555,7 @@ const VetLanding = () => {
  {/* CTA Section */}
  <section className="relative bg-gradient-to-br from-accent/10 to-primary/10 py-16 sm:py-20 lg:py-28">
  <div className="container mx-auto px-4 sm:px-6 lg:px-8">
- <div className="max-w-3xl mx-auto text-center">
+ <div className="max-w-5xl mx-auto text-center">
  <Stethoscope className="w-16 h-16 text-primary mx-auto mb-6" aria-hidden="true" />
  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
  Ready to Transform Your Practice?

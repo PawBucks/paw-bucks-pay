@@ -309,7 +309,7 @@ export function PremiumAnalyticsDashboard() {
  </div>
 
  <Tabs defaultValue="overview" className="space-y-6">
- <TabsList className="grid grid-cols-6 w-full max-w-3xl">
+ <TabsList className="grid grid-cols-6 w-full max-w-5xl">
  <TabsTrigger value="overview">Overview</TabsTrigger>
  <TabsTrigger value="velocity">Velocity</TabsTrigger>
  <TabsTrigger value="customers">Customers</TabsTrigger>

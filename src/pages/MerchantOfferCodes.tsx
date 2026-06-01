@@ -102,7 +102,7 @@ export default function MerchantOfferCodes() {
  />
  <MerchantWorkspaceLayout>
  <WorkspacePageHeader section="Catalog & Services" title="Redemption Codes" subtitle="Generate and manage redemption codes for your offer" />
- <main className="container mx-auto px-4 py-6 pb-24 max-w-4xl lg:max-w-6xl">
+ <main className="container mx-auto px-4 py-6 pb-24 max-w-7xl lg:max-w-7xl">
  <Button variant="ghost" onClick={() => navigate(`/merchant/offers/${id}`)} className="mb-4">
  <ArrowLeft className="mr-2 h-4 w-4" />
  Back to Offer Details

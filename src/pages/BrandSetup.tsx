@@ -265,7 +265,7 @@ const BrandSetup = () => {
  // Step 2: full setup form
  return (
  <div className="min-h-screen bg-background py-10 px-4">
- <div className="max-w-3xl mx-auto">
+ <div className="max-w-5xl mx-auto">
  <div className="text-center mb-8">
  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
  <Building2 className="h-8 w-8 text-primary" aria-hidden="true" />

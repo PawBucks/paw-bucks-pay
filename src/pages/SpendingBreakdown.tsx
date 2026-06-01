@@ -202,7 +202,7 @@ const SpendingBreakdown = () => {
  return (
  <div className="min-h-screen bg-background">
  <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
- <main className="container mx-auto px-4 py-8 max-w-4xl">
+ <main className="container mx-auto px-4 py-8 max-w-7xl">
  <DashboardSkeleton />
  </main>
  </div>

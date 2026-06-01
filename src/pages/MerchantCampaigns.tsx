@@ -309,7 +309,7 @@ export default function MerchantCampaigns() {
        </>
      }
    />
-   <div className="p-4 md:p-6 max-w-4xl lg:max-w-6xl mx-auto w-full space-y-6">
+   <div className="p-4 md:p-6 max-w-7xl lg:max-w-7xl mx-auto w-full space-y-6">
 
  {/* Campaign History */}
  <div className="space-y-4">
