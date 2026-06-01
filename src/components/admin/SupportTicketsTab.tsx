@@ -300,7 +300,7 @@ export const SupportTicketsTab = () => {
 
  {/* Detail Dialog */}
  <Dialog open={!!selectedTicket} onOpenChange={() => setSelectedTicket(null)}>
- <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+ <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2 flex-wrap">
  <span className="font-mono text-sm text-muted-foreground">{selectedTicket?.ticket_number}</span>

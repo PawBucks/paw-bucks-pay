@@ -333,7 +333,7 @@ export function BadgePromotionsTab() {
  Create Promotion
  </Button>
  </DialogTrigger>
- <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+ <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
  <DialogHeader>
  <DialogTitle>
  {editingPromotion ?"Edit Promotion" :"Create New Promotion"}

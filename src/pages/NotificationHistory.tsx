@@ -200,7 +200,7 @@ export default function NotificationHistory() {
 
  return (
  <div className="min-h-screen bg-background">
- <div className="container mx-auto px-4 py-6 max-w-4xl lg:max-w-6xl">
+ <div className="container mx-auto px-4 py-6 max-w-7xl lg:max-w-7xl">
  {/* Header */}
  <div className="flex items-center gap-4 mb-6">
  <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>

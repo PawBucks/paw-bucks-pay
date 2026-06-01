@@ -134,7 +134,7 @@ const NotificationPreferences = () => {
  return (
  <div className="min-h-screen bg-[var(--gradient-hero)]">
  <Header isAuthenticated={true} onLogout={handleSignOut} />
- <div className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-4xl lg:max-w-5xl">
+ <div className="container mx-auto px-4 pt-6 pb-24 md:pb-12 max-w-7xl lg:max-w-5xl">
  {/* Header */}
  <div className="flex items-center gap-3 mb-8">
  <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>

@@ -17,7 +17,7 @@ export default function LoyaltyCardsPage() {
  <div className="min-h-screen bg-background">
  <SEO title="My Loyalty Cards" description="Track your loyalty punch cards and rewards" />
  <Header />
- <div className="container max-w-4xl lg:max-w-6xl mx-auto px-4 py-8 pb-24 space-y-6">
+ <div className="container max-w-7xl lg:max-w-7xl mx-auto px-4 py-8 pb-24 space-y-6">
  <div>
  <h1 className="text-2xl font-bold flex items-center gap-2">
  <Stamp className="w-6 h-6 text-primary" />

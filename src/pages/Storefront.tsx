@@ -349,7 +349,7 @@ const Storefront = memo(() => {
 
   {/* Sticky sub-nav */}
   <div className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border">
-   <div className="container mx-auto px-4 max-w-4xl flex items-center gap-3 py-2.5">
+   <div className="container mx-auto px-4 max-w-7xl flex items-center gap-3 py-2.5">
     {merchantId ? (
      <Link to={`/merchant/${merchantId}`} className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
       <ArrowLeft className="h-4 w-4" /> Back to Profile
@@ -364,7 +364,7 @@ const Storefront = memo(() => {
 
   {/* Hero */}
   <div className="bg-card border-b border-border">
-   <div className="container mx-auto px-4 max-w-4xl pt-5 pb-0">
+   <div className="container mx-auto px-4 max-w-7xl pt-5 pb-0">
     <div className="flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.14em] uppercase text-muted-foreground mb-3.5">
      <Store className="h-3 w-3" /> The Storefront
     </div>
@@ -413,7 +413,7 @@ const Storefront = memo(() => {
 
    {/* Trust strip */}
    <div className="border-t border-border">
-    <div className="container mx-auto px-4 max-w-4xl flex items-center gap-2 overflow-x-auto py-2.5 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
+    <div className="container mx-auto px-4 max-w-7xl flex items-center gap-2 overflow-x-auto py-2.5 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: "none" }}>
      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card text-[11px] font-medium text-muted-foreground whitespace-nowrap">
       <Shield className="h-3 w-3" /> Secure
      </span>
@@ -432,7 +432,7 @@ const Storefront = memo(() => {
 
   {/* About + Ask */}
   {(merchantDescription || merchantAddress || merchantId) && (
-   <div className="container mx-auto px-4 max-w-4xl pt-6">
+   <div className="container mx-auto px-4 max-w-7xl pt-6">
     <div className="text-[10px] font-semibold tracking-[0.14em] uppercase text-muted-foreground mb-2">About</div>
     {merchantDescription && (
      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{merchantDescription}</p>
@@ -452,7 +452,7 @@ const Storefront = memo(() => {
   )}
 
   {/* Products Section */}
-  <div className="container mx-auto px-4 max-w-4xl py-6 pb-32">
+  <div className="container mx-auto px-4 max-w-7xl py-6 pb-32">
    <div className="mb-4">
     <h2 className="text-xl font-extrabold tracking-tight text-foreground">Shop Products &amp; Subscription Plans</h2>
     <p className="text-[13px] text-muted-foreground mt-0.5">
@@ -607,7 +607,7 @@ const Storefront = memo(() => {
 
  {/* Footer */}
   <div className="border-t border-border bg-card py-7">
-  <div className="container mx-auto px-4 max-w-4xl">
+  <div className="container mx-auto px-4 max-w-7xl">
  <div className="flex flex-col items-center gap-6">
   <Avatar className="h-[52px] w-[52px] rounded-xl border border-border">
  <AvatarImage src={merchantLogo || undefined} alt={merchantName} />
@@ -646,7 +646,7 @@ const Storefront = memo(() => {
 
    {/* Sticky bottom CTA — always visible on storefront */}
    <div className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur border-t border-border px-4 py-3 pb-safe shadow-[0_-4px_12px_-4px_hsl(var(--foreground)/0.08)]">
-    <div className="container mx-auto max-w-4xl flex gap-2.5">
+    <div className="container mx-auto max-w-7xl flex gap-2.5">
      {merchantId && (
       <AskQuestionButton
        merchantId={merchantId}

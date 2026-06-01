@@ -205,7 +205,7 @@ export const LostPetShareDialog = ({ post, children }: LostPetShareDialogProps) 
  </Button>
  )}
  </DialogTrigger>
-<DialogContent className="max-w-md w-[calc(100vw-2rem)] lg:max-w-4xl lg:w-auto max-h-[90vh] overflow-y-auto">
+<DialogContent className="max-w-md w-[calc(100vw-2rem)] lg:max-w-7xl lg:w-auto max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
  <span className="w-5 h-5 text-primary" aria-hidden="true">🔗</span>

@@ -140,7 +140,7 @@ const PawBucksRedeem = () => {
  return (
  <div className="min-h-screen bg-[var(--gradient-hero)] pb-24">
  <Header isAuthenticated={true} onLogout={handleSignOut} />
- <main className="container mx-auto px-4 py-8 max-w-4xl lg:max-w-6xl">
+ <main className="container mx-auto px-4 py-8 max-w-7xl lg:max-w-7xl">
  <DashboardSkeleton />
  </main>
  </div>

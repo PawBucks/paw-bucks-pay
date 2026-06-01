@@ -306,7 +306,7 @@ export const ScanVetPaperwork = ({
  Scan Paperwork
  </Button>
  </DialogTrigger>
- <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+ <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
  {step ==="upload" && (
  <>
  <DialogHeader>

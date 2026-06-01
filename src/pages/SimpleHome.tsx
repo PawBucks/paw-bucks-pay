@@ -131,7 +131,7 @@ const SimpleHome = () => {
             className="mb-6 lg:mb-10"
           >
             <p className="text-sm text-muted-foreground">Hi {firstName} 👋</p>
-            <h1 className="text-2xl sm:text-3xl lg:text-5xl font-semibold tracking-tight lg:leading-tight max-w-3xl">
+            <h1 className="text-2xl sm:text-3xl lg:text-5xl font-semibold tracking-tight lg:leading-tight max-w-5xl">
               Pay for pet care. Save automatically.
             </h1>
           </motion.div>

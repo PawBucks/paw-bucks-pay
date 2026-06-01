@@ -205,7 +205,7 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
  Add Visit Records
  </Button>
  </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[calc(100dvh-1rem)] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-7xl max-h-[calc(100dvh-1rem)] overflow-hidden flex flex-col">
  <DialogHeader>
  <DialogTitle>Add Medical Visit</DialogTitle>
  <DialogDescription>

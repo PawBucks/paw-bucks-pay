@@ -343,7 +343,7 @@ export default function MerchantPOSIntegration() {
  return (
  <MerchantWorkspaceLayout>
  <WorkspacePageHeader section="Catalog & Services" title="POS & API Integration" subtitle="Connect your POS to award PawBucks automatically" />
- <main className="container max-w-4xl lg:max-w-6xl mx-auto px-4 py-6">
+ <main className="container max-w-7xl lg:max-w-7xl mx-auto px-4 py-6">
 
  <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
  <CardHeader className="text-center pb-4">
@@ -410,7 +410,7 @@ export default function MerchantPOSIntegration() {
    subtitle="Connect your systems to award PawBucks automatically"
    actions={<Badge className="bg-primary">Premium</Badge>}
  />
- <main className="container max-w-5xl lg:max-w-6xl mx-auto px-4 py-6">
+ <main className="container max-w-5xl lg:max-w-7xl mx-auto px-4 py-6">
 
  <Tabs defaultValue="api-keys" className="space-y-6">
  <TabsList className="grid w-full grid-cols-4">

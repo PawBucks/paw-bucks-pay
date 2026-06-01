@@ -385,7 +385,7 @@ const MerchantDirectory = () => {
       >
         {/* Top nav: title + view toggles + search */}
         <div className="bg-card border-b border-border px-4 py-3 sticky top-0 z-20">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-3">
               <h1 className="text-lg font-extrabold tracking-tight">Directory</h1>
               <div className="flex gap-1.5">
@@ -466,7 +466,7 @@ const MerchantDirectory = () => {
             {/* Top sponsored ad — Free + PawPass only */}
             {showAds && topAdMerchant && (
               <div className="bg-card border-b border-border">
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-7xl mx-auto">
                   <div className="flex items-center justify-between px-4 pt-2 pb-0.5">
                     <span className="text-[9px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
                       Advertisement
@@ -509,7 +509,7 @@ const MerchantDirectory = () => {
 
             {/* Hero + category pills */}
             <div className="bg-card border-b border-border">
-              <div className="max-w-4xl mx-auto px-4 pt-5">
+              <div className="max-w-7xl mx-auto px-4 pt-5">
                 <div className="text-[10px] font-semibold tracking-[0.18em] uppercase text-primary mb-1.5 flex items-center gap-1.5">
                   <MapPin className="w-3 h-3" /> The Directory
                 </div>
@@ -549,7 +549,7 @@ const MerchantDirectory = () => {
 
             {/* Sort bar */}
             <div className="bg-card border-b border-border px-4">
-              <div className="max-w-4xl mx-auto flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto scrollbar-hide">
                 {sortOptions.map((opt) => {
                   const isActive = sortBy === opt.value;
                   const isDistance = opt.value === "distance";
@@ -587,7 +587,7 @@ const MerchantDirectory = () => {
             </div>
 
             {/* List body */}
-            <div className="max-w-4xl mx-auto px-4 pt-3 pb-6">
+            <div className="max-w-7xl mx-auto px-4 pt-3 pb-6">
               <div className="text-[11px] text-muted-foreground mb-3">
                 {filteredMerchants.length} result{filteredMerchants.length !== 1 ? "s" : ""}
                 {selectedCategory !== "all" &&
@@ -631,7 +631,7 @@ const MerchantDirectory = () => {
         {/* Sticky footer ad — Free + PawPass only. Uses a different merchant from the top ad. */}
         {showAds && inlineAdMerchant && viewMode !== "map" && !showMobileMap && (
           <div className="sticky bottom-0 left-0 right-0 z-30 bg-card border-t border-border shadow-[0_-4px_16px_hsl(var(--foreground)/0.07)]">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-7xl mx-auto">
               <div className="flex items-center justify-between px-4 pt-1 pb-0.5">
                 <span className="text-[9px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
                   Advertisement

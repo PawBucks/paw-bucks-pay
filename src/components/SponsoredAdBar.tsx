@@ -110,7 +110,7 @@ export function SponsoredAdBar({ variant }: SponsoredAdBarProps) {
 
   return (
     <div className="w-full">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Sponsored header strip */}
         <div className="flex items-center justify-between px-3 py-1.5 bg-muted/60 rounded-t-xl border border-b-0 border-border">
           <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">

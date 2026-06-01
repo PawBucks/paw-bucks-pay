@@ -142,7 +142,7 @@ const MerchantPawBucksWallet = () => {
  return (
  <MerchantWorkspaceLayout>
  <WorkspacePageHeader section="Wallet" title="Merchant PawBucks" subtitle={merchant.business_name} />
- <main className="p-4 md:p-6 max-w-4xl lg:max-w-5xl mx-auto w-full">
+ <main className="p-4 md:p-6 max-w-7xl lg:max-w-5xl mx-auto w-full">
  {/* Main Balance Card */}
  <GradientCard gradient className="mb-6">
  <div className="text-center">
