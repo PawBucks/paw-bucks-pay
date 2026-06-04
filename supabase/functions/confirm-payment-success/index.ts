@@ -166,6 +166,10 @@ serve(async (req) => {
 
     const metadata = paymentIntent.metadata || {};
     const userId = metadata.user_id;
+    // Shared accounts: PawBucks, Pet Fund and Welcome Credit all live on
+    // the primary owner's record. create-combined-payment writes this in
+    // metadata so we debit from the correct user.
+    const effectiveUserId = metadata.effective_user_id || userId;
     const merchantId = metadata.merchant_id;
     const pawbucksAmount = parseInt(metadata.pawbucks_amount || "0", 10);
     const storeLockedPawbucks = parseInt(metadata.store_locked_pawbucks || "0", 10);
@@ -381,7 +385,7 @@ serve(async (req) => {
       const { data: userWallet } = await supabaseAdmin
         .from('pawbucks_wallet')
         .select('balance')
-        .eq('user_id', userId)
+        .eq('user_id', effectiveUserId)
         .single();
 
       const walletBalance = userWallet?.balance || 0;
@@ -398,7 +402,7 @@ serve(async (req) => {
         const { data: petFundLedger } = await supabaseAdmin
           .from('pet_fund_ledgers')
           .select('id, available_balance')
-          .eq('user_id', userId)
+          .eq('user_id', effectiveUserId)
           .eq('status', 'active')
           .maybeSingle();
 
@@ -407,7 +411,7 @@ serve(async (req) => {
           const { data: oldestRelease } = await supabaseAdmin
             .from('pet_fund_releases')
             .select('min_transaction_usd')
-            .eq('user_id', userId)
+            .eq('user_id', effectiveUserId)
             .eq('status', 'released')
             .is('used_at', null)
             .order('month_number', { ascending: true })
@@ -429,7 +433,7 @@ serve(async (req) => {
           const { data: welcomeCredit } = await supabaseAdmin
             .from('user_welcome_credits')
             .select('id, credit_amount, status, expires_at')
-            .eq('user_id', userId)
+            .eq('user_id', effectiveUserId)
             .eq('status', 'active')
             .maybeSingle();
 
@@ -444,10 +448,10 @@ serve(async (req) => {
         await supabaseAdmin
           .from('pawbucks_wallet')
           .update({ balance: walletBalance - walletDeduction })
-          .eq('user_id', userId);
+          .eq('user_id', effectiveUserId);
 
         await supabaseAdmin.from('pawbucks_activity').insert({
-          user_id: userId,
+          user_id: effectiveUserId,
           amount: walletDeduction,
           type: 'redeem',
           source: 'merchant_payment',
@@ -483,7 +487,7 @@ serve(async (req) => {
         const { data: availableReleases } = await supabaseAdmin
           .from('pet_fund_releases')
           .select('id, amount, month_number')
-          .eq('user_id', userId)
+          .eq('user_id', effectiveUserId)
           .eq('status', 'released')
           .is('used_at', null)
           .order('month_number', { ascending: true });
@@ -519,7 +523,7 @@ serve(async (req) => {
         const { data: currentLedger } = await supabaseAdmin
           .from('pet_fund_ledgers')
           .select('available_balance, total_used')
-          .eq('user_id', userId)
+          .eq('user_id', effectiveUserId)
           .single();
 
         if (currentLedger) {
@@ -529,7 +533,7 @@ serve(async (req) => {
               available_balance: Math.max(0, currentLedger.available_balance - petFundDeduction),
               total_used: currentLedger.total_used + petFundDeduction,
             })
-            .eq('user_id', userId);
+            .eq('user_id', effectiveUserId);
         }
 
         logStep("Pet Fund deducted", { amount: petFundDeduction });
@@ -539,7 +543,7 @@ serve(async (req) => {
       if (welcomeCreditDeduction > 0) {
         const totalCents = Math.round(amountInDollars * 100);
         await supabaseAdmin.rpc('redeem_welcome_credit', {
-          p_user_id: userId,
+          p_user_id: effectiveUserId,
           p_merchant_id: merchantId,
           p_transaction_total_cents: totalCents,
         });
