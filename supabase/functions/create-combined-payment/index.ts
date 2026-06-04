@@ -193,7 +193,7 @@ serve(async (req) => {
       const { data: arWallet } = await supabaseAdmin
         .from('pawbucks_wallet')
         .select('balance')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .single();
 
       const arAvailable = arWallet?.balance || 0;
@@ -275,7 +275,7 @@ serve(async (req) => {
       const { data: wallet, error: walletError } = await supabaseAdmin
         .from('pawbucks_wallet')
         .select('balance')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .single();
 
       if (walletError && walletError.code !== 'PGRST116') {
@@ -289,7 +289,7 @@ serve(async (req) => {
       const { data: petFundLedgerForBalance } = await supabaseAdmin
         .from('pet_fund_ledgers')
         .select('available_balance')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .eq('status', 'active')
         .maybeSingle();
       const petFundAvailable = petFundLedgerForBalance?.available_balance || 0;
@@ -298,7 +298,7 @@ serve(async (req) => {
       const { data: welcomeCredit } = await supabaseAdmin
         .from('user_welcome_credits')
         .select('id, credit_amount, status, expires_at')
-        .eq('user_id', user.id)
+        .eq('user_id', effectiveUserId)
         .eq('status', 'active')
         .maybeSingle();
 
@@ -328,7 +328,7 @@ serve(async (req) => {
         const { data: oldestPetFundRelease } = await supabaseAdmin
           .from('pet_fund_releases')
           .select('min_transaction_usd, amount, month_number')
-          .eq('user_id', user.id)
+          .eq('user_id', effectiveUserId)
           .eq('status', 'released')
           .is('used_at', null)
           .order('month_number', { ascending: true })
@@ -428,7 +428,7 @@ serve(async (req) => {
         const { data: currentWallet } = await supabaseAdmin
           .from('pawbucks_wallet')
           .select('balance')
-          .eq('user_id', user.id)
+          .eq('user_id', effectiveUserId)
           .single();
 
         actualWalletPawbucks = Math.min(currentWallet?.balance || 0, walletPawbucks);
@@ -437,10 +437,10 @@ serve(async (req) => {
         await supabaseAdmin
           .from('pawbucks_wallet')
           .update({ balance: newBalance })
-          .eq('user_id', user.id);
+          .eq('user_id', effectiveUserId);
 
         await supabaseAdmin.from('pawbucks_activity').insert({
-          user_id: user.id,
+          user_id: effectiveUserId,
           amount: actualWalletPawbucks,
           type: 'redeem',
           source: 'merchant_payment',
@@ -456,7 +456,7 @@ serve(async (req) => {
         const { data: petFundLedger } = await supabaseAdmin
           .from('pet_fund_ledgers')
           .select('id, available_balance')
-          .eq('user_id', user.id)
+          .eq('user_id', effectiveUserId)
           .eq('status', 'active')
           .maybeSingle();
 
@@ -467,7 +467,7 @@ serve(async (req) => {
           const { data: availableReleases } = await supabaseAdmin
             .from('pet_fund_releases')
             .select('id, amount, month_number')
-            .eq('user_id', user.id)
+            .eq('user_id', effectiveUserId)
             .eq('status', 'released')
             .is('used_at', null)
             .order('month_number', { ascending: true });
@@ -509,7 +509,7 @@ serve(async (req) => {
           legacyWelcomePawbucks = stillRemaining;
           const totalCents = Math.round(totalAmount * 100);
           const { error: redeemError } = await supabaseAdmin.rpc('redeem_welcome_credit', {
-            p_user_id: user.id,
+            p_user_id: effectiveUserId,
             p_merchant_id: merchantId,
             p_transaction_total_cents: totalCents,
           });
@@ -786,6 +786,7 @@ serve(async (req) => {
         metadata: {
           merchant_id: merchantId,
           user_id: user.id,
+          effective_user_id: effectiveUserId,
           user_email: user.email || '',
           business_name: merchant.business_name,
           description: description || `Payment to ${merchant.business_name}`,
