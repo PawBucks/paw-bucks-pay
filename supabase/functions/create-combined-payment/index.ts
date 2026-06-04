@@ -123,6 +123,19 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Resolve effective wallet user (shared accounts). PawBucks, Pet Fund,
+    // and Welcome Credits all live on the primary owner's record — if the
+    // paying user is a shared-account member we must read/debit from the
+    // owner, otherwise we falsely report "Insufficient PawBucks balance".
+    const { data: sharedMembership } = await supabaseAdmin
+      .from('shared_account_members')
+      .select('account_id, shared_accounts!inner(owner_id)')
+      .eq('member_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle();
+    const effectiveUserId = (sharedMembership as any)?.shared_accounts?.owner_id || user.id;
+    logStep('Effective wallet user resolved', { paying: user.id, effective: effectiveUserId });
+
     // Get merchant details
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
