@@ -1070,7 +1070,7 @@ serve(async (req) => {
           // Fetch invoice and merchant details for transaction
           const { data: invoiceForTx } = await supabaseAdmin
             .from('invoices')
-            .select('invoice_number, client_name')
+            .select('invoice_number, client_name, client_email')
             .eq('id', invoiceId)
             .single();
           
@@ -1079,8 +1079,25 @@ serve(async (req) => {
             .select('business_name')
             .eq('id', merchantId)
             .single();
-          
-          if (invoicePayerUserId && merchantId) {
+
+          // Fallback: resolve payer user_id from invoice client email when the
+          // payer is not logged in (public invoice link). Without this fallback
+          // the transaction record is skipped and the merchant never sees the
+          // payment in their transactions feed.
+          let resolvedPayerUserId: string | null = invoicePayerUserId || null;
+          if (!resolvedPayerUserId && invoiceForTx?.client_email) {
+            const { data: payerProfile } = await supabaseAdmin
+              .from('profiles')
+              .select('id')
+              .or(`email.eq.${invoiceForTx.client_email},normalized_email.eq.${invoiceForTx.client_email.toLowerCase()}`)
+              .maybeSingle();
+            if (payerProfile?.id) {
+              resolvedPayerUserId = payerProfile.id;
+              console.log('[INVOICE_PAYMENT] Resolved payer user_id from client_email:', resolvedPayerUserId);
+            }
+          }
+
+          if (merchantId) {
             const pawbucksValueUSD = pawbucksUsed * 0.001;
             const totalTransactionAmount = paymentAmount + pawbucksValueUSD;
             const platformFee = paymentAmount * 0.025; // 2.5% fee only on Stripe portion
@@ -1088,7 +1105,7 @@ serve(async (req) => {
             const { data: transaction, error: transactionError } = await supabaseAdmin
               .from('transactions')
               .insert({
-                user_id: invoicePayerUserId,
+                user_id: resolvedPayerUserId,
                 merchant_id: merchantId,
                 amount: totalTransactionAmount,
                 stripe_amount: paymentAmount,
@@ -1109,8 +1126,8 @@ serve(async (req) => {
               console.log('[INVOICE_PAYMENT] ✅ Transaction recorded:', transaction.id);
             }
           } else {
-            console.log('[INVOICE_PAYMENT] Skipping transaction record - missing userId or merchantId:', {
-              hasUserId: !!invoicePayerUserId,
+            console.log('[INVOICE_PAYMENT] Skipping transaction record - missing merchantId:', {
+              hasUserId: !!resolvedPayerUserId,
               hasMerchantId: !!merchantId,
             });
           }
