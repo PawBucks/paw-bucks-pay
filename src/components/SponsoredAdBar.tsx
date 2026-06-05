@@ -63,6 +63,8 @@ export function SponsoredAdBar({ variant }: SponsoredAdBarProps) {
   const tier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
   // PawPass+ subscribers don't see ads at all
   if (tier === "pawpass_plus") return null;
+  // PawPass subscribers see fewer ads — suppress the bottom ad bar, keep only the top.
+  if (tier === "pawpass" && variant === "bottom") return null;
 
   // Pick merchant: offset bottom so top/bottom show different merchants
   let merchantContent: AdContent | null = null;
