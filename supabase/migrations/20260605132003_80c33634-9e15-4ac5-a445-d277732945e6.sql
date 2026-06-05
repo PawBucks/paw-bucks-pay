@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Vets can view checkin user profiles" ON public.profiles;
