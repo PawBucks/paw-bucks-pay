@@ -256,7 +256,7 @@ serve(async (req) => {
     // Get merchant details for receipt - ALWAYS use database name, not metadata
     const { data: merchant } = await supabaseAdmin
       .from('merchants')
-      .select('business_name, address')
+      .select('business_name, address, phone, email')
       .eq('id', merchantId)
       .single();
 
