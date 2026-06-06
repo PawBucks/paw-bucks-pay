@@ -299,7 +299,7 @@ export const EditMerchantProfileDialog = ({
  <div
  className="absolute inset-0 flex items-center justify-center"
  style={{
- transform: `scale(${logoZoom})`,
+ transform: `translate(${logoOffsetX}%, ${logoOffsetY}%) scale(${logoZoom})`,
  transition:"transform 0.2s ease",
  }}
  >
@@ -311,23 +311,31 @@ export const EditMerchantProfileDialog = ({
  </div>
  </div>
  {logoPreview && (
- <div className="space-y-2">
- <Label htmlFor="logoZoom" className="text-sm">
- Adjust Logo Size
- </Label>
- <input
- id="logoZoom"
- type="range"
- min="0.5"
- max="2"
- step="0.1"
- value={logoZoom}
- onChange={(e) => setLogoZoom(parseFloat(e.target.value))}
- className="w-full"
- />
- <p className="text-xs text-muted-foreground text-center">
- Scale: {Formatters.decimal(logoZoom, 1)}x
- </p>
+ <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-3">
+ <div className="space-y-1.5">
+ <div className="flex items-center justify-between">
+ <Label htmlFor="logoZoom" className="text-xs font-medium">Zoom</Label>
+ <span className="text-[11px] text-muted-foreground">{Formatters.decimal(logoZoom, 2)}x</span>
+ </div>
+ <input id="logoZoom" type="range" min="0.5" max="3" step="0.05" value={logoZoom} onChange={(e) => setLogoZoom(parseFloat(e.target.value))} className="w-full" />
+ </div>
+ <div className="space-y-1.5">
+ <div className="flex items-center justify-between">
+ <Label htmlFor="logoOffsetX" className="text-xs font-medium">Horizontal</Label>
+ <span className="text-[11px] text-muted-foreground">{logoOffsetX}%</span>
+ </div>
+ <input id="logoOffsetX" type="range" min="-50" max="50" step="1" value={logoOffsetX} onChange={(e) => setLogoOffsetX(parseInt(e.target.value, 10))} className="w-full" />
+ </div>
+ <div className="space-y-1.5">
+ <div className="flex items-center justify-between">
+ <Label htmlFor="logoOffsetY" className="text-xs font-medium">Vertical</Label>
+ <span className="text-[11px] text-muted-foreground">{logoOffsetY}%</span>
+ </div>
+ <input id="logoOffsetY" type="range" min="-50" max="50" step="1" value={logoOffsetY} onChange={(e) => setLogoOffsetY(parseInt(e.target.value, 10))} className="w-full" />
+ </div>
+ <button type="button" onClick={() => { setLogoZoom(1); setLogoOffsetX(0); setLogoOffsetY(0); }} className="text-[11px] text-primary hover:underline">
+ Reset position
+ </button>
  </div>
  )}
  </div>
