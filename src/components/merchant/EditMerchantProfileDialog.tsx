@@ -46,6 +46,7 @@ type Merchant = {
  business_name: string;
  contact_person: string;
  phone?: string;
+ email?: string | null;
  business_type: string;
  business_categories?: string[] | null;
  address?: string;
@@ -170,6 +171,19 @@ export const EditMerchantProfileDialog = ({
  placeholder="(310) 555-1234"
  defaultValue={merchant.phone ||""}
  />
+ </div>
+ <div className="space-y-2">
+  <Label htmlFor="email">Business Email</Label>
+  <Input
+   id="email"
+   name="email"
+   type="email"
+   placeholder="hello@yourbusiness.com"
+   defaultValue={merchant.email ||""}
+  />
+  <p className="text-xs text-muted-foreground">
+   Customers will see this email on your receipts and business profile.
+  </p>
  </div>
 
  <div className="space-y-2">
