@@ -82,6 +82,8 @@ export const EditMerchantProfileDialog = ({
  const [logoFile, setLogoFile] = useState<File | null>(null);
  const [logoPreview, setLogoPreview] = useState<string | null>(null);
  const [logoZoom, setLogoZoom] = useState(1);
+ const [logoOffsetX, setLogoOffsetX] = useState(0);
+ const [logoOffsetY, setLogoOffsetY] = useState(0);
  const [categories, setCategories] = useState<string[]>([]);
  const hoursRef = useRef<BusinessHoursEditorHandle>(null);
  const [submitting, setSubmitting] = useState(false);
@@ -105,12 +107,57 @@ export const EditMerchantProfileDialog = ({
  const file = e.target.files?.[0];
  if (file) {
  setLogoFile(file);
+   setLogoZoom(1);
+   setLogoOffsetX(0);
+   setLogoOffsetY(0);
  const reader = new FileReader();
  reader.onloadend = () => {
  setLogoPreview(reader.result as string);
  };
  reader.readAsDataURL(file);
  }
+ };
+
+ // Bake the chosen scale + offset into a square PNG so the saved logo
+ // matches exactly what the merchant arranged in the preview.
+ const composeLogoFile = async (
+   src: File,
+   scale: number,
+   offsetXPct: number,
+   offsetYPct: number,
+ ): Promise<File> => {
+   const dataUrl: string = await new Promise((resolve, reject) => {
+     const r = new FileReader();
+     r.onloadend = () => resolve(r.result as string);
+     r.onerror = reject;
+     r.readAsDataURL(src);
+   });
+   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+     const i = new Image();
+     i.onload = () => resolve(i);
+     i.onerror = reject;
+     i.src = dataUrl;
+   });
+   const SIZE = 512;
+   const canvas = document.createElement("canvas");
+   canvas.width = SIZE;
+   canvas.height = SIZE;
+   const ctx = canvas.getContext("2d");
+   if (!ctx) return src;
+   ctx.clearRect(0, 0, SIZE, SIZE);
+   // Cover-fit base size, then apply user scale
+   const base = Math.max(SIZE / img.width, SIZE / img.height);
+   const drawW = img.width * base * scale;
+   const drawH = img.height * base * scale;
+   const cx = SIZE / 2 + (offsetXPct / 100) * SIZE;
+   const cy = SIZE / 2 + (offsetYPct / 100) * SIZE;
+   ctx.drawImage(img, cx - drawW / 2, cy - drawH / 2, drawW, drawH);
+   const blob: Blob = await new Promise((resolve) =>
+     canvas.toBlob((b) => resolve(b as Blob), "image/png", 0.95)!,
+   );
+   return new File([blob], (src.name.replace(/\.[^.]+$/, "") || "logo") + ".png", {
+     type: "image/png",
+   });
  };
 
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -127,9 +174,20 @@ export const EditMerchantProfileDialog = ({
     } catch (err) {
      console.error("Failed to save business hours:", err);
     }
-  await onSubmit(formData, logoFile, categories);
+   let fileToUpload = logoFile;
+   if (logoFile && (logoZoom !== 1 || logoOffsetX !== 0 || logoOffsetY !== 0)) {
+    try {
+     fileToUpload = await composeLogoFile(logoFile, logoZoom, logoOffsetX, logoOffsetY);
+    } catch (err) {
+     console.error("Failed to compose logo, uploading original:", err);
+    }
+   }
+   await onSubmit(formData, fileToUpload, categories);
  setLogoFile(null);
  setLogoPreview(null);
+   setLogoZoom(1);
+   setLogoOffsetX(0);
+   setLogoOffsetY(0);
   } finally {
    setSubmitting(false);
   }
