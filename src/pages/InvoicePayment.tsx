@@ -246,7 +246,15 @@ const InvoicePayment = () => {
  );
 
  const handlePayment = async () => {
- if (!invoice || !merchant) return;
+  if (!invoice) {
+    toast.error("Invoice not loaded yet. Please refresh and try again.");
+    return;
+  }
+  if (!merchant) {
+    console.error("[InvoicePayment] Cannot pay — merchant data missing", { invoiceId, hasInvoice: !!invoice });
+    toast.error("We couldn't load this merchant's payment account. Please refresh — if it keeps happening, contact the sender.");
+    return;
+  }
 
  // Determine if this is a guest checkout
  const isGuestCheckout = !user && guestCheckoutConfirmed;
@@ -257,6 +265,15 @@ const InvoicePayment = () => {
  // Guests cannot use PawBucks
  const pawbucksCents = isGuestCheckout ? 0 : Math.round(pawbucksValueUSD * 100);
  const tipCents = Math.round(parseFloat(tipAmount ||"0") * 100);
+
+  console.log("[InvoicePayment] Submitting payment", {
+    invoiceId: invoice.id,
+    totalCents,
+    pawbucksCents,
+    tipCents,
+    userId: user?.id,
+    isGuestCheckout,
+  });
 
  // Use the edge function that handles PawBucks
  const { data, error } = await supabase.functions.invoke("process-invoice-pawbucks-payment", {
@@ -271,21 +288,28 @@ const InvoicePayment = () => {
  },
  });
 
- if (error) throw error;
+  console.log("[InvoicePayment] process-invoice-pawbucks-payment response", { data, error });
+
+  if (error) throw new Error(error.message || "Payment service error. Please try again.");
+  if (data?.error) throw new Error(data.error);
 
  if (data?.success && data?.paymentMethod ==="pawbucks") {
  // Full PawBucks payment completed
  toast.success(`Payment completed with ${data.pawbucksUsed} PawBucks!`);
  navigate(`/invoice/${invoiceId}/success?pawbucks=true`);
- } else if (data?.checkoutUrl || data?.url) {
+  } else if (data?.checkoutUrl || data?.url) {
  // Redirect to Stripe checkout (handle both field names for compatibility)
- window.location.href = data.checkoutUrl || data.url;
+  const redirectUrl = data.checkoutUrl || data.url;
+  console.log("[InvoicePayment] Redirecting to Stripe checkout:", redirectUrl);
+  // Use assign so the browser treats this as navigation in the same gesture
+  window.location.assign(redirectUrl);
  } else if (data?.success) {
  // Success but no redirect needed
  toast.success("Payment processed successfully!");
  navigate(`/invoice/${invoiceId}/success`);
  } else {
- throw new Error("No checkout URL received from payment processor");
+  console.error("[InvoicePayment] Unexpected response shape:", data);
+  throw new Error("We didn't get a checkout link back. Please try again or contact the sender.");
  }
  } catch (error: any) {
  console.error("Error processing payment:", error);
