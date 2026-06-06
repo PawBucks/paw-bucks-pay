@@ -46,6 +46,7 @@ type Merchant = {
  business_name: string;
  contact_person: string;
  phone?: string;
+ email?: string | null;
  business_type: string;
  business_categories?: string[] | null;
  address?: string;
