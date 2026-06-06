@@ -82,6 +82,8 @@ export const EditMerchantProfileDialog = ({
  const [logoFile, setLogoFile] = useState<File | null>(null);
  const [logoPreview, setLogoPreview] = useState<string | null>(null);
  const [logoZoom, setLogoZoom] = useState(1);
+ const [logoOffsetX, setLogoOffsetX] = useState(0);
+ const [logoOffsetY, setLogoOffsetY] = useState(0);
  const [categories, setCategories] = useState<string[]>([]);
  const hoursRef = useRef<BusinessHoursEditorHandle>(null);
  const [submitting, setSubmitting] = useState(false);
@@ -105,12 +107,57 @@ export const EditMerchantProfileDialog = ({
  const file = e.target.files?.[0];
  if (file) {
  setLogoFile(file);
+   setLogoZoom(1);
+   setLogoOffsetX(0);
+   setLogoOffsetY(0);
  const reader = new FileReader();
  reader.onloadend = () => {
  setLogoPreview(reader.result as string);
  };
  reader.readAsDataURL(file);
  }
+ };
+
+ // Bake the chosen scale + offset into a square PNG so the saved logo
+ // matches exactly what the merchant arranged in the preview.
+ const composeLogoFile = async (
+   src: File,
+   scale: number,
+   offsetXPct: number,
+   offsetYPct: number,
+ ): Promise<File> => {
+   const dataUrl: string = await new Promise((resolve, reject) => {
+     const r = new FileReader();
+     r.onloadend = () => resolve(r.result as string);
+     r.onerror = reject;
+     r.readAsDataURL(src);
+   });
+   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+     const i = new Image();
+     i.onload = () => resolve(i);
+     i.onerror = reject;
+     i.src = dataUrl;
+   });
+   const SIZE = 512;
+   const canvas = document.createElement("canvas");
+   canvas.width = SIZE;
+   canvas.height = SIZE;
+   const ctx = canvas.getContext("2d");
+   if (!ctx) return src;
+   ctx.clearRect(0, 0, SIZE, SIZE);
+   // Cover-fit base size, then apply user scale
+   const base = Math.max(SIZE / img.width, SIZE / img.height);
+   const drawW = img.width * base * scale;
+   const drawH = img.height * base * scale;
+   const cx = SIZE / 2 + (offsetXPct / 100) * SIZE;
+   const cy = SIZE / 2 + (offsetYPct / 100) * SIZE;
+   ctx.drawImage(img, cx - drawW / 2, cy - drawH / 2, drawW, drawH);
+   const blob: Blob = await new Promise((resolve) =>
+     canvas.toBlob((b) => resolve(b as Blob), "image/png", 0.95)!,
+   );
+   return new File([blob], (src.name.replace(/\.[^.]+$/, "") || "logo") + ".png", {
+     type: "image/png",
+   });
  };
 
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -127,9 +174,20 @@ export const EditMerchantProfileDialog = ({
     } catch (err) {
      console.error("Failed to save business hours:", err);
     }
-  await onSubmit(formData, logoFile, categories);
+   let fileToUpload = logoFile;
+   if (logoFile && (logoZoom !== 1 || logoOffsetX !== 0 || logoOffsetY !== 0)) {
+    try {
+     fileToUpload = await composeLogoFile(logoFile, logoZoom, logoOffsetX, logoOffsetY);
+    } catch (err) {
+     console.error("Failed to compose logo, uploading original:", err);
+    }
+   }
+   await onSubmit(formData, fileToUpload, categories);
  setLogoFile(null);
  setLogoPreview(null);
+   setLogoZoom(1);
+   setLogoOffsetX(0);
+   setLogoOffsetY(0);
   } finally {
    setSubmitting(false);
   }
@@ -241,7 +299,7 @@ export const EditMerchantProfileDialog = ({
  <div
  className="absolute inset-0 flex items-center justify-center"
  style={{
- transform: `scale(${logoZoom})`,
+ transform: `translate(${logoOffsetX}%, ${logoOffsetY}%) scale(${logoZoom})`,
  transition:"transform 0.2s ease",
  }}
  >
@@ -253,23 +311,31 @@ export const EditMerchantProfileDialog = ({
  </div>
  </div>
  {logoPreview && (
- <div className="space-y-2">
- <Label htmlFor="logoZoom" className="text-sm">
- Adjust Logo Size
- </Label>
- <input
- id="logoZoom"
- type="range"
- min="0.5"
- max="2"
- step="0.1"
- value={logoZoom}
- onChange={(e) => setLogoZoom(parseFloat(e.target.value))}
- className="w-full"
- />
- <p className="text-xs text-muted-foreground text-center">
- Scale: {Formatters.decimal(logoZoom, 1)}x
- </p>
+ <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-3">
+ <div className="space-y-1.5">
+ <div className="flex items-center justify-between">
+ <Label htmlFor="logoZoom" className="text-xs font-medium">Zoom</Label>
+ <span className="text-[11px] text-muted-foreground">{Formatters.decimal(logoZoom, 2)}x</span>
+ </div>
+ <input id="logoZoom" type="range" min="0.5" max="3" step="0.05" value={logoZoom} onChange={(e) => setLogoZoom(parseFloat(e.target.value))} className="w-full" />
+ </div>
+ <div className="space-y-1.5">
+ <div className="flex items-center justify-between">
+ <Label htmlFor="logoOffsetX" className="text-xs font-medium">Horizontal</Label>
+ <span className="text-[11px] text-muted-foreground">{logoOffsetX}%</span>
+ </div>
+ <input id="logoOffsetX" type="range" min="-50" max="50" step="1" value={logoOffsetX} onChange={(e) => setLogoOffsetX(parseInt(e.target.value, 10))} className="w-full" />
+ </div>
+ <div className="space-y-1.5">
+ <div className="flex items-center justify-between">
+ <Label htmlFor="logoOffsetY" className="text-xs font-medium">Vertical</Label>
+ <span className="text-[11px] text-muted-foreground">{logoOffsetY}%</span>
+ </div>
+ <input id="logoOffsetY" type="range" min="-50" max="50" step="1" value={logoOffsetY} onChange={(e) => setLogoOffsetY(parseInt(e.target.value, 10))} className="w-full" />
+ </div>
+ <button type="button" onClick={() => { setLogoZoom(1); setLogoOffsetX(0); setLogoOffsetY(0); }} className="text-[11px] text-primary hover:underline">
+ Reset position
+ </button>
  </div>
  )}
  </div>
