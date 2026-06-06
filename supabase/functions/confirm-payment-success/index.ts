@@ -755,6 +755,8 @@ serve(async (req) => {
         receiptId: transaction.id,
         merchantName: merchant?.business_name || businessName,
         merchantLocation: merchant?.address || undefined,
+        merchantPhone: (merchant as any)?.phone || undefined,
+        merchantEmail: (merchant as any)?.email || undefined,
         items: [{ name: description, price: totalAmount > 0 ? totalAmount : amountInDollars }],
         subtotal: totalAmount > 0 ? totalAmount : amountInDollars,
         pawbucksApplied: pawbucksUsdValue,
