@@ -54,12 +54,22 @@ export default function MerchantBusinessProfile() {
     try {
       let logoUrl = merchant.logo_url ?? null;
       if (logoFile) {
-        const ext = logoFile.name.split(".").pop();
+        const ext = logoFile.name.includes(".") ? logoFile.name.split(".").pop() : "png";
         const path = `${user.id}/${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("merchant-logos").upload(path, logoFile, { upsert: true });
-        if (upErr) throw upErr;
-        const { data: urlData } = supabase.storage.from("merchant-logos").getPublicUrl(path);
-        logoUrl = urlData.publicUrl;
+        const { error: upErr } = await supabase.storage
+          .from("merchant-logos")
+          .upload(path, logoFile, { upsert: true, contentType: logoFile.type || undefined });
+        if (upErr) {
+          console.error("Logo upload failed:", upErr);
+          toast({
+            title: "Logo upload failed",
+            description: "We saved your other changes but couldn't upload the new logo. Please try the logo again.",
+            variant: "destructive",
+          });
+        } else {
+          const { data: urlData } = supabase.storage.from("merchant-logos").getPublicUrl(path);
+          logoUrl = urlData.publicUrl;
+        }
       }
 
       const businessType = (formData.get("businessType") as string) || merchant.business_type;
@@ -67,6 +77,7 @@ export default function MerchantBusinessProfile() {
         business_name: (formData.get("businessName") as string)?.trim() || merchant.business_name,
         contact_person: (formData.get("contactPerson") as string)?.trim() || merchant.contact_person,
         phone: (formData.get("phone") as string)?.trim() || null,
+        email: (formData.get("email") as string)?.trim() || null,
         business_type: businessType,
         business_categories: businessCategories.length > 0 ? businessCategories : [businessType],
         address: (formData.get("address") as string)?.trim() || null,
