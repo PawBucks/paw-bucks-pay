@@ -172,6 +172,19 @@ export const EditMerchantProfileDialog = ({
  defaultValue={merchant.phone ||""}
  />
  </div>
+ <div className="space-y-2">
+  <Label htmlFor="email">Business Email</Label>
+  <Input
+   id="email"
+   name="email"
+   type="email"
+   placeholder="hello@yourbusiness.com"
+   defaultValue={merchant.email ||""}
+  />
+  <p className="text-xs text-muted-foreground">
+   Customers will see this email on your receipts and business profile.
+  </p>
+ </div>
 
  <div className="space-y-2">
  <Label>Business Categories</Label>
