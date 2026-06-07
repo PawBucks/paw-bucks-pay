@@ -581,9 +581,29 @@ export const getBrandAllMerchantsPerformance = async (
     // 1. Pull every merchant enrolled in any of these campaigns (active or otherwise)
     const { data: enrollments, error: enrollErr } = await supabase
       .from("brand_campaign_merchants")
-      .select("merchant_id, campaign_id, status, merchants(business_name, logo_url, address, business_type)")
+      .select("merchant_id, campaign_id, status")
       .in("campaign_id", campaignIds);
     if (enrollErr) return { data: [], error: enrollErr };
+
+    // Resolve merchant details via the public view (RLS-safe)
+    const enrolledMerchantIds = Array.from(
+      new Set(((enrollments || []) as Array<{ merchant_id: string | null }>).map((e) => e.merchant_id).filter(Boolean) as string[]),
+    );
+    const { data: merchantsData } = enrolledMerchantIds.length
+      ? await supabase
+          .from("merchants_public")
+          .select("id, business_name, logo_url, address, business_type")
+          .in("id", enrolledMerchantIds)
+      : { data: [] as Array<{ id: string; business_name: string; logo_url: string | null; address: string | null; business_type: string | null }> };
+    const merchantDetailsMap = new Map<
+      string,
+      { business_name: string; logo_url: string | null; address: string | null; business_type: string | null }
+    >(
+      (merchantsData || []).map((m: { id: string; business_name: string; logo_url: string | null; address: string | null; business_type: string | null }) => [
+        m.id,
+        { business_name: m.business_name, logo_url: m.logo_url, address: m.address, business_type: m.business_type },
+      ]),
+    );
 
     type Row = MerchantPerformanceRow & { _users: Set<string>; _campaigns: Set<string> };
     const map = new Map<string, Row>();
@@ -591,7 +611,6 @@ export const getBrandAllMerchantsPerformance = async (
       merchant_id: string;
       campaign_id: string;
       status: string;
-      merchants: { business_name: string; logo_url: string | null; address: string | null; business_type: string | null } | null;
     }>) {
       if (!e.merchant_id) continue;
       const existing = map.get(e.merchant_id);
@@ -600,12 +619,13 @@ export const getBrandAllMerchantsPerformance = async (
       } else {
         const campaignsSet = new Set<string>();
         campaignsSet.add(e.campaign_id);
+        const m = merchantDetailsMap.get(e.merchant_id);
         map.set(e.merchant_id, {
           merchant_id: e.merchant_id,
-          business_name: e.merchants?.business_name || "Unknown Merchant",
-          logo_url: e.merchants?.logo_url ?? null,
-          address: e.merchants?.address ?? null,
-          business_type: e.merchants?.business_type ?? null,
+          business_name: m?.business_name || "Unknown Merchant",
+          logo_url: m?.logo_url ?? null,
+          address: m?.address ?? null,
+          business_type: m?.business_type ?? null,
           checkins: 0,
           redemptions: 0,
           pawbucks_distributed: 0,
