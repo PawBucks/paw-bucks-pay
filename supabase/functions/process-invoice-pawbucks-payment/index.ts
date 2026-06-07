@@ -41,6 +41,7 @@ serve(async (req) => {
       invoiceId, 
       totalAmountCents, 
       pawbucksAmountCents, 
+      pawbucksUsed: pawbucksUsedFromClient,
       tipAmountCents,
       userId,
       accessToken,
@@ -94,9 +95,46 @@ serve(async (req) => {
     // Stripe will charge the invoice line item PLUS a separate tip line item,
     // so the invoice line item must NOT include the tip (otherwise tip is double-charged).
     const tipCents = Number(tipAmountCents || 0);
-    const invoiceLineCents = Math.max(0, totalAmountCents - pawbucksAmountCents - tipCents);
+    // 1 PawBuck = $0.001 = 0.1¢. Prefer the explicit PawBucks count from the
+    // client so we never re-derive (and inflate) it from rounded cents.
+    let pawbucksUsed = Number.isFinite(pawbucksUsedFromClient) && pawbucksUsedFromClient >= 0
+      ? Math.floor(Number(pawbucksUsedFromClient))
+      : Math.round(pawbucksAmountCents / PAWBUCKS_TO_USD / 100);
+    let pawbucksCents = Number(pawbucksAmountCents || 0);
+
+    // Safety net: clamp to the user's actual eligible balance BEFORE we build
+    // any line items, so a small client/server rounding mismatch can never
+    // silently fail the entire payment.
+    if (pawbucksUsed > 0 && userId) {
+      const sources = await getSpendableSources(supabase, userId);
+      const txnTotalUsd = totalAmountCents / 100;
+      const petFundEligible =
+        sources.petFundAvailable > 0 &&
+        (!sources.petFundMinUsd || txnTotalUsd >= sources.petFundMinUsd)
+          ? sources.petFundAvailable
+          : 0;
+      const totalEligible =
+        sources.walletBalance + petFundEligible + sources.legacyCreditBalance;
+      if (pawbucksUsed > totalEligible) {
+        logStep("Clamping pawbucksUsed to eligible balance", {
+          requested: pawbucksUsed,
+          eligible: totalEligible,
+        });
+        pawbucksUsed = Math.max(0, totalEligible);
+      }
+      // Snap to a multiple of 10 PB so the cent value is exact.
+      pawbucksUsed = Math.floor(pawbucksUsed / 10) * 10;
+      pawbucksCents = pawbucksUsed / 10;
+    } else if (!userId) {
+      // Guest / unauth flow: no PawBucks allowed.
+      pawbucksUsed = 0;
+      pawbucksCents = 0;
+    }
+
+    const invoiceLineCents = Math.max(0, totalAmountCents - pawbucksCents - tipCents);
     const stripeAmountCents = invoiceLineCents; // backwards-compat alias
-    const pawbucksUsed = Math.round(pawbucksAmountCents / PAWBUCKS_TO_USD / 100);
+    // Keep downstream code referencing the canonical (clamped) cent value.
+    const pawbucksAmountCentsFinal = pawbucksCents;
 
     // Validate Stripe Connect account if merchant has one
     const connectedAccountId = merchant.stripe_account_id;
