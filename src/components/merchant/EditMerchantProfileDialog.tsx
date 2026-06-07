@@ -15,6 +15,8 @@ import {
 import { Facebook, Globe, Info, Instagram, Linkedin, Twitter } from "lucide-react";
 import { PolicyDocumentUpload } from"./PolicyDocumentUpload";
 import { BusinessHoursEditor, type BusinessHoursEditorHandle } from"./BusinessHoursEditor";
+import { Video as VideoIcon, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Formatters } from "@/utils/formatters";
 const BUSINESS_TYPE_OPTIONS: { key: string; label: string }[] = [
@@ -61,6 +63,7 @@ type Merchant = {
  tos_url?: string | null;
  privacy_policy_url?: string | null;
  shipping_returns_policy_url?: string | null;
+ intro_video_url?: string | null;
 };
 
 type EditMerchantProfileDialogProps = {
@@ -68,6 +71,7 @@ type EditMerchantProfileDialogProps = {
  onOpenChange: (open: boolean) => void;
  merchant: Merchant;
  onSubmit: (formData: FormData, logoFile: File | null, businessCategories: string[]) => Promise<void>;
+ onVideoUpload?: (file: File | null, remove?: boolean) => Promise<void>;
  onRefresh?: () => void;
 };
 
@@ -76,6 +80,7 @@ export const EditMerchantProfileDialog = ({
  onOpenChange,
  merchant,
  onSubmit,
+  onVideoUpload,
  onRefresh,
 }: EditMerchantProfileDialogProps) => {
  const { user } = useAuth();
@@ -87,6 +92,58 @@ export const EditMerchantProfileDialog = ({
  const [categories, setCategories] = useState<string[]>([]);
  const hoursRef = useRef<BusinessHoursEditorHandle>(null);
  const [submitting, setSubmitting] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+
+  const MAX_VIDEO_MB = 100;
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("video/")) {
+      toast.error("Please select a video file.");
+      return;
+    }
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      toast.error(`Video must be under ${MAX_VIDEO_MB}MB.`);
+      return;
+    }
+    setVideoFile(file);
+    setVideoPreview(URL.createObjectURL(file));
+  };
+
+  const handleVideoSave = async () => {
+    if (!videoFile || !onVideoUpload) return;
+    setVideoUploading(true);
+    try {
+      await onVideoUpload(videoFile);
+      setVideoFile(null);
+      setVideoPreview(null);
+      toast.success("Intro video uploaded!");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to upload video");
+    } finally {
+      setVideoUploading(false);
+    }
+  };
+
+  const handleVideoRemove = async () => {
+    if (!onVideoUpload) return;
+    if (videoFile) {
+      setVideoFile(null);
+      setVideoPreview(null);
+      return;
+    }
+    setVideoUploading(true);
+    try {
+      await onVideoUpload(null, true);
+      toast.success("Intro video removed");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to remove video");
+    } finally {
+      setVideoUploading(false);
+    }
+  };
 
  useEffect(() => {
  const initial = (merchant.business_categories && merchant.business_categories.length > 0)
