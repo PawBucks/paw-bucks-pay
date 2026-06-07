@@ -160,7 +160,7 @@ serve(async (req) => {
     }
 
     // If paying entirely with PawBucks (no tip — tips can't be paid with PawBucks)
-    if (stripeAmountCents <= 0 && tipCents <= 0 && pawbucksAmountCents > 0) {
+    if (stripeAmountCents <= 0 && tipCents <= 0 && pawbucksCents > 0) {
       logStep("Processing full PawBucks payment");
       
       if (!userId) {
@@ -170,11 +170,11 @@ serve(async (req) => {
       // Plan debit across wallet → Pet Fund → legacy welcome credit.
       // Throws if combined eligible balance is insufficient or Pet Fund min spend not met.
       const sources = await getSpendableSources(supabase, userId);
-      const invoiceTotalUsd = (pawbucksAmountCents + (tipAmountCents || 0)) / 100;
+      const invoiceTotalUsd = (pawbucksCents + (tipAmountCents || 0)) / 100;
       const debitPlan = planPawBucksDebit(sources, pawbucksUsed, invoiceTotalUsd);
       await applyPawBucksDebit(supabase, userId, debitPlan, {
         merchantId: merchant.id,
-        transactionTotalCents: pawbucksAmountCents + (tipAmountCents || 0),
+        transactionTotalCents: pawbucksCents + (tipAmountCents || 0),
       });
       logStep("PawBucks debit applied", debitPlan);
 
@@ -227,7 +227,7 @@ serve(async (req) => {
       });
 
       // Record payment
-      const paymentAmountUSD = (pawbucksAmountCents + (tipAmountCents || 0)) / 100;
+      const paymentAmountUSD = (pawbucksCents + (tipAmountCents || 0)) / 100;
       const { data: payment, error: paymentError } = await supabase
         .from("invoice_payments")
         .insert({
