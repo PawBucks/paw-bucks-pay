@@ -162,6 +162,7 @@ export interface CommandCenterSummary {
  total_distributed: number;
  total_redeemed: number;
  total_checkins: number;
+ total_redemptions: number;
  active_campaigns: number;
  unique_users_reached: number;
  cost_per_checkin: number;
