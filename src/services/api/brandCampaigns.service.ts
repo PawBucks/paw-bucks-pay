@@ -139,6 +139,22 @@ export interface MerchantLeaderboardEntry {
  unique_users: number;
 }
 
+export interface MerchantPerformanceRow {
+  merchant_id: string;
+  business_name: string;
+  logo_url: string | null;
+  address: string | null;
+  business_type: string | null;
+  checkins: number;
+  redemptions: number;
+  pawbucks_distributed: number;
+  pawbucks_redeemed: number;
+  unique_users: number;
+  campaigns_count: number;
+  last_activity_at: string | null;
+  redemption_rate_pct: number;
+}
+
 export interface CommandCenterSummary {
  total_budget_usd: number;
  total_spent_usd: number;
