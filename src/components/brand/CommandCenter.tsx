@@ -5,6 +5,7 @@ import {
  getBrandDailyStats,
  getBrandMerchantLeaderboard,
  getBrandRecentActivity,
+ getBrandAllMerchantsPerformance,
 } from"@/services/api/brandCampaigns.service";
 import { HeroMetrics } from"./HeroMetrics";
 import { SpendChart } from"./SpendChart";
@@ -12,6 +13,7 @@ import { MerchantLeaderboard } from"./MerchantLeaderboard";
 import { LiveActivityFeed } from"./LiveActivityFeed";
 import { ConversionFunnel } from"./ConversionFunnel";
 import { RealtimeRoiChart } from"./RealtimeRoiChart";
+import { AllMerchantsPerformance } from"./AllMerchantsPerformance";
 
 interface CommandCenterProps {
  brandId: string;
@@ -42,6 +44,16 @@ export function CommandCenter({ brandId }: CommandCenterProps) {
  queryKey: ["brand-leaderboard", brandId],
  queryFn: async () => {
  const { data, error } = await getBrandMerchantLeaderboard(brandId, 5);
+ if (error) throw error;
+ return data;
+ },
+ refetchInterval: 60000,
+ });
+
+ const { data: allMerchants = [], isLoading: allMerchantsLoading } = useQuery({
+ queryKey: ["brand-all-merchants-performance", brandId],
+ queryFn: async () => {
+ const { data, error } = await getBrandAllMerchantsPerformance(brandId);
  if (error) throw error;
  return data;
  },
@@ -81,6 +93,8 @@ export function CommandCenter({ brandId }: CommandCenterProps) {
  <MerchantLeaderboard entries={leaderboard} />
  <LiveActivityFeed activity={activity} />
  </div>
+
+ <AllMerchantsPerformance rows={allMerchants} isLoading={allMerchantsLoading} />
  </div>
  );
 }

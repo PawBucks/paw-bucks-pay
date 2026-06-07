@@ -139,6 +139,22 @@ export interface MerchantLeaderboardEntry {
  unique_users: number;
 }
 
+export interface MerchantPerformanceRow {
+  merchant_id: string;
+  business_name: string;
+  logo_url: string | null;
+  address: string | null;
+  business_type: string | null;
+  checkins: number;
+  redemptions: number;
+  pawbucks_distributed: number;
+  pawbucks_redeemed: number;
+  unique_users: number;
+  campaigns_count: number;
+  last_activity_at: string | null;
+  redemption_rate_pct: number;
+}
+
 export interface CommandCenterSummary {
  total_budget_usd: number;
  total_spent_usd: number;
@@ -512,6 +528,144 @@ export const getBrandMerchantLeaderboard = async (
 // ============================================================
 export const getCommandCenterSummary = async (
  brandId: string
+): Promise<ServiceResult<CommandCenterSummary>> => {
+  return _getCommandCenterSummaryImpl(brandId);
+};
+
+// Full performance breakdown for every merchant participating in any of the brand's campaigns.
+// Includes merchants enrolled via brand_campaign_merchants even if they have no activity yet.
+export const getBrandAllMerchantsPerformance = async (
+  brandId: string,
+): Promise<ServiceListResult<MerchantPerformanceRow>> => {
+  try {
+    const { data: campaigns } = await supabase
+      .from("brand_campaigns")
+      .select("id")
+      .eq("brand_id", brandId);
+    const campaignIds = (campaigns || []).map((c: { id: string }) => c.id);
+    if (campaignIds.length === 0) return { data: [], error: null };
+
+    // 1. Pull every merchant enrolled in any of these campaigns (active or otherwise)
+    const { data: enrollments, error: enrollErr } = await supabase
+      .from("brand_campaign_merchants")
+      .select("merchant_id, campaign_id, status, merchants(business_name, logo_url, address, business_type)")
+      .in("campaign_id", campaignIds);
+    if (enrollErr) return { data: [], error: enrollErr };
+
+    type Row = MerchantPerformanceRow & { _users: Set<string>; _campaigns: Set<string> };
+    const map = new Map<string, Row>();
+    for (const e of (enrollments || []) as Array<{
+      merchant_id: string;
+      campaign_id: string;
+      status: string;
+      merchants: { business_name: string; logo_url: string | null; address: string | null; business_type: string | null } | null;
+    }>) {
+      if (!e.merchant_id) continue;
+      const existing = map.get(e.merchant_id);
+      if (existing) {
+        existing._campaigns.add(e.campaign_id);
+      } else {
+        const campaignsSet = new Set<string>();
+        campaignsSet.add(e.campaign_id);
+        map.set(e.merchant_id, {
+          merchant_id: e.merchant_id,
+          business_name: e.merchants?.business_name || "Unknown Merchant",
+          logo_url: e.merchants?.logo_url ?? null,
+          address: e.merchants?.address ?? null,
+          business_type: e.merchants?.business_type ?? null,
+          checkins: 0,
+          redemptions: 0,
+          pawbucks_distributed: 0,
+          pawbucks_redeemed: 0,
+          unique_users: 0,
+          campaigns_count: 0,
+          last_activity_at: null,
+          redemption_rate_pct: 0,
+          _users: new Set<string>(),
+          _campaigns: campaignsSet,
+        });
+      }
+    }
+
+    // 2. Pull activity (paged) and aggregate
+    const PAGE = 1000;
+    let from = 0;
+    while (true) {
+      const { data: activity, error: actErr } = await supabase
+        .from("branded_pawbucks_activity")
+        .select("merchant_id, amount, type, user_id, created_at")
+        .in("campaign_id", campaignIds)
+        .not("merchant_id", "is", null)
+        .order("created_at", { ascending: false })
+        .range(from, from + PAGE - 1);
+      if (actErr) return { data: [], error: actErr };
+      const rows = (activity || []) as Array<{
+        merchant_id: string;
+        amount: number;
+        type: string;
+        user_id: string;
+        created_at: string;
+      }>;
+      for (const a of rows) {
+        let entry = map.get(a.merchant_id);
+        if (!entry) {
+          // Activity exists but enrollment row missing — still surface the merchant
+          entry = {
+            merchant_id: a.merchant_id,
+            business_name: "Unknown Merchant",
+            logo_url: null,
+            address: null,
+            business_type: null,
+            checkins: 0,
+            redemptions: 0,
+            pawbucks_distributed: 0,
+            pawbucks_redeemed: 0,
+            unique_users: 0,
+            campaigns_count: 0,
+            last_activity_at: null,
+            redemption_rate_pct: 0,
+            _users: new Set<string>(),
+            _campaigns: new Set<string>(),
+          };
+          map.set(a.merchant_id, entry);
+        }
+        if (a.type === "earn") {
+          entry.checkins += 1;
+          entry.pawbucks_distributed += Number(a.amount) || 0;
+        } else if (a.type === "redeem") {
+          entry.redemptions += 1;
+          entry.pawbucks_redeemed += Math.abs(Number(a.amount) || 0);
+        }
+        if (a.user_id) entry._users.add(a.user_id);
+        if (!entry.last_activity_at || a.created_at > entry.last_activity_at) {
+          entry.last_activity_at = a.created_at;
+        }
+      }
+      if (rows.length < PAGE) break;
+      from += PAGE;
+      if (from > 20000) break; // safety cap
+    }
+
+    const result: MerchantPerformanceRow[] = Array.from(map.values())
+      .map(({ _users, _campaigns, ...rest }) => ({
+        ...rest,
+        unique_users: _users.size,
+        campaigns_count: _campaigns.size,
+        redemption_rate_pct:
+          rest.pawbucks_distributed > 0
+            ? (rest.pawbucks_redeemed / rest.pawbucks_distributed) * 100
+            : 0,
+      }))
+      .sort((a, b) => b.checkins - a.checkins || b.pawbucks_distributed - a.pawbucks_distributed);
+
+    return { data: result, error: null };
+  } catch (error) {
+    return { data: [], error: handleError(error) };
+  }
+};
+
+const _getCommandCenterSummaryImpl = async (
+  brandId: string,
 ): Promise<ServiceResult<CommandCenterSummary>> => {
  try {
  const { data: campaigns, error } = await supabase
