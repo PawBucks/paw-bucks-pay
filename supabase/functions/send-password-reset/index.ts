@@ -100,8 +100,8 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, redirectUrl }: PasswordResetRequest = await req.json();
-    
+    const { email }: PasswordResetRequest = await req.json();
+
     if (!email) {
       return new Response(
         JSON.stringify({ error: "Email is required" }),
@@ -110,6 +110,11 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     console.log("Password reset requested for:", email);
+
+    // SECURITY: redirect URL is hardcoded server-side to prevent open-redirect
+    // phishing attacks. Never accept caller-controlled redirect URLs.
+    const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://pawbucks.app";
+    const redirectUrl = `${APP_BASE_URL}/reset-password`;
 
     // Create admin client to generate recovery link
     const supabaseAdmin = createClient(
@@ -167,7 +172,6 @@ serve(async (req: Request): Promise<Response> => {
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     console.error("Error in send-password-reset:", error);
     
     // Always return success to prevent email enumeration

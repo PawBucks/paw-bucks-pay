@@ -23,7 +23,43 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    // Require authenticated caller; only brand owners or admins may estimate reach.
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: userData } = await userClient.auth.getUser(authHeader.replace("Bearer ", ""));
+    const user = userData?.user;
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+
+    // Authorize: must be a brand owner OR have admin/superadmin role
+    const [{ data: brand }, { data: isAdmin }, { data: isSuper }] = await Promise.all([
+      admin.from("brand_accounts").select("id").eq("user_id", user.id).maybeSingle(),
+      admin.rpc("has_role", { _user_id: user.id, _role: "admin" }),
+      admin.rpc("has_role", { _user_id: user.id, _role: "superadmin" }),
+    ]);
+    if (!brand && !isAdmin && !isSuper) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { rules } = await req.json() as { rules: TargetingRules };
 
     // Start broad: count distinct pet_owner profiles
@@ -78,7 +114,7 @@ Deno.serve(async (req) => {
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("estimate-campaign-reach error:", e);
-    return new Response(JSON.stringify({ error: (e as Error).message, estimated_audience: 0 }), {
+    return new Response(JSON.stringify({ error: "Internal server error", estimated_audience: 0 }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
