@@ -458,6 +458,17 @@ export const EditMerchantProfileDialog = ({
           {videoUploading ? "Uploading..." : "Upload Video"}
         </Button>
       )}
+      {(merchant.intro_video_url || videoFile) && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleVideoRemove}
+          disabled={videoUploading}
+        >
+          <X className="w-4 h-4 mr-1.5" />
+          {videoFile ? "Discard selection" : "Remove video"}
+        </Button>
+      )}
     </div>
   </div>
  <div className="space-y-2">
