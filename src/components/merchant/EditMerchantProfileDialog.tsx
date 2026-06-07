@@ -104,6 +104,27 @@ export const EditMerchantProfileDialog = ({
       toast.error("Please select a video file.");
       return;
     }
+    // QuickTime/MOV (common on iPhone) won't play in Chrome/Android browsers,
+    // resulting in a black video. Force broadly-compatible formats.
+    const name = file.name.toLowerCase();
+    const isQuickTime =
+      file.type === "video/quicktime" ||
+      file.type === "video/x-quicktime" ||
+      name.endsWith(".mov");
+    if (isQuickTime) {
+      toast.error(
+        "QuickTime (.mov) videos don't play in most browsers. Please convert to MP4 (H.264) and re-upload."
+      );
+      e.target.value = "";
+      return;
+    }
+    const allowed = ["video/mp4", "video/webm"];
+    const hasOkExt = name.endsWith(".mp4") || name.endsWith(".webm");
+    if (!allowed.includes(file.type) && !hasOkExt) {
+      toast.error("Unsupported format. Please upload an MP4 or WebM video.");
+      e.target.value = "";
+      return;
+    }
     if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
       toast.error(`Video must be under ${MAX_VIDEO_MB}MB.`);
       return;
@@ -444,7 +465,7 @@ export const EditMerchantProfileDialog = ({
       <Input
         id="introVideo"
         type="file"
-        accept="video/mp4,video/quicktime,video/webm,video/*"
+        accept="video/mp4,video/webm"
         onChange={handleVideoChange}
         disabled={videoUploading}
       />
