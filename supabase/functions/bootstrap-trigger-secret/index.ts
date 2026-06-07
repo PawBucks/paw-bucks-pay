@@ -19,18 +19,26 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // No external auth: this function only copies a server-only env var into a
-    // private (non-public) config table and reveals nothing. Idempotent.
+    // Require service-role bearer to prevent unauthenticated config writes.
+    const authHeader = req.headers.get("Authorization");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    if (!authHeader || authHeader !== `Bearer ${serviceRoleKey}`) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const secret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
     if (!secret) {
-      return new Response(JSON.stringify({ error: "INTERNAL_TRIGGER_SECRET not set" }), {
+      return new Response(JSON.stringify({ error: "Configuration error" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      serviceRoleKey,
       { auth: { persistSession: false } },
     );
 
@@ -44,8 +52,8 @@ serve(async (req) => {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "unknown";
-    return new Response(JSON.stringify({ error: msg }), {
+    console.error("bootstrap-trigger-secret error:", err);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
