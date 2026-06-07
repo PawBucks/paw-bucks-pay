@@ -435,7 +435,7 @@ export const EditMerchantProfileDialog = ({
       <Label className="text-base font-semibold">Intro Video for Pet Owners</Label>
     </div>
     <p className="text-xs text-muted-foreground">
-      Upload a short (under 60 sec) intro video. This plays prominently on your profile so pet owners can get to know you fast. MP4/MOV, up to {MAX_VIDEO_MB}MB.
+      Upload a short (under 60 sec) intro video. This plays prominently on your profile so pet owners can get to know you fast. <strong>MP4 (H.264) or WebM only</strong> — up to {MAX_VIDEO_MB}MB. iPhone .MOV files won't play in most browsers; convert to MP4 first.
     </p>
 
     {(videoPreview || merchant.intro_video_url) && (
