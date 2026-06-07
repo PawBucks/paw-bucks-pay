@@ -369,6 +369,20 @@ export const addMerchantToCampaign = async (
 // ============================================================
 // Activity
 // ============================================================
+async function attachMerchantNames<T extends { merchant_id?: string | null }>(rows: T[]): Promise<(T & { merchants: { business_name: string } | null })[]> {
+  const ids = Array.from(new Set(rows.map((r) => r.merchant_id).filter((x): x is string => !!x)));
+  if (ids.length === 0) return rows.map((r) => ({ ...r, merchants: null }));
+  const { data: merchants } = await supabase
+    .from("merchants_public")
+    .select("id, business_name")
+    .in("id", ids);
+  const map = new Map<string, string>((merchants || []).map((m: { id: string; business_name: string }) => [m.id, m.business_name]));
+  return rows.map((r) => ({
+    ...r,
+    merchants: r.merchant_id && map.has(r.merchant_id) ? { business_name: map.get(r.merchant_id)! } : null,
+  }));
+}
+
 export const getCampaignActivity = async (campaignId: string): Promise<ServiceListResult<BrandedPawbucksActivity>> => {
  try {
  const { data, error } = await supabase
