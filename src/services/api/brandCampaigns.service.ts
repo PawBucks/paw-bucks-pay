@@ -373,11 +373,12 @@ export const getCampaignActivity = async (campaignId: string): Promise<ServiceLi
  try {
  const { data, error } = await supabase
  .from("branded_pawbucks_activity")
- .select("*, merchants(business_name)")
+  .select("*")
  .eq("campaign_id", campaignId)
  .order("created_at", { ascending: false })
  .limit(200);
- return { data: data || [], error };
+  const withMerchants = await attachMerchantNames(data || []);
+  return { data: withMerchants, error };
  } catch (error) {
  return { data: [], error: handleError(error) };
  }
@@ -398,11 +399,12 @@ export const getBrandRecentActivity = async (
 
  const { data, error } = await supabase
  .from("branded_pawbucks_activity")
- .select("*, merchants(business_name)")
+  .select("*")
  .in("campaign_id", ids)
  .order("created_at", { ascending: false })
  .limit(limit);
- return { data: data || [], error };
+  const withMerchants = await attachMerchantNames(data || []);
+  return { data: withMerchants, error };
  } catch (error) {
  return { data: [], error: handleError(error) };
  }
