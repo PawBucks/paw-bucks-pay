@@ -402,7 +402,7 @@ serve(async (req) => {
           currency: invoice.currency || "usd",
           product_data: {
             name: `Invoice #${invoice.invoice_number}`,
-            description: pawbucksAmountCents > 0 
+            description: pawbucksCents > 0 
               ? `Payment after ${pawbucksUsed} PawBucks credit applied` 
               : invoice.title || `Payment for invoice from ${merchant.business_name}`,
           },
@@ -433,7 +433,7 @@ serve(async (req) => {
       type: "invoice_payment",
       tip_amount: String(tipAmountCents || 0),
       pawbucks_used: String(pawbucksUsed || 0),
-      pawbucks_amount_cents: String(pawbucksAmountCents || 0),
+      pawbucks_amount_cents: String(pawbucksCents || 0),
       user_id: userId || "",
       is_guest_checkout: String(isGuestCheckout || false),
       charge_type: "direct",
@@ -470,7 +470,7 @@ serve(async (req) => {
               invoice_id: invoiceId,
               merchant_id: merchant.id,
               pawbucks_used: String(pawbucksUsed || 0),
-              pawbucks_amount_cents: String(pawbucksAmountCents || 0),
+              pawbucks_amount_cents: String(pawbucksCents || 0),
               user_id: userId || "",
               charge_type: "direct",
               type: "invoice_payment",
