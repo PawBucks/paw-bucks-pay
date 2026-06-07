@@ -12,7 +12,7 @@ export function ConversionFunnel({ summary }: ConversionFunnelProps) {
  // Funnel stages: Reach -> Check-ins -> Redemptions -> (estimated) Repeat
  const reach = Math.max(summary.unique_users_reached, summary.total_checkins);
  const checkins = summary.total_checkins;
- const redemptions = summary.total_redeemed > 0 ? Math.max(1, Math.floor(summary.total_redeemed / 1000)) : 0;
+ const redemptions = summary.total_redemptions;
  // Repeat = users with more than 1 check-in (rough estimate)
  const repeat = summary.total_checkins > summary.unique_users_reached
  ? summary.total_checkins - summary.unique_users_reached
