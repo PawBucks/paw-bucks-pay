@@ -527,7 +527,7 @@ serve(async (req) => {
     //
     // We pre-validate balance up front so we can fail fast before sending the user to
     // Stripe if they don't have enough PawBucks.
-    if (pawbucksAmountCents > 0 && userId) {
+    if (pawbucksCents > 0 && userId) {
       // Include wallet + Pet Fund + legacy welcome credit, and enforce Pet Fund minimum spend.
       const sources = await getSpendableSources(supabase, userId);
       const txnTotalUsd = totalAmountCents / 100;
