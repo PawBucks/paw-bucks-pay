@@ -4,7 +4,7 @@ import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merch
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Pencil, Globe, Facebook, Instagram, Twitter, Linkedin, MapPin, Phone, User, Building2 } from "lucide-react";
+import { Loader2, Pencil, Globe, Facebook, Instagram, Twitter, Linkedin, MapPin, Phone, User, Building2, Video as VideoIcon, PlayCircle } from "lucide-react";
 import { EditMerchantProfileDialog } from "@/components/merchant/EditMerchantProfileDialog";
 import { merchantsService } from "@/services/api/merchants.service";
 import { supabase } from "@/integrations/supabase/client";
@@ -102,6 +102,29 @@ export default function MerchantBusinessProfile() {
     }
   };
 
+  const handleVideoUpload = async (file: File | null, remove?: boolean) => {
+    if (!merchant || !user) return;
+    let intro_video_url: string | null = merchant.intro_video_url ?? null;
+    if (remove) {
+      intro_video_url = null;
+    } else if (file) {
+      const ext = file.name.includes(".") ? file.name.split(".").pop() : "mp4";
+      const path = `${user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("merchant-videos")
+        .upload(path, file, { upsert: true, contentType: file.type || undefined });
+      if (upErr) throw upErr;
+      const { data: signed, error: signErr } = await supabase.storage
+        .from("merchant-videos")
+        .createSignedUrl(path, 60 * 60 * 24 * 365); // 1 year
+      if (signErr || !signed?.signedUrl) throw signErr || new Error("Failed to create signed URL");
+      intro_video_url = signed.signedUrl;
+    }
+    const { error } = await merchantsService.update(merchant.id, { intro_video_url } as any);
+    if (error) throw error;
+    await load();
+  };
+
   const categories = merchant?.business_categories?.length
     ? merchant.business_categories
     : merchant?.business_type ? [merchant.business_type] : [];
@@ -125,6 +148,45 @@ export default function MerchantBusinessProfile() {
             <Card><CardContent className="p-8 text-center text-muted-foreground">No merchant profile found.</CardContent></Card>
           ) : (
             <>
+              {/* Intro Video — prominent placement at the top */}
+              <Card className="overflow-hidden border-2 border-primary/30">
+                <CardHeader className="pb-3 bg-gradient-to-r from-primary/10 to-accent/10">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <PlayCircle className="w-5 h-5 text-primary" />
+                    Intro Video for Pet Owners
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {(merchant as any).intro_video_url ? (
+                    <div className="relative w-full aspect-video bg-black">
+                      <video
+                        src={(merchant as any).intro_video_url}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center gap-3 py-12 px-6 bg-muted/30">
+                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <VideoIcon className="w-8 h-8 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">No intro video yet</p>
+                        <p className="text-xs text-muted-foreground mt-1 max-w-md">
+                          Add a short video to introduce your business. Pet owners watch intros to decide who to trust — make yours count.
+                        </p>
+                      </div>
+                      <Button size="sm" onClick={() => setEditOpen(true)}>
+                        <VideoIcon className="w-4 h-4 mr-1.5" />
+                        Upload Intro Video
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* Header card */}
               <Card>
                 <CardContent className="p-6 flex items-start gap-5 flex-wrap">
@@ -204,6 +266,7 @@ export default function MerchantBusinessProfile() {
                 onOpenChange={setEditOpen}
                 merchant={merchant as any}
                 onSubmit={handleSubmit}
+                onVideoUpload={handleVideoUpload}
                 onRefresh={load}
               />
             </>

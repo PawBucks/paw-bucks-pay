@@ -15,6 +15,8 @@ import {
 import { Facebook, Globe, Info, Instagram, Linkedin, Twitter } from "lucide-react";
 import { PolicyDocumentUpload } from"./PolicyDocumentUpload";
 import { BusinessHoursEditor, type BusinessHoursEditorHandle } from"./BusinessHoursEditor";
+import { Video as VideoIcon, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Formatters } from "@/utils/formatters";
 const BUSINESS_TYPE_OPTIONS: { key: string; label: string }[] = [
@@ -61,6 +63,7 @@ type Merchant = {
  tos_url?: string | null;
  privacy_policy_url?: string | null;
  shipping_returns_policy_url?: string | null;
+ intro_video_url?: string | null;
 };
 
 type EditMerchantProfileDialogProps = {
@@ -68,6 +71,7 @@ type EditMerchantProfileDialogProps = {
  onOpenChange: (open: boolean) => void;
  merchant: Merchant;
  onSubmit: (formData: FormData, logoFile: File | null, businessCategories: string[]) => Promise<void>;
+ onVideoUpload?: (file: File | null, remove?: boolean) => Promise<void>;
  onRefresh?: () => void;
 };
 
@@ -76,6 +80,7 @@ export const EditMerchantProfileDialog = ({
  onOpenChange,
  merchant,
  onSubmit,
+  onVideoUpload,
  onRefresh,
 }: EditMerchantProfileDialogProps) => {
  const { user } = useAuth();
@@ -87,6 +92,58 @@ export const EditMerchantProfileDialog = ({
  const [categories, setCategories] = useState<string[]>([]);
  const hoursRef = useRef<BusinessHoursEditorHandle>(null);
  const [submitting, setSubmitting] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+
+  const MAX_VIDEO_MB = 100;
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("video/")) {
+      toast.error("Please select a video file.");
+      return;
+    }
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      toast.error(`Video must be under ${MAX_VIDEO_MB}MB.`);
+      return;
+    }
+    setVideoFile(file);
+    setVideoPreview(URL.createObjectURL(file));
+  };
+
+  const handleVideoSave = async () => {
+    if (!videoFile || !onVideoUpload) return;
+    setVideoUploading(true);
+    try {
+      await onVideoUpload(videoFile);
+      setVideoFile(null);
+      setVideoPreview(null);
+      toast.success("Intro video uploaded!");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to upload video");
+    } finally {
+      setVideoUploading(false);
+    }
+  };
+
+  const handleVideoRemove = async () => {
+    if (!onVideoUpload) return;
+    if (videoFile) {
+      setVideoFile(null);
+      setVideoPreview(null);
+      return;
+    }
+    setVideoUploading(true);
+    try {
+      await onVideoUpload(null, true);
+      toast.success("Intro video removed");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to remove video");
+    } finally {
+      setVideoUploading(false);
+    }
+  };
 
  useEffect(() => {
  const initial = (merchant.business_categories && merchant.business_categories.length > 0)
@@ -350,6 +407,59 @@ export const EditMerchantProfileDialog = ({
  defaultValue={merchant.address ||""}
  />
  </div>
+  {/* Intro Video Section */}
+  <div className="space-y-2 rounded-lg border-2 border-primary/30 bg-primary/5 p-4">
+    <div className="flex items-center gap-2">
+      <VideoIcon className="w-5 h-5 text-primary" />
+      <Label className="text-base font-semibold">Intro Video for Pet Owners</Label>
+    </div>
+    <p className="text-xs text-muted-foreground">
+      Upload a short (under 60 sec) intro video. This plays prominently on your profile so pet owners can get to know you fast. MP4/MOV, up to {MAX_VIDEO_MB}MB.
+    </p>
+
+    {(videoPreview || merchant.intro_video_url) && (
+      <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
+        <video
+          key={videoPreview || merchant.intro_video_url || ""}
+          src={videoPreview || merchant.intro_video_url || ""}
+          controls
+          playsInline
+          className="w-full h-full object-cover"
+        />
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          className="absolute top-2 right-2 h-7 w-7"
+          onClick={handleVideoRemove}
+          disabled={videoUploading}
+          aria-label="Remove video"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    )}
+
+    <div className="flex flex-col sm:flex-row gap-2">
+      <Input
+        id="introVideo"
+        type="file"
+        accept="video/mp4,video/quicktime,video/webm,video/*"
+        onChange={handleVideoChange}
+        disabled={videoUploading}
+      />
+      {videoFile && (
+        <Button
+          type="button"
+          onClick={handleVideoSave}
+          disabled={videoUploading}
+        >
+          {videoUploading ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <VideoIcon className="w-4 h-4 mr-1.5" />}
+          {videoUploading ? "Uploading..." : "Upload Video"}
+        </Button>
+      )}
+    </div>
+  </div>
  <div className="space-y-2">
  <Label htmlFor="description">About</Label>
  <Textarea
