@@ -699,6 +699,26 @@ export const getBrandAllMerchantsPerformance = async (
       if (from > 20000) break; // safety cap
     }
 
+    // Backfill names/logos for any merchants surfaced via activity but missing details
+    const missingIds = Array.from(map.values())
+      .filter((r) => r.business_name === "Unknown Merchant")
+      .map((r) => r.merchant_id);
+    if (missingIds.length > 0) {
+      const { data: extra } = await supabase
+        .from("merchants_public")
+        .select("id, business_name, logo_url, address, business_type")
+        .in("id", missingIds);
+      for (const m of (extra || []) as Array<{ id: string; business_name: string; logo_url: string | null; address: string | null; business_type: string | null }>) {
+        const entry = map.get(m.id);
+        if (entry) {
+          entry.business_name = m.business_name || entry.business_name;
+          entry.logo_url = m.logo_url ?? entry.logo_url;
+          entry.address = m.address ?? entry.address;
+          entry.business_type = m.business_type ?? entry.business_type;
+        }
+      }
+    }
+
     const result: MerchantPerformanceRow[] = Array.from(map.values())
       .map(({ _users, _campaigns, ...rest }) => ({
         ...rest,
