@@ -287,6 +287,7 @@ const InvoicePayment = () => {
  invoiceId: invoice.id,
  totalAmountCents: totalCents,
  pawbucksAmountCents: pawbucksCents,
+	  pawbucksUsed: snappedPawbucks,
  tipAmountCents: tipCents,
  userId: user?.id,
  accessToken,
