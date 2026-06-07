@@ -775,24 +775,64 @@ const _getCommandCenterSummaryImpl = async (
  .eq("brand_id", brandId);
  const ids = (campaignIds || []).map((c: { id: string }) => c.id);
  let unique_users_reached = 0;
+ let total_redemptions = 0;
+ let activity_distributed_30d = 0;
  if (ids.length > 0) {
- const { count } = await supabase
- .from("branded_pawbucks_ledger")
- .select("user_id", { count:"exact", head: true })
- .in("campaign_id", ids);
- unique_users_reached = count || 0;
+   // Distinct user_ids across all of the brand's campaigns (page through ledger)
+   const userSet = new Set<string>();
+   const LEDGER_PAGE = 1000;
+   let lFrom = 0;
+   while (true) {
+     const { data: ledgerPage, error: ledgerErr } = await supabase
+       .from("branded_pawbucks_ledger")
+       .select("user_id")
+       .in("campaign_id", ids)
+       .range(lFrom, lFrom + LEDGER_PAGE - 1);
+     if (ledgerErr) break;
+     const page = (ledgerPage || []) as Array<{ user_id: string }>;
+     for (const r of page) if (r.user_id) userSet.add(r.user_id);
+     if (page.length < LEDGER_PAGE) break;
+     lFrom += LEDGER_PAGE;
+     if (lFrom > 50000) break;
+   }
+   unique_users_reached = userSet.size;
+
+   // True redemption transaction count
+   const { count: redCount } = await supabase
+     .from("branded_pawbucks_activity")
+     .select("id", { count: "exact", head: true })
+     .in("campaign_id", ids)
+     .eq("type", "redeem");
+   total_redemptions = redCount || 0;
+
+   // Real burn rate: sum of PB distributed in the last 30 days from activity
+   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+   const ACT_PAGE = 1000;
+   let aFrom = 0;
+   while (true) {
+     const { data: actPage, error: actErr } = await supabase
+       .from("branded_pawbucks_activity")
+       .select("amount")
+       .in("campaign_id", ids)
+       .eq("type", "earn")
+       .gte("created_at", since30)
+       .range(aFrom, aFrom + ACT_PAGE - 1);
+     if (actErr) break;
+     const page = (actPage || []) as Array<{ amount: number }>;
+     for (const r of page) activity_distributed_30d += Number(r.amount) || 0;
+     if (page.length < ACT_PAGE) break;
+     aFrom += ACT_PAGE;
+     if (aFrom > 50000) break;
+   }
  }
 
  const cost_per_checkin = total_checkins > 0 ? total_spent_usd / total_checkins : 0;
- const cost_per_redemption = total_redeemed > 0 ? total_spent_usd / (total_redeemed / 1000) : 0;
+ const cost_per_redemption = total_redemptions > 0 ? total_spent_usd / total_redemptions : 0;
  const redemption_rate_pct = total_distributed > 0 ? (total_redeemed / total_distributed) * 100 : 0;
 
- // Burn rate based on active campaigns funded in the last 30d
- const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
- const recentSpend = list
- .filter((c) => c.funded_at && new Date(c.funded_at).getTime() >= thirtyDaysAgo)
- .reduce((s, c) => s + Number(c.total_distributed || 0), 0) / 1000;
- const burn_rate_per_day_usd = recentSpend / 30;
+ // Burn rate from real activity in the trailing 30 days (1 PB = $0.001)
+ const recentSpendUsd = activity_distributed_30d / 1000;
+ const burn_rate_per_day_usd = recentSpendUsd / 30;
  const remainingPool = Math.max(total_pool - total_distributed, 0);
  const remainingUsd = remainingPool / 1000;
  const days_until_depletion =
@@ -806,6 +846,7 @@ const _getCommandCenterSummaryImpl = async (
  total_distributed,
  total_redeemed,
  total_checkins,
+ total_redemptions,
  active_campaigns,
  unique_users_reached,
  cost_per_checkin,
