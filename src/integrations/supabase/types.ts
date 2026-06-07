@@ -7307,6 +7307,7 @@ export type Database = {
           funding_status: string | null
           id: string
           instagram_url: string | null
+          intro_video_url: string | null
           is_paused: boolean
           is_sponsored: boolean | null
           last_notified_status: string | null
@@ -7370,6 +7371,7 @@ export type Database = {
           funding_status?: string | null
           id?: string
           instagram_url?: string | null
+          intro_video_url?: string | null
           is_paused?: boolean
           is_sponsored?: boolean | null
           last_notified_status?: string | null
@@ -7433,6 +7435,7 @@ export type Database = {
           funding_status?: string | null
           id?: string
           instagram_url?: string | null
+          intro_video_url?: string | null
           is_paused?: boolean
           is_sponsored?: boolean | null
           last_notified_status?: string | null
@@ -14934,6 +14937,7 @@ export type Database = {
           facebook_url: string | null
           id: string | null
           instagram_url: string | null
+          intro_video_url: string | null
           is_paused: boolean | null
           is_sponsored: boolean | null
           latitude: number | null
@@ -14986,6 +14990,7 @@ export type Database = {
           facebook_url?: string | null
           id?: string | null
           instagram_url?: string | null
+          intro_video_url?: string | null
           is_paused?: boolean | null
           is_sponsored?: boolean | null
           latitude?: number | null
@@ -15038,6 +15043,7 @@ export type Database = {
           facebook_url?: string | null
           id?: string | null
           instagram_url?: string | null
+          intro_video_url?: string | null
           is_paused?: boolean | null
           is_sponsored?: boolean | null
           latitude?: number | null
