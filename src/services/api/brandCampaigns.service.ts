@@ -488,24 +488,40 @@ export const getBrandMerchantLeaderboard = async (
  const ids = (campaigns || []).map((c: { id: string }) => c.id);
  if (ids.length === 0) return { data: [], error: null };
 
- const { data, error } = await supabase
- .from("branded_pawbucks_activity")
- .select("merchant_id, amount, type, user_id, merchants(business_name, logo_url)")
- .in("campaign_id", ids)
- .eq("type","earn")
- .not("merchant_id","is", null)
- .limit(5000);
+  const { data, error } = await supabase
+  .from("branded_pawbucks_activity")
+  .select("merchant_id, amount, type, user_id")
+  .in("campaign_id", ids)
+  .eq("type","earn")
+  .not("merchant_id","is", null)
+  .limit(5000);
 
- if (error) return { data: [], error };
+  if (error) return { data: [], error };
 
- // Aggregate in memory
- const map = new Map<string, MerchantLeaderboardEntry & { _users: Set<string> }>();
- for (const row of (data || []) as Array<{
- merchant_id: string;
- amount: number;
- user_id: string;
- merchants: { business_name: string; logo_url: string | null } | null;
- }>) {
+  // Resolve merchant names/logos via the public view (RLS-safe)
+  const merchantIds = Array.from(
+    new Set(((data || []) as Array<{ merchant_id: string | null }>).map((r) => r.merchant_id).filter(Boolean) as string[]),
+  );
+  const { data: merchantsData } = merchantIds.length
+    ? await supabase
+        .from("merchants_public")
+        .select("id, business_name, logo_url")
+        .in("id", merchantIds)
+    : { data: [] as Array<{ id: string; business_name: string; logo_url: string | null }> };
+  const merchantMap = new Map<string, { business_name: string; logo_url: string | null }>(
+    (merchantsData || []).map((m: { id: string; business_name: string; logo_url: string | null }) => [
+      m.id,
+      { business_name: m.business_name, logo_url: m.logo_url },
+    ]),
+  );
+
+  // Aggregate in memory
+  const map = new Map<string, MerchantLeaderboardEntry & { _users: Set<string> }>();
+  for (const row of (data || []) as Array<{
+  merchant_id: string;
+  amount: number;
+  user_id: string;
+  }>) {
  const mid = row.merchant_id;
  if (!mid) continue;
  const existing = map.get(mid);
@@ -516,10 +532,11 @@ export const getBrandMerchantLeaderboard = async (
  } else {
  const users = new Set<string>();
  users.add(row.user_id);
+  const m = merchantMap.get(mid);
  map.set(mid, {
  merchant_id: mid,
- business_name: row.merchants?.business_name ||"Unknown Merchant",
- logo_url: row.merchants?.logo_url || null,
+  business_name: m?.business_name || "Unknown Merchant",
+  logo_url: m?.logo_url || null,
  checkins: 1,
  pawbucks_distributed: row.amount,
  unique_users: 0,
