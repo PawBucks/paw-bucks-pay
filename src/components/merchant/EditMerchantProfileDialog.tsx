@@ -407,6 +407,59 @@ export const EditMerchantProfileDialog = ({
  defaultValue={merchant.address ||""}
  />
  </div>
+  {/* Intro Video Section */}
+  <div className="space-y-2 rounded-lg border-2 border-primary/30 bg-primary/5 p-4">
+    <div className="flex items-center gap-2">
+      <VideoIcon className="w-5 h-5 text-primary" />
+      <Label className="text-base font-semibold">Intro Video for Pet Owners</Label>
+    </div>
+    <p className="text-xs text-muted-foreground">
+      Upload a short (under 60 sec) intro video. This plays prominently on your profile so pet owners can get to know you fast. MP4/MOV, up to {MAX_VIDEO_MB}MB.
+    </p>
+
+    {(videoPreview || merchant.intro_video_url) && (
+      <div className="relative rounded-lg overflow-hidden bg-black aspect-video">
+        <video
+          key={videoPreview || merchant.intro_video_url || ""}
+          src={videoPreview || merchant.intro_video_url || ""}
+          controls
+          playsInline
+          className="w-full h-full object-cover"
+        />
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          className="absolute top-2 right-2 h-7 w-7"
+          onClick={handleVideoRemove}
+          disabled={videoUploading}
+          aria-label="Remove video"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    )}
+
+    <div className="flex flex-col sm:flex-row gap-2">
+      <Input
+        id="introVideo"
+        type="file"
+        accept="video/mp4,video/quicktime,video/webm,video/*"
+        onChange={handleVideoChange}
+        disabled={videoUploading}
+      />
+      {videoFile && (
+        <Button
+          type="button"
+          onClick={handleVideoSave}
+          disabled={videoUploading}
+        >
+          {videoUploading ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <VideoIcon className="w-4 h-4 mr-1.5" />}
+          {videoUploading ? "Uploading..." : "Upload Video"}
+        </Button>
+      )}
+    </div>
+  </div>
  <div className="space-y-2">
  <Label htmlFor="description">About</Label>
  <Textarea
