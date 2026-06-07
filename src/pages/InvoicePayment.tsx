@@ -262,9 +262,15 @@ const InvoicePayment = () => {
  setProcessing(true);
  try {
  const totalCents = Math.round(totalPayment * 100);
- // Guests cannot use PawBucks
- const pawbucksCents = isGuestCheckout ? 0 : Math.round(pawbucksValueUSD * 100);
- const tipCents = Math.round(parseFloat(tipAmount ||"0") * 100);
+	  // Guests cannot use PawBucks.
+	  // 1 PawBuck = $0.001 = 0.1¢. Stripe requires integer cents, so snap the
+	  // amount of PawBucks down to a multiple of 10 to guarantee an exact
+	  // cent value with no rounding drift between client and server.
+	  const snappedPawbucks = isGuestCheckout
+	    ? 0
+	    : Math.floor(pawbucksToUse / 10) * 10;
+	  const pawbucksCents = snappedPawbucks / 10; // always integer
+	  const tipCents = Math.round(parseFloat(tipAmount ||"0") * 100);
 
   console.log("[InvoicePayment] Submitting payment", {
     invoiceId: invoice.id,
@@ -281,6 +287,7 @@ const InvoicePayment = () => {
  invoiceId: invoice.id,
  totalAmountCents: totalCents,
  pawbucksAmountCents: pawbucksCents,
+	  pawbucksUsed: snappedPawbucks,
  tipAmountCents: tipCents,
  userId: user?.id,
  accessToken,

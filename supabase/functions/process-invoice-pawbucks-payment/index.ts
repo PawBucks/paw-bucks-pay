@@ -41,6 +41,7 @@ serve(async (req) => {
       invoiceId, 
       totalAmountCents, 
       pawbucksAmountCents, 
+      pawbucksUsed: pawbucksUsedFromClient,
       tipAmountCents,
       userId,
       accessToken,
@@ -94,9 +95,46 @@ serve(async (req) => {
     // Stripe will charge the invoice line item PLUS a separate tip line item,
     // so the invoice line item must NOT include the tip (otherwise tip is double-charged).
     const tipCents = Number(tipAmountCents || 0);
-    const invoiceLineCents = Math.max(0, totalAmountCents - pawbucksAmountCents - tipCents);
+    // 1 PawBuck = $0.001 = 0.1¢. Prefer the explicit PawBucks count from the
+    // client so we never re-derive (and inflate) it from rounded cents.
+    let pawbucksUsed = Number.isFinite(pawbucksUsedFromClient) && pawbucksUsedFromClient >= 0
+      ? Math.floor(Number(pawbucksUsedFromClient))
+      : Math.round(pawbucksAmountCents / PAWBUCKS_TO_USD / 100);
+    let pawbucksCents = Number(pawbucksAmountCents || 0);
+
+    // Safety net: clamp to the user's actual eligible balance BEFORE we build
+    // any line items, so a small client/server rounding mismatch can never
+    // silently fail the entire payment.
+    if (pawbucksUsed > 0 && userId) {
+      const sources = await getSpendableSources(supabase, userId);
+      const txnTotalUsd = totalAmountCents / 100;
+      const petFundEligible =
+        sources.petFundAvailable > 0 &&
+        (!sources.petFundMinUsd || txnTotalUsd >= sources.petFundMinUsd)
+          ? sources.petFundAvailable
+          : 0;
+      const totalEligible =
+        sources.walletBalance + petFundEligible + sources.legacyCreditBalance;
+      if (pawbucksUsed > totalEligible) {
+        logStep("Clamping pawbucksUsed to eligible balance", {
+          requested: pawbucksUsed,
+          eligible: totalEligible,
+        });
+        pawbucksUsed = Math.max(0, totalEligible);
+      }
+      // Snap to a multiple of 10 PB so the cent value is exact.
+      pawbucksUsed = Math.floor(pawbucksUsed / 10) * 10;
+      pawbucksCents = pawbucksUsed / 10;
+    } else if (!userId) {
+      // Guest / unauth flow: no PawBucks allowed.
+      pawbucksUsed = 0;
+      pawbucksCents = 0;
+    }
+
+    const invoiceLineCents = Math.max(0, totalAmountCents - pawbucksCents - tipCents);
     const stripeAmountCents = invoiceLineCents; // backwards-compat alias
-    const pawbucksUsed = Math.round(pawbucksAmountCents / PAWBUCKS_TO_USD / 100);
+    // Keep downstream code referencing the canonical (clamped) cent value.
+    const pawbucksAmountCentsFinal = pawbucksCents;
 
     // Validate Stripe Connect account if merchant has one
     const connectedAccountId = merchant.stripe_account_id;
@@ -122,7 +160,7 @@ serve(async (req) => {
     }
 
     // If paying entirely with PawBucks (no tip — tips can't be paid with PawBucks)
-    if (stripeAmountCents <= 0 && tipCents <= 0 && pawbucksAmountCents > 0) {
+    if (stripeAmountCents <= 0 && tipCents <= 0 && pawbucksCents > 0) {
       logStep("Processing full PawBucks payment");
       
       if (!userId) {
@@ -132,11 +170,11 @@ serve(async (req) => {
       // Plan debit across wallet → Pet Fund → legacy welcome credit.
       // Throws if combined eligible balance is insufficient or Pet Fund min spend not met.
       const sources = await getSpendableSources(supabase, userId);
-      const invoiceTotalUsd = (pawbucksAmountCents + (tipAmountCents || 0)) / 100;
+      const invoiceTotalUsd = (pawbucksCents + (tipAmountCents || 0)) / 100;
       const debitPlan = planPawBucksDebit(sources, pawbucksUsed, invoiceTotalUsd);
       await applyPawBucksDebit(supabase, userId, debitPlan, {
         merchantId: merchant.id,
-        transactionTotalCents: pawbucksAmountCents + (tipAmountCents || 0),
+        transactionTotalCents: pawbucksCents + (tipAmountCents || 0),
       });
       logStep("PawBucks debit applied", debitPlan);
 
@@ -189,7 +227,7 @@ serve(async (req) => {
       });
 
       // Record payment
-      const paymentAmountUSD = (pawbucksAmountCents + (tipAmountCents || 0)) / 100;
+      const paymentAmountUSD = (pawbucksCents + (tipAmountCents || 0)) / 100;
       const { data: payment, error: paymentError } = await supabase
         .from("invoice_payments")
         .insert({
@@ -364,7 +402,7 @@ serve(async (req) => {
           currency: invoice.currency || "usd",
           product_data: {
             name: `Invoice #${invoice.invoice_number}`,
-            description: pawbucksAmountCents > 0 
+            description: pawbucksCents > 0 
               ? `Payment after ${pawbucksUsed} PawBucks credit applied` 
               : invoice.title || `Payment for invoice from ${merchant.business_name}`,
           },
@@ -395,7 +433,7 @@ serve(async (req) => {
       type: "invoice_payment",
       tip_amount: String(tipAmountCents || 0),
       pawbucks_used: String(pawbucksUsed || 0),
-      pawbucks_amount_cents: String(pawbucksAmountCents || 0),
+      pawbucks_amount_cents: String(pawbucksCents || 0),
       user_id: userId || "",
       is_guest_checkout: String(isGuestCheckout || false),
       charge_type: "direct",
@@ -432,7 +470,7 @@ serve(async (req) => {
               invoice_id: invoiceId,
               merchant_id: merchant.id,
               pawbucks_used: String(pawbucksUsed || 0),
-              pawbucks_amount_cents: String(pawbucksAmountCents || 0),
+              pawbucks_amount_cents: String(pawbucksCents || 0),
               user_id: userId || "",
               charge_type: "direct",
               type: "invoice_payment",
@@ -489,7 +527,7 @@ serve(async (req) => {
     //
     // We pre-validate balance up front so we can fail fast before sending the user to
     // Stripe if they don't have enough PawBucks.
-    if (pawbucksAmountCents > 0 && userId) {
+    if (pawbucksCents > 0 && userId) {
       // Include wallet + Pet Fund + legacy welcome credit, and enforce Pet Fund minimum spend.
       const sources = await getSpendableSources(supabase, userId);
       const txnTotalUsd = totalAmountCents / 100;
