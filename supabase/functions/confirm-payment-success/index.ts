@@ -461,12 +461,15 @@ serve(async (req) => {
 
         // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
         try {
+          // Generic merchant payment has no SKU info → no product-gate match.
+          // Pass empty line items; v2 will redeem 0 from gated campaigns.
           const { data: brandedRedeem, error: brandedRedeemErr } = await supabaseAdmin.rpc(
-            "redeem_branded_pawbucks",
+            "redeem_branded_pawbucks_v2",
             {
               p_user_id: userId,
               p_merchant_id: merchantId,
               p_amount: walletDeduction,
+              p_line_items: [],
               p_transaction_id: transaction.id,
               p_description: `Branded PawBucks redeemed at ${businessName}`,
             },
