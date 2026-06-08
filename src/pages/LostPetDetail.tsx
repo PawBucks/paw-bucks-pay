@@ -91,13 +91,13 @@ const LostPetDetail = () => {
  queryFn: async () => {
  if (!id) throw new Error("No post ID provided");
  const { data, error } = await supabase
- .from("lost_pet_posts")
+          .from("lost_pet_posts_public" as any)
  .select("*")
  .eq("id", id)
  .maybeSingle();
  if (error) throw error;
  if (!data) throw new Error("Post not found");
- return data as LostPetPost;
+        return data as unknown as LostPetPost;
  },
  enabled: !!id,
  });
