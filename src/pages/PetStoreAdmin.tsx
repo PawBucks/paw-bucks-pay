@@ -35,6 +35,7 @@ import { Plus, Edit, Trash2 } from"lucide-react";
 import { useNavigate } from"react-router-dom";
 
 import { Formatters } from "@/utils/formatters";
+import { BrandSelector } from "@/components/brand/BrandSelector";
 const CATEGORIES = ["Food","Treats","Toys","Bedding","Accessories","Healthcare","Grooming","Sanitation"];
 
 export default function PetStoreAdmin() {
@@ -54,6 +55,7 @@ export default function PetStoreAdmin() {
  image_url:"",
  image_urls: [] as string[],
  is_active: true,
+  brand_id: null as string | null,
  });
 
  // Check if user is admin or superadmin
@@ -175,6 +177,7 @@ export default function PetStoreAdmin() {
  image_url: formData.image_urls?.[0] || formData.image_url || null,
  image_urls: formData.image_urls || [],
  is_active: formData.is_active,
+  brand_id: formData.brand_id,
  };
 
  if (editingItem) {
@@ -197,6 +200,7 @@ export default function PetStoreAdmin() {
  image_url: item.image_url ||"",
  image_urls: item.image_urls || (item.image_url ? [item.image_url] : []),
  is_active: item.is_active,
+  brand_id: item.brand_id ?? null,
  });
  setIsDialogOpen(true);
  };
