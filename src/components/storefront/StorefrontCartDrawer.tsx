@@ -9,6 +9,7 @@ import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
 import type { StorefrontCartItem } from"@/hooks/useStorefrontCart";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { useMerchantBrandedBalances } from "@/hooks/useMerchantBrandedBalances";
 
 const PAWBUCKS_TO_USD = 0.001; // 1000 PB = $1
 
@@ -33,6 +34,8 @@ interface StorefrontCartDrawerProps {
  isCheckingOut?: boolean;
  pawbucksBalance?: number;
  merchantAcceptsPawBucks?: boolean;
+ merchantId?: string | null;
+ userId?: string | null;
 }
 
 export function StorefrontCartDrawer({
@@ -48,8 +51,11 @@ export function StorefrontCartDrawer({
  isCheckingOut = false,
  pawbucksBalance = 0,
  merchantAcceptsPawBucks = false,
+ merchantId,
+ userId,
 }: StorefrontCartDrawerProps) {
  const [pawbucksPercent, setPawbucksPercent] = useState(0);
+ const { data: brandedBalances = [] } = useMerchantBrandedBalances(userId, merchantId);
 
  const totalDollars = totalCents / 100;
  const maxPawbucksForTotal = Math.floor(totalDollars / PAWBUCKS_TO_USD);
