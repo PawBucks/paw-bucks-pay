@@ -40,6 +40,7 @@ import { Textarea } from"@/components/ui/textarea";
 import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";
+import { BrandSelector } from "@/components/brand/BrandSelector";
 export interface CatalogItem {
  id: string;
  merchant_id: string;
@@ -53,6 +54,7 @@ export interface CatalogItem {
  is_active: boolean;
  created_at: string;
  updated_at: string;
+ brand_id?: string | null;
 }
 
 const catalogItemSchema = z.object({
@@ -63,6 +65,7 @@ const catalogItemSchema = z.object({
  tax_rate: z.number().min(0).max(100).default(0),
  category: z.string().optional(),
  sku: z.string().optional(),
+ brand_id: z.string().uuid().nullable().optional(),
 });
 
 type CatalogFormData = z.infer<typeof catalogItemSchema>;
@@ -74,6 +77,7 @@ interface CatalogManagerProps {
  onUpdateItem: (id: string, item: Partial<CatalogItem>) => Promise<void>;
  onDeleteItem: (id: string) => Promise<void>;
  onRefresh: () => void;
+ merchantId?: string | null;
 }
 
 const UNIT_TYPES = [
@@ -105,6 +109,7 @@ export function CatalogManager({
  onUpdateItem,
  onDeleteItem,
  onRefresh,
+ merchantId,
 }: CatalogManagerProps) {
  const [searchTerm, setSearchTerm] = useState("");
  const [dialogOpen, setDialogOpen] = useState(false);
@@ -121,6 +126,7 @@ export function CatalogManager({
  tax_rate: 0,
  category:"",
  sku:"",
+  brand_id: null,
  },
  });
 
@@ -146,6 +152,7 @@ export function CatalogManager({
  tax_rate: 0,
  category:"",
  sku:"",
+  brand_id: null,
  });
  setDialogOpen(true);
  };
@@ -160,6 +167,7 @@ export function CatalogManager({
  tax_rate: Number(item.tax_rate) || 0,
  category: item.category ||"",
  sku: item.sku ||"",
+  brand_id: item.brand_id ?? null,
  });
  setDialogOpen(true);
  };
@@ -464,6 +472,26 @@ export function CatalogManager({
  <FormMessage />
  </FormItem>
  )}
+ />
+
+ <FormField
+  control={form.control}
+  name="brand_id"
+  render={({ field }) => (
+   <FormItem>
+    <FormLabel>Brand (Optional)</FormLabel>
+    <FormControl>
+     <BrandSelector
+      value={field.value ?? null}
+      onChange={(v) => field.onChange(v)}
+      merchantId={merchantId ?? null}
+     />
+    </FormControl>
+    <p className="text-xs text-muted-foreground">
+     Tag with a brand to enable that brand's PawBucks on this item.
+    </p>
+   </FormItem>
+  )}
  />
 
  <DialogFooter>

@@ -9,6 +9,7 @@ import { Formatters } from"@/utils/formatters";
 import { motion, AnimatePresence } from"framer-motion";
 import type { StorefrontCartItem } from"@/hooks/useStorefrontCart";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { useMerchantBrandedBalances } from "@/hooks/useMerchantBrandedBalances";
 
 const PAWBUCKS_TO_USD = 0.001; // 1000 PB = $1
 
@@ -33,6 +34,8 @@ interface StorefrontCartDrawerProps {
  isCheckingOut?: boolean;
  pawbucksBalance?: number;
  merchantAcceptsPawBucks?: boolean;
+ merchantId?: string | null;
+ userId?: string | null;
 }
 
 export function StorefrontCartDrawer({
@@ -48,8 +51,11 @@ export function StorefrontCartDrawer({
  isCheckingOut = false,
  pawbucksBalance = 0,
  merchantAcceptsPawBucks = false,
+ merchantId,
+ userId,
 }: StorefrontCartDrawerProps) {
  const [pawbucksPercent, setPawbucksPercent] = useState(0);
+ const { data: brandedBalances = [] } = useMerchantBrandedBalances(userId, merchantId);
 
  const totalDollars = totalCents / 100;
  const maxPawbucksForTotal = Math.floor(totalDollars / PAWBUCKS_TO_USD);
@@ -201,6 +207,30 @@ export function StorefrontCartDrawer({
  <span className="text-sm text-muted-foreground">Order Total</span>
  <span className="font-bold text-lg">{Formatters.currency(totalDollars)}</span>
  </div>
+
+ {/* Branded PawBucks eligibility */}
+ {brandedBalances.length > 0 && (
+  <div className="space-y-1.5">
+   {brandedBalances.map((b) => (
+    <div
+     key={b.campaign_id}
+     className="flex items-start gap-2 text-xs rounded-md border border-primary/30 bg-primary/5 px-2.5 py-2"
+    >
+     <PawBucksLogo className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
+     <div className="flex-1">
+      <div className="font-medium text-foreground">
+       {Formatters.number(b.balance_pb)} {b.brand_name} PawBucks available
+      </div>
+      <div className="text-muted-foreground">
+       {b.enforce_product_gate
+        ? `Applies only to ${b.brand_name}-tagged items in your cart at checkout.`
+        : `Applies to your entire cart at this store.`}
+      </div>
+     </div>
+    </div>
+   ))}
+  </div>
+ )}
 
  {/* PawBucks slider */}
  {merchantAcceptsPawBucks && pawbucksBalance > 0 && (

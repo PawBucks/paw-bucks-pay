@@ -44,6 +44,7 @@ export interface MerchantService {
  flash_sale_pawbucks_price?: number | null;
  flash_sale_start_at?: string | null;
  flash_sale_end_at?: string | null;
+ brand_id?: string | null;
  created_at: string;
  updated_at: string;
 }
