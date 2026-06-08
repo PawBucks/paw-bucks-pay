@@ -345,8 +345,8 @@ const Discover = () => {
   const premiumIdSet = useMemo(() => new Set(premiumAdsList.map((m) => m.id)), [premiumAdsList]);
 
   const handleMapMerchantClick = useCallback(
-    (merchantId: string) => navigate(`/merchant/${merchantId}`),
-    [navigate]
+    (merchantId: string) => navigate(withBookingParams(`/merchant/${merchantId}`)),
+    [navigate, withBookingParams]
   );
 
   if (isLoading) return <PageLoader message="Discovering pet care near you..." />;
@@ -535,7 +535,7 @@ const Discover = () => {
                     </div>
                     <button
                       type="button"
-                      onClick={() => navigate(`/merchant/${topAdMerchant.id}`)}
+                      onClick={() => navigate(withBookingParams(`/merchant/${topAdMerchant.id}`))}
                       className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0"
                     >
                       Visit
@@ -700,7 +700,7 @@ const Discover = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => navigate(`/merchant/${inlineAdMerchant.id}`)}
+                  onClick={() => navigate(withBookingParams(`/merchant/${inlineAdMerchant.id}`))}
                   className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0"
                 >
                   Visit
