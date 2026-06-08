@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
@@ -106,6 +106,44 @@ const Discover = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const bookingPetId = searchParams.get("petId");
+  const bookingIntent = searchParams.get("intent");
+
+  // Fetch the preselected pet (for the "Booking for {name}" chip)
+  const { data: bookingPet } = useOptimizedQuery<{ id: string; name: string; photo_url: string | null } | null>(
+    ["discover-booking-pet", bookingPetId],
+    async () => {
+      if (!bookingPetId) return null;
+      const { data } = await supabase
+        .from("pet_profiles")
+        .select("id, name, photo_url")
+        .eq("id", bookingPetId)
+        .maybeSingle();
+      return data;
+    },
+    { staleTime: QUERY_STALE_TIMES.LONG, enabled: !!bookingPetId }
+  );
+
+  // Append petId/intent to a target merchant URL so booking context survives the navigation.
+  const withBookingParams = useCallback(
+    (path: string) => {
+      if (!bookingPetId) return path;
+      const sp = new URLSearchParams();
+      sp.set("petId", bookingPetId);
+      if (bookingIntent) sp.set("intent", bookingIntent);
+      return `${path}?${sp.toString()}`;
+    },
+    [bookingPetId, bookingIntent]
+  );
+
+  const clearBookingPet = useCallback(() => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("petId");
+    next.delete("intent");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   const { subscription, loading: subLoading } = useSubscription();
   const tier = getSubscriptionTier(subscription.product_id, subscription.subscription_tier);
   const showAds = !subLoading && tier !== "pawpass_plus";
