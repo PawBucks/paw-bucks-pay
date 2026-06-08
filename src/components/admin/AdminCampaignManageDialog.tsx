@@ -1,19 +1,25 @@
-import { useState } from"react";
-import { useMutation, useQueryClient } from"@tanstack/react-query";
+import { useMemo, useState } from"react";
+import { useMutation, useQuery, useQueryClient } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Separator } from"@/components/ui/separator";
+import { Textarea } from"@/components/ui/textarea";
+import { Badge } from"@/components/ui/badge";
+import { ScrollArea } from"@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { Gift, Loader2, Search, Settings } from "lucide-react";
+import { Gift, Loader2, Search, Settings, Users, BarChart3, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { toast } from"sonner";
 import {
  adminUpdateBrandCampaign,
  adminGrantBrandedPawbucks,
+ adminBulkGrantBrandedPawbucks,
+ lookupUserIdsByEmails,
  type BrandCampaign,
 } from"@/services/api/brandCampaigns.service";
+import { useAuth } from"@/hooks/useAuth";
 
 interface Props {
  open: boolean;
@@ -23,6 +29,7 @@ interface Props {
 
 export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Props) => {
  const queryClient = useQueryClient();
+ const { user } = useAuth();
 
  // Parameter editor state
  const [params, setParams] = useState({
@@ -41,6 +48,109 @@ export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Prop
  const [grantSelected, setGrantSelected] = useState<{ id: string; label: string } | null>(null);
  const [grantAmount, setGrantAmount] = useState(1000);
  const [grantNote, setGrantNote] = useState("");
+
+ // Bulk grant state
+ const [bulkEmails, setBulkEmails] = useState("");
+ const [bulkAmount, setBulkAmount] = useState(500);
+ const [bulkNote, setBulkNote] = useState("");
+ const [bulkPreview, setBulkPreview] = useState<{ matched: { id: string; email: string | null; full_name: string | null }[]; notFound: string[] } | null>(null);
+ const [bulkPreviewLoading, setBulkPreviewLoading] = useState(false);
+
+ const parseEmails = (raw: string): string[] => {
+   return Array.from(new Set(
+     raw.split(/[\s,;\n]+/).map((s) => s.trim().toLowerCase()).filter((s) => /.+@.+\..+/.test(s))
+   ));
+ };
+
+ const previewBulk = async () => {
+   const emails = parseEmails(bulkEmails);
+   if (emails.length === 0) {
+     toast.error("Enter at least one valid email");
+     return;
+   }
+   setBulkPreviewLoading(true);
+   const { data, error } = await lookupUserIdsByEmails(emails);
+   setBulkPreviewLoading(false);
+   if (error) {
+     toast.error("Lookup failed");
+     return;
+   }
+   const matchedEmails = new Set((data || []).map((u) => (u.email || "").toLowerCase()));
+   setBulkPreview({
+     matched: data || [],
+     notFound: emails.filter((e) => !matchedEmails.has(e)),
+   });
+ };
+
+ const bulkMutation = useMutation({
+   mutationFn: async () => {
+     if (!user?.id) throw new Error("Not authenticated");
+     if (!bulkPreview || bulkPreview.matched.length === 0) throw new Error("Run a preview first");
+     if (bulkAmount <= 0) throw new Error("Amount must be positive");
+     const needed = bulkPreview.matched.length * bulkAmount;
+     const remaining = campaign.pawbucks_pool - campaign.total_distributed;
+     if (needed > remaining) throw new Error(`Insufficient pool: need ${needed.toLocaleString()} PB, have ${remaining.toLocaleString()} PB`);
+     const batchId = crypto.randomUUID();
+     const { data, error } = await adminBulkGrantBrandedPawbucks(
+       campaign.id,
+       bulkPreview.matched.map((u) => u.id),
+       bulkAmount,
+       batchId,
+       user.id,
+       bulkNote || "Admin bulk grant",
+     );
+     if (error) throw error;
+     const r = data as { success: boolean; error?: string; granted_users?: number; skipped_users?: number; total_pb?: number } | null;
+     if (r && !r.success) throw new Error(r.error || "Bulk grant failed");
+     return r;
+   },
+   onSuccess: (r) => {
+     toast.success(`Granted ${(r?.total_pb ?? 0).toLocaleString()} PB to ${r?.granted_users ?? 0} users${r?.skipped_users ? ` (skipped ${r.skipped_users} duplicates)` : ""}`);
+     setBulkPreview(null);
+     setBulkEmails("");
+     queryClient.invalidateQueries({ queryKey: ["admin-brand-campaigns"] });
+     queryClient.invalidateQueries({ queryKey: ["campaign-activity", campaign.id] });
+     queryClient.invalidateQueries({ queryKey: ["campaign-distribution", campaign.id] });
+   },
+   onError: (e: Error) => toast.error(e.message),
+ });
+
+ // Distribution & redemption ledger
+ type ActivityRow = {
+   id: string;
+   type: string;
+   amount: number;
+   merchant_id: string | null;
+   description: string | null;
+   created_at: string;
+   source: string | null;
+   actor_user_id: string | null;
+   batch_id: string | null;
+   user_id: string;
+ };
+ const { data: ledgerActivity = [] } = useQuery({
+   queryKey: ["campaign-distribution", campaign.id, open],
+   enabled: open,
+   queryFn: async () => {
+     const { data, error } = await supabase
+       .from("branded_pawbucks_activity")
+       .select("id,type,amount,merchant_id,description,created_at,source,actor_user_id,batch_id,user_id")
+       .eq("campaign_id", campaign.id)
+       .order("created_at", { ascending: false })
+       .limit(200);
+     if (error) throw error;
+     return (data || []) as ActivityRow[];
+   },
+ });
+
+ const ledgerKpis = useMemo(() => {
+   let minted = 0, redeemed = 0, recipients = new Set<string>();
+   for (const r of ledgerActivity) {
+     if (r.type === "earn") { minted += r.amount; recipients.add(r.user_id); }
+     else if (r.type === "redeem") { redeemed += Math.abs(r.amount); }
+   }
+   return { minted, redeemed, outstanding: minted - redeemed, recipients: recipients.size };
+ }, [ledgerActivity]);
 
  const updateMutation = useMutation({
  mutationFn: async () => {
@@ -111,21 +221,23 @@ export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Prop
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto">
+  <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
  <Settings className="h-5 w-5 text-primary" />
  Manage Campaign — {campaign.name}
  </DialogTitle>
  <DialogDescription>
- Edit live campaign parameters or manually issue branded PawBucks from the pool.
+  Edit parameters, issue branded PawBucks (single or bulk), and audit the distribution & redemption ledger.
  </DialogDescription>
  </DialogHeader>
 
  <Tabs defaultValue="params">
  <TabsList>
  <TabsTrigger value="params"><Settings className="h-4 w-4 mr-1" /> Parameters</TabsTrigger>
- <TabsTrigger value="grant"><Gift className="h-4 w-4 mr-1" aria-hidden="true" /> Manual PB Grant</TabsTrigger>
+  <TabsTrigger value="grant"><Gift className="h-4 w-4 mr-1" aria-hidden="true" /> Manual Grant</TabsTrigger>
+  <TabsTrigger value="bulk"><Users className="h-4 w-4 mr-1" aria-hidden="true" /> Bulk Grant</TabsTrigger>
+  <TabsTrigger value="ledger"><BarChart3 className="h-4 w-4 mr-1" aria-hidden="true" /> Distribution & Redemption</TabsTrigger>
  </TabsList>
 
  <TabsContent value="params" className="space-y-4 pt-3">
