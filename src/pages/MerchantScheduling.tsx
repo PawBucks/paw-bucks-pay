@@ -429,6 +429,7 @@ const MerchantScheduling = () => {
  if (!open) setEditingService(null);
  }}
  service={editingService}
+ merchantId={merchantId}
  onSubmit={editingService 
  ? (data) => handleUpdateService(editingService.id, data)
  : handleCreateService
