@@ -1,107 +1,90 @@
-## Goal
+# Brand-Funded PawBucks: Tight Pipeline
 
-Guarantee a frictionless Pet Owner payment experience across all four surfaces, with PawBucks **always** earned on the USD portion of every successful charge — no shape mismatches, no race conditions, no silent failures.
+Goal: Brand-funded PawBucks (e.g., Orijen) can only be spent on **brand-tagged products at participating merchants**. Admins get clean tools to assign and audit every PB minted and burned per brand.
 
-## Scope (confirmed)
+What already exists (reused, not rebuilt):
+- `brand_campaigns` + `branded_pawbucks_ledger` (per user × campaign balance)
+- `brand_campaign_merchants` (participating merchants)
+- `redeem_branded_pawbucks` RPC with FIFO across campaigns
+- Admin "Manual PB Grant" tab on each campaign (per-user)
 
-1. In-person Pay flow — `PaymentDialog` → `create-payment-intent` / `create-combined-payment` → `confirm-payment-success`
-2. Booking deposits & no-show capture — `DepositCardForm` → `create-booking-setup-intent` → `charge-no-show-fee`
-3. Invoice payments — public + admin invoices, `create-invoice-payment`, `create-admin-invoice-payment`, `verify-invoice-payment`, `process-invoice-pawbucks-payment`, `RecordPaymentDialog`
-4. Merchant Storefront / Pet Store cart — `create-pet-store-payment`, `confirm-pet-store-payment`, `pet-store-pawbucks-purchase`, `StorefrontCartDrawer`
+## 1. Brand product tagging (the product gate)
 
-Total surface: ~4,300+ LOC of edge functions plus the React payment UIs.
+Add a brand link to catalog items so we can compute "brand-eligible cart total":
 
-## Reality check
+- `pet_store_items.brand_id` → `brand_accounts.id` (nullable)
+- `merchant_services.brand_id` → `brand_accounts.id` (nullable)
+- `invoice_items.brand_id` → `brand_accounts.id` (nullable, denormalized for invoice lines)
+- `invoice_catalog_items.brand_id` → `brand_accounts.id` (nullable)
 
-A single-pass "fix everything" across this much payment code is high risk — these flows touch money, Stripe Connect Direct Charges, the wallet, the pet fund, legacy welcome credit, idempotency, and webhooks. I'm proposing a **phased** sweep so each phase can be reviewed and shipped independently before moving on. Each phase ends with a verification step.
+UI to tag items with a brand:
+- Merchant: brand dropdown on pet-store item editor, service editor, invoice line, and catalog item editor (only brands they're enrolled in via `brand_campaign_merchants`).
+- Admin: bulk-tag tool in BrandCampaignsTab — search items and assign brand.
 
-## Phase 0 — Audit (no code changes)
+## 2. Redemption enforcement (merchant gate + product gate)
 
-Read every file in scope and produce an inline issue list grouped by:
+New SECURITY DEFINER function `compute_brand_redeemable_cents(p_user_id, p_merchant_id, p_line_items jsonb)`:
+- Returns, per active campaign the user has balance in:
+  - `eligible_cents` = sum of line totals where `line.brand_id = campaign.brand_id`, but only if merchant is `active` in `brand_campaign_merchants` for that campaign.
+  - Cap = `min(user_branded_balance, eligible_cents_in_PB)`.
 
-- **Friction** — extra clicks, confusing copy, missing loading/disabled states, retry traps, double-submit risk
-- **Correctness** — PB earn missing/duplicated, success-fee math, tip handling (USD-only), min $0.50, USD/PB split rounding
-- **Reliability** — idempotency keys, race conditions between `confirm` and webhooks, error swallowing, missing CORS, partial-failure rollback
-- **Consistency** — query-cache shape mismatches (the bug pattern we just hit with `avg_rating`), formatter usage, EST/PST timezone, terminology ("Success Fee")
-- **Security** — JWT verification, Zod validation, service-role boundaries
+`redeem_branded_pawbucks` is updated to require a `p_line_items jsonb` argument and only spend up to the per-campaign cap returned above. Falls back to 0 if no eligible lines.
 
-Deliverable: a structured report posted in chat. No files touched.
+Wire `p_line_items` through every caller:
+- `confirm-payment-success`, `create-combined-payment`, `confirm-pet-store-payment`, `pet-store-pawbucks-purchase`, `process-invoice-pawbucks-payment`, `clover-pos-webhook`, `stripe-webhook`, `redeem-pawbucks`.
+- For `redeem-pawbucks` (offer redemption), line item = the offer's brand (offers gain `brand_id` too) at the merchant — gated identically.
 
-## Phase 1 — PawBucks earn guarantee (highest priority)
+Checkout UI changes:
+- Cart shows a "Brand PawBucks available: 1,200 PB ($1.20) on Orijen items only" chip per active brand the user has balance in.
+- PawBucks slider splits into: General PB + per-brand PB sliders, each capped to its eligible subtotal. Constraint memory (split-payment rules, success-fee on USD only) preserved.
 
-For each of the 4 surfaces, verify in the confirm/verify edge function that:
+## 3. Admin distribution controls (assign + audit)
 
-- Successful USD charge → `pawbucks_activity` row with `type='earn'` is written exactly once
-- Earn rate respects user tier (10/20/30 PB per $1 via `useUserEarnRate` server equivalent)
-- Earn is computed on **USD portion only** (never on PB-funded portion, never on tip-only? — confirm policy)
-- Earn write is idempotent (keyed off `payment_intent_id` / `transaction_id`)
-- Earn happens even when the user closes the tab before `confirm-*` returns (webhook fallback)
+Extend `AdminCampaignManageDialog`:
 
-Fix any surface where earn is conditional, missing, or duplicated. Add the missing webhook-side earn write where the client-side confirm is the only path today.
+**Manual Grant tab** (kept):
+- Adds a "Bulk grant" mode with three targeting options:
+  1. CSV upload (email or user_id column)
+  2. Segment query — users with N+ check-ins at participating merchants in last X days
+  3. Users who purchased a brand-tagged product (auto-pulls candidates)
+- Preview count + total PB to be issued + remaining pool guard before commit.
+- New edge function `admin-bulk-grant-branded-pawbucks` (zod-validated, superadmin-only, batched server-side, idempotent per (campaign_id, user_id, batch_id)).
 
-## Phase 2 — Frictionless UX pass
+**New "Distribution & Redemption" tab** on the dialog:
+- KPIs: Minted PB, Distributed (to users), Redeemed PB, Outstanding (issued − redeemed), Burn rate / day.
+- Distribution ledger table: when, who, source (auto-rule / manual / bulk / check-in), amount, admin actor.
+- Redemption ledger table: when, who, merchant, items, amount.
+- Both backed by existing `branded_pawbucks_activity` table plus a join to `profiles`, `merchants`, and (for redeems) order/invoice line snapshot.
 
-Per surface, normalize:
+Admin Brand Campaigns dashboard tab gets a top-level "Brand Vault" widget — for each brand: total minted, outstanding liability, % redeemed at brand-tagged SKUs vs forfeit candidates.
 
-- Single source of truth for "amount due" / "split" / "tip" / "fee" (no drift between client and server)
-- Disable submit during in-flight Stripe calls; show spinner; prevent double-tap
-- Friendly, actionable error messages (map Stripe decline codes to plain English)
-- Auto-retry transient network errors once, then surface a clear retry button
-- Success screen shows: USD charged, PB redeemed, PB earned, new balance — consistently across all 4 surfaces
-- Respect the `max-w-4xl` / Premium Consumer aesthetic and Pet-Owner emoji policy
+## 4. Retroactive application
 
-## Phase 3 — Reliability hardening
-
-- Idempotency keys on every Stripe create call (payment intent, refund, setup intent)
-- Wrap multi-step DB writes in a single RPC or careful try/catch with compensating actions
-- Confirm webhook (`connect-webhook`) handles `payment_intent.succeeded` for **all 4** surfaces and is the authoritative earn writer; client confirms become best-effort UX accelerators
-- Add structured logging tags (`[surface=pay|booking|invoice|store]`) for traceability
-
-## Phase 4 — Verification
-
-- Re-read each touched file
-- `bun run test` for any covered paths (totals-invariants etc.)
-- Manual trace of one synthetic transaction per surface in the report (PB-only, USD-only, split, tip)
-- Edge function logs spot-check
+Migration plan for existing balances:
+- Existing `branded_pawbucks_ledger` rows stay as-is.
+- After the new redemption rules ship, any redeem attempt re-runs through the new gates → automatically restricted.
+- One-time backfill: tag legacy brand-aligned products where merchant explicitly carries a single brand (best-effort using merchant ↔ brand_campaign_merchants where brand has 1 enrolled merchant only); rest tagged by merchants/admins via the new UI.
+- A scheduled cron `branded-pb-eligibility-report` emails each affected user once: "Your X Orijen PawBucks are now spendable on Orijen products at participating stores."
 
 ## Technical details
 
-Key files I'll touch (non-exhaustive, finalized after Phase 0):
+Schema migrations (single migration each, with GRANTs + RLS):
+1. `ALTER TABLE pet_store_items / merchant_services / invoice_items / invoice_catalog_items / partner_offers ADD COLUMN brand_id uuid REFERENCES brand_accounts(id) ON DELETE SET NULL;` + indexes.
+2. `branded_pawbucks_activity` add `source text` ('auto_checkin' | 'manual_grant' | 'bulk_grant' | 'redeem'), `actor_user_id uuid`, `batch_id uuid`.
+3. New RPC `compute_brand_redeemable_cents(uuid, uuid, jsonb) RETURNS jsonb`.
+4. Update `redeem_branded_pawbucks` signature + body to require `p_line_items jsonb` and enforce per-campaign caps; old signature dropped (single-call audit, replace all call sites in same change).
 
-```text
-src/components/PaymentDialog.tsx
-src/components/scheduling/DepositCardForm.tsx
-src/components/invoicing/RecordPaymentDialog.tsx
-src/components/storefront/StorefrontCartDrawer.tsx
-src/hooks/useShoppingCart.ts, useStorefrontCart.ts
-src/hooks/useSpendablePawBucks.tsx, useUserEarnRate.tsx
+Edge functions:
+- New: `admin-bulk-grant-branded-pawbucks` (zod, superadmin JWT check, batched).
+- Updated: every caller listed above passes `p_line_items` derived from the actual cart / invoice / offer.
 
-supabase/functions/create-payment-intent
-supabase/functions/create-combined-payment
-supabase/functions/confirm-payment-success
-supabase/functions/create-booking-setup-intent
-supabase/functions/charge-no-show-fee
-supabase/functions/create-invoice-payment
-supabase/functions/verify-invoice-payment
-supabase/functions/process-invoice-pawbucks-payment
-supabase/functions/create-admin-invoice-payment
-supabase/functions/create-pet-store-payment
-supabase/functions/confirm-pet-store-payment
-supabase/functions/pet-store-pawbucks-purchase
-supabase/functions/connect-webhook
-supabase/functions/_shared/pet-fund-debit.ts
-```
+Frontend:
+- `AdminCampaignManageDialog.tsx`: add Bulk Grant subtab + Distribution & Redemption tab.
+- `BrandCampaignsTab.tsx`: add "Brand Vault" header strip.
+- Merchant editors: brand dropdown on product/service/catalog item/invoice line forms.
+- Checkout: per-brand PB sliders; eligibility chip on cart.
 
-Invariants enforced everywhere:
-
-- Min charge $0.50 USD (DB constraint already)
-- Success Fee = 3% on USD portion only; label "Success Fee"
-- Tipping = USD only
-- PB earn on USD portion only, at user tier multiplier
-- `pawbucks_activity.type ∈ {'earn','redeem'}`
-- All dates rendered in America/New_York
-- Spend order: wallet → pet fund → legacy welcome credit (via `_shared/pet-fund-debit.ts`)
-
-## How we proceed
-
-I'll execute **Phase 0 first** and post the issue report in chat. You then tell me which fixes to ship and in what order — that way you keep control over what changes in the payment money path, and we avoid a 30-file diff landing all at once.
+Out of scope for this round:
+- Programmatic SKU/UPC sync from external brand catalogs.
+- Multi-brand per item (single brand per item only for v1).
+- Cross-brand offer codes.
