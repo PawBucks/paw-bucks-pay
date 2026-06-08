@@ -1,19 +1,25 @@
-import { useState } from"react";
-import { useMutation, useQueryClient } from"@tanstack/react-query";
+import { useMemo, useState } from"react";
+import { useMutation, useQuery, useQueryClient } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from"@/components/ui/dialog";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Separator } from"@/components/ui/separator";
+import { Textarea } from"@/components/ui/textarea";
+import { Badge } from"@/components/ui/badge";
+import { ScrollArea } from"@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
-import { Gift, Loader2, Search, Settings } from "lucide-react";
+import { Gift, Loader2, Search, Settings, Users, BarChart3, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { toast } from"sonner";
 import {
  adminUpdateBrandCampaign,
  adminGrantBrandedPawbucks,
+ adminBulkGrantBrandedPawbucks,
+ lookupUserIdsByEmails,
  type BrandCampaign,
 } from"@/services/api/brandCampaigns.service";
+import { useAuth } from"@/hooks/useAuth";
 
 interface Props {
  open: boolean;
@@ -23,6 +29,7 @@ interface Props {
 
 export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Props) => {
  const queryClient = useQueryClient();
+ const { user } = useAuth();
 
  // Parameter editor state
  const [params, setParams] = useState({
@@ -41,6 +48,109 @@ export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Prop
  const [grantSelected, setGrantSelected] = useState<{ id: string; label: string } | null>(null);
  const [grantAmount, setGrantAmount] = useState(1000);
  const [grantNote, setGrantNote] = useState("");
+
+ // Bulk grant state
+ const [bulkEmails, setBulkEmails] = useState("");
+ const [bulkAmount, setBulkAmount] = useState(500);
+ const [bulkNote, setBulkNote] = useState("");
+ const [bulkPreview, setBulkPreview] = useState<{ matched: { id: string; email: string | null; full_name: string | null }[]; notFound: string[] } | null>(null);
+ const [bulkPreviewLoading, setBulkPreviewLoading] = useState(false);
+
+ const parseEmails = (raw: string): string[] => {
+   return Array.from(new Set(
+     raw.split(/[\s,;\n]+/).map((s) => s.trim().toLowerCase()).filter((s) => /.+@.+\..+/.test(s))
+   ));
+ };
+
+ const previewBulk = async () => {
+   const emails = parseEmails(bulkEmails);
+   if (emails.length === 0) {
+     toast.error("Enter at least one valid email");
+     return;
+   }
+   setBulkPreviewLoading(true);
+   const { data, error } = await lookupUserIdsByEmails(emails);
+   setBulkPreviewLoading(false);
+   if (error) {
+     toast.error("Lookup failed");
+     return;
+   }
+   const matchedEmails = new Set((data || []).map((u) => (u.email || "").toLowerCase()));
+   setBulkPreview({
+     matched: data || [],
+     notFound: emails.filter((e) => !matchedEmails.has(e)),
+   });
+ };
+
+ const bulkMutation = useMutation({
+   mutationFn: async () => {
+     if (!user?.id) throw new Error("Not authenticated");
+     if (!bulkPreview || bulkPreview.matched.length === 0) throw new Error("Run a preview first");
+     if (bulkAmount <= 0) throw new Error("Amount must be positive");
+     const needed = bulkPreview.matched.length * bulkAmount;
+     const remaining = campaign.pawbucks_pool - campaign.total_distributed;
+     if (needed > remaining) throw new Error(`Insufficient pool: need ${needed.toLocaleString()} PB, have ${remaining.toLocaleString()} PB`);
+     const batchId = crypto.randomUUID();
+     const { data, error } = await adminBulkGrantBrandedPawbucks(
+       campaign.id,
+       bulkPreview.matched.map((u) => u.id),
+       bulkAmount,
+       batchId,
+       user.id,
+       bulkNote || "Admin bulk grant",
+     );
+     if (error) throw error;
+     const r = data as { success: boolean; error?: string; granted_users?: number; skipped_users?: number; total_pb?: number } | null;
+     if (r && !r.success) throw new Error(r.error || "Bulk grant failed");
+     return r;
+   },
+   onSuccess: (r) => {
+     toast.success(`Granted ${(r?.total_pb ?? 0).toLocaleString()} PB to ${r?.granted_users ?? 0} users${r?.skipped_users ? ` (skipped ${r.skipped_users} duplicates)` : ""}`);
+     setBulkPreview(null);
+     setBulkEmails("");
+     queryClient.invalidateQueries({ queryKey: ["admin-brand-campaigns"] });
+     queryClient.invalidateQueries({ queryKey: ["campaign-activity", campaign.id] });
+     queryClient.invalidateQueries({ queryKey: ["campaign-distribution", campaign.id] });
+   },
+   onError: (e: Error) => toast.error(e.message),
+ });
+
+ // Distribution & redemption ledger
+ type ActivityRow = {
+   id: string;
+   type: string;
+   amount: number;
+   merchant_id: string | null;
+   description: string | null;
+   created_at: string;
+   source: string | null;
+   actor_user_id: string | null;
+   batch_id: string | null;
+   user_id: string;
+ };
+ const { data: ledgerActivity = [] } = useQuery({
+   queryKey: ["campaign-distribution", campaign.id, open],
+   enabled: open,
+   queryFn: async () => {
+     const { data, error } = await supabase
+       .from("branded_pawbucks_activity")
+       .select("id,type,amount,merchant_id,description,created_at,source,actor_user_id,batch_id,user_id")
+       .eq("campaign_id", campaign.id)
+       .order("created_at", { ascending: false })
+       .limit(200);
+     if (error) throw error;
+     return (data || []) as ActivityRow[];
+   },
+ });
+
+ const ledgerKpis = useMemo(() => {
+   let minted = 0, redeemed = 0, recipients = new Set<string>();
+   for (const r of ledgerActivity) {
+     if (r.type === "earn") { minted += r.amount; recipients.add(r.user_id); }
+     else if (r.type === "redeem") { redeemed += Math.abs(r.amount); }
+   }
+   return { minted, redeemed, outstanding: minted - redeemed, recipients: recipients.size };
+ }, [ledgerActivity]);
 
  const updateMutation = useMutation({
  mutationFn: async () => {
@@ -111,21 +221,23 @@ export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Prop
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="max-w-2xl max-h-[92vh] overflow-y-auto">
+  <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
  <Settings className="h-5 w-5 text-primary" />
  Manage Campaign — {campaign.name}
  </DialogTitle>
  <DialogDescription>
- Edit live campaign parameters or manually issue branded PawBucks from the pool.
+  Edit parameters, issue branded PawBucks (single or bulk), and audit the distribution & redemption ledger.
  </DialogDescription>
  </DialogHeader>
 
  <Tabs defaultValue="params">
  <TabsList>
  <TabsTrigger value="params"><Settings className="h-4 w-4 mr-1" /> Parameters</TabsTrigger>
- <TabsTrigger value="grant"><Gift className="h-4 w-4 mr-1" aria-hidden="true" /> Manual PB Grant</TabsTrigger>
+  <TabsTrigger value="grant"><Gift className="h-4 w-4 mr-1" aria-hidden="true" /> Manual Grant</TabsTrigger>
+  <TabsTrigger value="bulk"><Users className="h-4 w-4 mr-1" aria-hidden="true" /> Bulk Grant</TabsTrigger>
+  <TabsTrigger value="ledger"><BarChart3 className="h-4 w-4 mr-1" aria-hidden="true" /> Distribution & Redemption</TabsTrigger>
  </TabsList>
 
  <TabsContent value="params" className="space-y-4 pt-3">
@@ -291,6 +403,129 @@ export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Prop
  Grant {grantAmount.toLocaleString()} PB
  </Button>
  </TabsContent>
+
+  <TabsContent value="bulk" className="space-y-4 pt-3">
+    <div className="rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
+      Paste a list of recipient emails (comma, space, or newline separated). We'll resolve them to users, show a preview, and grant the chosen PawBucks amount to each. Grants are idempotent per batch — re-running won't double-issue.
+    </div>
+    <div className="space-y-2">
+      <Label>Recipient emails</Label>
+      <Textarea
+        rows={6}
+        value={bulkEmails}
+        onChange={(e) => { setBulkEmails(e.target.value); setBulkPreview(null); }}
+        placeholder="alice@example.com, bob@example.com&#10;carol@example.com"
+      />
+    </div>
+    <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-2">
+        <Label>PB per recipient</Label>
+        <Input
+          type="number" min={1}
+          value={bulkAmount}
+          onChange={(e) => setBulkAmount(Number(e.target.value))}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Internal note (optional)</Label>
+        <Input value={bulkNote} onChange={(e) => setBulkNote(e.target.value)} placeholder="Q2 loyalty boost" />
+      </div>
+    </div>
+
+    <div className="flex gap-2">
+      <Button variant="outline" onClick={previewBulk} disabled={bulkPreviewLoading || !bulkEmails.trim()}>
+        {bulkPreviewLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />} Preview recipients
+      </Button>
+      {bulkPreview && (
+        <div className="text-sm text-muted-foreground self-center">
+          <span className="font-medium text-foreground">{bulkPreview.matched.length}</span> matched
+          {bulkPreview.notFound.length > 0 && (
+            <> · <span className="text-destructive">{bulkPreview.notFound.length}</span> not found</>
+          )}
+          {" · "}Total: <span className="font-medium text-foreground">{(bulkPreview.matched.length * bulkAmount).toLocaleString()} PB</span>
+        </div>
+      )}
+    </div>
+
+    {bulkPreview && bulkPreview.notFound.length > 0 && (
+      <ScrollArea className="max-h-24 rounded-md border p-2">
+        <p className="text-xs font-medium text-destructive mb-1">Emails without a matching account (will be skipped):</p>
+        <p className="text-xs text-muted-foreground break-all">{bulkPreview.notFound.join(", ")}</p>
+      </ScrollArea>
+    )}
+
+    <Button
+      className="w-full"
+      onClick={() => bulkMutation.mutate()}
+      disabled={bulkMutation.isPending || !bulkPreview || bulkPreview.matched.length === 0 || bulkAmount <= 0}
+    >
+      {bulkMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Users className="h-4 w-4 mr-2" />}
+      Grant {bulkAmount.toLocaleString()} PB to {bulkPreview?.matched.length ?? 0} users
+    </Button>
+
+    <p className="text-xs text-muted-foreground">
+      Pool remaining: {(campaign.pawbucks_pool - campaign.total_distributed).toLocaleString()} PB
+    </p>
+  </TabsContent>
+
+  <TabsContent value="ledger" className="space-y-4 pt-3">
+    <div className="grid grid-cols-4 gap-2">
+      <div className="rounded-lg border p-3">
+        <p className="text-xs text-muted-foreground">Minted</p>
+        <p className="text-lg font-semibold">{ledgerKpis.minted.toLocaleString()} PB</p>
+      </div>
+      <div className="rounded-lg border p-3">
+        <p className="text-xs text-muted-foreground">Redeemed</p>
+        <p className="text-lg font-semibold">{ledgerKpis.redeemed.toLocaleString()} PB</p>
+      </div>
+      <div className="rounded-lg border p-3">
+        <p className="text-xs text-muted-foreground">Outstanding</p>
+        <p className="text-lg font-semibold">{ledgerKpis.outstanding.toLocaleString()} PB</p>
+      </div>
+      <div className="rounded-lg border p-3">
+        <p className="text-xs text-muted-foreground">Recipients</p>
+        <p className="text-lg font-semibold">{ledgerKpis.recipients.toLocaleString()}</p>
+      </div>
+    </div>
+
+    <Separator />
+
+    <div>
+      <h4 className="text-sm font-medium mb-2">Recent activity (last 200)</h4>
+      <ScrollArea className="h-72 rounded-md border">
+        <div className="divide-y">
+          {ledgerActivity.length === 0 && (
+            <p className="p-4 text-sm text-muted-foreground text-center">No activity yet for this campaign.</p>
+          )}
+          {ledgerActivity.map((row) => {
+            const isEarn = row.type === "earn";
+            return (
+              <div key={row.id} className="flex items-start gap-3 p-2.5 text-sm">
+                {isEarn ? (
+                  <ArrowUpCircle className="h-4 w-4 mt-0.5 text-emerald-600 shrink-0" />
+                ) : (
+                  <ArrowDownCircle className="h-4 w-4 mt-0.5 text-amber-600 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium">
+                      {isEarn ? "+" : ""}{row.amount.toLocaleString()} PB
+                    </span>
+                    {row.source && <Badge variant="secondary" className="text-[10px]">{row.source.replace("_", " ")}</Badge>}
+                    {row.batch_id && <Badge variant="outline" className="text-[10px]">batch</Badge>}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">{row.description || (isEarn ? "Granted" : "Redeemed")}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {new Date(row.created_at).toLocaleString("en-US", { timeZone: "America/New_York" })} EST · user {row.user_id.slice(0, 8)}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </ScrollArea>
+    </div>
+  </TabsContent>
  </Tabs>
  </DialogContent>
  </Dialog>
