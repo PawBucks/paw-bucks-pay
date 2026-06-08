@@ -160,6 +160,7 @@ export default function PetStoreAdmin() {
  image_url:"",
  image_urls: [] as string[],
  is_active: true,
+  brand_id: null,
  });
  };
 
