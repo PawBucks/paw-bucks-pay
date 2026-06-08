@@ -281,7 +281,7 @@ const SimpleHome = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/book-visit?pet=${p.id}`);
+                              navigate(`/discover?petId=${p.id}&intent=book`);
                             }}
                             className="p-2 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground shadow-sm transition-colors"
                             aria-label={`Schedule visit for ${p.name}`}
@@ -342,7 +342,7 @@ const SimpleHome = () => {
                     <FileText className="h-3 w-3 text-muted-foreground" />
                   </button>
                   <button
-                    onClick={() => navigate(`/book-visit?pet=${p.id}`)}
+                    onClick={() => navigate(`/discover?petId=${p.id}&intent=book`)}
                     className="p-1 rounded-md bg-muted hover:bg-accent/20 transition-colors"
                     aria-label={`Schedule visit for ${p.name}`}
                     title="Schedule visit"
