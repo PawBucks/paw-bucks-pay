@@ -513,6 +513,26 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit, merchantI
  )}
  />
 
+ <FormField
+  control={form.control}
+  name="brand_id"
+  render={({ field }) => (
+   <FormItem>
+    <FormLabel>Brand (optional)</FormLabel>
+    <FormControl>
+     <BrandSelector
+      value={field.value ?? null}
+      onChange={(v) => field.onChange(v)}
+      merchantId={merchantId ?? null}
+     />
+    </FormControl>
+    <FormDescription>
+     Tag this service with a brand to allow that brand's PawBucks to apply at checkout.
+    </FormDescription>
+   </FormItem>
+  )}
+ />
+
  <div className="flex gap-3 pt-4">
  <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
  Cancel
