@@ -685,6 +685,8 @@ const Storefront = memo(() => {
   ((petFundBalance > 0 && totalCents / 100 >= (petFundMinTransactionUsd || 0)) ? petFundBalance : 0)
   }
  merchantAcceptsPawBucks={merchantAcceptsPawBucks}
+ merchantId={merchantId}
+ userId={user?.id ?? null}
  />
 
  {/* Subscription Checkout Dialog */}
