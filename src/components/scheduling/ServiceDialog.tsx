@@ -34,6 +34,7 @@ import {
  type PaymentType,
  CATEGORY_LABELS 
 } from"@/services/api/scheduling.service";
+import { BrandSelector } from "@/components/brand/BrandSelector";
 
 const serviceSchema = z.object({
  name: z.string().min(1,"Name is required").max(100),
@@ -52,6 +53,7 @@ const serviceSchema = z.object({
  deposit_amount: z.coerce.number().min(0).max(10000),
  no_show_fee_amount: z.coerce.number().min(0).max(10000),
  is_mobile_service: z.boolean(),
+ brand_id: z.string().uuid().nullable().optional(),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
@@ -61,6 +63,7 @@ interface ServiceDialogProps {
  onOpenChange: (open: boolean) => void;
  service: MerchantService | null;
  onSubmit: (data: ServiceFormData) => Promise<void>;
+ merchantId?: string | null;
 }
 
 const PAYMENT_TYPE_LABELS: Record<PaymentType, string> = {
@@ -90,7 +93,7 @@ const BOARDING_DURATION_PRESETS = [
  { value: 20160, label:'14 Nights (2 Weeks)' },
 ];
 
-export function ServiceDialog({ open, onOpenChange, service, onSubmit }: ServiceDialogProps) {
+export function ServiceDialog({ open, onOpenChange, service, onSubmit, merchantId }: ServiceDialogProps) {
  const form = useForm<ServiceFormData>({
  resolver: zodResolver(serviceSchema),
  defaultValues: {
@@ -110,6 +113,7 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
  deposit_amount: 0,
  no_show_fee_amount: 0,
  is_mobile_service: false,
+  brand_id: null,
  },
  });
 
@@ -132,6 +136,7 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit }: Service
  deposit_amount: (service as any).deposit_amount || 0,
  no_show_fee_amount: (service as any).no_show_fee_amount || 0,
  is_mobile_service: (service as any).is_mobile_service || false,
+  brand_id: (service as any).brand_id ?? null,
  });
  } else {
  form.reset({
