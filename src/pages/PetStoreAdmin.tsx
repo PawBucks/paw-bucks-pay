@@ -357,6 +357,17 @@ export default function PetStoreAdmin() {
  />
  </div>
 
+ <div>
+  <Label>Brand (optional)</Label>
+  <BrandSelector
+   value={formData.brand_id}
+   onChange={(brandId) => setFormData({ ...formData, brand_id: brandId })}
+  />
+  <p className="text-xs text-muted-foreground mt-1">
+   Tag this item with a brand to unlock that brand's PawBucks for it at checkout.
+  </p>
+ </div>
+
  <div className="flex items-center space-x-2">
  <input
  type="checkbox"
