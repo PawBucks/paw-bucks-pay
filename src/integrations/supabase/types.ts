@@ -1353,6 +1353,7 @@ export type Database = {
           daily_spend_cap: number | null
           description: string | null
           end_date: string | null
+          enforce_product_gate: boolean
           funded_at: string | null
           funding_method: string
           id: string
@@ -1392,6 +1393,7 @@ export type Database = {
           daily_spend_cap?: number | null
           description?: string | null
           end_date?: string | null
+          enforce_product_gate?: boolean
           funded_at?: string | null
           funding_method?: string
           id?: string
@@ -1431,6 +1433,7 @@ export type Database = {
           daily_spend_cap?: number | null
           description?: string | null
           end_date?: string | null
+          enforce_product_gate?: boolean
           funded_at?: string | null
           funding_method?: string
           id?: string
@@ -1522,37 +1525,46 @@ export type Database = {
       }
       branded_pawbucks_activity: {
         Row: {
+          actor_user_id: string | null
           amount: number
+          batch_id: string | null
           campaign_id: string
           checkin_id: string | null
           created_at: string
           description: string | null
           id: string
           merchant_id: string | null
+          source: string | null
           transaction_id: string | null
           type: string
           user_id: string
         }
         Insert: {
+          actor_user_id?: string | null
           amount: number
+          batch_id?: string | null
           campaign_id: string
           checkin_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
           merchant_id?: string | null
+          source?: string | null
           transaction_id?: string | null
           type: string
           user_id: string
         }
         Update: {
+          actor_user_id?: string | null
           amount?: number
+          batch_id?: string | null
           campaign_id?: string
           checkin_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
           merchant_id?: string | null
+          source?: string | null
           transaction_id?: string | null
           type?: string
           user_id?: string
@@ -4016,6 +4028,7 @@ export type Database = {
       }
       invoice_catalog_items: {
         Row: {
+          brand_id: string | null
           category: string | null
           created_at: string
           description: string | null
@@ -4030,6 +4043,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -4044,6 +4058,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
@@ -4058,6 +4073,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "invoice_catalog_items_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "invoice_catalog_items_merchant_id_fkey"
             columns: ["merchant_id"]
@@ -4151,6 +4173,7 @@ export type Database = {
       }
       invoice_items: {
         Row: {
+          brand_id: string | null
           catalog_item_id: string | null
           created_at: string
           description: string
@@ -4171,6 +4194,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_id?: string | null
           catalog_item_id?: string | null
           created_at?: string
           description: string
@@ -4191,6 +4215,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_id?: string | null
           catalog_item_id?: string | null
           created_at?: string
           description?: string
@@ -4211,6 +4236,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "invoice_items_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "invoice_items_catalog_item_id_fkey"
             columns: ["catalog_item_id"]
@@ -6559,6 +6591,7 @@ export type Database = {
       merchant_services: {
         Row: {
           allow_recurring: boolean
+          brand_id: string | null
           buffer_minutes: number
           cancellation_policy_hours: number
           category: Database["public"]["Enums"]["service_category"]
@@ -6586,6 +6619,7 @@ export type Database = {
         }
         Insert: {
           allow_recurring?: boolean
+          brand_id?: string | null
           buffer_minutes?: number
           cancellation_policy_hours?: number
           category?: Database["public"]["Enums"]["service_category"]
@@ -6613,6 +6647,7 @@ export type Database = {
         }
         Update: {
           allow_recurring?: boolean
+          brand_id?: string | null
           buffer_minutes?: number
           cancellation_policy_hours?: number
           category?: Database["public"]["Enums"]["service_category"]
@@ -6639,6 +6674,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "merchant_services_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "merchant_services_merchant_id_fkey"
             columns: ["merchant_id"]
@@ -7755,6 +7797,7 @@ export type Database = {
       }
       partner_offers: {
         Row: {
+          brand_id: string | null
           cash_equivalent: number | null
           coins_required: number
           created_at: string | null
@@ -7775,6 +7818,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          brand_id?: string | null
           cash_equivalent?: number | null
           coins_required: number
           created_at?: string | null
@@ -7795,6 +7839,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          brand_id?: string | null
           cash_equivalent?: number | null
           coins_required?: number
           created_at?: string | null
@@ -7815,6 +7860,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "partner_offers_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "partner_offers_partner_id_fkey"
             columns: ["partner_id"]
@@ -9557,6 +9609,7 @@ export type Database = {
       }
       pet_store_items: {
         Row: {
+          brand_id: string | null
           category: string
           created_at: string
           description: string | null
@@ -9575,6 +9628,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_id?: string | null
           category: string
           created_at?: string
           description?: string | null
@@ -9593,6 +9647,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_id?: string | null
           category?: string
           created_at?: string
           description?: string | null
@@ -9611,6 +9666,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pet_store_items_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pet_store_items_merchant_id_fkey"
             columns: ["merchant_id"]
@@ -15164,6 +15226,17 @@ export type Database = {
       }
     }
     Functions: {
+      admin_bulk_grant_branded_pawbucks: {
+        Args: {
+          p_actor_user_id: string
+          p_amount: number
+          p_batch_id: string
+          p_campaign_id: string
+          p_description?: string
+          p_user_ids: string[]
+        }
+        Returns: Json
+      }
       admin_delete_brand_account: {
         Args: { p_brand_id: string }
         Returns: Json
@@ -15239,6 +15312,10 @@ export type Database = {
       claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: string }
       complete_brand_setup: {
         Args: { p_brand_id: string; p_payload: Json }
+        Returns: Json
+      }
+      compute_brand_redeemable_cents: {
+        Args: { p_line_items: Json; p_merchant_id: string; p_user_id: string }
         Returns: Json
       }
       credit_branded_pawbucks: {
@@ -15597,6 +15674,17 @@ export type Database = {
         Args: {
           p_amount: number
           p_description?: string
+          p_merchant_id: string
+          p_transaction_id?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      redeem_branded_pawbucks_v2: {
+        Args: {
+          p_amount: number
+          p_description?: string
+          p_line_items: Json
           p_merchant_id: string
           p_transaction_id?: string
           p_user_id: string
