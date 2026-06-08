@@ -334,6 +334,37 @@ export const adminGrantBrandedPawbucks = async (
  return { data, error };
 };
 
+// Bulk-grant branded PawBucks to a list of users (CSV/segment upload).
+// Server-side function enforces superadmin + pool guard + per-batch idempotency.
+export const adminBulkGrantBrandedPawbucks = async (
+  campaignId: string,
+  userIds: string[],
+  amount: number,
+  batchId: string,
+  actorUserId: string,
+  description?: string
+) => {
+  const { data, error } = await supabase.rpc("admin_bulk_grant_branded_pawbucks", {
+    p_campaign_id: campaignId,
+    p_user_ids: userIds,
+    p_amount: amount,
+    p_batch_id: batchId,
+    p_actor_user_id: actorUserId,
+    p_description: description ?? "Admin bulk grant",
+  });
+  return { data, error };
+};
+
+// Resolve a list of emails to user IDs for bulk grants.
+export const lookupUserIdsByEmails = async (emails: string[]) => {
+  if (emails.length === 0) return { data: [] as { id: string; email: string | null; full_name: string | null }[], error: null };
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, email, full_name")
+    .in("email", emails);
+  return { data: (data || []) as { id: string; email: string | null; full_name: string | null }[], error };
+};
+
 // ============================================================
 // Campaign merchants
 // ============================================================
