@@ -299,10 +299,13 @@ serve(async (req) => {
       // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
       if (pawbucksUsed > 0 && transaction?.id) {
         try {
-          const { error: brandedRedeemErr } = await supabase.rpc("redeem_branded_pawbucks", {
+          const { buildInvoiceLineItems } = await import("../_shared/branded-line-items.ts");
+          const brandedLineItems = await buildInvoiceLineItems(supabase, invoiceId);
+          const { error: brandedRedeemErr } = await supabase.rpc("redeem_branded_pawbucks_v2", {
             p_user_id: userId,
             p_merchant_id: merchant.id,
             p_amount: pawbucksUsed,
+            p_line_items: brandedLineItems,
             p_transaction_id: transaction.id,
             p_description: `Branded PawBucks redeemed on Invoice #${invoice.invoice_number}`,
           });
