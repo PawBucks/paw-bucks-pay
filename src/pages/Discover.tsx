@@ -383,7 +383,7 @@ const Discover = () => {
           searchTerm: debouncedSearch || undefined,
           isBoosted: true,
         });
-      navigate(`/merchant/${merchant.id}`);
+      navigate(withBookingParams(`/merchant/${merchant.id}`));
     };
     return (
       <MerchantListItem
