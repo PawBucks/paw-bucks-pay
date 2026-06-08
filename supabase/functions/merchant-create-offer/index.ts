@@ -20,6 +20,7 @@ const createOfferSchema = z.object({
   per_user_limit: z.number().int().min(1).max(1000).optional().default(1),
   image_url: z.string().url().max(2000).optional().nullable(),
   require_approval: z.boolean().optional().default(false),
+  brand_id: z.string().uuid().optional().nullable(),
 });
 
 // Sanitize text to prevent XSS
@@ -99,12 +100,42 @@ serve(async (req) => {
       redemption_cap,
       per_user_limit,
       image_url,
-      require_approval
+      require_approval,
+      brand_id,
     } = validationResult.data;
 
     // Sanitize text fields
     const sanitizedTitle = sanitizeText(title);
     const sanitizedDescription = sanitizeText(description);
+
+    // If a brand_id was supplied, verify this merchant is actively enrolled in
+    // at least one campaign for that brand. This keeps merchants from tagging
+    // offers with brands that haven't authorized them.
+    let validatedBrandId: string | null = null;
+    if (brand_id) {
+      const { data: enrollment, error: enrollErr } = await supabaseClient
+        .from("brand_campaign_merchants")
+        .select("id, brand_campaigns!inner(brand_id, status)")
+        .eq("merchant_id", merchant.id)
+        .eq("status", "active")
+        .eq("brand_campaigns.brand_id", brand_id)
+        .eq("brand_campaigns.status", "active")
+        .limit(1);
+      if (enrollErr) {
+        console.error("Brand enrollment check failed:", enrollErr);
+        return new Response(
+          JSON.stringify({ error: "Unable to verify brand enrollment." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+        );
+      }
+      if (!enrollment || enrollment.length === 0) {
+        return new Response(
+          JSON.stringify({ error: "You are not enrolled in any active campaign for that brand." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+        );
+      }
+      validatedBrandId = brand_id;
+    }
 
     // Additional date validation
     if (start_date && end_date && new Date(start_date) >= new Date(end_date)) {
@@ -145,7 +176,8 @@ serve(async (req) => {
         per_user_limit: per_user_limit || 1,
         is_active,
         status,
-        require_approval: require_approval || false
+        require_approval: require_approval || false,
+        brand_id: validatedBrandId,
       })
       .select()
       .single();
