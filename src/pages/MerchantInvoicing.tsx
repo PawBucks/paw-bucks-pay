@@ -1000,6 +1000,7 @@ const MerchantInvoicing = () => {
  onUpdateItem={handleUpdateCatalogItem}
  onDeleteItem={handleDeleteCatalogItem}
  onRefresh={loadData}
+ merchantId={merchantId}
  />
  </CardContent>
  </Card>
