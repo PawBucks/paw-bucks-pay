@@ -13,12 +13,17 @@ import { Check, Copy } from "lucide-react";
 import { toast } from"sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from"@/components/ui/dialog";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { Badge } from"@/components/ui/badge";
+import { useQuery } from"@tanstack/react-query";
 
 type PartnerOffer = {
  id: string;
  title: string;
  description: string;
  coins_required: number;
+ brand_id?: string | null;
+ partner_id?: string | null;
+ brand?: { id: string; brand_name: string } | null;
  merchants: {
  business_name: string;
  business_type: string;
@@ -76,7 +81,40 @@ const PawBucksRedeem = () => {
  { staleTime: 1000 * 60 * 5 }
  );
 
- const loading = sharedAccount.isLoading || walletLoading || offersLoading;
+  // Branded PB balances per (brand_id, merchant_id) for the offers shown.
+  // The product gate already runs server-side; this hook just powers the
+  // "X PB available for this brand" hint on each offer card.
+  const brandedKeys = (offers ?? [])
+    .filter((o) => !!o.brand_id && !!o.partner_id)
+    .map((o) => `${o.partner_id}:${o.brand_id}`);
+  const { data: brandedBalances = {} } = useQuery<Record<string, number>>({
+    queryKey: ['branded-pb-for-offers', effectiveWalletUserId, brandedKeys.sort().join('|')],
+    enabled: !!effectiveWalletUserId && brandedKeys.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('branded_pawbucks_ledger')
+        .select(
+          'balance, campaign_id, brand_campaigns!inner(brand_id, status, brand_campaign_merchants!inner(merchant_id, status))',
+        )
+        .eq('user_id', effectiveWalletUserId!)
+        .gt('balance', 0);
+      if (error) throw error;
+      const out: Record<string, number> = {};
+      for (const row of (data ?? []) as any[]) {
+        const c = row.brand_campaigns;
+        if (!c || c.status !== 'active') continue;
+        for (const m of c.brand_campaign_merchants ?? []) {
+          if ((m.status ?? 'active') !== 'active') continue;
+          const key = `${m.merchant_id}:${c.brand_id}`;
+          out[key] = (out[key] ?? 0) + (Number(row.balance) || 0);
+        }
+      }
+      return out;
+    },
+    staleTime: 30 * 1000,
+  });
+
+  const loading = sharedAccount.isLoading || walletLoading || offersLoading;
 
  useEffect(() => {
  if (!authLoading && !user) {
@@ -176,7 +214,10 @@ const PawBucksRedeem = () => {
  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
  {offers.map((offer) => {
  const canAfford = wallet && wallet.balance >= offer.coins_required;
- 
+        const brandedAvail = offer.brand_id && offer.partner_id
+          ? brandedBalances[`${offer.partner_id}:${offer.brand_id}`] ?? 0
+          : 0;
+
  return (
  <GradientCard key={offer.id} className="relative overflow-hidden">
  {!canAfford && (
@@ -197,6 +238,23 @@ const PawBucksRedeem = () => {
 
  <h4 className="font-bold text-xl mb-2">{offer.title}</h4>
  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{offer.description}</p>
+
+       {offer.brand && (
+         <div className="mb-3 flex flex-wrap items-center gap-2">
+           <Badge variant="secondary" className="text-xs">
+             {offer.brand.brand_name} branded
+           </Badge>
+           {brandedAvail > 0 ? (
+             <span className="text-xs text-muted-foreground">
+               {brandedAvail.toLocaleString()} {offer.brand.brand_name} PB available
+             </span>
+           ) : (
+             <span className="text-xs text-muted-foreground">
+               Requires {offer.brand.brand_name}-funded PawBucks
+             </span>
+           )}
+         </div>
+       )}
 
  <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
  <div className="flex items-center gap-1">

@@ -72,7 +72,8 @@ serve(async (req) => {
         redemption_count,
         per_user_limit,
         is_active,
-        partner_id
+        partner_id,
+        brand_id
       `)
       .eq("is_active", true)
       .order("coins_required", { ascending: true });
@@ -107,10 +108,31 @@ serve(async (req) => {
       }
     }
 
+    // Fetch brand display info for any brand-tagged offers.
+    const brandIds = [
+      ...new Set((offers ?? []).map((o: any) => o.brand_id).filter(Boolean)),
+    ] as string[];
+    let brandsMap: Record<string, { id: string; brand_name: string }> = {};
+    if (brandIds.length > 0) {
+      const { data: brands, error: brandsError } = await supabaseClient
+        .from("brand_accounts")
+        .select("id, brand_name, status")
+        .in("id", brandIds);
+      if (!brandsError && brands) {
+        brandsMap = brands.reduce((acc, b: any) => {
+          if (b.id && b.status === "active") {
+            acc[b.id] = { id: b.id, brand_name: b.brand_name };
+          }
+          return acc;
+        }, {} as typeof brandsMap);
+      }
+    }
+
     // Combine offers with merchant data
     const offersWithMerchants = offers?.map(offer => ({
       ...offer,
-      merchants: merchantsMap[offer.partner_id] || { business_name: 'Partner', business_type: 'Merchant', description: null }
+      merchants: merchantsMap[offer.partner_id] || { business_name: 'Partner', business_type: 'Merchant', description: null },
+      brand: offer.brand_id ? (brandsMap[offer.brand_id] || null) : null,
     })) || [];
 
     console.log(`Fetched ${offersWithMerchants.length} active partner offers`);

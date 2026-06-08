@@ -14,12 +14,15 @@ import { ArrowLeft, Save } from"lucide-react";
 import { ProductImageUpload } from"@/components/shared/ProductImageUpload";
 import { toast } from"sonner";
 import { ErrorHandler } from"@/utils/errorHandler";
+import { BrandSelector } from"@/components/brand/BrandSelector";
+import { useMerchantContext } from"@/hooks/useMerchantContext";
 
 export default function MerchantOfferEditor() {
  const navigate = useNavigate();
  const { id } = useParams();
  const isEditMode = !!id;
  const { signOut: globalSignOut } = useAuth();
+  const { merchantId } = useMerchantContext();
 
  const [user, setUser] = useState<any>(null);
  const [loading, setLoading] = useState(false);
@@ -34,7 +37,8 @@ export default function MerchantOfferEditor() {
  end_date:"",
  redemption_cap:"" as string | number,
  per_user_limit:"" as string | number,
- require_approval: false
+  require_approval: false,
+  brand_id: null as string | null,
  });
 
  useEffect(() => {
@@ -82,7 +86,8 @@ export default function MerchantOfferEditor() {
  end_date: data.end_date ? new Date(data.end_date).toISOString().slice(0, 16) :"",
  redemption_cap: data.redemption_cap || 0,
  per_user_limit: data.per_user_limit || 1,
- require_approval: data.require_approval || false
+  require_approval: data.require_approval || false,
+  brand_id: data.brand_id ?? null,
  });
  } catch (error) {
  ErrorHandler.handle(error);
@@ -115,7 +120,8 @@ export default function MerchantOfferEditor() {
  redemption_cap: formData.redemption_cap ? (typeof formData.redemption_cap ==='string' ? parseInt(formData.redemption_cap) : formData.redemption_cap) : null,
  per_user_limit: formData.per_user_limit ? (typeof formData.per_user_limit ==='string' ? parseInt(formData.per_user_limit) : formData.per_user_limit) : 1,
  start_date: formData.start_date || null,
- end_date: formData.end_date || null
+  end_date: formData.end_date || null,
+  brand_id: formData.brand_id || null,
  };
 
  if (isEditMode) {
@@ -299,6 +305,20 @@ const handleSignOut = async () => {
  />
  <Label htmlFor="require_approval">Require Admin Approval</Label>
  </div>
+
+  <div className="space-y-2">
+  <Label htmlFor="brand_id">Brand Tag</Label>
+  <BrandSelector
+  value={formData.brand_id}
+  onChange={(brandId) => setFormData({ ...formData, brand_id: brandId })}
+  merchantId={merchantId ?? null}
+  placeholder="No brand (general offer)"
+  />
+  <p className="text-xs text-muted-foreground">
+  Tagging this offer to a brand makes branded PawBucks from that brand's
+  campaigns redeemable here. Leave unset for general offers.
+  </p>
+  </div>
 
  <div className="flex gap-4">
  <Button type="submit" disabled={loading}>
