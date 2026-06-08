@@ -412,10 +412,12 @@ serve(async (req) => {
         },
       );
       try {
-        const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
+        // Clover POS doesn't map SKUs to brand_id → no product-gate match.
+        const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks_v2", {
           p_user_id: matchedUser.id,
           p_merchant_id: integration.merchant_id,
           p_amount: requestedPawbucks,
+          p_line_items: [],
           p_transaction_id: posTx!.id,
           p_description: `Branded PawBucks redeemed at ${merchant?.business_name || "Partner Store"} (Clover POS) [cid:${correlationId}] [ext:${externalTxId ?? "n/a"}]`,
         });

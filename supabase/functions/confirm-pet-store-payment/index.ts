@@ -6,6 +6,7 @@ import {
   planPawBucksDebit,
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
+import { buildPetStoreLineItems } from "../_shared/branded-line-items.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -243,10 +244,15 @@ serve(async (req) => {
           amount: pawbucksUsedInSplit,
         });
         try {
-          const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
+          const brandedLineItems = await buildPetStoreLineItems(
+            supabaseAdmin,
+            lineItems.map((li) => ({ id: li.id, total_cents: li.priceCents * li.qty })),
+          );
+          const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks_v2", {
             p_user_id: userId,
             p_merchant_id: item.merchant_id,
             p_amount: pawbucksUsedInSplit,
+            p_line_items: brandedLineItems,
             p_transaction_id: transaction.id,
             p_description: `Branded PawBucks redeemed in Pet Store: ${itemName} [cid:${correlationId}] [pi:${paymentIntentId}]`,
           });

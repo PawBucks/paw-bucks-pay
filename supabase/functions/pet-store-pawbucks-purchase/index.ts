@@ -171,10 +171,19 @@ serve(async (req) => {
     const storeMerchantId = validatedItems[0]?.dbItem?.merchant_id || null;
     if (storeMerchantId && totalPawbucksCost > 0 && txRecord?.id) {
       try {
-        const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
+        const { buildPetStoreLineItems } = await import("../_shared/branded-line-items.ts");
+        const brandedLineItems = await buildPetStoreLineItems(
+          supabaseAdmin,
+          validatedItems.map(({ dbItem, quantity }) => ({
+            id: dbItem.id,
+            total_cents: Math.round(Number(dbItem.price) * quantity),
+          })),
+        );
+        const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks_v2", {
           p_user_id: effectiveUserId,
           p_merchant_id: storeMerchantId,
           p_amount: totalPawbucksCost,
+          p_line_items: brandedLineItems,
           p_transaction_id: txRecord.id,
           p_description: `Branded PawBucks redeemed in Pet Store`,
         });

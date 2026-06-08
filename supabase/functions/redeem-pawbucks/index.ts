@@ -171,10 +171,18 @@ serve(async (req) => {
         },
       );
       try {
-        const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks", {
+        // Build a single-line offer item so the product gate can match by brand.
+        const { buildOfferLineItem } = await import("../_shared/branded-line-items.ts");
+        const brandedLineItems = await buildOfferLineItem(
+          supabaseAdmin,
+          offer_id,
+          Math.ceil(offer.coins_required / 10), // PB → cents (1 PB = 0.1¢)
+        );
+        const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks_v2", {
           p_user_id: user.id,
           p_merchant_id: offer.partner_id,
           p_amount: offer.coins_required,
+          p_line_items: brandedLineItems,
           p_transaction_id: null,
           p_description: `Branded PawBucks redeemed for offer: ${offer.title} [cid:${correlationId}] [code:${redemptionCode}]`,
         });

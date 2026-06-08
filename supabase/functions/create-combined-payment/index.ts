@@ -567,12 +567,14 @@ serve(async (req) => {
       // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
       if (actualWalletPawbucks > 0 && transaction?.id) {
         try {
+          // No line-item context for generic merchant payments → empty cart.
           const { error: brandedRedeemErr } = await supabaseAdmin.rpc(
-            "redeem_branded_pawbucks",
+            "redeem_branded_pawbucks_v2",
             {
               p_user_id: user.id,
               p_merchant_id: merchantId,
               p_amount: actualWalletPawbucks,
+              p_line_items: [],
               p_transaction_id: transaction.id,
               p_description: `Branded PawBucks redeemed at ${merchant.business_name}`,
             },
