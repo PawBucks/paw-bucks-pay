@@ -81,6 +81,8 @@ const MerchantProfile = memo(() => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const shouldOpenMessage = searchParams.get("openMessage") === "1";
+  const incomingPetId = searchParams.get("petId");
+  const incomingIntent = searchParams.get("intent");
   const { user, signOut } = useAuth();
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
@@ -151,6 +153,13 @@ const MerchantProfile = memo(() => {
   const merchantStripeInfo = queryResults[2].data as { accountId?: string } | null;
   const connectedAccountId = merchantStripeInfo?.accountId || null;
   const hasBookableServices = merchantServices.length > 0;
+
+  // If user arrived with intent=book (e.g. from "Schedule Visit"), auto-open the booking tab.
+  useEffect(() => {
+    if (incomingIntent === "book" && hasBookableServices) {
+      setTab("booking");
+    }
+  }, [incomingIntent, hasBookableServices]);
 
   // Subscription plans
   const { data: plans = [] } = useQuery<SubscriptionPlan[]>({
@@ -844,6 +853,7 @@ const MerchantProfile = memo(() => {
                       merchantId={merchant.id}
                       merchantName={merchant.business_name}
                       cashbackRate={merchant.cashback_rate}
+                      preselectedPetId={incomingPetId}
                     />
                   </div>
                 </TabsContent>
