@@ -124,9 +124,10 @@ type Props = {
   merchantId: string;
   merchantName: string;
   cashbackRate?: number;
+  preselectedPetId?: string | null;
 };
 
-export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: Props) => {
+export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, preselectedPetId = null }: Props) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -143,7 +144,18 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10 }: P
   const [notes, setNotes] = useState("");
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1); // 5 = deposit
   const [done, setDone] = useState(false);
-  const [groomingData, setGroomingData] = useState<GroomingPetData>(createDefaultGroomingData());
+  const [groomingData, setGroomingData] = useState<GroomingPetData>(() => ({
+    ...createDefaultGroomingData(),
+    petId: preselectedPetId || null,
+  }));
+
+  // Sync preselected pet if it changes after mount (e.g. URL param updates).
+  useEffect(() => {
+    if (preselectedPetId && groomingData.petId !== preselectedPetId) {
+      setGroomingData((prev) => ({ ...prev, petId: preselectedPetId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preselectedPetId]);
   const [savedPaymentMethodId, setSavedPaymentMethodId] = useState<string | null>(null);
   const [savedSetupIntentId, setSavedSetupIntentId] = useState<string | null>(null);
   const [serviceAddress, setServiceAddress] = useState("");
