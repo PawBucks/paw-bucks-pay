@@ -14799,6 +14799,7 @@ export type Database = {
           contact_name: string | null
           contact_phone: string | null
           created_at: string | null
+          deletion_warning_sent_at: string | null
           gender: string | null
           id: string | null
           identifying_features: string | null
@@ -14815,6 +14816,7 @@ export type Database = {
           size: string | null
           status: string | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           additional_notes?: string | null
@@ -14826,6 +14828,7 @@ export type Database = {
           contact_name?: string | null
           contact_phone?: string | null
           created_at?: string | null
+          deletion_warning_sent_at?: string | null
           gender?: string | null
           id?: string | null
           identifying_features?: string | null
@@ -14842,6 +14845,7 @@ export type Database = {
           size?: string | null
           status?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           additional_notes?: string | null
@@ -14853,6 +14857,7 @@ export type Database = {
           contact_name?: string | null
           contact_phone?: string | null
           created_at?: string | null
+          deletion_warning_sent_at?: string | null
           gender?: string | null
           id?: string | null
           identifying_features?: string | null
@@ -14869,6 +14874,7 @@ export type Database = {
           size?: string | null
           status?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
