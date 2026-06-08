@@ -69,7 +69,8 @@ serve(async (req) => {
       end_date,
       redemption_cap,
       per_user_limit,
-      image_url
+      image_url,
+      brand_id,
     } = body;
 
     // Normalization: convert empty strings to null for nullable fields
@@ -90,6 +91,28 @@ serve(async (req) => {
       throw new Error("Redemption cap must be >= 0");
     }
 
+    // Validate brand_id (if explicitly provided) against active enrollment.
+    let normalizedBrandId: string | null | undefined = undefined;
+    if (brand_id !== undefined) {
+      if (brand_id === null || brand_id === "") {
+        normalizedBrandId = null;
+      } else {
+        const { data: enrollment, error: enrollErr } = await supabaseClient
+          .from("brand_campaign_merchants")
+          .select("id, brand_campaigns!inner(brand_id, status)")
+          .eq("merchant_id", merchant.id)
+          .eq("status", "active")
+          .eq("brand_campaigns.brand_id", brand_id)
+          .eq("brand_campaigns.status", "active")
+          .limit(1);
+        if (enrollErr) throw enrollErr;
+        if (!enrollment || enrollment.length === 0) {
+          throw new Error("You are not enrolled in any active campaign for that brand.");
+        }
+        normalizedBrandId = brand_id;
+      }
+    }
+
     // Prepare update object
     const updates: any = { updated_at: new Date().toISOString() };
     if (title !== undefined) updates.title = title;
@@ -102,6 +125,7 @@ serve(async (req) => {
     if (redemption_cap !== undefined) updates.redemption_cap = redemption_cap;
     if (per_user_limit !== undefined) updates.per_user_limit = per_user_limit;
     if (image_url !== undefined) updates.image_url = image_url;
+    if (normalizedBrandId !== undefined) updates.brand_id = normalizedBrandId;
 
     // Update status if start_date changed
     if (start_date && new Date(start_date) > new Date()) {
