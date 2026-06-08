@@ -944,10 +944,15 @@ serve(async (req) => {
 
                   // Branded PawBucks tracking (non-fatal)
                   try {
-                    await supabaseAdmin.rpc('redeem_branded_pawbucks', {
+                    const { buildInvoiceLineItems } = await import('../_shared/branded-line-items.ts');
+                    const brandedLineItems = invoiceId
+                      ? await buildInvoiceLineItems(supabaseAdmin, invoiceId)
+                      : [];
+                    await supabaseAdmin.rpc('redeem_branded_pawbucks_v2', {
                       p_user_id: invoicePayerUserId,
                       p_merchant_id: merchantId,
                       p_amount: debitAmount,
+                      p_line_items: brandedLineItems,
                       p_transaction_id: null,
                       p_description: `Branded PawBucks redeemed on invoice payment (Stripe-confirmed)`,
                     });
