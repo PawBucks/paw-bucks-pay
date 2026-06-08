@@ -403,6 +403,129 @@ export const AdminCampaignManageDialog = ({ open, onOpenChange, campaign }: Prop
  Grant {grantAmount.toLocaleString()} PB
  </Button>
  </TabsContent>
+
+  <TabsContent value="bulk" className="space-y-4 pt-3">
+    <div className="rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
+      Paste a list of recipient emails (comma, space, or newline separated). We'll resolve them to users, show a preview, and grant the chosen PawBucks amount to each. Grants are idempotent per batch — re-running won't double-issue.
+    </div>
+    <div className="space-y-2">
+      <Label>Recipient emails</Label>
+      <Textarea
+        rows={6}
+        value={bulkEmails}
+        onChange={(e) => { setBulkEmails(e.target.value); setBulkPreview(null); }}
+        placeholder="alice@example.com, bob@example.com&#10;carol@example.com"
+      />
+    </div>
+    <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-2">
+        <Label>PB per recipient</Label>
+        <Input
+          type="number" min={1}
+          value={bulkAmount}
+          onChange={(e) => setBulkAmount(Number(e.target.value))}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Internal note (optional)</Label>
+        <Input value={bulkNote} onChange={(e) => setBulkNote(e.target.value)} placeholder="Q2 loyalty boost" />
+      </div>
+    </div>
+
+    <div className="flex gap-2">
+      <Button variant="outline" onClick={previewBulk} disabled={bulkPreviewLoading || !bulkEmails.trim()}>
+        {bulkPreviewLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />} Preview recipients
+      </Button>
+      {bulkPreview && (
+        <div className="text-sm text-muted-foreground self-center">
+          <span className="font-medium text-foreground">{bulkPreview.matched.length}</span> matched
+          {bulkPreview.notFound.length > 0 && (
+            <> · <span className="text-destructive">{bulkPreview.notFound.length}</span> not found</>
+          )}
+          {" · "}Total: <span className="font-medium text-foreground">{(bulkPreview.matched.length * bulkAmount).toLocaleString()} PB</span>
+        </div>
+      )}
+    </div>
+
+    {bulkPreview && bulkPreview.notFound.length > 0 && (
+      <ScrollArea className="max-h-24 rounded-md border p-2">
+        <p className="text-xs font-medium text-destructive mb-1">Emails without a matching account (will be skipped):</p>
+        <p className="text-xs text-muted-foreground break-all">{bulkPreview.notFound.join(", ")}</p>
+      </ScrollArea>
+    )}
+
+    <Button
+      className="w-full"
+      onClick={() => bulkMutation.mutate()}
+      disabled={bulkMutation.isPending || !bulkPreview || bulkPreview.matched.length === 0 || bulkAmount <= 0}
+    >
+      {bulkMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Users className="h-4 w-4 mr-2" />}
+      Grant {bulkAmount.toLocaleString()} PB to {bulkPreview?.matched.length ?? 0} users
+    </Button>
+
+    <p className="text-xs text-muted-foreground">
+      Pool remaining: {(campaign.pawbucks_pool - campaign.total_distributed).toLocaleString()} PB
+    </p>
+  </TabsContent>
+
+  <TabsContent value="ledger" className="space-y-4 pt-3">
+    <div className="grid grid-cols-4 gap-2">
+      <div className="rounded-lg border p-3">
+        <p className="text-xs text-muted-foreground">Minted</p>
+        <p className="text-lg font-semibold">{ledgerKpis.minted.toLocaleString()} PB</p>
+      </div>
+      <div className="rounded-lg border p-3">
+        <p className="text-xs text-muted-foreground">Redeemed</p>
+        <p className="text-lg font-semibold">{ledgerKpis.redeemed.toLocaleString()} PB</p>
+      </div>
+      <div className="rounded-lg border p-3">
+        <p className="text-xs text-muted-foreground">Outstanding</p>
+        <p className="text-lg font-semibold">{ledgerKpis.outstanding.toLocaleString()} PB</p>
+      </div>
+      <div className="rounded-lg border p-3">
+        <p className="text-xs text-muted-foreground">Recipients</p>
+        <p className="text-lg font-semibold">{ledgerKpis.recipients.toLocaleString()}</p>
+      </div>
+    </div>
+
+    <Separator />
+
+    <div>
+      <h4 className="text-sm font-medium mb-2">Recent activity (last 200)</h4>
+      <ScrollArea className="h-72 rounded-md border">
+        <div className="divide-y">
+          {ledgerActivity.length === 0 && (
+            <p className="p-4 text-sm text-muted-foreground text-center">No activity yet for this campaign.</p>
+          )}
+          {ledgerActivity.map((row) => {
+            const isEarn = row.type === "earn";
+            return (
+              <div key={row.id} className="flex items-start gap-3 p-2.5 text-sm">
+                {isEarn ? (
+                  <ArrowUpCircle className="h-4 w-4 mt-0.5 text-emerald-600 shrink-0" />
+                ) : (
+                  <ArrowDownCircle className="h-4 w-4 mt-0.5 text-amber-600 shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium">
+                      {isEarn ? "+" : ""}{row.amount.toLocaleString()} PB
+                    </span>
+                    {row.source && <Badge variant="secondary" className="text-[10px]">{row.source.replace("_", " ")}</Badge>}
+                    {row.batch_id && <Badge variant="outline" className="text-[10px]">batch</Badge>}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">{row.description || (isEarn ? "Granted" : "Redeemed")}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {new Date(row.created_at).toLocaleString("en-US", { timeZone: "America/New_York" })} EST · user {row.user_id.slice(0, 8)}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </ScrollArea>
+    </div>
+  </TabsContent>
  </Tabs>
  </DialogContent>
  </Dialog>
