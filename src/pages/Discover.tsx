@@ -476,6 +476,41 @@ const Discover = () => {
           </div>
         </div>
 
+        {bookingPet && (
+          <div className="bg-primary/5 border-b border-primary/20 px-4 py-2.5">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {bookingPet.photo_url ? (
+                  <img
+                    src={bookingPet.photo_url}
+                    alt={bookingPet.name}
+                    className="w-8 h-8 rounded-full object-cover border border-primary/30 flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center flex-shrink-0">
+                    <Dog className="w-4 h-4 text-primary" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="text-[10px] font-semibold tracking-wider uppercase text-primary">
+                    Booking for
+                  </div>
+                  <div className="text-sm font-bold truncate">{bookingPet.name}</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={clearBookingPet}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1"
+                aria-label="Clear pet selection"
+              >
+                <X className="w-3.5 h-3.5" />
+                Clear
+              </button>
+            </div>
+          </div>
+        )}
+
         {viewMode === "map" || showMobileMap ? (
           /* Map View */
           <div className="flex-1 relative">
