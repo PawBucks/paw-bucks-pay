@@ -140,7 +140,7 @@ const LostPets = () => {
  queryKey: ["lost-pet-posts", statusFilter],
  queryFn: async () => {
  let query = supabase
- .from("lost_pet_posts")
+        .from("lost_pet_posts_public" as any)
  .select("*")
  .eq("is_active", true)
  .order("created_at", { ascending: false });
