@@ -474,6 +474,26 @@ export function CatalogManager({
  )}
  />
 
+ <FormField
+  control={form.control}
+  name="brand_id"
+  render={({ field }) => (
+   <FormItem>
+    <FormLabel>Brand (Optional)</FormLabel>
+    <FormControl>
+     <BrandSelector
+      value={field.value ?? null}
+      onChange={(v) => field.onChange(v)}
+      merchantId={merchantId ?? null}
+     />
+    </FormControl>
+    <p className="text-xs text-muted-foreground">
+     Tag with a brand to enable that brand's PawBucks on this item.
+    </p>
+   </FormItem>
+  )}
+ />
+
  <DialogFooter>
  <Button
  type="button"
