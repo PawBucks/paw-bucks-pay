@@ -853,6 +853,7 @@ const MerchantProfile = memo(() => {
                       merchantId={merchant.id}
                       merchantName={merchant.business_name}
                       cashbackRate={merchant.cashback_rate}
+                      preselectedPetId={incomingPetId}
                     />
                   </div>
                 </TabsContent>
