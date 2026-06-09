@@ -492,7 +492,7 @@ const Index = () => {
  <div className="pl-hero-left">
  <p className="pl-eyebrow">For Pet Parents</p>
  <h1 className="pl-hero-title">
- Automatically <em>save</em> money<br />on pet care.
+              Discover. Pay. Automatically <em>save</em><br />on local pet care.
  </h1>
  <p className="pl-hero-sub">
  Earn rewards every time you care for your pet. PawBucks gives you instant
