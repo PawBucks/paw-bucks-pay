@@ -554,17 +554,6 @@ const Index = () => {
  </div>
  </section>
 
-  {/* TRUST STRIP */}
-  <section className="pl-section" style={{ paddingTop:"3rem", paddingBottom:"3rem", background:"var(--white)", borderTop:"1px solid var(--border)", borderBottom:"1px solid var(--border)" }}>
-  <div className="pl-hero-stats" style={{ justifyContent:"center", paddingTop:0 }}>
-  <div className="pl-stat"><span className="pl-stat-num">$0</span><span className="pl-stat-label">to join</span></div>
-  <div className="pl-stat-divider" />
-  <div className="pl-stat"><span className="pl-stat-num">Instant</span><span className="pl-stat-label">savings</span></div>
-  <div className="pl-stat-divider" />
-  <div className="pl-stat"><span className="pl-stat-num">Local</span><span className="pl-stat-label">pet businesses</span></div>
-  </div>
-  </section>
-
  {/* HOW IT WORKS */}
  <section className="pl-section pl-how">
  <p className="pl-eyebrow">How It Works</p>
