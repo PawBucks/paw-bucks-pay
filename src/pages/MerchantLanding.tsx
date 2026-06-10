@@ -336,7 +336,7 @@ const MerchantLanding = () => {
  <div className="ml-hero-left">
  <div className="ml-eyebrow">For Pet Businesses</div>
  <h1 className="ml-hero-title">
- Grow your pet business with <em>rewards that work.</em>
+            Get more repeat customers <em>without paying CPC ads.</em>
  </h1>
  <p className="ml-hero-sub">
  Join PawBucks free. Accept payments, run loyalty, manage bookings, and keep customers coming back — all from one platform built for pet professionals.
