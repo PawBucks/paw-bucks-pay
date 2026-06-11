@@ -102,6 +102,19 @@ const LostPetDetail = () => {
  enabled: !!id,
  });
 
+  // Contact info is PII — only fetched for authenticated users via a SECURITY DEFINER RPC.
+  const { data: contact } = useQuery({
+    queryKey: ["lost-pet-contact", id, user?.id ?? null],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase.rpc("get_lost_pet_contact", { _post_id: id });
+      if (error) return null;
+      const row = Array.isArray(data) ? data[0] : data;
+      return (row ?? null) as { contact_name: string; contact_phone: string; contact_email: string | null } | null;
+    },
+    enabled: !!id && !!user,
+  });
+
  // Get all photos (combine photo_urls with legacy photo_url)
  const allPhotos = post ? [
  ...(post.photo_urls?.filter(Boolean) || []),
@@ -294,17 +307,17 @@ const LostPetDetail = () => {
  pdf.setFont("helvetica","bold");
  pdf.text("IF FOUND, PLEASE CONTACT:", pageWidth / 2, yPos + 10, { align:"center" });
  pdf.setFontSize(18);
- pdf.text(post.contact_name, pageWidth / 2, yPos + 20, { align:"center" });
+  pdf.text(contact?.contact_name ?? "(Sign in to view)", pageWidth / 2, yPos + 20, { align:"center" });
  pdf.setFontSize(20);
- pdf.text(post.contact_phone, pageWidth / 2, yPos + 30, { align:"center" });
+  pdf.text(contact?.contact_phone ?? "(Sign in to view)", pageWidth / 2, yPos + 30, { align:"center" });
  yPos += 42;
 
  // Email if provided
- if (post.contact_email) {
+  if (contact?.contact_email) {
  pdf.setTextColor(0, 0, 0);
  pdf.setFontSize(11);
  pdf.setFont("helvetica","normal");
- pdf.text(`Email: ${post.contact_email}`, pageWidth / 2, yPos, { align:"center" });
+  pdf.text(`Email: ${contact.contact_email}`, pageWidth / 2, yPos, { align:"center" });
  yPos += 8;
  }
 
@@ -378,7 +391,7 @@ const LostPetDetail = () => {
           image: allPhotos[0],
           datePublished: post.created_at,
           dateModified: post.created_at,
-          author: { "@type":"Person", name: post.contact_name },
+          author: { "@type":"Person", name: contact?.contact_name ?? "Pet Owner" },
         }}
  />
  <div className="min-h-screen bg-background">
@@ -550,23 +563,36 @@ const LostPetDetail = () => {
  <CardTitle className="text-lg">Contact Information</CardTitle>
  </CardHeader>
  <CardContent className="space-y-4">
- <p className="font-medium">{post.contact_name}</p>
- <a
- href={`tel:${post.contact_phone}`}
- className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
- >
- <span className="w-5 h-5 text-primary" aria-hidden="true">📞</span>
- <span className="font-medium">{post.contact_phone}</span>
- </a>
- {post.contact_email && (
- <a
- href={`mailto:${post.contact_email}`}
- className="flex items-center gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
- >
- <span className="w-5 h-5 text-primary" aria-hidden="true">📧</span>
- <span className="truncate">{post.contact_email}</span>
- </a>
- )}
+  {!user ? (
+    <div className="p-3 bg-muted rounded-lg text-sm">
+      <p className="mb-2">Contact info is hidden to protect the owner's privacy.</p>
+      <a href="/auth" className="text-primary font-medium hover:underline">
+        Sign in to view contact details
+      </a>
+    </div>
+  ) : contact ? (
+    <>
+      <p className="font-medium">{contact.contact_name}</p>
+      <a
+        href={`tel:${contact.contact_phone}`}
+        className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
+      >
+        <span className="w-5 h-5 text-primary" aria-hidden="true">📞</span>
+        <span className="font-medium">{contact.contact_phone}</span>
+      </a>
+      {contact.contact_email && (
+        <a
+          href={`mailto:${contact.contact_email}`}
+          className="flex items-center gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+        >
+          <span className="w-5 h-5 text-primary" aria-hidden="true">📧</span>
+          <span className="truncate">{contact.contact_email}</span>
+        </a>
+      )}
+    </>
+  ) : (
+    <p className="text-sm text-muted-foreground">Loading contact details…</p>
+  )}
  </CardContent>
  </Card>
 

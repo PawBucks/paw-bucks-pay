@@ -928,22 +928,9 @@ const LostPets = () => {
  )}
  
  {/* Contact Info */}
- <div className="pt-3 border-t space-y-2">
- <div className="flex items-center gap-2 text-sm">
- <span className="w-4 h-4 text-primary" aria-hidden="true">📞</span>
- <a href={`tel:${post.contact_phone}`} className="hover:underline">
- {post.contact_phone}
- </a>
- </div>
- {post.contact_email && (
- <div className="flex items-center gap-2 text-sm">
- <span className="w-4 h-4 text-primary" aria-hidden="true">📧</span>
- <a href={`mailto:${post.contact_email}`} className="hover:underline truncate">
- {post.contact_email}
- </a>
- </div>
- )}
- </div>
+  <div className="pt-3 border-t text-sm text-muted-foreground">
+  Contact details available on the post page (sign-in required).
+  </div>
  
  {/* Actions */}
  <div className="flex flex-col gap-2 pt-2 border-t">

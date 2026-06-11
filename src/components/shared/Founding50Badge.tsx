@@ -28,12 +28,12 @@ const Founding50BadgeComponent = ({ entityType, entityId, size = "md" }: Foundin
     queryKey: ["founding-50", entityType, entityId],
     queryFn: async () => {
       const { data } = await supabase
-        .from("founding_50_badges")
+        .from("founding_50_badges_public" as any)
         .select("badge_number, awarded_at")
         .eq("entity_type", entityType)
         .eq("entity_id", entityId)
         .maybeSingle();
-      return data;
+      return data as unknown as { badge_number: number; awarded_at: string } | null;
     },
     staleTime: 1000 * 60 * 30,
   });

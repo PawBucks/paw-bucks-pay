@@ -14788,6 +14788,27 @@ export type Database = {
         }
         Relationships: []
       }
+      founding_50_badges_public: {
+        Row: {
+          awarded_at: string | null
+          badge_number: number | null
+          entity_id: string | null
+          entity_type: string | null
+        }
+        Insert: {
+          awarded_at?: string | null
+          badge_number?: number | null
+          entity_id?: string | null
+          entity_type?: string | null
+        }
+        Update: {
+          awarded_at?: string | null
+          badge_number?: number | null
+          entity_id?: string | null
+          entity_type?: string | null
+        }
+        Relationships: []
+      }
       lost_pet_posts_public: {
         Row: {
           additional_notes: string | null
@@ -14795,9 +14816,6 @@ export type Database = {
           breed: string | null
           collar_description: string | null
           color_markings: string | null
-          contact_email: string | null
-          contact_name: string | null
-          contact_phone: string | null
           created_at: string | null
           deletion_warning_sent_at: string | null
           gender: string | null
@@ -14824,9 +14842,6 @@ export type Database = {
           breed?: string | null
           collar_description?: string | null
           color_markings?: string | null
-          contact_email?: string | null
-          contact_name?: string | null
-          contact_phone?: string | null
           created_at?: string | null
           deletion_warning_sent_at?: string | null
           gender?: string | null
@@ -14853,9 +14868,6 @@ export type Database = {
           breed?: string | null
           collar_description?: string | null
           color_markings?: string | null
-          contact_email?: string | null
-          contact_name?: string | null
-          contact_phone?: string | null
           created_at?: string | null
           deletion_warning_sent_at?: string | null
           gender?: string | null
@@ -15485,6 +15497,14 @@ export type Database = {
         Returns: {
           items: Json
           total_locked: number
+        }[]
+      }
+      get_lost_pet_contact: {
+        Args: { _post_id: string }
+        Returns: {
+          contact_email: string
+          contact_name: string
+          contact_phone: string
         }[]
       }
       get_marketplace_merchants: {
