@@ -307,17 +307,17 @@ const LostPetDetail = () => {
  pdf.setFont("helvetica","bold");
  pdf.text("IF FOUND, PLEASE CONTACT:", pageWidth / 2, yPos + 10, { align:"center" });
  pdf.setFontSize(18);
- pdf.text(post.contact_name, pageWidth / 2, yPos + 20, { align:"center" });
+  pdf.text(contact?.contact_name ?? "(Sign in to view)", pageWidth / 2, yPos + 20, { align:"center" });
  pdf.setFontSize(20);
- pdf.text(post.contact_phone, pageWidth / 2, yPos + 30, { align:"center" });
+  pdf.text(contact?.contact_phone ?? "(Sign in to view)", pageWidth / 2, yPos + 30, { align:"center" });
  yPos += 42;
 
  // Email if provided
- if (post.contact_email) {
+  if (contact?.contact_email) {
  pdf.setTextColor(0, 0, 0);
  pdf.setFontSize(11);
  pdf.setFont("helvetica","normal");
- pdf.text(`Email: ${post.contact_email}`, pageWidth / 2, yPos, { align:"center" });
+  pdf.text(`Email: ${contact.contact_email}`, pageWidth / 2, yPos, { align:"center" });
  yPos += 8;
  }
 
