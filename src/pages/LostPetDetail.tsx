@@ -391,7 +391,7 @@ const LostPetDetail = () => {
           image: allPhotos[0],
           datePublished: post.created_at,
           dateModified: post.created_at,
-          author: { "@type":"Person", name: post.contact_name },
+          author: { "@type":"Person", name: contact?.contact_name ?? "Pet Owner" },
         }}
  />
  <div className="min-h-screen bg-background">
