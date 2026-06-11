@@ -563,23 +563,36 @@ const LostPetDetail = () => {
  <CardTitle className="text-lg">Contact Information</CardTitle>
  </CardHeader>
  <CardContent className="space-y-4">
- <p className="font-medium">{post.contact_name}</p>
- <a
- href={`tel:${post.contact_phone}`}
- className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
- >
- <span className="w-5 h-5 text-primary" aria-hidden="true">📞</span>
- <span className="font-medium">{post.contact_phone}</span>
- </a>
- {post.contact_email && (
- <a
- href={`mailto:${post.contact_email}`}
- className="flex items-center gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
- >
- <span className="w-5 h-5 text-primary" aria-hidden="true">📧</span>
- <span className="truncate">{post.contact_email}</span>
- </a>
- )}
+  {!user ? (
+    <div className="p-3 bg-muted rounded-lg text-sm">
+      <p className="mb-2">Contact info is hidden to protect the owner's privacy.</p>
+      <a href="/auth" className="text-primary font-medium hover:underline">
+        Sign in to view contact details
+      </a>
+    </div>
+  ) : contact ? (
+    <>
+      <p className="font-medium">{contact.contact_name}</p>
+      <a
+        href={`tel:${contact.contact_phone}`}
+        className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
+      >
+        <span className="w-5 h-5 text-primary" aria-hidden="true">📞</span>
+        <span className="font-medium">{contact.contact_phone}</span>
+      </a>
+      {contact.contact_email && (
+        <a
+          href={`mailto:${contact.contact_email}`}
+          className="flex items-center gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+        >
+          <span className="w-5 h-5 text-primary" aria-hidden="true">📧</span>
+          <span className="truncate">{contact.contact_email}</span>
+        </a>
+      )}
+    </>
+  ) : (
+    <p className="text-sm text-muted-foreground">Loading contact details…</p>
+  )}
  </CardContent>
  </Card>
 
