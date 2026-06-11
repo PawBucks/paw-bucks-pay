@@ -33,7 +33,7 @@ const Founding50BadgeComponent = ({ entityType, entityId, size = "md" }: Foundin
         .eq("entity_type", entityType)
         .eq("entity_id", entityId)
         .maybeSingle();
-      return data as { badge_number: number; awarded_at: string } | null;
+      return data as unknown as { badge_number: number; awarded_at: string } | null;
     },
     staleTime: 1000 * 60 * 30,
   });
