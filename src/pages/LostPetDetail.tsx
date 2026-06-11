@@ -102,6 +102,19 @@ const LostPetDetail = () => {
  enabled: !!id,
  });
 
+  // Contact info is PII — only fetched for authenticated users via a SECURITY DEFINER RPC.
+  const { data: contact } = useQuery({
+    queryKey: ["lost-pet-contact", id, user?.id ?? null],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase.rpc("get_lost_pet_contact", { _post_id: id });
+      if (error) return null;
+      const row = Array.isArray(data) ? data[0] : data;
+      return (row ?? null) as { contact_name: string; contact_phone: string; contact_email: string | null } | null;
+    },
+    enabled: !!id && !!user,
+  });
+
  // Get all photos (combine photo_urls with legacy photo_url)
  const allPhotos = post ? [
  ...(post.photo_urls?.filter(Boolean) || []),
