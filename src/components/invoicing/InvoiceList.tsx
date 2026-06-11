@@ -390,12 +390,10 @@ export function InvoiceList({
  <Eye className="h-4 w-4 mr-2" />
  View
  </DropdownMenuItem>
- {['draft','sent','viewed','overdue','partially_paid'].includes(invoice.status) && (
- <DropdownMenuItem onClick={() => onEdit(invoice)}>
- <Edit className="h-4 w-4 mr-2" />
- Edit
- </DropdownMenuItem>
- )}
+                         <DropdownMenuItem onClick={() => onEdit(invoice)}>
+                           <Edit className="h-4 w-4 mr-2" />
+                           Edit
+                         </DropdownMenuItem>
  {invoice.status ==='draft' && (
  <DropdownMenuItem onClick={() => onSend(invoice)}>
  <Send className="h-4 w-4 mr-2" />

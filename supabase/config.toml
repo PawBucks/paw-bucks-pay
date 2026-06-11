@@ -273,6 +273,9 @@ verify_jwt = true
 [functions.send-invoice-email]
 verify_jwt = true
 
+[functions.send-invoice-modified-email]
+verify_jwt = true
+
 [functions.create-invoice-payment]
 verify_jwt = false
 

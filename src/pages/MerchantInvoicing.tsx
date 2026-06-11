@@ -65,6 +65,75 @@ const MerchantInvoicing = () => {
  const [deleteTargetInvoice, setDeleteTargetInvoice] = useState<Invoice | null>(null);
  const [isDeleting, setIsDeleting] = useState(false);
 
+  // Build a human-readable list of changes between the old invoice/items and the new form data/items.
+  const buildInvoiceChanges = (
+    oldInv: Invoice & { items?: InvoiceItem[] },
+    newData: any,
+    newItems: any[],
+    newTotal: number,
+  ): string[] => {
+    const changes: string[] = [];
+    const fmtMoney = (v: any) => `$${Number(v || 0).toFixed(2)}`;
+    const cmpStr = (label: string, oldV: any, newV: any) => {
+      const a = (oldV ?? "").toString().trim();
+      const b = (newV ?? "").toString().trim();
+      if (a !== b) changes.push(`${label}: "${a || "—"}" → "${b || "—"}"`);
+    };
+    const cmpDate = (label: string, oldV: any, newV: any) => {
+      const a = (oldV ?? "").toString().slice(0, 10);
+      const b = (newV ?? "").toString().slice(0, 10);
+      if (a !== b) changes.push(`${label}: ${a || "—"} → ${b || "—"}`);
+    };
+    const cmpNum = (label: string, oldV: any, newV: any, money = false) => {
+      const a = Number(oldV || 0);
+      const b = Number(newV || 0);
+      if (Math.abs(a - b) > 0.001) {
+        changes.push(`${label}: ${money ? fmtMoney(a) : a} → ${money ? fmtMoney(b) : b}`);
+      }
+    };
+
+    cmpStr("Title", oldInv.title, newData.title);
+    cmpStr("Client name", oldInv.client_name, newData.client_name);
+    cmpStr("Client email", oldInv.client_email, newData.client_email);
+    cmpDate("Issue date", oldInv.issue_date, newData.issue_date);
+    cmpDate("Due date", oldInv.due_date, newData.due_date);
+    cmpNum("Tax rate", oldInv.tax_rate, newData.tax_rate);
+    cmpNum("Shipping", oldInv.shipping_amount, newData.shipping_amount, true);
+    cmpNum("Total", oldInv.total, newTotal, true);
+    cmpStr("Notes", oldInv.notes, newData.notes);
+
+    // Items diff (by sort_order position)
+    const oldItems = [...(oldInv.items || [])].sort(
+      (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+    );
+    const max = Math.max(oldItems.length, newItems.length);
+    for (let i = 0; i < max; i++) {
+      const o = oldItems[i];
+      const n = newItems[i];
+      if (o && !n) {
+        changes.push(`Removed item: "${o.description}" (${o.quantity} × ${fmtMoney(o.unit_price)})`);
+      } else if (!o && n) {
+        changes.push(`Added item: "${n.description}" (${n.quantity} × ${fmtMoney(n.unit_price)})`);
+      } else if (o && n) {
+        const diffs: string[] = [];
+        if ((o.description || "") !== (n.description || "")) {
+          diffs.push(`description "${o.description}" → "${n.description}"`);
+        }
+        if (Number(o.quantity) !== Number(n.quantity)) {
+          diffs.push(`qty ${Number(o.quantity)} → ${Number(n.quantity)}`);
+        }
+        if (Math.abs(Number(o.unit_price) - Number(n.unit_price)) > 0.001) {
+          diffs.push(`rate ${fmtMoney(o.unit_price)} → ${fmtMoney(n.unit_price)}`);
+        }
+        if (diffs.length > 0) {
+          changes.push(`Item "${n.description || o.description}": ${diffs.join(", ")}`);
+        }
+      }
+    }
+
+    return changes;
+  };
+
  useEffect(() => {
  if (!authLoading && !user) {
  navigate("/auth");
@@ -225,6 +294,7 @@ const MerchantInvoicing = () => {
  if (selectedInvoice?.id) {
  // Update existing invoice
  invoiceId = selectedInvoice.id;
+        const previousInvoice = selectedInvoice;
  
  // Calculate next_invoice_date for recurring invoices
  let nextInvoiceDateStr = null;
@@ -258,6 +328,30 @@ const MerchantInvoicing = () => {
  tax_rate: item.tax_rate,
  });
  }
+
+        // If this invoice was previously sent to the client (or is paid/partially_paid/etc.),
+        // notify the pet owner that the invoice was modified and include what changed.
+        const shouldNotify =
+          !!previousInvoice.sent_at ||
+          !["draft"].includes(previousInvoice.status);
+        if (shouldNotify) {
+          const changes = buildInvoiceChanges(
+            previousInvoice,
+            formattedData,
+            items,
+            Number(formattedData.total || 0),
+          );
+          if (changes.length > 0) {
+            try {
+              await supabase.functions.invoke("send-invoice-modified-email", {
+                body: { invoiceId, changes },
+              });
+            } catch (notifyErr) {
+              console.error("Failed to send modification notification:", notifyErr);
+              toast.warning("Invoice updated, but notification email failed to send");
+            }
+          }
+        }
  } else {
  // Create new invoice
  // Calculate next_invoice_date for recurring invoices
