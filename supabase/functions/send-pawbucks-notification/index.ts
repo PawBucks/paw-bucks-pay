@@ -326,6 +326,16 @@ serve(async (req) => {
   }
 
   try {
+    // Internal-only: callers must provide the shared trigger secret
+    const internalSecret = Deno.env.get('INTERNAL_TRIGGER_SECRET');
+    const provided = req.headers.get('x-internal-secret');
+    if (!internalSecret || provided !== internalSecret) {
+      return new Response(JSON.stringify({ error: 'unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) {
       console.error("RESEND_API_KEY not configured");
