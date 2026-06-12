@@ -423,7 +423,7 @@ const MerchantProfile = memo(() => {
                 <OpenStatusBadge merchantId={merchant.id} />
                 {merchant.accepts_pawbucks && (
                   <>
-                    <span className="text-white/30">·</span>
+                    <span aria-hidden="true" className="text-white/80">·</span>
                     <span className="inline-flex items-center gap-1.5 text-primary font-medium">
                       <PawBucksLogo className="w-4 h-4" /> Earns PawBucks
                     </span>
