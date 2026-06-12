@@ -44,7 +44,7 @@ import { PlusCircle, Search, Phone, Dog, Cat, Bird, Rabbit, Upload, AlertTriangl
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { LostPetShareDialog } from"@/components/LostPetShareDialog";
 import { PetProfileSelector } from"@/components/PetProfileSelector";
-import { format } from"date-fns";
+import { format, differenceInCalendarDays } from"date-fns";
 import { Tables } from"@/integrations/supabase/types";
 
 type PetProfile = Tables<"pet_profiles">;
