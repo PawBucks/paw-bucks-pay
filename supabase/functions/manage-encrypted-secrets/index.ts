@@ -125,7 +125,7 @@ serve(async (req) => {
           .insert({
             merchant_id,
             name: name || "Default Webhook",
-            url,
+            url: urlCheck.url,
             secret: encryptedSecret,
             events: events || ["transaction.created", "reward.awarded"],
           })
