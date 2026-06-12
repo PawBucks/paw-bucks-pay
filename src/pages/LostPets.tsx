@@ -9,14 +9,12 @@ import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Textarea } from"@/components/ui/textarea";
 import { Label } from"@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import {
  Dialog,
  DialogContent,
  DialogHeader,
  DialogTitle,
- DialogTrigger,
 } from"@/components/ui/dialog";
 import {
  AlertDialog,
@@ -40,11 +38,10 @@ import { useToast } from"@/hooks/use-toast";
 import { LoadingSpinner } from"@/components/LoadingSpinner";
 import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
-import { PlusCircle, Search, Phone, Dog, Cat, Bird, Rabbit, Upload, AlertTriangle, CheckCircle2, PartyPopper, Eye, X, Images, ArrowLeft } from "lucide-react";
+import { Search, Bird, Rabbit, Upload, AlertTriangle, CheckCircle2, PartyPopper, X, Images, ArrowLeft } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
-import { LostPetShareDialog } from"@/components/LostPetShareDialog";
 import { PetProfileSelector } from"@/components/PetProfileSelector";
-import { format } from"date-fns";
+import { format, differenceInCalendarDays } from"date-fns";
 import { Tables } from"@/integrations/supabase/types";
 
 type PetProfile = Tables<"pet_profiles">;
@@ -395,64 +392,338 @@ const LostPets = () => {
  keywords={[...seoMeta.lostPets.keywords]}
  canonical={seoMeta.lostPets.canonical}
  />
- <div className="min-h-screen bg-background">
- <Header 
- isAuthenticated={!!user} 
+      <div className="min-h-screen bg-muted/30 pb-32">
+        <Header
+          isAuthenticated={!!user}
           onLogout={async () => {
             await signOut();
           }}
- userId={user?.id}
- />
- 
- <main className="container mx-auto px-4 py-6 pb-24 md:pb-6">
- {/* Hero Section */}
- <div className="text-center mb-8">
- <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
- Lost Pet Flyers
- </h1>
- <p className="text-muted-foreground max-w-2xl mx-auto">
- Help reunite lost pets with their families. Browse active flyers or create your own.
- </p>
- </div>
+          userId={user?.id}
+        />
 
- {/* Search and Filters */}
- <div className="flex flex-col md:flex-row gap-4 mb-6">
- <div className="relative flex-1">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
- <Input
- placeholder="Search by pet name, type, breed, or location..."
- value={searchTerm}
- onChange={(e) => setSearchTerm(e.target.value)}
- className="pl-10"
- />
- </div>
- 
- <Select value={statusFilter} onValueChange={setStatusFilter}>
- <SelectTrigger className="w-full md:w-40">
- <SelectValue placeholder="Filter by status" />
- </SelectTrigger>
- <SelectContent>
- <SelectItem value="all">All Status</SelectItem>
- <SelectItem value="lost">Lost</SelectItem>
- <SelectItem value="found">Found</SelectItem>
- <SelectItem value="reunited">Reunited</SelectItem>
- </SelectContent>
- </Select>
+        {/* Hero + filters card */}
+        <div className="bg-background border-b">
+          <div className="container mx-auto max-w-4xl px-4 pt-6 pb-4">
+            <div className="text-[10px] font-semibold tracking-[0.14em] uppercase text-primary mb-2 flex items-center gap-1">
+              🐾 Lost Pet Flyers
+            </div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-foreground leading-tight tracking-tight mb-2">
+              Help reunite lost pets with their families.
+            </h1>
+            <p className="text-sm text-muted-foreground mb-5">
+              Browse active flyers or create one in seconds using your pet's profile.
+            </p>
 
- {user && (
- <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
- setIsCreateDialogOpen(open);
- if (!open) {
- resetForm();
- }
- }}>
- <DialogTrigger asChild>
- <Button className="gap-2">
- <PlusCircle className="w-4 h-4" />
- Create Flyer
- </Button>
- </DialogTrigger>
- <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            {/* Stats */}
+            {(() => {
+              const counts = {
+                lost: posts?.filter((p) => p.status === "lost").length ?? 0,
+                found: posts?.filter((p) => p.status === "found").length ?? 0,
+                reunited: posts?.filter((p) => p.status === "reunited").length ?? 0,
+              };
+              const stat = [
+                { key: "lost", label: "Lost", count: counts.lost, color: "text-destructive" },
+                { key: "found", label: "Found", count: counts.found, color: "text-orange-500" },
+                { key: "reunited", label: "Reunited", count: counts.reunited, color: "text-emerald-600" },
+              ];
+              return (
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {stat.map((s) => (
+                    <div
+                      key={s.key}
+                      className="bg-muted/40 border rounded-xl py-2 text-center"
+                    >
+                      <div className={`text-lg font-extrabold ${s.color}`}>{s.count}</div>
+                      <div className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
+                        {s.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* Search */}
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by pet name, breed, or location..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-muted/40 rounded-lg"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  aria-label="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Status pills */}
+            <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+              {[
+                { id: "all", label: "All" },
+                { id: "lost", label: "🔴 Lost" },
+                { id: "found", label: "🟠 Found" },
+                { id: "reunited", label: "🟢 Reunited" },
+              ].map((f) => {
+                const active = statusFilter === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => setStatusFilter(f.id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border ${
+                      active
+                        ? "bg-foreground text-background border-foreground"
+                        : "bg-background text-muted-foreground border-border hover:bg-muted"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <main className="container mx-auto max-w-4xl px-4 py-4">
+          <div className="text-[11px] text-muted-foreground mb-3">
+            {filteredPosts?.length ?? 0} flyer{(filteredPosts?.length ?? 0) === 1 ? "" : "s"}
+            {statusFilter !== "all" ? ` · ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` : ""}
+          </div>
+
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <LoadingSpinner />
+            </div>
+          ) : filteredPosts?.length === 0 ? (
+            <div className="text-center py-14">
+              <div className="text-4xl mb-3">🐾</div>
+              <h2 className="text-base font-semibold mb-1">
+                {searchTerm ? "No flyers match your search" : "No lost pet flyers yet"}
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                {searchTerm
+                  ? "Try a different name, breed, or location"
+                  : "Be the first to post a flyer if you've lost a pet"}
+              </p>
+              {searchTerm && (
+                <Button variant="outline" onClick={() => setSearchTerm("")}>
+                  Clear search
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {filteredPosts?.map((post) => {
+                const status = post.status as "lost" | "found" | "reunited";
+                const days = differenceInCalendarDays(new Date(), new Date(post.created_at));
+                const photo = post.photo_urls?.[0] || post.photo_url;
+                const accentBg =
+                  status === "lost"
+                    ? "bg-destructive/5"
+                    : status === "found"
+                    ? "bg-orange-500/5"
+                    : "bg-emerald-500/5";
+                const statusPill =
+                  status === "lost"
+                    ? "bg-destructive/10 text-destructive border-destructive/20"
+                    : status === "found"
+                    ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                    : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
+                const urgencyPill =
+                  days === 0
+                    ? "bg-destructive/10 text-destructive border-destructive/20"
+                    : days === 1
+                    ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
+                    : "bg-muted text-muted-foreground border-transparent";
+                const urgencyLabel =
+                  days === 0 ? "Today" : days === 1 ? "Yesterday" : `${days}d ago`;
+
+                return (
+                  <div
+                    key={post.id}
+                    onClick={() => navigate(`/lost-pets/${post.id}`)}
+                    className="bg-background border rounded-2xl overflow-hidden cursor-pointer transition-shadow hover:shadow-md"
+                  >
+                    {status === "reunited" && (
+                      <div className="bg-emerald-500/10 border-b border-emerald-500/20 px-4 py-1.5 text-[11px] text-emerald-700 font-semibold">
+                        🎉 Reunited with family — thanks to the community!
+                      </div>
+                    )}
+                    <div className="flex">
+                      <div
+                        className={`w-[110px] shrink-0 ${accentBg} flex items-center justify-center text-4xl min-h-[130px] relative overflow-hidden`}
+                      >
+                        {photo ? (
+                          <img
+                            src={photo}
+                            alt={post.pet_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span>
+                            {post.pet_type === "dog"
+                              ? "🐕"
+                              : post.pet_type === "cat"
+                              ? "🐱"
+                              : post.pet_type === "bird"
+                              ? "🐦"
+                              : post.pet_type === "rabbit"
+                              ? "🐰"
+                              : "🐾"}
+                          </span>
+                        )}
+                        <span
+                          className={`absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusPill}`}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span>
+                      </div>
+                      <div className="flex-1 p-3 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <div className="min-w-0">
+                            <div className="text-base font-extrabold text-foreground tracking-tight truncate">
+                              {post.pet_name}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {[post.breed, post.age_estimate].filter(Boolean).join(" · ") || post.color_markings}
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1 shrink-0">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${urgencyPill}`}>
+                              {urgencyLabel}
+                            </span>
+                            {post.reward_amount && Number(post.reward_amount) > 0 && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                                ${Number(post.reward_amount)} reward
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-1 mb-1.5 text-[11px] text-muted-foreground">
+                          <span className="shrink-0">📍</span>
+                          <span className="truncate">{post.last_seen_location}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-snug line-clamp-2 mb-2">
+                          {post.identifying_features || post.last_seen_area_description || post.additional_notes || `${post.color_markings}`}
+                        </p>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {post.microchip_number && (
+                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                              Microchipped
+                            </span>
+                          )}
+                          {post.size && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                              {post.size}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Owner-only quick action */}
+                        {user?.id === post.user_id && post.status === "lost" && (
+                          <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 gap-1.5 text-[11px] border-emerald-500/40 text-emerald-700 hover:bg-emerald-500/10 hover:text-emerald-700"
+                                >
+                                  <PartyPopper className="w-3 h-3" />
+                                  Mark as Reunited
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="flex items-center gap-2">
+                                    <PartyPopper className="w-5 h-5 text-emerald-600" />
+                                    Great News!
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Has {post.pet_name} been found and reunited with you?
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() =>
+                                      updateStatusMutation.mutate({ postId: post.id, newStatus: "reunited" })
+                                    }
+                                  >
+                                    Yes, {post.pet_name} is home!
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </main>
+
+        {/* Sticky bottom action bar */}
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-t px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div className="container mx-auto max-w-4xl flex gap-2.5">
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: "Lost Pets on PawBucks",
+                    url: "https://pawbucks.app/lost-pets",
+                  }).catch(() => {});
+                } else {
+                  navigator.clipboard?.writeText("https://pawbucks.app/lost-pets");
+                  toast({ title: "Link copied" });
+                }
+              }}
+            >
+              <Upload className="w-4 h-4" />
+              Share Page
+            </Button>
+            {user ? (
+              <Button
+                className="flex-[2] gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold"
+                onClick={() => setIsCreateDialogOpen(true)}
+              >
+                🚨 Create Lost Pet Flyer
+              </Button>
+            ) : (
+              <Button
+                className="flex-[2] gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold"
+                onClick={() => (window.location.href = "/auth?role=pet_owner")}
+              >
+                🚨 Sign in to Create Flyer
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Create flyer dialog (preserved from original) */}
+        {user && (
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={(open) => {
+              setIsCreateDialogOpen(open);
+              if (!open) {
+                resetForm();
+              }
+            }}
+          >
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="flex items-center gap-2">
  {showPetSelector ? (
@@ -829,186 +1100,7 @@ const LostPets = () => {
  )}
  </DialogContent>
  </Dialog>
- )}
- {!user && (
- <Button onClick={() => window.location.href ="/auth"} variant="outline">
- Sign in to create a flyer
- </Button>
- )}
- </div>
-
- {/* Posts Grid */}
- {isLoading ? (
- <div className="flex justify-center py-12">
- <LoadingSpinner />
- </div>
- ) : filteredPosts?.length === 0 ? (
- <div className="text-center py-12">
- <span className="w-16 h-16 text-muted-foreground mx-auto mb-4" aria-hidden="true">🐕</span>
- <h2 className="text-xl font-semibold mb-2">No lost pet flyers found</h2>
- <p className="text-muted-foreground">
- {searchTerm || statusFilter !=="all" 
- ?"Try adjusting your search or filters"
- :"Be the first to create a flyer if you've lost a pet"
- }
- </p>
- </div>
- ) : (
- <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
- {filteredPosts?.map((post) => (
- <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
- {/* Photo */}
- <div className="relative h-48 bg-muted">
- {(post.photo_urls?.length > 0 || post.photo_url) ? (
- <>
- <img 
- src={post.photo_urls?.[0] || post.photo_url!} 
- alt={post.pet_name}
- className="w-full h-full object-cover"
- />
- {/* Photo count indicator */}
- {post.photo_urls && post.photo_urls.length > 1 && (
- <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-0.5 rounded-full text-xs flex items-center gap-1">
- <Images className="w-3 h-3" />
- {post.photo_urls.length}
- </div>
- )}
- </>
- ) : (
- <div className="w-full h-full flex items-center justify-center">
- {petTypeIcons[post.pet_type] || <span className="w-16 h-16 text-muted-foreground" aria-hidden="true">🐕</span>}
- </div>
- )}
- 
- {/* Status Badge */}
- <Badge className={`absolute top-3 left-3 gap-1 ${statusColors[post.status]}`}>
- {statusIcons[post.status]}
- {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
- </Badge>
- 
- {/* Reward Badge */}
- {post.reward_amount && (
- <Badge className="absolute top-3 right-3 bg-success text-white gap-1">
- <span className="w-3 h-3" aria-hidden="true">💵</span>
- ${post.reward_amount} Reward
- </Badge>
- )}
- </div>
- 
- <CardHeader className="pb-2">
- <CardTitle className="flex items-center gap-2 text-xl">
- {petTypeIcons[post.pet_type]}
- {post.pet_name}
- </CardTitle>
- <p className="text-sm text-muted-foreground">
- {post.breed && `${post.breed} • `}
- {post.color_markings}
- {post.size && ` • ${post.size}`}
- </p>
- </CardHeader>
- 
- <CardContent className="space-y-3">
- {/* Last Seen */}
- <div className="flex items-start gap-2 text-sm">
- <span className="text-base text-destructive shrink-0 mt-0.5">📍</span>
- <div>
- <p className="font-medium">Last seen: {post.last_seen_location}</p>
- <p className="text-muted-foreground">
- {format(new Date(post.last_seen_date),"MMMM d, yyyy")}
- {post.last_seen_time && ` at ${post.last_seen_time}`}
- </p>
- </div>
- </div>
- 
- {/* Identifying Features */}
- {post.identifying_features && (
- <p className="text-sm text-muted-foreground line-clamp-2">
- {post.identifying_features}
- </p>
- )}
- 
- {/* Contact Info */}
-  <div className="pt-3 border-t text-sm text-muted-foreground">
-  Contact details available on the post page (sign-in required).
-  </div>
- 
- {/* Actions */}
- <div className="flex flex-col gap-2 pt-2 border-t">
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-2 text-xs text-muted-foreground">
- <span className="w-3 h-3" aria-hidden="true">📅</span>
- Posted {format(new Date(post.created_at),"MMM d, yyyy")}
- </div>
- <div className="flex items-center gap-1">
- <Button
- variant="ghost"
- size="sm"
- className="gap-1.5 h-8"
- onClick={() => navigate(`/lost-pets/${post.id}`)}
- >
- <Eye className="w-3.5 h-3.5" />
- View
- </Button>
- <LostPetShareDialog post={post}>
- <Button variant="outline" size="sm" className="gap-1.5 h-8">
- <span className="w-3.5 h-3.5" aria-hidden="true">🔗</span>
- Share
- </Button>
- </LostPetShareDialog>
- </div>
- </div>
- 
- {/* Owner: Mark as Found button */}
- {user?.id === post.user_id && post.status ==="lost" && (
- <AlertDialog>
- <AlertDialogTrigger asChild>
- <Button
- variant="outline"
- size="sm"
- className="w-full gap-1.5 border-success text-success hover:bg-success/10 hover:text-success"
- >
- <PartyPopper className="w-3.5 h-3.5" />
- Mark as Found / Reunited
- </Button>
- </AlertDialogTrigger>
- <AlertDialogContent>
- <AlertDialogHeader>
- <AlertDialogTitle className="flex items-center gap-2">
- <PartyPopper className="w-5 h-5 text-success" />
- Great News!
- </AlertDialogTitle>
- <AlertDialogDescription>
- Has {post.pet_name} been found and reunited with you? This will update
- the flyer status to show that {post.pet_name} is no longer missing.
- </AlertDialogDescription>
- </AlertDialogHeader>
- <AlertDialogFooter>
- <AlertDialogCancel>Cancel</AlertDialogCancel>
- <AlertDialogAction
- onClick={() => updateStatusMutation.mutate({ postId: post.id, newStatus:"reunited" })}
- className="bg-success hover:bg-success"
- >
- Yes, {post.pet_name} is home!
- </AlertDialogAction>
- </AlertDialogFooter>
- </AlertDialogContent>
- </AlertDialog>
- )}
- 
- {/* Show reunited badge for owner */}
- {user?.id === post.user_id && post.status ==="reunited" && (
- <div className="flex items-center justify-center gap-1.5 p-2 bg-success/10 rounded text-xs text-success">
- <CheckCircle2 className="w-3.5 h-3.5" />
- {post.pet_name} has been reunited!
- </div>
- )}
- </div>
- </CardContent>
- </Card>
- ))}
- </div>
- )}
- </main>
+        )}
  
  <BottomNav />
  </div>
