@@ -239,6 +239,7 @@ serve(async (req) => {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${supabaseServiceKey}`,
+              'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
             },
             body: JSON.stringify(notificationPayload),
           }
