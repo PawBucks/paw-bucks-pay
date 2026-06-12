@@ -9,14 +9,12 @@ import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Textarea } from"@/components/ui/textarea";
 import { Label } from"@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import {
  Dialog,
  DialogContent,
  DialogHeader,
  DialogTitle,
- DialogTrigger,
 } from"@/components/ui/dialog";
 import {
  AlertDialog,
@@ -40,9 +38,8 @@ import { useToast } from"@/hooks/use-toast";
 import { LoadingSpinner } from"@/components/LoadingSpinner";
 import { SEO } from"@/components/SEO";
 import { seoMeta } from"@/lib/seoMeta";
-import { PlusCircle, Search, Phone, Dog, Cat, Bird, Rabbit, Upload, AlertTriangle, CheckCircle2, PartyPopper, Eye, X, Images, ArrowLeft } from "lucide-react";
+import { Search, Bird, Rabbit, Upload, AlertTriangle, CheckCircle2, PartyPopper, X, Images, ArrowLeft } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
-import { LostPetShareDialog } from"@/components/LostPetShareDialog";
 import { PetProfileSelector } from"@/components/PetProfileSelector";
 import { format, differenceInCalendarDays } from"date-fns";
 import { Tables } from"@/integrations/supabase/types";
