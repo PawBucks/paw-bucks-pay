@@ -414,9 +414,6 @@ ${pets.length > 0 ? pets.map((p: any) => {
   - Size: ${p.size || 'Unknown'}
   - Birthday: ${p.birthday || 'Unknown'}${p.age_estimate ? ' (est. ' + p.age_estimate + ')' : ''}
   - Color/Markings: ${p.color_markings || 'Not recorded'}
-  - Microchip: ${p.microchip_number || 'None'}
-  - Collar: ${p.collar_description || 'Not described'}
-  - Identifying features: ${p.identifying_features || 'None'}
   - Personality type: ${p.personality_type || 'Not assessed'}${p.personality_quiz_completed ? ' (quiz completed)' : ''}
   - Pet email: ${email}
   - Added: ${new Date(p.created_at).toLocaleDateString()}`;
@@ -459,7 +456,7 @@ PET INSURANCE POLICIES
 ═══════════════════════════════════════
 ${insurancePolicies.length > 0 ? insurancePolicies.map((ip: any) => {
   const petName = pets.find((p: any) => p.id === ip.pet_id)?.name || 'Unknown pet';
-  return `- [${petName}] Policy #${ip.policy_number} — ${ip.coverage_type || 'Standard'} ${ip.is_active ? '✅ Active' : '❌ Inactive'}
+  return `- [${petName}] ${ip.coverage_type || 'Standard'} ${ip.is_active ? '✅ Active' : '❌ Inactive'}
   - Effective: ${new Date(ip.effective_date).toLocaleDateString()}${ip.expiration_date ? ' → ' + new Date(ip.expiration_date).toLocaleDateString() : ''}
   - Annual limit: $${ip.annual_limit?.toFixed(2) || 'N/A'} | Used: $${ip.annual_used?.toFixed(2) || '0.00'}
   - Deductible: $${ip.deductible_amount?.toFixed(2) || 'N/A'} | Met: $${ip.deductible_met?.toFixed(2) || '0.00'}
