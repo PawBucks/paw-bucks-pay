@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { validateWebhookUrl } from "../_shared/url-guard.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -86,6 +87,15 @@ serve(async (req) => {
       case "create_webhook": {
         const { merchant_id, name, url, events } = body;
 
+        // SSRF guard: validate webhook URL before storing
+        const urlCheck = validateWebhookUrl(url);
+        if (!urlCheck.ok) {
+          return new Response(JSON.stringify({ error: urlCheck.error }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
         // Verify user owns this merchant
         const { data: merchant } = await supabaseAdmin
           .from("merchants")
@@ -115,7 +125,7 @@ serve(async (req) => {
           .insert({
             merchant_id,
             name: name || "Default Webhook",
-            url,
+            url: urlCheck.url,
             secret: encryptedSecret,
             events: events || ["transaction.created", "reward.awarded"],
           })

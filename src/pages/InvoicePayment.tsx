@@ -332,7 +332,7 @@ const InvoicePayment = () => {
  
  try {
  const { data, error } = await supabase.functions.invoke("generate-invoice-pdf", {
- body: { invoiceId: invoice?.id },
+ body: { invoiceId: invoice?.id, accessToken },
  });
 
  if (error) throw error;

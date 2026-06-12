@@ -35,10 +35,25 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { invoiceId } = await req.json();
+    const { invoiceId, accessToken } = await req.json();
 
     if (!invoiceId) {
       throw new Error("Invoice ID is required");
+    }
+
+    // Authorize the request: either a valid merchant JWT owning the invoice,
+    // or a valid invoice access_token (public client download flow).
+    let userId: string | null = null;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.replace("Bearer ", "");
+      const authClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+        { auth: { persistSession: false } }
+      );
+      const { data: claimsData } = await authClient.auth.getClaims(token);
+      if (claimsData?.claims?.sub) userId = claimsData.claims.sub as string;
     }
 
     // Fetch the invoice with items
@@ -64,6 +79,20 @@ serve(async (req) => {
 
     if (merchantError || !merchant) {
       throw new Error("Merchant not found");
+    }
+
+    // Authorization check
+    const ownsMerchant = userId && merchant.user_id === userId;
+    const validAccessToken =
+      typeof accessToken === "string" &&
+      accessToken.length > 0 &&
+      (invoice as any).access_token === accessToken;
+
+    if (!ownsMerchant && !validAccessToken) {
+      return new Response(JSON.stringify({ error: "forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Generate HTML for PDF

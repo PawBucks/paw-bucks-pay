@@ -265,7 +265,38 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const payload: EmailHookPayload = await req.json();
+    // Verify the request originates from Supabase Auth via the Standard Webhooks signature,
+    // or (fallback) from an internal trigger using a shared secret. Reject everything else
+    // so this branded mail endpoint cannot be abused for phishing/spam.
+    const rawBody = await req.text();
+    const hookSecret =
+      Deno.env.get("SEND_EMAIL_HOOK_SECRET") ||
+      Deno.env.get("AUTH_EMAIL_HOOK_SECRET");
+    const internalSecret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
+    const providedInternal = req.headers.get("x-internal-secret");
+
+    let authorized = false;
+    if (internalSecret && providedInternal && providedInternal === internalSecret) {
+      authorized = true;
+    } else if (hookSecret) {
+      try {
+        const { Webhook } = await import("https://esm.sh/standardwebhooks@1.0.0");
+        const wh = new Webhook(hookSecret.replace(/^v1,whsec_/, ""));
+        const headers = Object.fromEntries(req.headers);
+        wh.verify(rawBody, headers);
+        authorized = true;
+      } catch (e) {
+        console.error("email-hook signature verification failed:", e);
+      }
+    }
+    if (!authorized) {
+      return new Response(JSON.stringify({ error: "unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const payload: EmailHookPayload = JSON.parse(rawBody);
     
     console.log("Email hook received:", JSON.stringify({
       email: payload.user?.email,
@@ -286,10 +317,26 @@ serve(async (req: Request): Promise<Response> => {
 
     const { token_hash, redirect_to, email_action_type, site_url } = email_data;
     const userName = user.user_metadata?.full_name || "";
-    
+
+    // Only allow redirects back to our own domains to prevent abuse via crafted redirect URLs
+    const ALLOWED_REDIRECT_HOSTS = new Set([
+      "pawbucks.app",
+      "www.pawbucks.app",
+      "paw-bucks-pay.lovable.app",
+    ]);
+    let safeRedirect = "https://pawbucks.app/";
+    try {
+      const parsed = new URL(redirect_to);
+      if (parsed.protocol === "https:" && ALLOWED_REDIRECT_HOSTS.has(parsed.hostname.toLowerCase())) {
+        safeRedirect = parsed.toString();
+      }
+    } catch {
+      // keep default
+    }
+
     // Build the confirmation URL
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || site_url;
-    const confirmationUrl = `${supabaseUrl}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to)}`;
+    const confirmationUrl = `${supabaseUrl}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(safeRedirect)}`;
     
     console.log("Generated confirmation URL:", confirmationUrl);
 
