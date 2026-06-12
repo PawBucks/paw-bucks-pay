@@ -28,10 +28,8 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  const navigate = useNavigate();
  
  const defaultMenuItems: MenuItem[] = [
- { label:"For Pet Owners", path:"/" },
  { label:"Pet Store", path:"/pet-store" },
  { label:"Lost Pets", path:"/lost-pets" },
- { label:"For Pet Merchants", path:"/merchants" }
  ];
 
  const merchantMenuItems: MenuItem[] = [
