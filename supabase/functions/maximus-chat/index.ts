@@ -191,7 +191,8 @@ serve(async (req) => {
       platformClient.from('wallets').select('balance, total_spent, rewards_points, last_updated').eq('user_id', effectiveUserId).maybeSingle(),
       platformClient.from('pawbucks_wallet').select('balance, last_updated').eq('user_id', effectiveUserId).maybeSingle(),
       platformClient.from('transactions').select('id, amount, status, description, created_at, cashback_earned, rewards_earned, merchants!transactions_merchant_id_fkey(business_name)').eq('user_id', effectiveUserId).order('created_at', { ascending: false }).limit(25),
-      platformClient.from('pet_profiles').select('id, name, type, breed, birthday, gender, size, color_markings, microchip_number, collar_description, identifying_features, age_estimate, personality_type, personality_quiz_completed, created_at').eq('user_id', effectiveUserId),
+      // PII minimization: do NOT pull microchip_number, collar_description, or identifying_features into the LLM context.
+      platformClient.from('pet_profiles').select('id, name, type, breed, birthday, gender, size, color_markings, age_estimate, personality_type, personality_quiz_completed, created_at').eq('user_id', effectiveUserId),
       platformClient.from('wallet_activity').select('type, amount, description, created_at').eq('user_id', effectiveUserId).order('created_at', { ascending: false }).limit(25),
       platformClient.from('subscriptions').select('plan_id, status, current_period_end').eq('user_id', effectiveUserId).eq('status', 'active').maybeSingle(),
       platformClient.from('pet_fund_ledgers').select('total_amount, available_balance, escrow_balance, total_released, total_used, status, created_at').eq('user_id', effectiveUserId).maybeSingle(),
@@ -235,7 +236,8 @@ serve(async (req) => {
         platformClient.from('pet_medical_visits').select('id, pet_id, visit_date, vet_name, doctor_name, notes').in('pet_id', petIds).order('visit_date', { ascending: false }).limit(20),
         platformClient.from('pet_vaccinations').select('id, pet_id, vaccine_name, vaccine_type, administration_date, next_due_date, dose, manufacturer, reaction_notes').in('pet_id', petIds).order('administration_date', { ascending: false }).limit(30),
         platformClient.from('pet_lab_results').select('id, pet_id, test_type, test_category, test_date, status, result_summary, interpretation, abnormal_flags').in('pet_id', petIds).order('test_date', { ascending: false }).limit(20),
-        platformClient.from('pet_insurance_policies').select('id, pet_id, policy_number, coverage_type, effective_date, expiration_date, is_active, annual_limit, annual_used, deductible_amount, deductible_met, copay_percentage').in('pet_id', petIds).limit(10),
+        // PII minimization: omit policy_number.
+        platformClient.from('pet_insurance_policies').select('id, pet_id, coverage_type, effective_date, expiration_date, is_active, annual_limit, annual_used, deductible_amount, deductible_met, copay_percentage').in('pet_id', petIds).limit(10),
         platformClient.from('pet_email_addresses').select('pet_id, email_address, is_active').in('pet_id', petIds),
       ]);
 
