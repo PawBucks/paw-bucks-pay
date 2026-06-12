@@ -323,6 +323,37 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication: accept either an internal-secret call (server-to-server)
+    // or an authenticated merchant who owns the invoice (frontend resends).
+    const internalSecret = Deno.env.get('INTERNAL_TRIGGER_SECRET');
+    const providedSecret = req.headers.get('x-internal-secret');
+    const isInternal = !!internalSecret && providedSecret === internalSecret;
+
+    const authHeader = req.headers.get('Authorization');
+    let authenticatedUserId: string | null = null;
+    if (!isInternal) {
+      if (!authHeader?.startsWith('Bearer ')) {
+        return new Response(JSON.stringify({ error: 'unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const token = authHeader.replace('Bearer ', '');
+      const authClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        { auth: { persistSession: false } }
+      );
+      const { data: claimsData, error: claimsErr } = await authClient.auth.getClaims(token);
+      if (claimsErr || !claimsData?.claims?.sub) {
+        return new Response(JSON.stringify({ error: 'unauthorized' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      authenticatedUserId = claimsData.claims.sub as string;
+    }
+
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) {
       console.log("[INVOICE_RECEIPT] RESEND_API_KEY not configured, skipping receipt email");
@@ -355,6 +386,22 @@ serve(async (req) => {
 
     if (invoiceError || !invoice) {
       throw new Error("Invoice not found");
+    }
+
+    // If authenticated (non-internal), verify the caller owns the invoice's merchant
+    if (!isInternal && authenticatedUserId) {
+      const { data: ownedMerchant } = await supabase
+        .from("merchants")
+        .select("id")
+        .eq("id", invoice.merchant_id)
+        .eq("user_id", authenticatedUserId)
+        .maybeSingle();
+      if (!ownedMerchant) {
+        return new Response(JSON.stringify({ error: 'forbidden' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Fetch invoice items
