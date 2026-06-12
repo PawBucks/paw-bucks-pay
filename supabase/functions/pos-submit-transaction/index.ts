@@ -105,8 +105,15 @@ async function triggerWebhooks(
       try {
         const decryptedSecret = await decryptSecret(webhook.secret);
         const signature = await generateHmacSignature(payload, decryptedSecret);
-        
-        const response = await fetch(webhook.url, {
+
+        // SSRF guard: re-validate URL at delivery time
+        const { validateWebhookUrl } = await import("../_shared/url-guard.ts");
+        const urlCheck = validateWebhookUrl(webhook.url);
+        if (!urlCheck.ok) {
+          throw new Error(`Blocked unsafe webhook URL: ${urlCheck.error}`);
+        }
+
+        const response = await fetch(urlCheck.url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
