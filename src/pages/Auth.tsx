@@ -643,12 +643,12 @@ const Auth = () => {
  </a>
  </span>
  </span>
- <span className="hidden sm:inline text-muted-foreground/50">•</span>
+       <span aria-hidden="true" className="hidden sm:inline text-muted-foreground">•</span>
  <span className="whitespace-nowrap">PawBucks, Inc. · Los Angeles, CA</span>
  </div>
  <div className="flex items-center justify-center gap-x-3 text-xs text-muted-foreground">
  <a href="/about" className="underline hover:text-primary">About</a>
- <span className="text-muted-foreground/50">•</span>
+       <span aria-hidden="true" className="text-muted-foreground">•</span>
  <a href="mailto:Legal@PawBucks.app" className="underline hover:text-primary">Contact</a>
  </div>
  </div>

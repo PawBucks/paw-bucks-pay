@@ -603,7 +603,7 @@ const VetLanding = () => {
  >
  For Pet Owners
  </a>
- <span className="text-muted-foreground/50">•</span>
+       <span aria-hidden="true" className="text-muted-foreground">•</span>
  <a 
  href="/merchants" 
  className="text-muted-foreground hover:text-primary transition-colors"

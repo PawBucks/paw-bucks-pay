@@ -41,6 +41,9 @@ Disallow: /vet-loan-apply
 # Disallow checkout/payment pages
 Disallow: /checkout-success
 Disallow: /subscription-success
+Disallow: /pay/
+Disallow: /accountant-portal/
+Disallow: /store/
 
 # Disallow API endpoints
 Disallow: /api/
