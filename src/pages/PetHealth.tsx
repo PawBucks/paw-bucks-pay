@@ -2,6 +2,7 @@ import { useState, useEffect } from"react";
 import { useNavigate, useParams, useSearchParams } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
+import { useAuth } from"@/hooks/useAuth";
 import { Header } from"@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 import { MedicalRecordUpload } from"@/components/MedicalRecordUpload";
@@ -27,6 +28,7 @@ type PetProfile = {
 export default function PetHealth() {
  const navigate = useNavigate();
  const { petId } = useParams<{ petId: string }>();
+ const { signOut } = useAuth();
  const [searchParams] = useSearchParams();
  const defaultTab = searchParams.get("tab") ||"records";
  const [pet, setPet] = useState<PetProfile | null>(null);
@@ -103,7 +105,7 @@ export default function PetHealth() {
  if (isLoading || sharedAccount.isLoading) {
  return (
  <div className="min-h-screen bg-background">
- <Header />
+ <Header isAuthenticated onLogout={signOut} userId={userId} />
         <div className="container max-w-7xl mx-auto px-4 py-8">
           <div className="text-center text-muted-foreground">Loading...</div>
  </div>
@@ -117,7 +119,7 @@ export default function PetHealth() {
 
  return (
  <div className="min-h-screen bg-background">
- <Header />
+ <Header isAuthenticated onLogout={signOut} userId={userId} />
       <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
  <Button
  variant="ghost"
