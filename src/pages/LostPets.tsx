@@ -392,7 +392,7 @@ const LostPets = () => {
  keywords={[...seoMeta.lostPets.keywords]}
  canonical={seoMeta.lostPets.canonical}
  />
-      <div className="min-h-screen bg-muted/30 pb-32">
+      <div className="min-h-screen bg-muted/30 pb-44 md:pb-32">
         <Header
           isAuthenticated={!!user}
           onLogout={async () => {
@@ -674,7 +674,7 @@ const LostPets = () => {
         </main>
 
         {/* Sticky bottom action bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-t px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="fixed left-0 right-0 z-40 bg-background/95 backdrop-blur border-t px-4 py-3 bottom-16 md:bottom-0 pb-3 md:pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="container mx-auto max-w-4xl flex gap-2.5">
             <Button
               variant="outline"
