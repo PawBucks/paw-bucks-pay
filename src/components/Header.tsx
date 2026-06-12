@@ -28,8 +28,19 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  const navigate = useNavigate();
  
  const defaultMenuItems: MenuItem[] = [
+ { label:"For Pet Owners", path:"/" },
  { label:"Pet Store", path:"/pet-store" },
  { label:"Lost Pets", path:"/lost-pets" },
+ { label:"For Pet Merchants", path:"/merchants" }
+ ];
+
+ const petOwnerMenuItems: MenuItem[] = [
+ { label:"Home", path:"/home" },
+ { label:"Discover", path:"/discover" },
+ { label:"Pet Store", path:"/pet-store" },
+ { label:"Lost Pets", path:"/lost-pets" },
+ { label:"PawBucks Wallet", path:"/pawbucks/wallet" },
+ { label:"Profile", path:"/profile" }
  ];
 
  const merchantMenuItems: MenuItem[] = [
@@ -175,7 +186,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  </Button>
  </DropdownMenuTrigger>
  <DropdownMenuContent align="end" className="w-56 bg-card z-50">
- {(menuItems || defaultMenuItems).map((item, index) => (
+ {(menuItems || (isAuthenticated && variant ==="petowner" ? petOwnerMenuItems : isAuthenticated && variant ==="merchant" ? merchantMenuItems : defaultMenuItems)).map((item, index) => (
  <DropdownMenuItem 
  key={index}
  onClick={() => navigate(item.path)}
