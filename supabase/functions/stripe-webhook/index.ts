@@ -176,6 +176,7 @@ async function sendInvoiceReceiptEmail(invoiceId: string): Promise<void> {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${supabaseAnonKey}`,
+        'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
       },
       body: JSON.stringify({ invoiceId, isResend: false }),
     });
