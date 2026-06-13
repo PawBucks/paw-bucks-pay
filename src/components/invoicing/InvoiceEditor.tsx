@@ -434,12 +434,7 @@ export function InvoiceEditor({
  variant="outline"
 					onClick={form.handleSubmit(
 						(data) => handleSubmit(data, false),
-						(errors) => {
-							console.error("[InvoiceEditor] Save validation errors:", errors);
-							const first = Object.values(errors)[0] as any;
-							const msg = first?.message || first?.root?.message || "Please fix the highlighted fields before saving.";
-							toast.error(typeof msg === "string" ? msg : "Please fix the highlighted fields before saving.");
-						},
+						(errors) => showValidationErrors(errors),
 					)}
  disabled={saving}
  >
@@ -449,12 +444,7 @@ export function InvoiceEditor({
  <Button
 					onClick={form.handleSubmit(
 						(data) => handleSubmit(data, true),
-						(errors) => {
-							console.error("[InvoiceEditor] Save & Send validation errors:", errors);
-							const first = Object.values(errors)[0] as any;
-							const msg = first?.message || first?.root?.message || "Please fix the highlighted fields before saving.";
-							toast.error(typeof msg === "string" ? msg : "Please fix the highlighted fields before saving.");
-						},
+						(errors) => showValidationErrors(errors),
 					)}
  disabled={saving}
  >
