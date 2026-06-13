@@ -411,6 +411,8 @@ const AdminDashboard = () => {
  return <SecurityMonitoringTab />;
  case"audit":
  return <AuditLogsTab />;
+	  case"reconciliation":
+	  return <ReconciliationTab />;
  case"pawbucks-credit-logs":
  return <PawBucksCreditLogsTab />;
  case"pawbucks-debit-logs":
