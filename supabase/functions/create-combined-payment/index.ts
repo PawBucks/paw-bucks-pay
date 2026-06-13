@@ -275,84 +275,12 @@ serve(async (req) => {
     // Determine how much comes from wallet vs welcome credit
     let walletPawbucks = 0;
     let welcomeCreditPawbucks = 0;
+    let debitPlan: ReturnType<typeof planPawBucksDebit> | null = null;
 
     if (pawbucksAmount > 0) {
-      // Get wallet balance
-      const { data: wallet, error: walletError } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', effectiveUserId)
-        .single();
-
-      if (walletError && walletError.code !== 'PGRST116') {
-        throw new Error('Could not retrieve PawBucks balance');
-      }
-
-      const walletBalance = wallet?.balance || 0;
-
-      // Include Pet Fund available balance (new system) so redemptions
-      // are not falsely rejected as "insufficient PawBucks".
-      const { data: petFundLedgerForBalance } = await supabaseAdmin
-        .from('pet_fund_ledgers')
-        .select('available_balance')
-        .eq('user_id', effectiveUserId)
-        .eq('status', 'active')
-        .maybeSingle();
-      const petFundAvailable = petFundLedgerForBalance?.available_balance || 0;
-
-      // Check for active welcome credit
-      const { data: welcomeCredit } = await supabaseAdmin
-        .from('user_welcome_credits')
-        .select('id, credit_amount, status, expires_at')
-        .eq('user_id', effectiveUserId)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      const hasActiveWelcomeCredit = welcomeCredit && 
-        welcomeCredit.status === 'active' && 
-        new Date(welcomeCredit.expires_at) > new Date();
-
-      // Legacy welcome credit requires $75 minimum transaction
-      const welcomeCreditAvailable = hasActiveWelcomeCredit && totalAmount >= 75 
-        ? welcomeCredit.credit_amount 
-        : 0;
-
-      const totalAvailable = walletBalance + petFundAvailable + welcomeCreditAvailable;
-
-      if (totalAvailable < pawbucksAmount) {
-        throw new Error(`Insufficient PawBucks balance. You have ${totalAvailable} PawBucks available.`);
-      }
-
-      // Spend from wallet first, then Pet Fund / welcome credit
-      walletPawbucks = Math.min(walletBalance, pawbucksAmount);
-      welcomeCreditPawbucks = pawbucksAmount - walletPawbucks;
-
-      // Enforce Pet Fund per-release minimum spend whenever the requested
-      // PawBucks redemption would tap into the Pet Fund (i.e. the wallet
-      // alone does not cover the requested amount).
-      if (welcomeCreditPawbucks > 0) {
-        const { data: oldestPetFundRelease } = await supabaseAdmin
-          .from('pet_fund_releases')
-          .select('min_transaction_usd, amount, month_number')
-          .eq('user_id', effectiveUserId)
-          .eq('status', 'released')
-          .is('used_at', null)
-          .order('month_number', { ascending: true })
-          .limit(1)
-          .maybeSingle();
-
-        if (oldestPetFundRelease) {
-          const minUsd = Number(oldestPetFundRelease.min_transaction_usd);
-          if (totalAmount < minUsd) {
-            return new Response(
-              JSON.stringify({
-                error: `Minimum spend of $${minUsd.toFixed(2)} required to use this Pet Fund credit.`,
-              }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-            );
-          }
-        }
-      }
+      debitPlan = planPawBucksDebit(spendableSources, pawbucksAmount, baseAmount);
+      walletPawbucks = debitPlan.walletDeduction;
+      welcomeCreditPawbucks = debitPlan.petFundDeduction + debitPlan.legacyCreditDeduction;
     }
 
     logStep('Payment breakdown', {
