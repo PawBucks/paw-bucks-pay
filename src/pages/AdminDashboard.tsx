@@ -28,6 +28,7 @@ import { OverviewTab } from"@/components/admin/OverviewTab";
 import { AnalyticsTab } from"@/components/admin/AnalyticsTab";
 import { AuditLogsTab } from"@/components/admin/AuditLogsTab";
 import { AdminInvoicingTab } from"@/components/admin/AdminInvoicingTab";
+import { ReconciliationTab } from"@/components/admin/ReconciliationTab";
 import pawbucksLogo from"@/assets/pawbucks-logo.png";
 import { ApprovalsTab } from"@/components/admin/ApprovalsTab";
 import { AdminCheckInsTab } from"@/components/admin/AdminCheckInsTab";
@@ -50,7 +51,7 @@ import {
  SheetContent,
  SheetTrigger,
 } from"@/components/ui/sheet";
-import { Banknote, BarChart3, Bell, CalendarDays, ChevronRight, Clock, DollarSign, ExternalLink, FileEdit, FileText, Gift, GraduationCap, HelpCircle, History, LayoutDashboard, Loader2, LogOut, Mail, MapPin, Megaphone, Menu, MessageSquare, Package, Receipt, Settings, ShieldAlert, Store, ThumbsDown, UserSearch, Users } from "lucide-react";
+import { AlertTriangle, Banknote, BarChart3, Bell, CalendarDays, ChevronRight, Clock, DollarSign, ExternalLink, FileEdit, FileText, Gift, GraduationCap, HelpCircle, History, LayoutDashboard, Loader2, LogOut, Mail, MapPin, Megaphone, Menu, MessageSquare, Package, Receipt, Settings, ShieldAlert, Store, ThumbsDown, UserSearch, Users } from "lucide-react";
 import { toast } from"sonner";
 import { cn } from"@/lib/utils";
 
@@ -251,6 +252,12 @@ const NAV_SECTIONS = [
  icon: History,
  description:"Track all admin actions and changes made to the platform",
  },
+	  {
+	  id:"reconciliation",
+	  label:"Reconciliation",
+	  icon: AlertTriangle,
+	  description:"Cross-account audit: orphan transactions, missing invoice numbers, and paid invoices without transactions",
+	  },
  {
  id:"pawbucks-credit-logs",
  label:"PawBucks Credit Logs",
@@ -404,6 +411,8 @@ const AdminDashboard = () => {
  return <SecurityMonitoringTab />;
  case"audit":
  return <AuditLogsTab />;
+	  case"reconciliation":
+	  return <ReconciliationTab />;
  case"pawbucks-credit-logs":
  return <PawBucksCreditLogsTab />;
  case"pawbucks-debit-logs":

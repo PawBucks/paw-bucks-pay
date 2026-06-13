@@ -364,7 +364,10 @@ const MerchantInvoicing = () => {
 
  const invoiceRes = await invoicingService.createInvoice({
  merchant_id: merchantId,
- invoice_number: nextInvoiceNumber,
+	  // Leave blank so the DB trigger atomically assigns the next number
+	  // inside the insert transaction. Prevents skipped numbers from
+	  // failed/cancelled drafts.
+	  invoice_number: "",
  status:"draft",
  ...formattedData,
  next_invoice_date: nextInvoiceDateStr,
@@ -392,19 +395,9 @@ const MerchantInvoicing = () => {
  tax_rate: item.tax_rate,
  });
  }
- 
- // Increment the next invoice number in settings
- if (settings) {
- const newNextNumber = (settings.next_invoice_number || 1) + 1;
- await invoicingService.upsertSettings(merchantId, {
- next_invoice_number: newNextNumber,
- });
- // Update local state for immediate feedback
- setSettings({ ...settings, next_invoice_number: newNextNumber });
- setNextInvoiceNumber(
- `${settings.invoice_prefix ||"INV-"}${String(newNextNumber).padStart(5,"0")}`
- );
- }
+	  // Counter is incremented by the DB trigger as part of the insert,
+	  // so no client-side bump here. loadData() below refreshes settings
+	  // to show the next number in the UI.
  }
  
  // Save recipients
@@ -509,7 +502,7 @@ const MerchantInvoicing = () => {
  
  const newInvoice = await invoicingService.createInvoice({
  merchant_id: merchantId,
- invoice_number: nextInvoiceNumber,
+	  invoice_number: "", // DB trigger assigns atomically
  status:"draft",
  client_id: invoice.client_id,
  client_name: invoice.client_name,
