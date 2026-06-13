@@ -161,7 +161,7 @@ const VetLanding = () => {
 
   return (
     <>
-      <SEO {...seoMeta.vetLanding} />
+      <SEO {...seoMeta.vets} />
       <style>{css}</style>
       <div className="vl">
         {/* NAV */}
