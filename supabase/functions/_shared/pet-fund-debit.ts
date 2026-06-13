@@ -10,6 +10,7 @@ export interface SpendableSources {
   petFundMinUsd: number; // min transaction USD for the oldest available release (0 if none)
   legacyCreditBalance: number;
   legacyCreditId: string | null;
+  legacyCreditMinUsd: number;
 }
 
 export async function getSpendableSources(
@@ -65,6 +66,7 @@ export async function getSpendableSources(
     petFundMinUsd,
     legacyCreditBalance,
     legacyCreditId,
+    legacyCreditMinUsd: legacyCreditBalance > 0 ? 75 : 0,
   };
 }
 
@@ -100,19 +102,24 @@ export function planPawBucksDebit(
 
   let legacyCreditDeduction = 0;
   if (remaining > 0 && sources.legacyCreditBalance > 0) {
-    legacyCreditDeduction = Math.min(sources.legacyCreditBalance, remaining);
-    remaining -= legacyCreditDeduction;
+    const meetsLegacyMin = !sources.legacyCreditMinUsd || txnTotalUsd >= sources.legacyCreditMinUsd;
+    if (meetsLegacyMin) {
+      legacyCreditDeduction = Math.min(sources.legacyCreditBalance, remaining);
+      remaining -= legacyCreditDeduction;
+    }
   }
 
   if (remaining > 0) {
     const available =
       sources.walletBalance +
       (petFundDeduction > 0 || sources.petFundAvailable === 0 ? sources.petFundAvailable : 0) +
-      sources.legacyCreditBalance;
+      (legacyCreditDeduction > 0 || sources.legacyCreditBalance === 0 ? sources.legacyCreditBalance : 0);
     throw new Error(
       `Insufficient PawBucks. Need ${pawbucksNeeded.toLocaleString()}, have ${available.toLocaleString()} eligible. ` +
         (sources.petFundMinUsd && txnTotalUsd < sources.petFundMinUsd
           ? `Pet Fund Welcome Credit requires a $${sources.petFundMinUsd.toFixed(2)} minimum purchase.`
+          : sources.legacyCreditMinUsd && txnTotalUsd < sources.legacyCreditMinUsd
+          ? `Welcome Credit requires a $${sources.legacyCreditMinUsd.toFixed(2)} minimum purchase.`
           : ""),
     );
   }
