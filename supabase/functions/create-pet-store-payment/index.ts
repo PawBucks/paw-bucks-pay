@@ -552,6 +552,9 @@ serve(async (req) => {
         pawbucks_multiplier: pawbucksMultiplier.toString(),
         discount_percentage: discountPercentage.toString(),
         original_price: (originalPriceCents / 100).toString(),
+        order_total_cents: totalAmountCents.toString(),
+        order_total_dollars: totalAmount.toString(),
+        card_amount_cents: amountInCents.toString(),
         promotion_id: appliedPromotionId || '',
         user_badge_promotion_id: userBadgePromotionId || '',
         // pawbucks_amount carries the actual amount to debit on success.
