@@ -18,7 +18,7 @@ import { SEO, createProductSchema } from"@/components/SEO";
 import { StarRating } from"@/components/pet-store/StarRating";
 import { PromotionalBadge } from"@/components/pet-store/PromotionalBadge";
 import { CartIcon } from"@/components/pet-store/CartIcon";
-import { CartDrawer, type CartCheckoutParams } from"@/components/pet-store/CartDrawer";
+import { CartDrawer } from"@/components/pet-store/CartDrawer";
 import { usePromotionalItems } from"@/hooks/usePromotionalItems";
 import { useShoppingCart } from"@/hooks/useShoppingCart";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
@@ -470,7 +470,7 @@ export default function PetStoreProduct() {
  onUpdateQuantity={(cartItemId, qty) => updateQuantity.mutate({ cartItemId, quantity: qty })}
  onRemoveItem={(cartItemId) => removeFromCart.mutate(cartItemId)}
  onClearCart={() => clearCart.mutate()}
- onCheckout={() => {}}
+ onCheckout={() => navigate("/pet-store?cart=open")}
  isUpdating={updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending}
  isCheckingOut={false}
  pawbucksBalance={eligiblePbBalance}
