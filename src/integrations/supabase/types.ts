@@ -15268,6 +15268,18 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_reconciliation_report: {
+        Args: never
+        Returns: {
+          amount: number
+          business_name: string
+          detail: string
+          kind: string
+          merchant_id: string
+          occurred_at: string
+          reference_id: string
+        }[]
+      }
       admin_set_user_ban: {
         Args: { _banned: boolean; _reason?: string; _target_user_id: string }
         Returns: Json
