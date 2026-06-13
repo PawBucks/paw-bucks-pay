@@ -234,7 +234,7 @@ serve(async (req) => {
     const itemIds = cartItems.map(ci => ci.itemId);
     const { data: dbItems, error: itemError } = await supabaseAdmin
       .from('pet_store_items')
-      .select('id, name, description, price, category, stock_quantity')
+      .select('id, name, description, price, category, stock_quantity, merchant_id')
       .in('id', itemIds);
 
     if (itemError || !dbItems || dbItems.length !== itemIds.length) {
@@ -407,7 +407,7 @@ serve(async (req) => {
       // Deduct PawBucks from the canonical source order: wallet → Pet Fund → legacy welcome credit.
       const debitPlan = planPawBucksDebit(spendableSources, pawbucksUsed, totalAmount);
       await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan, {
-        merchantId: null,
+        merchantId: dbItems[0]?.merchant_id || null,
         transactionTotalCents: totalAmountCents,
       });
       
