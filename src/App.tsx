@@ -196,6 +196,7 @@ const AppRoutes = () => {
  <Route path="/about" element={<PageTransition><About /></PageTransition>} />
  <Route path="/privacy" element={<PageTransition><Privacy /></PageTransition>} />
  <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />
+ <Route path="/guides/wellness-plans-comparison" element={<PageTransition><WellnessPlansGuide /></PageTransition>} />
 
   {/* Authenticated pet owner routes */}
   <Route path="/home" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleHome /></PageTransition></ProtectedRoute>} />
