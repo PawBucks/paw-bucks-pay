@@ -151,6 +151,37 @@ const ROUTES_TO_PRERENDER: RouteContent[] = [
       <p><a href="/auth">Sign Up to Start Referring</a></p>
     `,
   },
+  {
+    path: '/guides/wellness-plans-comparison',
+    title: 'Vet Wellness Plans vs. Traditional Care - PawBucks Guide',
+    description: 'Compare vet wellness plans to traditional pay-per-visit care. See costs, what is covered, and how PawBucks rewards make quality pet care more affordable.',
+    ogTitle: 'Vet Wellness Plans vs. Traditional Care - PawBucks',
+    ogDescription: 'A cost-saving guide to wellness plans, low-cost vet clinics, and PawBucks rewards.',
+    canonical: 'https://pawbucks.app/guides/wellness-plans-comparison',
+    staticContent: `
+      <h1>Veterinary Wellness Plans vs. Traditional Care: A Cost-Saving Guide</h1>
+      <p>Routine vet visits, vaccines, and dental cleanings add up fast. Here is how wellness plans, low-cost vet clinics, and PawBucks rewards compare — and how to pick the right mix for your pet and your budget.</p>
+      <h2>What is a veterinary wellness plan?</h2>
+      <p>A veterinary wellness plan is a monthly subscription from your vet clinic that bundles preventive care into a predictable bill — annual exams, core vaccines, heartworm and fecal testing, and a dental cleaning. Plans typically run $25–$75 per month.</p>
+      <h2>Wellness plan vs. traditional pay-per-visit care</h2>
+      <ul>
+        <li>Wellness plan: predictable monthly payment, bundled preventive care, ~10–25% savings vs paying per visit.</li>
+        <li>Traditional care: pay for each service, easy to skip preventive visits, $300–$600 annual exam + vaccines bill at once.</li>
+      </ul>
+      <h2>Low-cost vet clinics and wellness clinics</h2>
+      <p>Community wellness clinics and low-cost vet clinics focus on essential preventive care at reduced prices — ideal for healthy adult pets. Many PawBucks partner vets blend low-cost wellness packages with the option to add specialty services as your pet ages.</p>
+      <h2>How PawBucks rewards make wellness plans more affordable</h2>
+      <p>Pay your monthly wellness plan through a PawBucks partner vet and earn 10–30 PawBucks per $1 depending on your tier. Those rewards redeem 1:1 on future care, grooming, and pet store purchases — effectively giving you cashback on care you were going to pay for anyway. Typical PawBucks pet owners save $200–$500 per year compared to traditional pay-per-visit care.</p>
+      <h2>When to pick which</h2>
+      <ul>
+        <li>Puppy or kitten: wellness plan — high volume of vaccines and checkups in year one.</li>
+        <li>Senior pet: wellness plan + pet insurance — more frequent screenings plus emergency coverage.</li>
+        <li>Healthy adult, tight budget: low-cost wellness clinic + PawBucks rewards.</li>
+        <li>Multi-pet household: wellness plans per pet at a PawBucks partner — rewards stack across pets.</li>
+      </ul>
+      <p><a href="/discover">Find a Partner Vet</a> · <a href="/auth">Sign Up to Earn PawBucks</a></p>
+    `,
+  },
 ];
 
 function injectMetaAndContent(html: string, route: RouteContent): string {
