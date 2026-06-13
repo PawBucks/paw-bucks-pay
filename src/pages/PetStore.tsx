@@ -201,6 +201,21 @@ export default function PetStore() { const { user, signOut } = useAuth();
  enabled: !!effectiveUserId && !sharedAccount.isLoading,
  });
 
+ // Spendable PawBucks including Pet Fund / Welcome Credit (when totalUsd meets min)
+ const {
+   spendableBalance,
+   petFundBalance,
+   welcomeCreditBalance,
+   hasPetFund,
+   hasWelcomeCredit,
+   petFundMinTransactionUsd,
+ } = useSpendablePawBucks(effectiveUserId);
+
+ const promoCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
+ const promoMinUsd = hasPetFund ? (petFundMinTransactionUsd || 60) : 75;
+ const promoApplicable = (hasPetFund || hasWelcomeCredit) && totalUsd >= promoMinUsd;
+ const eligiblePbBalance = spendableBalance + (promoApplicable ? promoCreditBalance : 0);
+
  const { data: subscription } = useQuery({
  queryKey: ["subscription", user?.id],
  queryFn: async () => {
