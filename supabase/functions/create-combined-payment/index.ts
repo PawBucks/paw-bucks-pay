@@ -7,6 +7,11 @@ import {
   clampManualPawBucks,
   clampAutoRedeemPawBucks,
 } from "../_shared/pawbucks-cap.ts";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -159,6 +164,14 @@ serve(async (req) => {
     // --- Auto-Redeem Logic ---
     let pawbucksAmount = manualPawbucksAmount;
     const baseAmount = totalAmount - tipAmount; // Base amount excluding tip
+    const spendableSources = await getSpendableSources(supabaseAdmin, effectiveUserId);
+    const petFundEligibleForBase =
+      spendableSources.petFundAvailable > 0 &&
+      (!spendableSources.petFundMinUsd || baseAmount >= spendableSources.petFundMinUsd);
+    const eligiblePawBucksTotal =
+      spendableSources.walletBalance +
+      (petFundEligibleForBase ? spendableSources.petFundAvailable : 0) +
+      spendableSources.legacyCreditBalance;
 
     // Apply cap to manual redemption requests up-front
     if (effectiveCapPct !== null && pawbucksAmount > 0 && baseAmount > 0) {
@@ -189,14 +202,7 @@ serve(async (req) => {
       const minCoveragePct = arProfile?.auto_redeem_min_coverage_pct ?? 20;
       const maxApplyPct = arProfile?.auto_redeem_max_apply_pct ?? 50;
 
-      // Fetch wallet balance for auto-redeem calculation
-      const { data: arWallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', effectiveUserId)
-        .single();
-
-      const arAvailable = arWallet?.balance || 0;
+      const arAvailable = eligiblePawBucksTotal;
 
       logStep('Auto-redeem check (combined)', { autoRedeemMode, minCoveragePct, maxApplyPct, arAvailable, baseAmount });
 
