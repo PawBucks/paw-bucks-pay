@@ -6,7 +6,7 @@ const navItems = [
   { title: "Home", to: "/home", emoji: "🏠", ariaLabel: "Home" },
   { title: "Pay", to: "/pay", emoji: "💳", ariaLabel: "Pay & save" },
   { title: "Discover", to: "/discover", emoji: "🧭", ariaLabel: "Discover places" },
-  { title: "Visits", to: "/visits", emoji: "🧾", ariaLabel: "Your visits" },
+  { title: "Activity", to: "/activity", emoji: "🧾", ariaLabel: "Your activity" },
   { title: "Profile", to: "/profile", emoji: "👤", ariaLabel: "Profile" },
 ];
 

@@ -20,7 +20,7 @@ import { ChevronDown, Receipt, TrendingDown, TrendingUp } from "lucide-react";
 
 const PB_TO_USD = 0.001;
 
-type VisitRow = {
+type ActivityRow = {
   id: string;
   amount: number;
   cashback_earned: number;
@@ -37,14 +37,14 @@ type VisitRow = {
   merchant_name: string | null;
 };
 
-const Visits = () => {
+const Activity = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const { data: visits, isLoading } = useQuery({
-    queryKey: ["pet-owner-visits", user?.id],
-    queryFn: async (): Promise<VisitRow[]> => {
+  const { data: activities, isLoading } = useQuery({
+    queryKey: ["pet-owner-activity", user?.id],
+    queryFn: async (): Promise<ActivityRow[]> => {
       if (!user?.id) return [];
       const { data: txs } = await supabase
         .from("transactions")
@@ -77,7 +77,7 @@ const Visits = () => {
   });
 
   const totals = useMemo(() => {
-    const list = visits ?? [];
+    const list = activities ?? [];
     let totalSpent = 0;
     let totalSaved = 0;
     for (const v of list) {
@@ -89,18 +89,18 @@ const Visits = () => {
       totalSaved += earnedUsd + Math.max(0, redeemedUsd - refundedUsd);
     }
     return { totalSpent, totalSaved, count: list.length };
-  }, [visits]);
+  }, [activities]);
 
   return (
     <>
-      <SEO title="Your visits — PawBucks" noIndex />
+      <SEO title="Your activity — PawBucks" noIndex />
       <div className="min-h-[100dvh] bg-background flex flex-col">
         <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
         <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-12 pb-28 md:pb-10 max-w-4xl">
           <div className="mb-6">
             <h1 className="text-2xl lg:text-4xl font-semibold tracking-tight">
-              Your visits
+              Your activity
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               Every penny you've spent — and every penny you've saved.
@@ -116,7 +116,7 @@ const Visits = () => {
                 {Formatters.currency(totals.totalSpent)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                across {totals.count} {totals.count === 1 ? "visit" : "visits"}
+                across {totals.count} {totals.count === 1 ? "transaction" : "transactions"}
               </p>
             </Card>
             <Card className="p-4 border-success/30 bg-success/5">
@@ -134,20 +134,20 @@ const Visits = () => {
 
           {isLoading ? (
             <div className="text-center text-sm text-muted-foreground py-12">
-              Loading your visits…
+              Loading your activity…
             </div>
-          ) : !visits || visits.length === 0 ? (
+          ) : !activities || activities.length === 0 ? (
             <Card className="p-8 text-center">
               <Receipt className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-              <h2 className="text-base font-medium mb-1">No visits yet</h2>
+              <h2 className="text-base font-medium mb-1">No activity yet</h2>
               <p className="text-sm text-muted-foreground mb-4">
-                Pay a pet care place through PawBucks to start tracking visits.
+                Pay a pet care place through PawBucks to start tracking activity.
               </p>
               <Button onClick={() => navigate("/pay")}>Make a payment</Button>
             </Card>
           ) : (
             <ul className="space-y-2">
-              {visits.map((v) => {
+              {activities.map((v) => {
                 const paid = Number(v.amount ?? 0);
                 const refunded = Number(v.amount_refunded ?? 0);
                 const net = paid - refunded;
@@ -303,4 +303,4 @@ const Row = ({
   </div>
 );
 
-export default Visits;
+export default Activity;
