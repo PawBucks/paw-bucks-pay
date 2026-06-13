@@ -509,7 +509,7 @@ serve(async (req) => {
                 .insert({
                   user_id: userId,
                   type: 'redeem',
-                  amount: -actualDeduction,
+                  amount: actualDeduction,
                   source: 'Auto-Redemption',
                   partner_id: merchantId || null,
                   description: `Auto-redeemed ${actualDeduction} PawBucks ($${(actualDeduction / 1000).toFixed(2)}) for subscription at ${merchantName}`,
