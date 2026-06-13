@@ -403,6 +403,16 @@ serve(async (req) => {
         status: 'completed',
       }).select().single();
 
+      await supabaseAdmin.from('pawbucks_activity').insert({
+        user_id: effectiveUserId,
+        amount: pawbucksAmount,
+        type: 'redeem',
+        source: 'merchant_payment',
+        description: `Payment to ${merchant.business_name}`,
+        partner_id: merchantId,
+        transaction_id: transaction?.id || null,
+      });
+
       // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
       if (actualWalletPawbucks > 0 && transaction?.id) {
         try {
