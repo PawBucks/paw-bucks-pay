@@ -108,6 +108,7 @@ const MerchantInvoicing = lazyWithRetry(() => import("./pages/MerchantInvoicing"
 const InvoicePayment = lazyWithRetry(() => import("./pages/InvoicePayment"),"InvoicePayment");
 const InvoicePaymentSuccess = lazyWithRetry(() => import("./pages/InvoicePaymentSuccess"),"InvoicePaymentSuccess");
 const MerchantSubscriptionPlans = lazyWithRetry(() => import("./pages/MerchantSubscriptionPlans"),"MerchantSubscriptionPlans");
+const WellnessPlansGuide = lazyWithRetry(() => import("./pages/WellnessPlansGuide"),"WellnessPlansGuide");
 const MerchantAvailableBalance = lazyWithRetry(() => import("./pages/MerchantAvailableBalance"),"MerchantAvailableBalance");
 const MerchantPendingBalance = lazyWithRetry(() => import("./pages/MerchantPendingBalance"),"MerchantPendingBalance");
 const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalEarnings"),"MerchantTotalEarnings");
