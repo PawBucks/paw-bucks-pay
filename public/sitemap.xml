@@ -153,6 +153,14 @@
     <priority>0.5</priority>
   </url>
 
+  <!-- Guides -->
+  <url>
+    <loc>https://pawbucks.app/guides/wellness-plans-comparison</loc>
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Merchant Storefronts (public, active merchants) -->
   <url>
     <loc>https://pawbucks.app/storefront/fidoflush</loc>
