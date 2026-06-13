@@ -90,7 +90,9 @@ serve(async (req) => {
     const quantity = parseInt(metadata.quantity || '1', 10);
     const pawbucksEarned = parseInt(metadata.pawbucks_earned || '0', 10);
     const pawbucksMultiplier = parseInt(metadata.pawbucks_multiplier || '10', 10);
-    const amountInDollars = paymentIntent.amount / 100;
+    const cardAmountDollars = paymentIntent.amount / 100;
+    const orderTotalCents = parseInt(metadata.order_total_cents || `${paymentIntent.amount}`, 10);
+    const orderTotalDollars = orderTotalCents / 100;
 
     // Get card details
     let cardBrand: string | undefined;
@@ -140,7 +142,7 @@ serve(async (req) => {
             id: itemId,
             qty: quantity,
             name: itemName,
-            priceCents: item?.price ?? Math.round((amountInDollars / Math.max(quantity, 1)) * 100),
+            priceCents: item?.price ?? Math.round((orderTotalDollars / Math.max(quantity, 1)) * 100),
           }];
 
     if (cartItemsParsed.length > 0) {
@@ -177,8 +179,8 @@ serve(async (req) => {
       .insert({
         user_id: userId,
         merchant_id: item?.merchant_id || null,
-        amount: amountInDollars,
-        stripe_amount: amountInDollars,
+        amount: orderTotalDollars,
+        stripe_amount: cardAmountDollars,
         pawbucks_used: pawbucksUsedInSplit,
         application_fee: 0,
         status: 'completed',
@@ -214,11 +216,11 @@ serve(async (req) => {
 
       // Plan + apply debit across wallet → Pet Fund → legacy welcome credit
       const sources = await getSpendableSources(supabaseAdmin, userId);
-      const plan = planPawBucksDebit(sources, pawbucksUsedInSplit, amountInDollars);
+      const plan = planPawBucksDebit(sources, pawbucksUsedInSplit, orderTotalDollars);
       await applyPawBucksDebit(supabaseAdmin, userId, plan, {
         merchantId: item?.merchant_id || null,
         transactionId: transaction.id,
-        transactionTotalCents: Math.round(amountInDollars * 100),
+        transactionTotalCents: orderTotalCents,
       });
       logStep("Split PawBucks debit applied", plan);
 
@@ -358,10 +360,10 @@ serve(async (req) => {
                 name: `${li.name} x${li.qty}`,
                 price: (li.priceCents * li.qty) / 100,
               })),
-              subtotal: amountInDollars,
-              pawbucksApplied: 0,
-              cardAmount: amountInDollars,
-              totalPaid: amountInDollars,
+              subtotal: orderTotalDollars,
+              pawbucksApplied: pawbucksUsedInSplit * 0.001,
+              cardAmount: cardAmountDollars,
+              totalPaid: orderTotalDollars,
               cardBrand,
               cardLast4,
               pawbucksEarned,
@@ -471,7 +473,7 @@ serve(async (req) => {
             ${lineItemsHtml}
             <tr>
               <td colspan="2" style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;">Total Paid</td>
-              <td style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;text-align:right;">$${amountInDollars.toFixed(2)}</td>
+              <td style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;text-align:right;">$${orderTotalDollars.toFixed(2)}</td>
             </tr>
           </table>
           <table cellpadding="0" cellspacing="0" style="margin-top:12px;">
@@ -530,7 +532,7 @@ serve(async (req) => {
     await supabaseAdmin.from('notifications').insert({
       user_id: userId,
       title: '🛍️ Purchase Confirmed',
-      message: `Your Pet Store order for ${itemName} ($${amountInDollars.toFixed(2)}) is confirmed. You earned ${pawbucksEarned} PawBucks!`,
+      message: `Your Pet Store order for ${itemName} ($${orderTotalDollars.toFixed(2)}) is confirmed. You earned ${pawbucksEarned} PawBucks!`,
       category: 'transactional',
     });
 

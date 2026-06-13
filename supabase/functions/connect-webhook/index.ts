@@ -466,32 +466,14 @@ serve(async (req) => {
             // ========================================
             if (pawbucksUsed > 0 && invoicePayerUserId) {
               try {
-                const { data: userWallet } = await supabaseAdmin
-                  .from('pawbucks_wallet')
-                  .select('balance')
-                  .eq('user_id', invoicePayerUserId)
-                  .single();
-
-                if (userWallet) {
-                  const newBalance = Math.max(userWallet.balance - pawbucksUsed, 0);
-                  const { error: deductError } = await supabaseAdmin
-                    .from('pawbucks_wallet')
-                    .update({ balance: newBalance })
-                    .eq('user_id', invoicePayerUserId);
-
-                  if (deductError) {
-                    logStep("Error deducting PawBucks from user wallet", { error: deductError.message });
-                  } else {
-                    logStep("PawBucks deducted from user wallet", { 
-                      userId: invoicePayerUserId, 
-                      previousBalance: userWallet.balance, 
-                      deducted: pawbucksUsed, 
-                      newBalance 
-                    });
-                  }
-                } else {
-                  logStep("User wallet not found for PawBucks deduction", { userId: invoicePayerUserId });
-                }
+                const sources = await getSpendableSources(supabaseAdmin, invoicePayerUserId);
+                const debitPlan = planPawBucksDebit(sources, pawbucksUsed, totalPaymentAmount);
+                await applyPawBucksDebit(supabaseAdmin, invoicePayerUserId, debitPlan, {
+                  merchantId,
+                  transactionId: transaction?.id || null,
+                  transactionTotalCents: Math.round(totalPaymentAmount * 100),
+                });
+                logStep("PawBucks debited from canonical sources", debitPlan);
 
                 // Record debit activity
                 const { data: invoiceForDebit } = await supabaseAdmin
@@ -503,7 +485,7 @@ serve(async (req) => {
                 await supabaseAdmin.from('pawbucks_activity').insert({
                   user_id: invoicePayerUserId,
                   type: 'redeem',
-                  amount: -pawbucksUsed,
+                  amount: pawbucksUsed,
                   source: 'invoice_payment',
                   description: `Used ${pawbucksUsed} PawBucks on Invoice #${invoiceForDebit?.invoice_number || 'Payment'}`,
                   partner_id: merchantId || null,

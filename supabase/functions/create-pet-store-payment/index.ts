@@ -2,6 +2,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -229,7 +234,7 @@ serve(async (req) => {
     const itemIds = cartItems.map(ci => ci.itemId);
     const { data: dbItems, error: itemError } = await supabaseAdmin
       .from('pet_store_items')
-      .select('id, name, description, price, category, stock_quantity')
+      .select('id, name, description, price, category, stock_quantity, merchant_id')
       .in('id', itemIds);
 
     if (itemError || !dbItems || dbItems.length !== itemIds.length) {
@@ -322,20 +327,28 @@ serve(async (req) => {
     let pawbucksUsed = 0;
     let pawbucksUsdValue = 0;
 
-    // Get user's PawBucks balance
-    const { data: walletData } = await supabaseAdmin
-      .from('pawbucks_wallet')
-      .select('balance')
-      .eq('user_id', user.id)
-      .single();
-    const availablePawBucks = walletData?.balance || 0;
+    // Get all eligible PawBucks sources: earned wallet + Pet Fund + legacy welcome credit.
+    const spendableSources = await getSpendableSources(supabaseAdmin, user.id);
+    const petFundEligible =
+      spendableSources.petFundAvailable > 0 &&
+      (!spendableSources.petFundMinUsd || totalAmount >= spendableSources.petFundMinUsd);
+    const availablePawBucks =
+      spendableSources.walletBalance +
+      (petFundEligible ? spendableSources.petFundAvailable : 0) +
+      spendableSources.legacyCreditBalance;
 
-    if (pawbucksAmount > 0 && availablePawBucks > 0) {
+    if (pawbucksAmount > 0) {
       // Pet Store rules: PawBucks only on orders >= $25 and capped at 33% of total
       const MIN_ORDER_USD_FOR_PAWBUCKS = 25;
       const MAX_PAWBUCKS_COVERAGE_PCT = 0.33;
       if (totalAmount < MIN_ORDER_USD_FOR_PAWBUCKS) {
         throw new Error(`PawBucks can only be applied to orders of $${MIN_ORDER_USD_FOR_PAWBUCKS} or more.`);
+      }
+      if (availablePawBucks <= 0) {
+        if (spendableSources.petFundAvailable > 0 && !petFundEligible) {
+          throw new Error(`Pet Fund Welcome Credit requires a $${spendableSources.petFundMinUsd.toFixed(2)} minimum purchase. Add $${Math.max(0, spendableSources.petFundMinUsd - totalAmount).toFixed(2)} more to unlock it.`);
+        }
+        throw new Error('Insufficient PawBucks balance');
       }
       const maxCoverageUsd = totalAmount * MAX_PAWBUCKS_COVERAGE_PCT;
       const maxPawbucksAllowed = Math.floor(maxCoverageUsd * PAWBUCKS_TO_USD);
@@ -391,9 +404,12 @@ serve(async (req) => {
 
     // If PawBucks cover the full amount, handle as full PawBucks purchase
     if (pawbucksUsed > 0 && finalAmountCents <= 0) {
-      // Deduct PawBucks from wallet
-      const newBalance = availablePawBucks - pawbucksUsed;
-      await supabaseAdmin.from('pawbucks_wallet').update({ balance: newBalance }).eq('user_id', user.id);
+      // Deduct PawBucks from the canonical source order: wallet → Pet Fund → legacy welcome credit.
+      const debitPlan = planPawBucksDebit(spendableSources, pawbucksUsed, totalAmount);
+      await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan, {
+        merchantId: dbItems[0]?.merchant_id || null,
+        transactionTotalCents: totalAmountCents,
+      });
       
       // Record activity
       await supabaseAdmin.from('pawbucks_activity').insert({
@@ -536,6 +552,9 @@ serve(async (req) => {
         pawbucks_multiplier: pawbucksMultiplier.toString(),
         discount_percentage: discountPercentage.toString(),
         original_price: (originalPriceCents / 100).toString(),
+        order_total_cents: totalAmountCents.toString(),
+        order_total_dollars: totalAmount.toString(),
+        card_amount_cents: amountInCents.toString(),
         promotion_id: appliedPromotionId || '',
         user_badge_promotion_id: userBadgePromotionId || '',
         // pawbucks_amount carries the actual amount to debit on success.

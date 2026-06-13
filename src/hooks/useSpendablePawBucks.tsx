@@ -71,7 +71,7 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  .select("amount")
  .eq("user_id", effectiveUserId)
  .eq("pawbucks_status","pending")
- .eq("type","credit")
+ .eq("type","earn")
  .not("slice_id","is", null),
  supabase
  .from("pet_fund_ledgers")
@@ -90,7 +90,7 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
   .select("expires_at")
   .eq("user_id", effectiveUserId)
   .eq("pawbucks_status","available")
-  .eq("type","credit")
+  .eq("type","earn")
   .not("expires_at","is", null)
   .gt("expires_at", new Date().toISOString())
   .order("expires_at", { ascending: true })

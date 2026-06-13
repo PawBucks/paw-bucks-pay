@@ -2,6 +2,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -504,7 +509,7 @@ serve(async (req) => {
                 .insert({
                   user_id: userId,
                   type: 'redeem',
-                  amount: -actualDeduction,
+                  amount: actualDeduction,
                   source: 'Auto-Redemption',
                   partner_id: merchantId || null,
                   description: `Auto-redeemed ${actualDeduction} PawBucks ($${(actualDeduction / 1000).toFixed(2)}) for subscription at ${merchantName}`,
@@ -883,28 +888,21 @@ serve(async (req) => {
           // happens here, only after Stripe confirms the checkout session completed.
           if (invoicePayerUserId && pawbucksUsed > 0) {
             try {
-              const { data: payerWallet } = await supabaseAdmin
-                .from('pawbucks_wallet')
-                .select('balance')
-                .eq('user_id', invoicePayerUserId)
-                .single();
-
-              const currentBalance = payerWallet?.balance || 0;
-              const debitAmount = Math.min(currentBalance, pawbucksUsed);
+              const sources = await getSpendableSources(supabaseAdmin, invoicePayerUserId);
+              const pawbucksAmountCents = parseInt(metadata.pawbucks_amount_cents || '0', 10);
+              const totalPaymentAmount = paymentAmount + (pawbucksAmountCents / 100);
+              const debitPlan = planPawBucksDebit(sources, pawbucksUsed, totalPaymentAmount);
+              await applyPawBucksDebit(supabaseAdmin, invoicePayerUserId, debitPlan, {
+                merchantId,
+                transactionTotalCents: Math.round(totalPaymentAmount * 100),
+              });
+              const debitAmount = pawbucksUsed;
 
               if (debitAmount > 0) {
-                await supabaseAdmin
-                  .from('pawbucks_wallet')
-                  .update({
-                    balance: currentBalance - debitAmount,
-                    updated_at: new Date().toISOString(),
-                  })
-                  .eq('user_id', invoicePayerUserId);
-
                 await supabaseAdmin.from('pawbucks_activity').insert({
                   user_id: invoicePayerUserId,
                   type: 'redeem',
-                  amount: -debitAmount,
+                  amount: debitAmount,
                   source: 'invoice_payment',
                   description: `Partial payment for Invoice (Stripe-confirmed)`,
                   partner_id: merchantId || null,
@@ -967,7 +965,7 @@ serve(async (req) => {
                 console.warn(`[INVOICE_PAYMENT] ⚠️ Could not debit PawBucks — insufficient balance at confirmation time`, {
                   invoicePayerUserId,
                   needed: pawbucksUsed,
-                  available: currentBalance,
+                  available: sources.walletBalance + sources.petFundAvailable + sources.legacyCreditBalance,
                 });
               }
             } catch (debitError) {
