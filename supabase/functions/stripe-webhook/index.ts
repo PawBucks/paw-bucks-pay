@@ -888,28 +888,21 @@ serve(async (req) => {
           // happens here, only after Stripe confirms the checkout session completed.
           if (invoicePayerUserId && pawbucksUsed > 0) {
             try {
-              const { data: payerWallet } = await supabaseAdmin
-                .from('pawbucks_wallet')
-                .select('balance')
-                .eq('user_id', invoicePayerUserId)
-                .single();
-
-              const currentBalance = payerWallet?.balance || 0;
-              const debitAmount = Math.min(currentBalance, pawbucksUsed);
+              const sources = await getSpendableSources(supabaseAdmin, invoicePayerUserId);
+              const pawbucksAmountCents = parseInt(metadata.pawbucks_amount_cents || '0', 10);
+              const totalPaymentAmount = paymentAmount + (pawbucksAmountCents / 100);
+              const debitPlan = planPawBucksDebit(sources, pawbucksUsed, totalPaymentAmount);
+              await applyPawBucksDebit(supabaseAdmin, invoicePayerUserId, debitPlan, {
+                merchantId,
+                transactionTotalCents: Math.round(totalPaymentAmount * 100),
+              });
+              const debitAmount = pawbucksUsed;
 
               if (debitAmount > 0) {
-                await supabaseAdmin
-                  .from('pawbucks_wallet')
-                  .update({
-                    balance: currentBalance - debitAmount,
-                    updated_at: new Date().toISOString(),
-                  })
-                  .eq('user_id', invoicePayerUserId);
-
                 await supabaseAdmin.from('pawbucks_activity').insert({
                   user_id: invoicePayerUserId,
                   type: 'redeem',
-                  amount: -debitAmount,
+                  amount: debitAmount,
                   source: 'invoice_payment',
                   description: `Partial payment for Invoice (Stripe-confirmed)`,
                   partner_id: merchantId || null,
@@ -972,7 +965,7 @@ serve(async (req) => {
                 console.warn(`[INVOICE_PAYMENT] ⚠️ Could not debit PawBucks — insufficient balance at confirmation time`, {
                   invoicePayerUserId,
                   needed: pawbucksUsed,
-                  available: currentBalance,
+                  available: sources.walletBalance + sources.petFundAvailable + sources.legacyCreditBalance,
                 });
               }
             } catch (debitError) {
