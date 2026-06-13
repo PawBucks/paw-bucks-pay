@@ -22,6 +22,7 @@ import { CartDrawer, type CartCheckoutParams } from"@/components/pet-store/CartD
 import { usePromotionalItems } from"@/hooks/usePromotionalItems";
 import { useShoppingCart } from"@/hooks/useShoppingCart";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
 
 export default function PetStoreProduct() {
  const { itemId } = useParams<{ itemId: string }>();
@@ -36,16 +37,14 @@ export default function PetStoreProduct() {
 
  const { cartItems, itemCount, totalUsd, totalPawbucks, addToCart, updateQuantity, removeFromCart, clearCart, markConverted } = useShoppingCart();
 
- const { data: wallet } = useQuery({
- queryKey: ["pawbucks-wallet", effectiveUserId],
- queryFn: async () => {
- if (!effectiveUserId) return null;
- const { data, error } = await supabase.from("pawbucks_wallet").select("*").eq("user_id", effectiveUserId).single();
- if (error) throw error;
- return data;
- },
- enabled: !!effectiveUserId && !sharedAccount.isLoading,
- });
+ const {
+  spendableBalance,
+  petFundBalance,
+  welcomeCreditBalance,
+  hasPetFund,
+  hasWelcomeCredit,
+  petFundMinTransactionUsd,
+ } = useSpendablePawBucks(effectiveUserId);
 
  const { data: subscription } = useQuery({
  queryKey: ["subscription", user?.id],
@@ -111,6 +110,10 @@ export default function PetStoreProduct() {
  const outOfStock = item?.stock_quantity === 0;
  const inCart = cartItems.find(ci => ci.item_id === itemId);
  const pawbucksEarned = Math.round((discountedPrice / 100) * cashbackRate);
+ const promoCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
+ const promoMinUsd = hasPetFund ? (petFundMinTransactionUsd || 60) : 75;
+ const promoApplicable = (hasPetFund || hasWelcomeCredit) && totalUsd / 100 >= promoMinUsd;
+ const eligiblePbBalance = spendableBalance + (promoApplicable ? promoCreditBalance : 0);
 
  const handleAddToCart = () => {
  if (!user) { navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`); return; }
@@ -470,7 +473,7 @@ export default function PetStoreProduct() {
  onCheckout={() => {}}
  isUpdating={updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending}
  isCheckingOut={false}
- pawbucksBalance={wallet?.balance || 0}
+ pawbucksBalance={eligiblePbBalance}
  />
 
  {user && <BottomNav />}
