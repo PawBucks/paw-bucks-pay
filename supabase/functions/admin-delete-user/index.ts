@@ -65,7 +65,7 @@ serve(async (req) => {
 
     if (deleteError) {
       console.error('Error deleting user:', deleteError);
-      throw new Error(`Failed to delete user: ${deleteError.message}`);
+      throw new Error('Failed to delete user');
     }
 
     // Log admin action
@@ -92,7 +92,15 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in admin-delete-user function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    const safeMessages = new Set([
+      'Missing authorization header',
+      'Unauthorized',
+      'Unauthorized: Admin access required',
+      'Cannot delete your own account',
+      'Failed to delete user',
+    ]);
+    const rawMessage = error instanceof Error ? error.message : '';
+    const errorMessage = safeMessages.has(rawMessage) ? rawMessage : 'An unexpected error occurred';
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { 
