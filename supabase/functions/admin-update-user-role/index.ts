@@ -67,7 +67,7 @@ serve(async (req) => {
 
       if (profileError) {
         console.error('Error updating profile:', profileError);
-        throw new Error(`Failed to update user type: ${profileError.message}`);
+        throw new Error('Failed to update user type');
       }
 
       console.log('Updated user_type to:', validatedData.user_type);
@@ -107,7 +107,7 @@ serve(async (req) => {
 
         if (roleUpdateError) {
           console.error('Error updating role:', roleUpdateError);
-          throw new Error(`Failed to update role: ${roleUpdateError.message}`);
+          throw new Error('Failed to update role');
         }
       } else {
         // Insert new role
@@ -120,7 +120,7 @@ serve(async (req) => {
 
         if (roleInsertError) {
           console.error('Error inserting role:', roleInsertError);
-          throw new Error(`Failed to insert role: ${roleInsertError.message}`);
+          throw new Error('Failed to assign role');
         }
       }
 
@@ -145,7 +145,18 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in admin-update-user-role function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    const safeMessages = new Set([
+      'Missing authorization header',
+      'Unauthorized',
+      'Unauthorized: Admin access required',
+      'Unauthorized: Only SuperAdmins can modify SuperAdmin accounts',
+      'Unauthorized: Only SuperAdmins can assign admin roles',
+      'Failed to update user type',
+      'Failed to update role',
+      'Failed to assign role',
+    ]);
+    const rawMessage = error instanceof Error ? error.message : '';
+    const errorMessage = safeMessages.has(rawMessage) ? rawMessage : 'An unexpected error occurred';
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { 
