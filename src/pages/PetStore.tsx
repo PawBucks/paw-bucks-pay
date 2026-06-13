@@ -269,7 +269,14 @@ export default function PetStore() { const { user, signOut } = useAuth();
  const cartPawbucksPurchase = useMutation({
  mutationFn: async () => {
  if (!user || !effectiveUserId) throw new Error("Must be logged in");
- if (!wallet || wallet.balance < totalPawbucks) throw new Error("Insufficient PawBucks balance");
+  if (eligiblePbBalance < totalPawbucks) {
+    if ((hasPetFund || hasWelcomeCredit) && !promoApplicable && (spendableBalance + promoCreditBalance) >= totalPawbucks) {
+      throw new Error(
+        `${hasPetFund ? "Pet Fund" : "Welcome"} credit requires a $${promoMinUsd.toFixed(2)} minimum cart. Add $${(promoMinUsd - totalUsd).toFixed(2)} more to unlock it.`
+      );
+    }
+    throw new Error("Insufficient PawBucks balance");
+  }
 
  const items = cartItems.map(ci => ({ itemId: ci.item.id, quantity: ci.quantity }));
  const cartId = cartItems[0] ? undefined : undefined;
