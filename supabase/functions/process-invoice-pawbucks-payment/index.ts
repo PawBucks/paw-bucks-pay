@@ -170,11 +170,11 @@ serve(async (req) => {
       // Plan debit across wallet → Pet Fund → legacy welcome credit.
       // Throws if combined eligible balance is insufficient or Pet Fund min spend not met.
       const sources = await getSpendableSources(supabase, userId);
-      const invoiceTotalUsd = (pawbucksCents + (tipAmountCents || 0)) / 100;
+      const invoiceTotalUsd = totalAmountCents / 100;
       const debitPlan = planPawBucksDebit(sources, pawbucksUsed, invoiceTotalUsd);
       await applyPawBucksDebit(supabase, userId, debitPlan, {
         merchantId: merchant.id,
-        transactionTotalCents: pawbucksCents + (tipAmountCents || 0),
+        transactionTotalCents: totalAmountCents,
       });
       logStep("PawBucks debit applied", debitPlan);
 
