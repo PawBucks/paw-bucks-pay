@@ -49,8 +49,7 @@ const BottomNavComponent = () => {
                 "flex items-center justify-center w-10 h-8 rounded-full transition-all duration-200",
                 isActive && "bg-primary/10"
               )}>
-                {item.emoji ? (
-                  <span
+                <span
                     className={cn(
                       "text-lg leading-none transition-all duration-200 select-none",
                       isActive && "text-primary"
@@ -59,15 +58,6 @@ const BottomNavComponent = () => {
                   >
                     {item.emoji}
                   </span>
-                ) : item.icon ? (
-                  <item.icon
-                    className={cn(
-                      "w-5 h-5 transition-all duration-200",
-                      isActive && "text-primary"
-                    )}
-                    aria-hidden="true"
-                  />
-                ) : null}
               </div>
               <span className={cn(
                 "text-[10px] font-medium transition-all leading-tight",
