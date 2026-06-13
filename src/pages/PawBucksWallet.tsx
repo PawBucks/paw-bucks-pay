@@ -22,6 +22,7 @@ import { PAWBUCKS_CONVERSION, ROUTES, CASHBACK_RATES, getSubscriptionTier } from
 import { Progress } from"@/components/ui/progress";
 import { LockedRewardsCard } from"@/components/wallet/LockedRewardsCard";
 import { RefundStatusTimeline } from"@/components/wallet/RefundStatusTimeline";
+import { PetFundCard } from"@/components/wallet/PetFundCard";
 import { useSpendablePawBucks } from"@/hooks/useSpendablePawBucks";
 import { PartnerReceiptDialog } from"@/components/receipts/PartnerReceiptDialog";
 import { NonPartnerReceiptDialog } from"@/components/receipts/NonPartnerReceiptDialog";
@@ -386,6 +387,13 @@ const PawBucksWallet = () => {
  {effectiveWalletUserId && (
  <div className="mb-8">
  <LockedRewardsCard userId={effectiveWalletUserId} />
+ </div>
+ )}
+
+ {/* Pet Fund / Welcome Credit balance + release schedule */}
+ {effectiveWalletUserId && (
+ <div className="mb-8">
+ <PetFundCard userId={effectiveWalletUserId} />
  </div>
  )}
 
