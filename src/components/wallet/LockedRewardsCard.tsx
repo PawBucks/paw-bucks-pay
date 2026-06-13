@@ -68,7 +68,7 @@ export const LockedRewardsCard = ({ userId, onBalanceUpdate }: LockedRewardsCard
  `)
  .eq("user_id", effectiveUserId)
  .eq("pawbucks_status","pending")
- .eq("type","credit")
+ .eq("type","earn")
  .not("slice_id","is", null)
  .order("created_at", { ascending: false });
 
