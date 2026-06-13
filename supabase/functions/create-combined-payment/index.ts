@@ -352,108 +352,13 @@ serve(async (req) => {
         );
       }
 
-      // Determine how much comes from wallet vs pet fund vs legacy welcome credit
-      let actualWalletPawbucks = 0;
-      let petFundPawbucks = 0;
-      let legacyWelcomePawbucks = 0;
-
-      // Deduct from wallet first
-      if (walletPawbucks > 0) {
-        const { data: currentWallet } = await supabaseAdmin
-          .from('pawbucks_wallet')
-          .select('balance')
-          .eq('user_id', effectiveUserId)
-          .single();
-
-        actualWalletPawbucks = Math.min(currentWallet?.balance || 0, walletPawbucks);
-        const newBalance = (currentWallet?.balance || 0) - actualWalletPawbucks;
-        
-        await supabaseAdmin
-          .from('pawbucks_wallet')
-          .update({ balance: newBalance })
-          .eq('user_id', effectiveUserId);
-
-        await supabaseAdmin.from('pawbucks_activity').insert({
-          user_id: effectiveUserId,
-          amount: actualWalletPawbucks,
-          type: 'redeem',
-          source: 'merchant_payment',
-          description: `Payment to ${merchant.business_name}`,
-          partner_id: merchantId,
-        });
-      }
-
-      // Deduct from Pet Fund if there's a remaining amount
-      const remainingAfterWallet = pawbucksAmount - actualWalletPawbucks;
-      if (remainingAfterWallet > 0) {
-        // Check Pet Fund
-        const { data: petFundLedger } = await supabaseAdmin
-          .from('pet_fund_ledgers')
-          .select('id, available_balance')
-          .eq('user_id', effectiveUserId)
-          .eq('status', 'active')
-          .maybeSingle();
-
-        if (petFundLedger && petFundLedger.available_balance > 0) {
-          petFundPawbucks = Math.min(remainingAfterWallet, petFundLedger.available_balance);
-
-          // Mark releases as used
-          const { data: availableReleases } = await supabaseAdmin
-            .from('pet_fund_releases')
-            .select('id, amount, month_number')
-            .eq('user_id', effectiveUserId)
-            .eq('status', 'released')
-            .is('used_at', null)
-            .order('month_number', { ascending: true });
-
-          let deductRemaining = petFundPawbucks;
-          for (const release of (availableReleases || [])) {
-            if (deductRemaining <= 0) break;
-            await supabaseAdmin
-              .from('pet_fund_releases')
-              .update({ used_at: new Date().toISOString() })
-              .eq('id', release.id);
-            deductRemaining -= release.amount;
-          }
-
-          // Update ledger atomically: decrement available_balance and increment total_used
-          // by the exact amount we deducted (petFundPawbucks).
-          const { data: currentLedger } = await supabaseAdmin
-            .from('pet_fund_ledgers')
-            .select('available_balance, total_used')
-            .eq('id', petFundLedger.id)
-            .single();
-
-          if (currentLedger) {
-            await supabaseAdmin
-              .from('pet_fund_ledgers')
-              .update({
-                available_balance: Math.max(0, (currentLedger.available_balance || 0) - petFundPawbucks),
-                total_used: (currentLedger.total_used || 0) + petFundPawbucks,
-              })
-              .eq('id', petFundLedger.id);
-          }
-
-          logStep("Pet Fund deducted (PawBucks-only)", { amount: petFundPawbucks });
-        }
-
-        // Legacy welcome credit fallback
-        const stillRemaining = remainingAfterWallet - petFundPawbucks;
-        if (stillRemaining > 0) {
-          legacyWelcomePawbucks = stillRemaining;
-          const totalCents = Math.round(totalAmount * 100);
-          const { error: redeemError } = await supabaseAdmin.rpc('redeem_welcome_credit', {
-            p_user_id: effectiveUserId,
-            p_merchant_id: merchantId,
-            p_transaction_total_cents: totalCents,
-          });
-          if (redeemError) {
-            logStep("Welcome credit redemption error", { error: redeemError.message });
-          } else {
-            logStep("Legacy welcome credit redeemed", { amount: legacyWelcomePawbucks });
-          }
-        }
-      }
+      const fullDebitPlan = debitPlan ?? planPawBucksDebit(spendableSources, pawbucksAmount, baseAmount);
+      await applyPawBucksDebit(supabaseAdmin, effectiveUserId, fullDebitPlan, {
+        merchantId,
+        transactionTotalCents: Math.round(baseAmount * 100),
+      });
+      const actualWalletPawbucks = fullDebitPlan.walletDeduction;
+      logStep("PawBucks debited from canonical sources (PawBucks-only)", fullDebitPlan);
 
       // Credit merchant's PawBucks wallet
       const { data: merchantWallet } = await supabaseAdmin
