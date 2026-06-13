@@ -37,6 +37,7 @@ import { useShoppingCart } from"@/hooks/useShoppingCart";
 import { getStripePromise } from"@/lib/stripe";
 import { buildAppUrl } from"@/lib/url";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { useSpendablePawBucks } from "@/hooks/useSpendablePawBucks";
 
 const CATEGORIES = ["All","Food","Treats","Toys","Bedding","Accessories","Healthcare","Grooming","Sanitation"];
 const ITEM_TYPES = ["All","Product","Service"] as const;
@@ -200,6 +201,21 @@ export default function PetStore() { const { user, signOut } = useAuth();
  enabled: !!effectiveUserId && !sharedAccount.isLoading,
  });
 
+ // Spendable PawBucks including Pet Fund / Welcome Credit (when totalUsd meets min)
+ const {
+   spendableBalance,
+   petFundBalance,
+   welcomeCreditBalance,
+   hasPetFund,
+   hasWelcomeCredit,
+   petFundMinTransactionUsd,
+ } = useSpendablePawBucks(effectiveUserId);
+
+ const promoCreditBalance = hasPetFund ? petFundBalance : welcomeCreditBalance;
+ const promoMinUsd = hasPetFund ? (petFundMinTransactionUsd || 60) : 75;
+ const promoApplicable = (hasPetFund || hasWelcomeCredit) && totalUsd >= promoMinUsd;
+ const eligiblePbBalance = spendableBalance + (promoApplicable ? promoCreditBalance : 0);
+
  const { data: subscription } = useQuery({
  queryKey: ["subscription", user?.id],
  queryFn: async () => {
@@ -253,7 +269,14 @@ export default function PetStore() { const { user, signOut } = useAuth();
  const cartPawbucksPurchase = useMutation({
  mutationFn: async () => {
  if (!user || !effectiveUserId) throw new Error("Must be logged in");
- if (!wallet || wallet.balance < totalPawbucks) throw new Error("Insufficient PawBucks balance");
+  if (eligiblePbBalance < totalPawbucks) {
+    if ((hasPetFund || hasWelcomeCredit) && !promoApplicable && (spendableBalance + promoCreditBalance) >= totalPawbucks) {
+      throw new Error(
+        `${hasPetFund ? "Pet Fund" : "Welcome"} credit requires a $${promoMinUsd.toFixed(2)} minimum cart. Add $${(promoMinUsd - totalUsd).toFixed(2)} more to unlock it.`
+      );
+    }
+    throw new Error("Insufficient PawBucks balance");
+  }
 
  const items = cartItems.map(ci => ({ itemId: ci.item.id, quantity: ci.quantity }));
  const cartId = cartItems[0] ? undefined : undefined;
@@ -480,10 +503,10 @@ export default function PetStore() { const { user, signOut } = useAuth();
  <div className="flex justify-between items-center gap-3 mb-1">
  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">PawBucks Pet Store</h1>
  <div className="flex items-center gap-2">
- {user && wallet && (
+ {user && (
  <div className="flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-lg">
  <PawBucksLogo className="h-3.5 w-3.5 text-primary" />
- <span className="text-xs font-semibold">{Formatters.number(wallet.balance)} PB</span>
+ <span className="text-xs font-semibold">{Formatters.number(eligiblePbBalance)} PB</span>
  </div>
  )}
  {user && <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />}
@@ -700,7 +723,7 @@ export default function PetStore() { const { user, signOut } = useAuth();
  onCheckout={handleCartCheckout}
  isUpdating={updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending}
  isCheckingOut={cartPawbucksPurchase.isPending}
- pawbucksBalance={wallet?.balance || 0}
+ pawbucksBalance={eligiblePbBalance}
  />
 
  {user && <BottomNav />}
