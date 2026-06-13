@@ -67,7 +67,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  .select("id, amount, expires_at, description, created_at")
  .eq("user_id", effectiveUserId)
  .eq("pawbucks_status","available")
- .eq("type","credit")
+ .eq("type","earn")
  .not("expires_at","is", null)
  .order("expires_at", { ascending: true })
   .limit(50),
