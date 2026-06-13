@@ -1,13 +1,12 @@
 import { memo, useCallback } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { title: "Home", to: "/home", emoji: "🏠", ariaLabel: "Home" },
   { title: "Pay", to: "/pay", emoji: "💳", ariaLabel: "Pay & save" },
   { title: "Discover", to: "/discover", emoji: "🧭", ariaLabel: "Discover places" },
-  { title: "Savings", to: "/savings", icon: Sparkles, ariaLabel: "Your savings" },
+  { title: "Visits", to: "/visits", emoji: "🧾", ariaLabel: "Your visits" },
   { title: "Profile", to: "/profile", emoji: "👤", ariaLabel: "Profile" },
 ];
 
@@ -50,8 +49,7 @@ const BottomNavComponent = () => {
                 "flex items-center justify-center w-10 h-8 rounded-full transition-all duration-200",
                 isActive && "bg-primary/10"
               )}>
-                {item.emoji ? (
-                  <span
+                <span
                     className={cn(
                       "text-lg leading-none transition-all duration-200 select-none",
                       isActive && "text-primary"
@@ -60,15 +58,6 @@ const BottomNavComponent = () => {
                   >
                     {item.emoji}
                   </span>
-                ) : item.icon ? (
-                  <item.icon
-                    className={cn(
-                      "w-5 h-5 transition-all duration-200",
-                      isActive && "text-primary"
-                    )}
-                    aria-hidden="true"
-                  />
-                ) : null}
               </div>
               <span className={cn(
                 "text-[10px] font-medium transition-all leading-tight",
