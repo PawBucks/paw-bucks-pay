@@ -360,10 +360,10 @@ serve(async (req) => {
                 name: `${li.name} x${li.qty}`,
                 price: (li.priceCents * li.qty) / 100,
               })),
-              subtotal: amountInDollars,
-              pawbucksApplied: 0,
-              cardAmount: amountInDollars,
-              totalPaid: amountInDollars,
+              subtotal: orderTotalDollars,
+              pawbucksApplied: pawbucksUsedInSplit * 0.001,
+              cardAmount: cardAmountDollars,
+              totalPaid: orderTotalDollars,
               cardBrand,
               cardLast4,
               pawbucksEarned,
@@ -473,7 +473,7 @@ serve(async (req) => {
             ${lineItemsHtml}
             <tr>
               <td colspan="2" style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;">Total Paid</td>
-              <td style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;text-align:right;">$${amountInDollars.toFixed(2)}</td>
+              <td style="padding:12px 0;font-size:15px;font-weight:700;color:#0f172a;text-align:right;">$${orderTotalDollars.toFixed(2)}</td>
             </tr>
           </table>
           <table cellpadding="0" cellspacing="0" style="margin-top:12px;">
@@ -532,7 +532,7 @@ serve(async (req) => {
     await supabaseAdmin.from('notifications').insert({
       user_id: userId,
       title: '🛍️ Purchase Confirmed',
-      message: `Your Pet Store order for ${itemName} ($${amountInDollars.toFixed(2)}) is confirmed. You earned ${pawbucksEarned} PawBucks!`,
+      message: `Your Pet Store order for ${itemName} ($${orderTotalDollars.toFixed(2)}) is confirmed. You earned ${pawbucksEarned} PawBucks!`,
       category: 'transactional',
     });
 
