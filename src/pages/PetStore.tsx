@@ -503,10 +503,10 @@ export default function PetStore() { const { user, signOut } = useAuth();
  <div className="flex justify-between items-center gap-3 mb-1">
  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">PawBucks Pet Store</h1>
  <div className="flex items-center gap-2">
- {user && wallet && (
+ {user && (
  <div className="flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-lg">
  <PawBucksLogo className="h-3.5 w-3.5 text-primary" />
- <span className="text-xs font-semibold">{Formatters.number(wallet.balance)} PB</span>
+ <span className="text-xs font-semibold">{Formatters.number(eligiblePbBalance)} PB</span>
  </div>
  )}
  {user && <CartIcon itemCount={itemCount} onClick={() => setCartOpen(true)} />}
@@ -723,7 +723,7 @@ export default function PetStore() { const { user, signOut } = useAuth();
  onCheckout={handleCartCheckout}
  isUpdating={updateQuantity.isPending || removeFromCart.isPending || clearCart.isPending}
  isCheckingOut={cartPawbucksPurchase.isPending}
- pawbucksBalance={wallet?.balance || 0}
+ pawbucksBalance={eligiblePbBalance}
  />
 
  {user && <BottomNav />}
