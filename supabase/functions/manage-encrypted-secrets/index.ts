@@ -141,53 +141,10 @@ serve(async (req) => {
         );
       }
 
-      case "decrypt_webhook_secret": {
-        // Internal use: decrypt a webhook secret for HMAC signing
-        // Only service-role or verified merchant owner can do this
-        const { webhook_id } = body;
-
-        const { data: webhook } = await supabaseAdmin
-          .from("merchant_webhooks")
-          .select("secret, merchant_id")
-          .eq("id", webhook_id)
-          .single();
-
-        if (!webhook) {
-          return new Response(JSON.stringify({ error: "Webhook not found" }), {
-            status: 404,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
-        // Verify ownership
-        const { data: ownerCheck } = await supabaseAdmin
-          .from("merchants")
-          .select("id")
-          .eq("id", webhook.merchant_id)
-          .eq("user_id", userId)
-          .single();
-
-        if (!ownerCheck) {
-          return new Response(JSON.stringify({ error: "Unauthorized" }), {
-            status: 403,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-
-        try {
-          const decrypted = await decrypt(webhook.secret);
-          return new Response(
-            JSON.stringify({ success: true, secret: decrypted }),
-            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        } catch {
-          // Secret might be legacy plain text
-          return new Response(
-            JSON.stringify({ success: true, secret: webhook.secret }),
-            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-      }
+      // Note: `decrypt_webhook_secret` was removed for security. The raw signing
+      // secret is revealed exactly once at creation. Server-side HMAC signing
+      // happens inside edge functions (e.g. pos-submit-transaction) using the
+      // service role to read and decrypt the stored secret directly.
 
       default:
         return new Response(JSON.stringify({ error: "Invalid action" }), {

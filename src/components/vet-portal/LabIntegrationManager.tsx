@@ -55,7 +55,7 @@ export function LabIntegrationManager({ vetId }: LabIntegrationManagerProps) {
  queryFn: async () => {
  const { data, error } = await supabase
  .from("vet_lab_integrations")
- .select("*")
+ .select("id, vet_id, lab_vendor, lab_name, account_id, api_endpoint, is_active, supports_dicom, auto_import, last_import_at, settings, created_at, updated_at")
  .eq("vet_id", vetId)
  .order("created_at", { ascending: false });
 
