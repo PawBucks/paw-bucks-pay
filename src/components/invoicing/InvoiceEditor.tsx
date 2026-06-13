@@ -41,6 +41,40 @@ import { PricingCalculator } from"@/components/merchant/PricingCalculator";
 import { cn } from"@/lib/utils";
 
 import { Formatters } from "@/utils/formatters";
+
+// Flatten react-hook-form errors into "field: message" strings the user can act on.
+function collectErrorMessages(errors: any, prefix = ""): string[] {
+	if (!errors || typeof errors !== "object") return [];
+	const out: string[] = [];
+	for (const [key, val] of Object.entries(errors as Record<string, any>)) {
+		if (!val) continue;
+		const path = prefix ? `${prefix}.${key}` : key;
+		if (typeof val === "object" && "message" in val && val.message) {
+			out.push(`${path}: ${val.message}`);
+		} else if (Array.isArray(val)) {
+			val.forEach((v, i) => out.push(...collectErrorMessages(v, `${path}[${i}]`)));
+		} else if (typeof val === "object") {
+			out.push(...collectErrorMessages(val, path));
+		}
+	}
+	return out;
+}
+
+function showValidationErrors(errors: any) {
+	console.error("[InvoiceEditor] Validation errors:", errors);
+	const messages = collectErrorMessages(errors);
+	if (messages.length === 0) {
+		toast.error("Could not save: form validation failed but no field errors were reported. Check the browser console for details.");
+		return;
+	}
+	const summary = messages.slice(0, 4).join("\n");
+	const more = messages.length > 4 ? `\n…and ${messages.length - 4} more` : "";
+	toast.error("Please fix the following before saving:", {
+		description: `${summary}${more}`,
+		duration: 8000,
+	});
+}
+
 const invoiceSchema = z.object({
  client_id: z.string().optional(),
  client_name: z.string().min(1,"Client name is required"),
