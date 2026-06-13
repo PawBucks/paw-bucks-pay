@@ -502,7 +502,7 @@ const MerchantInvoicing = () => {
  
  const newInvoice = await invoicingService.createInvoice({
  merchant_id: merchantId,
- invoice_number: nextInvoiceNumber,
+	  invoice_number: "", // DB trigger assigns atomically
  status:"draft",
  client_id: invoice.client_id,
  client_name: invoice.client_name,
