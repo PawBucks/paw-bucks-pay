@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
@@ -191,6 +191,20 @@ export default function DirectCheckout() {
             <p className="text-sm text-muted-foreground">Opening secure checkout…</p>
             <Button className="w-full" onClick={() => setDialogOpen(true)}>
               Open Checkout
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                if (window.history.length > 1) {
+                  navigate(-1);
+                } else {
+                  navigate("/");
+                }
+              }}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Go Back
             </Button>
           </CardContent>
         </Card>
