@@ -201,7 +201,19 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Once-per-day per campaign per merchant per trigger type
+      // Lifetime cap: a user can only collect from a given campaign ONCE, ever.
+      const { data: everEarned } = await supabase
+        .from("branded_pawbucks_activity")
+        .select("id")
+        .eq("campaign_id", campaign.id)
+        .eq("user_id", user_id)
+        .eq("type", "earn")
+        .limit(1);
+      if (everEarned && everEarned.length > 0) {
+        console.log(`[distribute-branded-pawbucks] user ${user_id} already collected campaign ${campaign.id} — skipping`);
+        continue;
+      }
+
       const triggerTag = `[${triggerType}]`;
       const txTag = transaction_id ? `[tx:${transaction_id}]` : null;
 
