@@ -25,7 +25,8 @@ import {
  AlertDialogTitle,
 } from"@/components/ui/alert-dialog";
 import { toast } from"sonner";
-import { ArrowLeft, DollarSign, ExternalLink, Loader2, Package, Pencil, Plus, RefreshCw, Store, Trash2 } from "lucide-react";
+import { ArrowLeft, DollarSign, ExternalLink, Loader2, Package, Pencil, Plus, RefreshCw, Store, Trash2, Upload } from "lucide-react";
+import { ImportProductsDialog } from "@/components/merchant/ImportProductsDialog";
 import { ProductImageUpload } from"@/components/shared/ProductImageUpload";
 import { PricingCalculator } from"@/components/merchant/PricingCalculator";
 import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
@@ -79,6 +80,7 @@ const MerchantProducts = () => {
  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
  const [loading, setLoading] = useState(true);
  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
  const [creating, setCreating] = useState(false);
  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -459,10 +461,16 @@ const MerchantProducts = () => {
      title="My Products"
      subtitle="Manage your store products and pricing"
      actions={
-       <Button onClick={() => setCreateDialogOpen(true)}>
-         <Plus className="h-4 w-4 sm:mr-2" />
-         <span className="hidden sm:inline">Add Product</span>
-       </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Import</span>
+          </Button>
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Product</span>
+          </Button>
+        </div>
      }
    />
    <div className="p-4 md:p-6 max-w-6xl mx-auto w-full">
@@ -969,6 +977,11 @@ const MerchantProducts = () => {
  </AlertDialogFooter>
  </AlertDialogContent>
  </AlertDialog>
+      <ImportProductsDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImported={() => merchant && loadProducts(merchant.id)}
+      />
    </div>
  </MerchantWorkspaceLayout>
  );
