@@ -18,6 +18,7 @@ import { format } from"date-fns";
 import { toast } from"sonner";
 import { cn } from"@/lib/utils";
 import { RefundPaymentDialog } from"@/components/shared/RefundPaymentDialog";
+import { TransactionItemsPanel } from "@/components/transactions/TransactionItemsPanel";
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
@@ -590,6 +591,12 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
                           {transaction.description && (
                             <p className="mt-3 text-xs text-muted-foreground"><span className="font-medium text-foreground">Note:</span> {transaction.description}</p>
                           )}
+                          <div className="mt-4">
+                            <TransactionItemsPanel
+                              transactionId={transaction.transaction_id}
+                              hideIfEmpty={false}
+                            />
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>

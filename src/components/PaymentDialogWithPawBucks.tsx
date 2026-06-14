@@ -35,6 +35,7 @@ import { PawBucksCapBreakdown } from"@/components/checkout/PawBucksCapBreakdown"
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useUserEarnRate } from "@/hooks/useUserEarnRate";
+import { ManualChargeItemsEditor, itemsToPayload, type LineItem } from "@/components/payment/ManualChargeItemsEditor";
 
 /**
  * Poll the `direct_payments` row (written by `create-combined-payment` and
@@ -304,6 +305,7 @@ export const PaymentDialogWithPawBucks = ({
     initialAmount && initialAmount > 0 ? initialAmount.toFixed(2) : ""
   );
  const [description, setDescription] = useState("");
+  const [lineItems, setLineItems] = useState<LineItem[]>([]);
   const [tipAmount, setTipAmount] = useState(initialTip && initialTip > 0 ? initialTip : 0);
  const [pawbucksToUse, setPawbucksToUse] = useState(0);
  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
@@ -326,6 +328,14 @@ export const PaymentDialogWithPawBucks = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialAmount, initialTip]);
+
+  // Auto-sync the amount field with the items subtotal whenever items change.
+  useEffect(() => {
+    if (lineItems.length === 0) return;
+    const sum = lineItems.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+    setAmount(sum > 0 ? sum.toFixed(2) : "");
+    setPawbucksToUse(0);
+  }, [lineItems]);
 
   // The backend credits PawBucks based on the USER's subscription tier
   // (Free 10x / PawPass 20x / PawPass+ 30x), NOT the merchant's cashback_rate.
@@ -541,6 +551,7 @@ export const PaymentDialogWithPawBucks = ({
  merchantId,
  description: description || `Payment to ${merchantName}`,
  autoRedeem: autoRedeemPref?.enabled ?? false,
+ items: itemsToPayload(lineItems),
  },
  });
 
@@ -622,6 +633,7 @@ export const PaymentDialogWithPawBucks = ({
  const handleSuccess = () => {
  setAmount("");
  setDescription("");
+ setLineItems([]);
  setTipAmount(0);
  setPawbucksToUse(0);
  setPawbucksSource("none");
@@ -636,6 +648,7 @@ export const PaymentDialogWithPawBucks = ({
  const handleCancel = () => {
  setAmount("");
  setDescription("");
+ setLineItems([]);
  setTipAmount(0);
  setPawbucksToUse(0);
  setPawbucksSource("none");
@@ -730,6 +743,11 @@ export const PaymentDialogWithPawBucks = ({
     <div className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground -mb-1">
       Order Details
     </div>
+ <ManualChargeItemsEditor
+   merchantId={merchantId}
+   items={lineItems}
+   onChange={setLineItems}
+ />
  <div className="space-y-2">
  <Label htmlFor="amount">Amount ($)</Label>
  <Input
@@ -746,7 +764,14 @@ export const PaymentDialogWithPawBucks = ({
  }}
  required
  autoFocus
+ readOnly={lineItems.length > 0}
+ className={lineItems.length > 0 ? "bg-muted/40 cursor-not-allowed" : ""}
  />
+ {lineItems.length > 0 && (
+   <p className="text-[11px] text-muted-foreground">
+     Total is calculated from the items above.
+   </p>
+ )}
  </div>
 
  <div className="space-y-2">

@@ -12539,6 +12539,65 @@ export type Database = {
         }
         Relationships: []
       }
+      transaction_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          inventory_decremented: boolean
+          merchant_id: string
+          name: string
+          quantity: number
+          sku: string | null
+          source_id: string | null
+          source_type: string
+          total: number | null
+          transaction_id: string
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          inventory_decremented?: boolean
+          merchant_id: string
+          name: string
+          quantity?: number
+          sku?: string | null
+          source_id?: string | null
+          source_type: string
+          total?: number | null
+          transaction_id: string
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          inventory_decremented?: boolean
+          merchant_id?: string
+          name?: string
+          quantity?: number
+          sku?: string | null
+          source_id?: string | null
+          source_type?: string
+          total?: number | null
+          transaction_id?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_items_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -15687,6 +15746,17 @@ export type Database = {
         Args: { p_merchant_id: string }
         Returns: boolean
       }
+      merchant_items_sold_report: {
+        Args: { p_end: string; p_merchant_id: string; p_start: string }
+        Returns: {
+          name: string
+          sku: string
+          source_type: string
+          total_quantity: number
+          total_revenue: number
+          transaction_count: number
+        }[]
+      }
       normalize_email: { Args: { raw_email: string }; Returns: string }
       process_checkin: {
         Args: { p_token: string; p_user_id: string }
@@ -15797,6 +15867,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      restore_transaction_inventory: {
+        Args: { p_transaction_id: string }
+        Returns: undefined
       }
       revoke_pet_digital_id_token: { Args: { p_pet_id: string }; Returns: Json }
       send_pawbucks_expiry_reminders: { Args: never; Returns: number }

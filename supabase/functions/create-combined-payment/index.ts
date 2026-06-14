@@ -12,6 +12,11 @@ import {
   planPawBucksDebit,
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
+import {
+  insertTransactionItems,
+  itemsToReceiptItems,
+  type IncomingTransactionItem,
+} from "../_shared/transaction-items.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +24,17 @@ const corsHeaders = {
 };
 
 // Validation schema for combined payment
+const itemSchema = z.object({
+  source_type: z.enum(["catalog_item", "pet_store_item", "merchant_service", "custom"]),
+  source_id: z.string().uuid().nullable().optional(),
+  name: z.string().trim().min(1).max(200),
+  description: z.string().max(1000).nullable().optional(),
+  sku: z.string().max(80).nullable().optional(),
+  quantity: z.number().positive(),
+  unit_price: z.number().min(0),
+  image_url: z.string().url().nullable().optional(),
+});
+
 const combinedPaymentSchema = z.object({
   totalAmount: z.number().positive({ message: "Amount must be greater than 0" }),
   pawbucksAmount: z.number().min(0).default(0),
@@ -27,6 +43,7 @@ const combinedPaymentSchema = z.object({
   merchantId: z.string().uuid({ message: "Invalid merchant ID" }),
   description: z.string().max(500).optional(),
   autoRedeem: z.boolean().optional().default(false),
+  items: z.array(itemSchema).max(100).optional(),
 });
 
 // PawBucks conversion for pet owners: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
@@ -121,7 +138,8 @@ serve(async (req) => {
       );
     }
 
-    const { totalAmount, pawbucksAmount: manualPawbucksAmount, storeLockedPawbucks, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem } = validation.data;
+    const { totalAmount, pawbucksAmount: manualPawbucksAmount, storeLockedPawbucks, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem, items } = validation.data;
+    const lineItems: IncomingTransactionItem[] = items ?? [];
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -413,6 +431,15 @@ serve(async (req) => {
         transaction_id: transaction?.id || null,
       });
 
+      // Persist line items (best-effort; non-fatal)
+      if (transaction?.id && lineItems.length > 0) {
+        await insertTransactionItems(supabaseAdmin, {
+          transactionId: transaction.id,
+          merchantId,
+          items: lineItems,
+        });
+      }
+
       // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
       if (actualWalletPawbucks > 0 && transaction?.id) {
         try {
@@ -453,7 +480,9 @@ serve(async (req) => {
           receiptId: transaction?.id || `PB-${Date.now()}`,
           merchantName: merchant.business_name,
           merchantLocation: merchant.address || undefined,
-          items: [{ name: description || 'PawBucks Payment', price: totalAmount }],
+          items: lineItems.length > 0
+            ? itemsToReceiptItems(lineItems)
+            : [{ name: description || 'PawBucks Payment', price: totalAmount }],
           subtotal: totalAmount,
           pawbucksApplied: pawbucksUsdValue,
           cardAmount: 0,
@@ -681,6 +710,7 @@ serve(async (req) => {
           subscription_tier: subscriptionTier,
           pawbucks_amount: pawbucksAmount,
           total_amount: totalAmount,
+          items: lineItems,
         },
       });
 

@@ -1,90 +1,96 @@
-# Brand-Funded PawBucks: Tight Pipeline
+# Line-Item Tracking for Merchant Charges
 
-Goal: Brand-funded PawBucks (e.g., Orijen) can only be spent on **brand-tagged products at participating merchants**. Admins get clean tools to assign and audit every PB minted and burned per brand.
+Adds optional itemized line items to in-person / manual merchant charges (PaymentDialog flow), persists them with each transaction, and surfaces them to both customers and merchants. Invoices and Pet Store orders already store items today; this extends parity to the most common transaction source on the platform.
 
-What already exists (reused, not rebuilt):
-- `brand_campaigns` + `branded_pawbucks_ledger` (per user × campaign balance)
-- `brand_campaign_merchants` (participating merchants)
-- `redeem_branded_pawbucks` RPC with FIFO across campaigns
-- Admin "Manual PB Grant" tab on each campaign (per-user)
+## 1. Data model
 
-## 1. Brand product tagging (the product gate)
+New table `public.transaction_items`:
 
-Add a brand link to catalog items so we can compute "brand-eligible cart total":
+- `transaction_id` → `transactions.id` (FK, cascade delete, indexed)
+- `merchant_id` (indexed — fast aggregate reports)
+- `source_type` enum: `catalog_item` | `pet_store_item` | `merchant_service` | `custom`
+- `source_id` (uuid, nullable — null for `custom`)
+- `name` (text, snapshot at sale time)
+- `description` (text, nullable)
+- `sku` (text, nullable)
+- `quantity` (numeric, default 1)
+- `unit_price` (numeric, USD)
+- `total` (numeric, generated: `quantity * unit_price`)
+- `image_url` (text, nullable — snapshot)
+- `inventory_decremented` (boolean, default false)
+- `created_at` timestamptz
 
-- `pet_store_items.brand_id` → `brand_accounts.id` (nullable)
-- `merchant_services.brand_id` → `brand_accounts.id` (nullable)
-- `invoice_items.brand_id` → `brand_accounts.id` (nullable, denormalized for invoice lines)
-- `invoice_catalog_items.brand_id` → `brand_accounts.id` (nullable)
+RLS:
+- Customer can SELECT items where the parent `transactions.user_id = auth.uid()`.
+- Merchant owner can SELECT items where the parent `transactions.merchant_id` belongs to them.
+- INSERT only via service role (edge functions).
 
-UI to tag items with a brand:
-- Merchant: brand dropdown on pet-store item editor, service editor, invoice line, and catalog item editor (only brands they're enrolled in via `brand_campaign_merchants`).
-- Admin: bulk-tag tool in BrandCampaignsTab — search items and assign brand.
+Inventory: trigger on insert decrements `pet_store_items.stock_quantity` when `source_type='pet_store_item'` and stock tracking is on, marks `inventory_decremented = true`. Refund flow (existing `merchant-issue-refund`) increments it back.
 
-## 2. Redemption enforcement (merchant gate + product gate)
+## 2. Backend (edge functions)
 
-New SECURITY DEFINER function `compute_brand_redeemable_cents(p_user_id, p_merchant_id, p_line_items jsonb)`:
-- Returns, per active campaign the user has balance in:
-  - `eligible_cents` = sum of line totals where `line.brand_id = campaign.brand_id`, but only if merchant is `active` in `brand_campaign_merchants` for that campaign.
-  - Cap = `min(user_branded_balance, eligible_cents_in_PB)`.
+Extend the combined-payment schema to accept an optional `items[]` array:
+```
+items: [{ source_type, source_id?, name, description?, sku?, quantity, unit_price, image_url? }]
+```
 
-`redeem_branded_pawbucks` is updated to require a `p_line_items jsonb` argument and only spend up to the per-campaign cap returned above. Falls back to 0 if no eligible lines.
+Server validates `sum(quantity * unit_price) ≈ baseAmount` (within 1¢), then writes rows to `transaction_items` after the transaction row is created. Affected functions:
 
-Wire `p_line_items` through every caller:
-- `confirm-payment-success`, `create-combined-payment`, `confirm-pet-store-payment`, `pet-store-pawbucks-purchase`, `process-invoice-pawbucks-payment`, `clover-pos-webhook`, `stripe-webhook`, `redeem-pawbucks`.
-- For `redeem-pawbucks` (offer redemption), line item = the offer's brand (offers gain `brand_id` too) at the merchant — gated identically.
+- `create-combined-payment` (PawBucks-only branch + Stripe branch metadata)
+- `confirm-payment-success` (writes items after Stripe confirms)
 
-Checkout UI changes:
-- Cart shows a "Brand PawBucks available: 1,200 PB ($1.20) on Orijen items only" chip per active brand the user has balance in.
-- PawBucks slider splits into: General PB + per-brand PB sliders, each capped to its eligible subtotal. Constraint memory (split-payment rules, success-fee on USD only) preserved.
+Items are also forwarded to the existing `send-receipt-email` call so the email shows the itemized table (it already accepts `items: { name, price }[]` — we'll enrich it to include quantity).
 
-## 3. Admin distribution controls (assign + audit)
+## 3. Manual charge UI (`PaymentDialogWithPawBucks`)
 
-Extend `AdminCampaignManageDialog`:
+New collapsible "Add items (optional)" section above the amount field:
 
-**Manual Grant tab** (kept):
-- Adds a "Bulk grant" mode with three targeting options:
-  1. CSV upload (email or user_id column)
-  2. Segment query — users with N+ check-ins at participating merchants in last X days
-  3. Users who purchased a brand-tagged product (auto-pulls candidates)
-- Preview count + total PB to be issued + remaining pool guard before commit.
-- New edge function `admin-bulk-grant-branded-pawbucks` (zod-validated, superadmin-only, batched server-side, idempotent per (campaign_id, user_id, batch_id)).
+- "Add from catalog" button → existing `CatalogItemPicker` patterns reused, sourcing from `invoice_catalog_items`, `merchant_services`, and `pet_store_items` for that merchant.
+- "Add custom line" → name + qty + price inputs.
+- Line list shows name × qty @ price = total, with remove button.
+- When ≥1 item exists, the `amount` field auto-populates from the sum and locks (with a small "Clear items to enter amount manually" link). Amount-only entry remains fully supported when no items are added.
+- Items are passed through `transactionsService.createCombinedPayment` to the edge function.
 
-**New "Distribution & Redemption" tab** on the dialog:
-- KPIs: Minted PB, Distributed (to users), Redeemed PB, Outstanding (issued − redeemed), Burn rate / day.
-- Distribution ledger table: when, who, source (auto-rule / manual / bulk / check-in), amount, admin actor.
-- Redemption ledger table: when, who, merchant, items, amount.
-- Both backed by existing `branded_pawbucks_activity` table plus a join to `profiles`, `merchants`, and (for redeems) order/invoice line snapshot.
+## 4. Customer view (`/activity`)
 
-Admin Brand Campaigns dashboard tab gets a top-level "Brand Vault" widget — for each brand: total minted, outstanding liability, % redeemed at brand-tagged SKUs vs forfeit candidates.
+In `src/pages/Activity.tsx`, each transaction row becomes expandable (chevron). On expand we fetch `transaction_items` for that id and render a simple table: item · qty · unit price · line total. Empty state: "No itemized details available for this transaction."
 
-## 4. Retroactive application
+## 5. Merchant view
 
-Migration plan for existing balances:
-- Existing `branded_pawbucks_ledger` rows stay as-is.
-- After the new redemption rules ship, any redeem attempt re-runs through the new gates → automatically restricted.
-- One-time backfill: tag legacy brand-aligned products where merchant explicitly carries a single brand (best-effort using merchant ↔ brand_campaign_merchants where brand has 1 enrolled merchant only); rest tagged by merchants/admins via the new UI.
-- A scheduled cron `branded-pb-eligibility-report` emails each affected user once: "Your X Orijen PawBucks are now spendable on Orijen products at participating stores."
+**Transactions list** (`MerchantTransactions.tsx` + `VirtualTransactionList`): each row gets an expandable items panel with the same table.
 
-## Technical details
+**New Items Sold report** under `MerchantSalesReport` → add a second tab "Items Sold":
+- Date range picker (default last 30 days).
+- Aggregated query: name, sku, total qty sold, total revenue, # transactions.
+- "Export CSV" downloads to `/mnt/documents` style direct download.
 
-Schema migrations (single migration each, with GRANTs + RLS):
-1. `ALTER TABLE pet_store_items / merchant_services / invoice_items / invoice_catalog_items / partner_offers ADD COLUMN brand_id uuid REFERENCES brand_accounts(id) ON DELETE SET NULL;` + indexes.
-2. `branded_pawbucks_activity` add `source text` ('auto_checkin' | 'manual_grant' | 'bulk_grant' | 'redeem'), `actor_user_id uuid`, `batch_id uuid`.
-3. New RPC `compute_brand_redeemable_cents(uuid, uuid, jsonb) RETURNS jsonb`.
-4. Update `redeem_branded_pawbucks` signature + body to require `p_line_items jsonb` and enforce per-campaign caps; old signature dropped (single-call audit, replace all call sites in same change).
+## 6. Receipt email
 
-Edge functions:
-- New: `admin-bulk-grant-branded-pawbucks` (zod, superadmin JWT check, batched).
-- Updated: every caller listed above passes `p_line_items` derived from the actual cart / invoice / offer.
+Update `send-receipt-email` template to render a proper line-item table (item name, qty, line total) when `items` includes qty fields. Falls back to existing single-line behavior when items array is empty.
 
-Frontend:
-- `AdminCampaignManageDialog.tsx`: add Bulk Grant subtab + Distribution & Redemption tab.
-- `BrandCampaignsTab.tsx`: add "Brand Vault" header strip.
-- Merchant editors: brand dropdown on product/service/catalog item/invoice line forms.
-- Checkout: per-brand PB sliders; eligibility chip on cart.
+## Technical notes
 
-Out of scope for this round:
-- Programmatic SKU/UPC sync from external brand catalogs.
-- Multi-brand per item (single brand per item only for v1).
-- Cross-brand offer codes.
+- Storage: items are append-only snapshots — never mutated when the source catalog item is later edited (so historical receipts stay accurate).
+- Refunds: existing partial/full refund flow is unchanged; only the inventory restore trigger is new.
+- No changes to PawBucks math, fees, or payout calculations — items are descriptive metadata layered on top of the existing `transactions.amount`.
+- Subscriptions, partner offers, and storefront/services checkout are explicitly out of scope per your selection.
+
+## Files
+
+**New**
+- `supabase/migrations/<ts>_transaction_items.sql`
+- `src/components/merchant/TransactionItemsPanel.tsx`
+- `src/components/merchant/ItemsSoldReport.tsx`
+- `src/components/payment/ManualChargeItemsEditor.tsx`
+
+**Edited**
+- `supabase/functions/create-combined-payment/index.ts`
+- `supabase/functions/confirm-payment-success/index.ts`
+- `supabase/functions/send-receipt-email/index.ts` (+ template)
+- `supabase/functions/merchant-issue-refund/index.ts` (restore inventory)
+- `src/components/PaymentDialogWithPawBucks.tsx`
+- `src/services/api/transactions.service.ts`
+- `src/pages/Activity.tsx`
+- `src/pages/MerchantTransactions.tsx`
+- `src/components/merchant/VirtualTransactionList.tsx`
+- `src/pages/MerchantSalesReport.tsx`
