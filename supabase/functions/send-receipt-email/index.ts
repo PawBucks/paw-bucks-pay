@@ -10,6 +10,8 @@ const corsHeaders = {
 interface ReceiptItem {
   name: string;
   price: number;
+  qty?: number;
+  unit_price?: number;
 }
 
 interface ReceiptEmailParams {
@@ -98,12 +100,19 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
   const shortReceiptId = receiptId.substring(0, 12).toUpperCase();
 
   // ── Items
-  const itemRowsHtml = items.map((item) => `
+  const itemRowsHtml = items.map((item) => {
+    const qty = item.qty && item.qty > 0 ? item.qty : null;
+    const unit = item.unit_price ?? (qty ? item.price / qty : undefined);
+    const label = qty && qty !== 1
+      ? `${item.name} <span style="color:#94a3b8;font-weight:400;">× ${qty}${unit !== undefined ? ` @ $${unit.toFixed(2)}` : ''}</span>`
+      : item.name;
+    return `
     <tr>
-      <td style="padding:6px 0;font-size:14px;color:#0f172a;font-weight:400;">${item.name}</td>
+      <td style="padding:6px 0;font-size:14px;color:#0f172a;font-weight:400;">${label}</td>
       <td align="right" style="padding:6px 0;font-size:14px;color:#0f172a;font-weight:500;white-space:nowrap;">$${item.price.toFixed(2)}</td>
     </tr>
-  `).join('');
+  `;
+  }).join('');
 
   // ── Payment summary rows
   let summaryRowsHtml = `
