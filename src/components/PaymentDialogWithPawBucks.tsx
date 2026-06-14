@@ -743,6 +743,11 @@ export const PaymentDialogWithPawBucks = ({
     <div className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground -mb-1">
       Order Details
     </div>
+ <ManualChargeItemsEditor
+   merchantId={merchantId}
+   items={lineItems}
+   onChange={setLineItems}
+ />
  <div className="space-y-2">
  <Label htmlFor="amount">Amount ($)</Label>
  <Input
@@ -759,7 +764,14 @@ export const PaymentDialogWithPawBucks = ({
  }}
  required
  autoFocus
+ readOnly={lineItems.length > 0}
+ className={lineItems.length > 0 ? "bg-muted/40 cursor-not-allowed" : ""}
  />
+ {lineItems.length > 0 && (
+   <p className="text-[11px] text-muted-foreground">
+     Total is calculated from the items above.
+   </p>
+ )}
  </div>
 
  <div className="space-y-2">
