@@ -431,6 +431,15 @@ serve(async (req) => {
         transaction_id: transaction?.id || null,
       });
 
+      // Persist line items (best-effort; non-fatal)
+      if (transaction?.id && lineItems.length > 0) {
+        await insertTransactionItems(supabaseAdmin, {
+          transactionId: transaction.id,
+          merchantId,
+          items: lineItems,
+        });
+      }
+
       // Track Branded PawBucks redemption (FIFO across active campaigns at this merchant)
       if (actualWalletPawbucks > 0 && transaction?.id) {
         try {
