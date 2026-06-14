@@ -6,6 +6,11 @@ import {
   planPawBucksDebit,
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
+import {
+  insertTransactionItems,
+  itemsToReceiptItems,
+  type IncomingTransactionItem,
+} from "../_shared/transaction-items.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -317,6 +322,28 @@ serve(async (req) => {
     }
 
     logStep("Transaction record created", { transactionId: transaction.id });
+
+    // Load line items stashed by create-combined-payment in direct_payments.metadata
+    let lineItems: IncomingTransactionItem[] = [];
+    try {
+      const { data: dp } = await supabaseAdmin
+        .from("direct_payments")
+        .select("metadata")
+        .eq("stripe_payment_intent_id", paymentIntentId)
+        .maybeSingle();
+      const rawItems = (dp as any)?.metadata?.items;
+      if (Array.isArray(rawItems)) lineItems = rawItems;
+    } catch (e) {
+      logStep("Could not load line items from direct_payments (non-fatal)", { error: String(e) });
+    }
+
+    if (lineItems.length > 0) {
+      await insertTransactionItems(supabaseAdmin, {
+        transactionId: transaction.id,
+        merchantId,
+        items: lineItems,
+      });
+    }
 
     // 3. Award PawBucks to user (only if not already credited for this payment intent)
     if (pawbucksEarned > 0) {
