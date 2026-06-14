@@ -633,6 +633,7 @@ export const PaymentDialogWithPawBucks = ({
  const handleSuccess = () => {
  setAmount("");
  setDescription("");
+ setLineItems([]);
  setTipAmount(0);
  setPawbucksToUse(0);
  setPawbucksSource("none");
@@ -647,6 +648,7 @@ export const PaymentDialogWithPawBucks = ({
  const handleCancel = () => {
  setAmount("");
  setDescription("");
+ setLineItems([]);
  setTipAmount(0);
  setPawbucksToUse(0);
  setPawbucksSource("none");
