@@ -480,7 +480,9 @@ serve(async (req) => {
           receiptId: transaction?.id || `PB-${Date.now()}`,
           merchantName: merchant.business_name,
           merchantLocation: merchant.address || undefined,
-          items: [{ name: description || 'PawBucks Payment', price: totalAmount }],
+          items: lineItems.length > 0
+            ? itemsToReceiptItems(lineItems)
+            : [{ name: description || 'PawBucks Payment', price: totalAmount }],
           subtotal: totalAmount,
           pawbucksApplied: pawbucksUsdValue,
           cardAmount: 0,
