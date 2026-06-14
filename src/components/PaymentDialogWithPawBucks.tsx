@@ -551,6 +551,7 @@ export const PaymentDialogWithPawBucks = ({
  merchantId,
  description: description || `Payment to ${merchantName}`,
  autoRedeem: autoRedeemPref?.enabled ?? false,
+ items: itemsToPayload(lineItems),
  },
  });
 
