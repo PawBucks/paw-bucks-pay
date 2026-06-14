@@ -661,7 +661,9 @@ serve(async (req) => {
         merchantLocation: merchant?.address || undefined,
         merchantPhone: (merchant as any)?.phone || undefined,
         merchantEmail: (merchant as any)?.email || undefined,
-        items: [{ name: description, price: totalAmount > 0 ? totalAmount : amountInDollars }],
+        items: lineItems.length > 0
+          ? itemsToReceiptItems(lineItems)
+          : [{ name: description, price: totalAmount > 0 ? totalAmount : amountInDollars }],
         subtotal: totalAmount > 0 ? totalAmount : amountInDollars,
         pawbucksApplied: pawbucksUsdValue,
         cardAmount: amountInDollars,
