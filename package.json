@@ -52,6 +52,7 @@
     "@types/canvas-confetti": "^1.9.0",
     "@types/dompurify": "^3.0.5",
     "@types/mapbox-gl": "^3.4.1",
+    "@types/papaparse": "^5.5.2",
     "canvas-confetti": "^1.9.4",
     "capacitor-native-biometric": "^4.2.2",
     "class-variance-authority": "^0.7.1",
@@ -69,6 +70,7 @@
     "lucide-react": "^0.462.0",
     "mapbox-gl": "^3.16.0",
     "next-themes": "^0.3.0",
+    "papaparse": "^5.5.3",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
@@ -83,6 +85,7 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
     "vite-plugin-pwa": "^1.1.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
