@@ -710,6 +710,7 @@ serve(async (req) => {
           subscription_tier: subscriptionTier,
           pawbucks_amount: pawbucksAmount,
           total_amount: totalAmount,
+          items: lineItems,
         },
       });
 
