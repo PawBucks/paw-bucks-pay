@@ -977,6 +977,11 @@ const MerchantProducts = () => {
  </AlertDialogFooter>
  </AlertDialogContent>
  </AlertDialog>
+      <ImportProductsDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImported={() => merchant && loadProducts(merchant.id)}
+      />
    </div>
  </MerchantWorkspaceLayout>
  );
