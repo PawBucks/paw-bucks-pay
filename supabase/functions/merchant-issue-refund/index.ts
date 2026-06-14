@@ -218,6 +218,18 @@ serve(async (req) => {
       .eq('id', transactionId);
     logStep('Transaction updated', { newStatus, newAmountRefunded });
 
+    // Restore inventory for items decremented on the original sale (full refund only).
+    if (isFinalRefund) {
+      try {
+        const { error: invErr } = await supabaseAdmin.rpc('restore_transaction_inventory', {
+          p_transaction_id: transactionId,
+        });
+        if (invErr) logStep('Inventory restore failed (non-fatal)', { error: invErr.message });
+      } catch (e) {
+        logStep('Inventory restore exception (non-fatal)', { error: String(e) });
+      }
+    }
+
     // Auto-cancel linked subscription on full refund only
     if (isFinalRefund && transaction.stripe_payment_intent_id && transaction.user_id) {
       const { data: linkedSubs } = await supabaseAdmin
