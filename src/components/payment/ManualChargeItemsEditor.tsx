@@ -67,6 +67,7 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
           .from("invoice_catalog_items")
           .select("id, name, unit_price, sku, category")
           .eq("merchant_id", merchantId)
+          .eq("is_active", true)
           .order("name"),
         supabase
           .from("merchant_services")
@@ -76,7 +77,7 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
           .order("name"),
         supabase
           .from("pet_store_items")
-          .select("id, name, price_usd, sku, stock_quantity")
+          .select("id, name, price, stock_quantity")
           .eq("merchant_id", merchantId)
           .eq("is_active", true)
           .order("name"),
@@ -106,8 +107,8 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
         list.push({
           id: p.id,
           name: p.name,
-          unit_price: Number(p.price_usd ?? 0),
-          sku: p.sku ?? null,
+          unit_price: Number(p.price ?? 0),
+          sku: null,
           source_type: "pet_store_item",
           group: "Store",
         }),
