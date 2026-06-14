@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Formatters } from "@/utils/formatters";
 import { format } from "date-fns";
 import { ChevronDown, Receipt, TrendingDown, TrendingUp } from "lucide-react";
+import { TransactionItemsPanel } from "@/components/transactions/TransactionItemsPanel";
 
 const PB_TO_USD = 0.001;
 
@@ -212,6 +213,9 @@ const Activity = () => {
                               <p className="text-xs text-muted-foreground mb-3">
                                 {v.description}
                               </p>
+                            )}
+                            {isOpen && (
+                              <TransactionItemsPanel transactionId={v.id} className="mb-3" />
                             )}
                             <dl className="text-sm space-y-1.5">
                               <Row label="Visit total" value={Formatters.currency(paid)} />
