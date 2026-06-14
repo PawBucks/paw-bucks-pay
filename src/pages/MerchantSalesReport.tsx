@@ -1,6 +1,8 @@
 import { SEO } from "@/components/SEO";
 import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SalesReportGenerator } from "@/components/shared/SalesReportGenerator";
+import { ItemsSoldReport } from "@/components/merchant/ItemsSoldReport";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMerchantContext } from "@/hooks/useMerchantContext";
 import { Loader2 } from "lucide-react";
 
@@ -15,7 +17,18 @@ export default function MerchantSalesReport() {
           {loading || !merchantId ? (
             <div className="flex items-center justify-center py-16"><Loader2 className="h-6 w-6 animate-spin" /></div>
           ) : (
-            <SalesReportGenerator entityId={merchantId} entityType="merchant" entityName={businessName ?? ""} />
+            <Tabs defaultValue="sales" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="sales">Sales Report</TabsTrigger>
+                <TabsTrigger value="items">Items Sold</TabsTrigger>
+              </TabsList>
+              <TabsContent value="sales">
+                <SalesReportGenerator entityId={merchantId} entityType="merchant" entityName={businessName ?? ""} />
+              </TabsContent>
+              <TabsContent value="items">
+                <ItemsSoldReport merchantId={merchantId} merchantName={businessName ?? ""} />
+              </TabsContent>
+            </Tabs>
           )}
         </div>
       </MerchantWorkspaceLayout>
