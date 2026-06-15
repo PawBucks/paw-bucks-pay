@@ -549,7 +549,7 @@ const Storefront = memo(() => {
   )}
   </div>
   <Button onClick={() => handleSubscribe(plan)} className="w-full" size="lg" disabled={!paymentsActive}>
-  <CreditCard className="h-4 w-4 mr-2" /> {paymentsActive ? "Subscribe" : "Payments unavailable"}
+  <CreditCard className="h-4 w-4 mr-2" /> {paymentsActive ? "Subscribe" : "Pay In-Store"}
  </Button>
  </CardContent>
  </Card>
@@ -592,21 +592,21 @@ const Storefront = memo(() => {
   {product.price?.formatted || "N/A"}
   </div>
   {user ? (
-  <Button
-  onClick={() => handleAddToCart(product)}
-  disabled={!product.price || !paymentsActive}
-  className="w-full"
-  variant={inCart ? "secondary" : "default"}
-  size="lg"
-  >
-  {!paymentsActive ? (
-  <>Payments unavailable</>
-  ) : inCart ? (
-  <><Plus className="h-4 w-4 mr-2" /> Add More ({inCart.quantity} in cart)</>
-  ) : (
-  <><ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart</>
-  )}
-  </Button>
+   <Button
+   onClick={() => handleAddToCart(product)}
+   disabled={!product.price || !paymentsActive}
+   className="w-full"
+   variant={inCart ? "secondary" : "default"}
+   size="lg"
+   >
+   {!paymentsActive ? (
+   <>Pay In-Store</>
+   ) : inCart ? (
+   <><Plus className="h-4 w-4 mr-2" /> Add More ({inCart.quantity} in cart)</>
+   ) : (
+   <><ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart</>
+   )}
+   </Button>
   ) : (
   <Button onClick={() => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`)} className="w-full" size="lg">
   Sign in to Shop
@@ -676,7 +676,7 @@ const Storefront = memo(() => {
      <Button onClick={() => setCartOpen(true)} className="flex-[2]" size="lg" disabled={!paymentsActive}>
       <ShoppingCart className="h-4 w-4 mr-2" />
        {!paymentsActive
-        ? "Payments unavailable"
+        ? "Pay In-Store"
         : itemCount > 0
         ? `View Cart (${itemCount}) · ${Formatters.currency(totalCents / 100)}`
         : "View Cart"}
