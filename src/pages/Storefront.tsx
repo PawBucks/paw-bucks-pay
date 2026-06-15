@@ -548,8 +548,7 @@ const Storefront = memo(() => {
   </span>
   )}
   </div>
-  <Button onClick={() => handleSubscribe(plan)} className="w-full" size="lg">
-  disabled={!paymentsActive}
+  <Button onClick={() => handleSubscribe(plan)} className="w-full" size="lg" disabled={!paymentsActive}>
   <CreditCard className="h-4 w-4 mr-2" /> {paymentsActive ? "Subscribe" : "Payments unavailable"}
  </Button>
  </CardContent>
