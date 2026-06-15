@@ -594,12 +594,14 @@ const Storefront = memo(() => {
   {user ? (
   <Button
   onClick={() => handleAddToCart(product)}
-  disabled={!product.price}
+  disabled={!product.price || !paymentsActive}
   className="w-full"
   variant={inCart ? "secondary" : "default"}
   size="lg"
   >
-  {inCart ? (
+  {!paymentsActive ? (
+  <>Payments unavailable</>
+  ) : inCart ? (
   <><Plus className="h-4 w-4 mr-2" /> Add More ({inCart.quantity} in cart)</>
   ) : (
   <><ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart</>
