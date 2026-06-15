@@ -549,7 +549,7 @@ const Storefront = memo(() => {
   )}
   </div>
   <Button onClick={() => handleSubscribe(plan)} className="w-full" size="lg" disabled={!paymentsActive}>
-  <CreditCard className="h-4 w-4 mr-2" /> {paymentsActive ? "Subscribe" : "Payments unavailable"}
+  <CreditCard className="h-4 w-4 mr-2" /> {paymentsActive ? "Subscribe" : "Pay In-Store"}
  </Button>
  </CardContent>
  </Card>
@@ -676,7 +676,7 @@ const Storefront = memo(() => {
      <Button onClick={() => setCartOpen(true)} className="flex-[2]" size="lg" disabled={!paymentsActive}>
       <ShoppingCart className="h-4 w-4 mr-2" />
        {!paymentsActive
-        ? "Payments unavailable"
+        ? "Pay In-Store"
         : itemCount > 0
         ? `View Cart (${itemCount}) · ${Formatters.currency(totalCents / 100)}`
         : "View Cart"}
