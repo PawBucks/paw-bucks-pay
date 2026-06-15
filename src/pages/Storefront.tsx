@@ -673,9 +673,11 @@ const Storefront = memo(() => {
        }
       />
      )}
-     <Button onClick={() => setCartOpen(true)} className="flex-[2]" size="lg">
+     <Button onClick={() => setCartOpen(true)} className="flex-[2]" size="lg" disabled={!paymentsActive}>
       <ShoppingCart className="h-4 w-4 mr-2" />
-       {itemCount > 0
+       {!paymentsActive
+        ? "Payments unavailable"
+        : itemCount > 0
         ? `View Cart (${itemCount}) · ${Formatters.currency(totalCents / 100)}`
         : "View Cart"}
      </Button>
