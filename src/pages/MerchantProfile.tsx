@@ -962,11 +962,17 @@ const MerchantProfile = memo(() => {
             />
             <button
               onClick={hasBookableServices ? scrollToBooking : handleOpenPaymentDialog}
-              disabled={!hasBookableServices && !merchant.accepts_pawbucks}
+              disabled={!hasBookableServices && !canPay}
               className="flex-[2] inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shadow-md hover:opacity-95 disabled:opacity-50 transition"
             >
               <PawBucksLogo className="w-4 h-4" />
-              {hasBookableServices ? "Book & Earn PawBucks" : merchant.accepts_pawbucks ? "Pay & Earn PawBucks" : "Doesn't accept PawBucks"}
+              {hasBookableServices
+                ? "Book & Earn PawBucks"
+                : !merchant.accepts_pawbucks
+                  ? "Doesn't accept PawBucks"
+                  : !paymentsActive
+                    ? "Payments unavailable"
+                    : "Pay & Earn PawBucks"}
             </button>
           </div>
         </div>
