@@ -335,12 +335,13 @@ const MerchantLanding = () => {
  <section className="ml-hero">
  <div className="ml-hero-left">
  <div className="ml-eyebrow">For Pet Businesses</div>
- <h1 className="ml-hero-title">
-            Get more repeat customers <em>without paying CPC ads.</em>
- </h1>
- <p className="ml-hero-sub">
- Join PawBucks free. Accept payments, run loyalty, manage bookings, and keep customers coming back — all from one platform built for pet professionals.
- </p>
+  <h1 className="ml-hero-title">
+            Grow your customer base <em>without upfront ad spend</em>
+  </h1>
+  <p className="ml-hero-sub">
+            PawBucks brings you new paying customers and helps them come back.<br />
+            No ads. No upfront spend. You only pay after a completed purchase.
+  </p>
  <div className="ml-actions">
  <button className="ml-btn-primary" onClick={goSignup}>Get Started Free</button>
  <button className="ml-btn-ghost" onClick={() => document.getElementById("how")?.scrollIntoView({ behavior:"smooth" })}>
