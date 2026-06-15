@@ -577,7 +577,7 @@ serve(async (req) => {
         // Update the merchant's onboarding status in our database
         await supabaseAdmin
           .from('merchants')
-          .update({ onboarding_complete: false })
+          .update({ onboarding_complete: false, stripe_account_status: 'restricted' })
           .eq('id', merchantId);
 
         throw new Error(`${merchant.business_name} hasn't completed their payment setup yet. Please ask them to complete onboarding in their Merchant Dashboard.`);
