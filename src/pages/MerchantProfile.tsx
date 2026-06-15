@@ -452,11 +452,13 @@ const MerchantProfile = memo(() => {
                 )}
                 <button
                   onClick={handleOpenPaymentDialog}
-                  disabled={!merchant.accepts_pawbucks}
+                  disabled={!canPay}
                   className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 disabled:opacity-50 active:scale-95 transition"
                 >
                   <PawBucksLogo className="w-5 h-5" />
-                  <span className="text-[11px] leading-tight text-center">Pay &amp; Earn</span>
+                  <span className="text-[11px] leading-tight text-center">
+                    {paymentsActive ? "Pay & Earn" : "Pay unavailable"}
+                  </span>
                 </button>
                 {merchant.storefront_slug && (
                   <Link
