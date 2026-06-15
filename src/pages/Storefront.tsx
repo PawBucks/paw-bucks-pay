@@ -592,21 +592,21 @@ const Storefront = memo(() => {
   {product.price?.formatted || "N/A"}
   </div>
   {user ? (
-  <Button
-  onClick={() => handleAddToCart(product)}
-  disabled={!product.price || !paymentsActive}
-  className="w-full"
-  variant={inCart ? "secondary" : "default"}
-  size="lg"
-  >
-  {!paymentsActive ? (
-  <>Payments unavailable</>
-  ) : inCart ? (
-  <><Plus className="h-4 w-4 mr-2" /> Add More ({inCart.quantity} in cart)</>
-  ) : (
-  <><ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart</>
-  )}
-  </Button>
+   <Button
+   onClick={() => handleAddToCart(product)}
+   disabled={!product.price || !paymentsActive}
+   className="w-full"
+   variant={inCart ? "secondary" : "default"}
+   size="lg"
+   >
+   {!paymentsActive ? (
+   <>Pay In-Store</>
+   ) : inCart ? (
+   <><Plus className="h-4 w-4 mr-2" /> Add More ({inCart.quantity} in cart)</>
+   ) : (
+   <><ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart</>
+   )}
+   </Button>
   ) : (
   <Button onClick={() => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`)} className="w-full" size="lg">
   Sign in to Shop
