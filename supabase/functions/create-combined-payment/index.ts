@@ -162,7 +162,7 @@ serve(async (req) => {
     // Get merchant details
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
-      .select('stripe_account_id, cashback_rate, business_name, accepts_pawbucks, onboarding_complete, address, business_type, pawbucks_cap_enabled, pawbucks_cap_pct, pawbucks_promo_cap_pct, pawbucks_promo_starts_at, pawbucks_promo_ends_at')
+      .select('stripe_account_id, stripe_account_status, cashback_rate, business_name, accepts_pawbucks, onboarding_complete, address, business_type, pawbucks_cap_enabled, pawbucks_cap_pct, pawbucks_promo_cap_pct, pawbucks_promo_starts_at, pawbucks_promo_ends_at')
       .eq('id', merchantId)
       .single();
 
@@ -554,6 +554,11 @@ serve(async (req) => {
       throw new Error('This merchant has not set up payment processing yet. Please contact the business directly.');
     }
 
+    // Disable all payment options when the merchant's Stripe account is not active
+    if (merchant.stripe_account_status !== 'active') {
+      throw new Error(`${merchant.business_name} is not currently able to accept payments. Please try again later or contact the business directly.`);
+    }
+
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2024-12-18.acacia',
     });
@@ -572,7 +577,7 @@ serve(async (req) => {
         // Update the merchant's onboarding status in our database
         await supabaseAdmin
           .from('merchants')
-          .update({ onboarding_complete: false })
+          .update({ onboarding_complete: false, stripe_account_status: 'restricted' })
           .eq('id', merchantId);
 
         throw new Error(`${merchant.business_name} hasn't completed their payment setup yet. Please ask them to complete onboarding in their Merchant Dashboard.`);

@@ -204,11 +204,17 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
       return row
-        ? { stripe_account_id: row.stripe_account_id, timezone: row.timezone }
+        ? {
+            stripe_account_id: row.stripe_account_id,
+            stripe_account_status: row.stripe_account_status,
+            timezone: row.timezone,
+          }
         : null;
     },
   });
-  const merchantAcceptsCards = !!merchantPaymentInfo?.stripe_account_id;
+  const merchantAcceptsCards =
+    !!merchantPaymentInfo?.stripe_account_id &&
+    merchantPaymentInfo?.stripe_account_status === "active";
   const merchantTz = merchantPaymentInfo?.timezone || DEFAULT_MERCHANT_TZ;
   const viewerTz = getViewerTimeZone();
   const showViewerLocal = viewerTz !== merchantTz;

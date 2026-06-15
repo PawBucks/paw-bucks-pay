@@ -18,6 +18,7 @@ interface Merchant {
   business_type: string;
   onboarding_complete: boolean;
   stripe_account_id: string | null;
+  stripe_account_status: string | null;
   address: string | null;
   phone: string | null;
   email: string | null;
@@ -74,6 +75,7 @@ export default function DirectCheckout() {
           ...(publicData as any),
           onboarding_complete: ctxRow?.onboarding_complete ?? false,
           stripe_account_id: ctxRow?.stripe_account_id ?? null,
+          stripe_account_status: ctxRow?.stripe_account_status ?? null,
         } as Merchant);
       } catch (err) {
         console.error("Error fetching merchant:", err);
@@ -101,6 +103,7 @@ export default function DirectCheckout() {
       merchant &&
       merchant.onboarding_complete &&
       merchant.stripe_account_id &&
+      merchant.stripe_account_status === "active" &&
       !success
     ) {
       setDialogOpen(true);
@@ -154,7 +157,11 @@ export default function DirectCheckout() {
     );
   }
 
-  if (!merchant.onboarding_complete || !merchant.stripe_account_id) {
+  if (
+    !merchant.onboarding_complete ||
+    !merchant.stripe_account_id ||
+    merchant.stripe_account_status !== "active"
+  ) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <SEO title={`Pay ${merchant.business_name}`} noIndex />
@@ -162,8 +169,20 @@ export default function DirectCheckout() {
           <CardContent className="pt-6 text-center">
             <h2 className="text-xl font-semibold mb-2">{merchant.business_name}</h2>
             <p className="text-muted-foreground">
-              This merchant hasn't completed their payment setup yet.
+              Payments are temporarily unavailable for this business. Please
+              check back later or contact them directly.
             </p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => {
+                if (window.history.length > 1) navigate(-1);
+                else navigate("/");
+              }}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Go Back
+            </Button>
           </CardContent>
         </Card>
       </div>
