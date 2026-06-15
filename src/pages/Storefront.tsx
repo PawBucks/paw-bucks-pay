@@ -221,6 +221,10 @@ const Storefront = memo(() => {
  toast.error("Please sign in to shop", { action: { label:"Sign In", onClick: () => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`) } });
  return;
  }
+ if (!paymentsActive) {
+ toast.error("This merchant is not accepting payments right now");
+ return;
+ }
  if (!product.price?.id || product.price.unit_amount == null) return;
 
  addToCart({
@@ -234,11 +238,15 @@ const Storefront = memo(() => {
  formatted: product.price.formatted,
  });
  toast.success("Added to cart!");
- }, [user, navigate, addToCart]);
+ }, [user, navigate, addToCart, paymentsActive]);
 
  // Cart checkout
  const handleCartCheckout = useCallback(async (params: StorefrontCheckoutParams) => {
  if (!user || cartItems.length === 0 || !merchantIdForProducts) return;
+ if (!paymentsActive) {
+ toast.error("This merchant is not accepting payments right now");
+ return;
+ }
 
  // Full PawBucks checkout
  if (params.mode ==="pawbucks") {
