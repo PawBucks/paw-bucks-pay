@@ -205,6 +205,7 @@ const Storefront = memo(() => {
  const merchantBusinessType = merchantData?.business_type || null;
  const cashbackRate = merchantData?.cashback_rate || 10;
  const merchantAcceptsPawBucks = merchantData?.acceptsPawBucks ?? false;
+ const paymentsActive = (merchantData as any)?.stripe_account_status === "active";
 
  const loading = merchantLoading || productsLoading;
 
