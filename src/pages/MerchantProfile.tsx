@@ -119,7 +119,7 @@ const MerchantProfile = memo(() => {
         queryFn: async () => {
           const { data, error } = await supabase
             .from("merchants_public")
-            .select("id, business_name, business_type, description, logo_url, address, phone, cashback_rate, accepts_pawbucks, storefront_slug, price_range, facebook_url, instagram_url, twitter_url, linkedin_url, website_url")
+            .select("id, business_name, business_type, description, logo_url, address, phone, cashback_rate, accepts_pawbucks, storefront_slug, price_range, facebook_url, instagram_url, twitter_url, linkedin_url, website_url, stripe_account_status")
             .eq("id", merchantId)
             .single();
           if (error) throw error;
@@ -153,6 +153,8 @@ const MerchantProfile = memo(() => {
   const merchantStripeInfo = queryResults[2].data as { accountId?: string } | null;
   const connectedAccountId = merchantStripeInfo?.accountId || null;
   const hasBookableServices = merchantServices.length > 0;
+  const paymentsActive = merchant?.stripe_account_status === "active";
+  const canPay = !!merchant?.accepts_pawbucks && paymentsActive;
 
   // If user arrived with intent=book (e.g. from "Schedule Visit"), auto-open the booking tab.
   useEffect(() => {
@@ -252,8 +254,12 @@ const MerchantProfile = memo(() => {
   }, [user, navigate, merchantId]);
 
   const handleOpenPaymentDialog = useCallback(() => {
+    if (!paymentsActive) {
+      toast.error("Payments are temporarily unavailable for this merchant");
+      return;
+    }
     requireAuth(() => setPaymentDialogOpen(true), "Please sign in to make a payment");
-  }, [requireAuth]);
+  }, [requireAuth, paymentsActive]);
 
   const handleOpenReviewDialog = useCallback(() => setReviewDialogOpen(true), []);
   const handleReviewSuccess = useCallback(() => refetchReviews(), [refetchReviews]);
