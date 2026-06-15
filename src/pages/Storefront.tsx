@@ -136,6 +136,7 @@ const Storefront = memo(() => {
  const merchantData = queryResults[0].data;
  const merchantLoading = queryResults[0].isLoading;
  const autoRedeemPref = queryResults[1].data as { enabled: boolean; mode: string } | undefined;
+ const paymentsActive = (merchantData as any)?.stripe_account_status === "active";
 
  const merchantIdForProducts = merchantData?.id;
  const { data: productsData, isLoading: productsLoading } = useQuery({
