@@ -187,6 +187,10 @@ const Storefront = memo(() => {
  toast.error("Please sign in to subscribe", { action: { label:"Sign In", onClick: () => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`) } });
  return;
  }
+ if (!paymentsActive) {
+ toast.error("Payments are temporarily unavailable for this merchant");
+ return;
+ }
  if (!merchantConnectedAccountId) {
  toast.error("This merchant hasn't completed payment setup.");
  return;
@@ -194,7 +198,7 @@ const Storefront = memo(() => {
  setConnectedAccountId(merchantConnectedAccountId);
  setSelectedPlan(plan);
  setShowSubDialog(true);
- }, [user, navigate, merchantConnectedAccountId]);
+ }, [user, navigate, merchantConnectedAccountId, paymentsActive]);
 
  // Derived values
  const merchantName = merchantData?.business_name ||"";
