@@ -554,6 +554,11 @@ serve(async (req) => {
       throw new Error('This merchant has not set up payment processing yet. Please contact the business directly.');
     }
 
+    // Disable all payment options when the merchant's Stripe account is not active
+    if (merchant.stripe_account_status !== 'active') {
+      throw new Error(`${merchant.business_name} is not currently able to accept payments. Please try again later or contact the business directly.`);
+    }
+
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2024-12-18.acacia',
     });
