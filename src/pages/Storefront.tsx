@@ -96,7 +96,7 @@ const Storefront = memo(() => {
  if (!accountId) return null;
  const { data: merchantBySlug } = await supabase
  .from('merchants_public')
- .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, business_categories, accepts_pawbucks, tos_url, privacy_policy_url, shipping_returns_policy_url')
+ .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, business_categories, accepts_pawbucks, tos_url, privacy_policy_url, shipping_returns_policy_url, stripe_account_status')
  .eq('storefront_slug', accountId)
  .maybeSingle();
 
@@ -106,7 +106,7 @@ const Storefront = memo(() => {
 
  const { data: merchantById } = await supabase
  .from('merchants_public')
- .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, business_categories, accepts_pawbucks, tos_url, privacy_policy_url, shipping_returns_policy_url')
+ .select('id, business_name, description, cashback_rate, storefront_slug, logo_url, address, business_type, business_categories, accepts_pawbucks, tos_url, privacy_policy_url, shipping_returns_policy_url, stripe_account_status')
  .eq('id', accountId)
  .maybeSingle();
 
@@ -136,6 +136,7 @@ const Storefront = memo(() => {
  const merchantData = queryResults[0].data;
  const merchantLoading = queryResults[0].isLoading;
  const autoRedeemPref = queryResults[1].data as { enabled: boolean; mode: string } | undefined;
+ const paymentsActive = (merchantData as any)?.stripe_account_status === "active";
 
  const merchantIdForProducts = merchantData?.id;
  const { data: productsData, isLoading: productsLoading } = useQuery({
@@ -187,6 +188,10 @@ const Storefront = memo(() => {
  toast.error("Please sign in to subscribe", { action: { label:"Sign In", onClick: () => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`) } });
  return;
  }
+ if (!paymentsActive) {
+ toast.error("Payments are temporarily unavailable for this merchant");
+ return;
+ }
  if (!merchantConnectedAccountId) {
  toast.error("This merchant hasn't completed payment setup.");
  return;
@@ -194,7 +199,7 @@ const Storefront = memo(() => {
  setConnectedAccountId(merchantConnectedAccountId);
  setSelectedPlan(plan);
  setShowSubDialog(true);
- }, [user, navigate, merchantConnectedAccountId]);
+ }, [user, navigate, merchantConnectedAccountId, paymentsActive]);
 
  // Derived values
  const merchantName = merchantData?.business_name ||"";
@@ -216,6 +221,10 @@ const Storefront = memo(() => {
  toast.error("Please sign in to shop", { action: { label:"Sign In", onClick: () => navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`) } });
  return;
  }
+ if (!paymentsActive) {
+ toast.error("This merchant is not accepting payments right now");
+ return;
+ }
  if (!product.price?.id || product.price.unit_amount == null) return;
 
  addToCart({
@@ -229,11 +238,15 @@ const Storefront = memo(() => {
  formatted: product.price.formatted,
  });
  toast.success("Added to cart!");
- }, [user, navigate, addToCart]);
+ }, [user, navigate, addToCart, paymentsActive]);
 
  // Cart checkout
  const handleCartCheckout = useCallback(async (params: StorefrontCheckoutParams) => {
  if (!user || cartItems.length === 0 || !merchantIdForProducts) return;
+ if (!paymentsActive) {
+ toast.error("This merchant is not accepting payments right now");
+ return;
+ }
 
  // Full PawBucks checkout
  if (params.mode ==="pawbucks") {
@@ -535,8 +548,8 @@ const Storefront = memo(() => {
   </span>
   )}
   </div>
-  <Button onClick={() => handleSubscribe(plan)} className="w-full" size="lg">
-  <CreditCard className="h-4 w-4 mr-2" /> Subscribe
+  <Button onClick={() => handleSubscribe(plan)} className="w-full" size="lg" disabled={!paymentsActive}>
+  <CreditCard className="h-4 w-4 mr-2" /> {paymentsActive ? "Subscribe" : "Payments unavailable"}
  </Button>
  </CardContent>
  </Card>
@@ -581,12 +594,14 @@ const Storefront = memo(() => {
   {user ? (
   <Button
   onClick={() => handleAddToCart(product)}
-  disabled={!product.price}
+  disabled={!product.price || !paymentsActive}
   className="w-full"
   variant={inCart ? "secondary" : "default"}
   size="lg"
   >
-  {inCart ? (
+  {!paymentsActive ? (
+  <>Payments unavailable</>
+  ) : inCart ? (
   <><Plus className="h-4 w-4 mr-2" /> Add More ({inCart.quantity} in cart)</>
   ) : (
   <><ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart</>
@@ -658,9 +673,11 @@ const Storefront = memo(() => {
        }
       />
      )}
-     <Button onClick={() => setCartOpen(true)} className="flex-[2]" size="lg">
+     <Button onClick={() => setCartOpen(true)} className="flex-[2]" size="lg" disabled={!paymentsActive}>
       <ShoppingCart className="h-4 w-4 mr-2" />
-       {itemCount > 0
+       {!paymentsActive
+        ? "Payments unavailable"
+        : itemCount > 0
         ? `View Cart (${itemCount}) · ${Formatters.currency(totalCents / 100)}`
         : "View Cart"}
      </Button>

@@ -80,10 +80,18 @@ const SimplePay = () => {
     if (initialMerchantId && !selected) {
       supabase
         .from("merchants_public")
-        .select("id, business_name, logo_url, business_type, business_categories, address")
+        .select("id, business_name, logo_url, business_type, business_categories, address, stripe_account_status")
         .eq("id", initialMerchantId)
+        .eq("stripe_account_status", "active")
         .maybeSingle()
-        .then(({ data }) => data && setSelected(data as Merchant));
+        .then(({ data }) => {
+          if (data) {
+            setSelected(data as Merchant);
+          } else {
+            toast.error("This merchant isn't accepting payments right now");
+            setStep("merchant");
+          }
+        });
     }
   }, [initialMerchantId, selected]);
 
@@ -95,6 +103,7 @@ const SimplePay = () => {
       let base = client
         .from("merchants_public")
         .select("id, business_name, logo_url, business_type, business_categories, address")
+        .eq("stripe_account_status", "active")
         .order("business_name", { ascending: true })
         .limit(50);
 
