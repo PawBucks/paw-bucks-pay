@@ -162,7 +162,7 @@ serve(async (req) => {
     // Get merchant details
     const { data: merchant, error: merchantError } = await supabaseAdmin
       .from('merchants')
-      .select('stripe_account_id, cashback_rate, business_name, accepts_pawbucks, onboarding_complete, address, business_type, pawbucks_cap_enabled, pawbucks_cap_pct, pawbucks_promo_cap_pct, pawbucks_promo_starts_at, pawbucks_promo_ends_at')
+      .select('stripe_account_id, stripe_account_status, cashback_rate, business_name, accepts_pawbucks, onboarding_complete, address, business_type, pawbucks_cap_enabled, pawbucks_cap_pct, pawbucks_promo_cap_pct, pawbucks_promo_starts_at, pawbucks_promo_ends_at')
       .eq('id', merchantId)
       .single();
 
