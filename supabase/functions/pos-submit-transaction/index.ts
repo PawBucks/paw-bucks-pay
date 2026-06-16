@@ -320,6 +320,16 @@ serve(async (req) => {
       const cashbackRate = merchantData?.cashback_rate || 5;
       pawbucksAwarded = Math.floor(amount * (cashbackRate / 100));
 
+      // Global kill switch: SuperAdmin can pause pet-owner PawBucks earning platform-wide
+      {
+        const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
+        const earnEnabled = await isPetOwnerPawBucksEarningEnabled(supabaseAdmin);
+        if (!earnEnabled) {
+          console.log('[POS-SUBMIT] Pet-owner PawBucks earning disabled platform-wide; overriding to 0');
+          pawbucksAwarded = 0;
+        }
+      }
+
       if (pawbucksAwarded > 0) {
         // Create PawBucks activity record
         const { error: pawbucksError } = await supabaseAdmin

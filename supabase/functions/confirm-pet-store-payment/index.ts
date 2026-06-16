@@ -88,7 +88,15 @@ serve(async (req) => {
     const itemId = metadata.item_id;
     const itemName = metadata.item_name || 'Pet Store Item';
     const quantity = parseInt(metadata.quantity || '1', 10);
-    const pawbucksEarned = parseInt(metadata.pawbucks_earned || '0', 10);
+    let pawbucksEarned = parseInt(metadata.pawbucks_earned || '0', 10);
+    {
+      const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
+      const earnEnabled = await isPetOwnerPawBucksEarningEnabled(supabaseAdmin);
+      if (!earnEnabled) {
+        console.log('[CONFIRM-PET-STORE] Pet-owner PawBucks earning disabled platform-wide; overriding to 0');
+        pawbucksEarned = 0;
+      }
+    }
     const pawbucksMultiplier = parseInt(metadata.pawbucks_multiplier || '10', 10);
     const cardAmountDollars = paymentIntent.amount / 100;
     const orderTotalCents = parseInt(metadata.order_total_cents || `${paymentIntent.amount}`, 10);

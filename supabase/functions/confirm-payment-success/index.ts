@@ -241,6 +241,16 @@ serve(async (req) => {
     // Calculate PawBucks earned based on Stripe amount and user's tier
     let pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
 
+    // Global kill switch: SuperAdmin can pause pet-owner PawBucks earning platform-wide
+    {
+      const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
+      const earnEnabled = await isPetOwnerPawBucksEarningEnabled(supabaseAdmin);
+      if (!earnEnabled) {
+        logStep("Pet-owner PawBucks earning disabled platform-wide; overriding to 0");
+        pawbucksEarned = 0;
+      }
+    }
+
     // Acquisition-Only merchants only reward PawBucks on the customer's first visit.
     const suppressAcq = await shouldSuppressPawBucksForAcquisitionOnly(
       supabaseAdmin,
