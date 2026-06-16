@@ -323,8 +323,12 @@ const MerchantProfile = memo(() => {
     <>
       <SEO
         title={merchant.business_name}
-        description={merchant.description || `Visit ${merchant.business_name} and earn ${merchant.cashback_rate}x points in PawBucks!`}
-        keywords={[merchant.business_name, merchant.business_type, "pet services", "PawBucks", "rewards"]}
+        description={merchant.description || (paymentsActive
+          ? `Visit ${merchant.business_name} and earn ${merchant.cashback_rate}x points in PawBucks!`
+          : `Visit ${merchant.business_name}.`)}
+        keywords={paymentsActive
+          ? [merchant.business_name, merchant.business_type, "pet services", "PawBucks", "rewards"]
+          : [merchant.business_name, merchant.business_type, "pet services"]}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
