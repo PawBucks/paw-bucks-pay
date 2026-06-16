@@ -139,12 +139,27 @@ serve(async (req) => {
     // PawBucks earning rules:
     // - full_ecosystem merchants: customer earns on every purchase (tierMultiplier x $).
     // - acquisition_only merchants: customer earns ONLY on their first (acquisition) purchase.
-    const pawbucksEarned = calculatePawBucksEarned({
+    let pawbucksEarned = calculatePawBucksEarned({
       amount,
       feeModel,
       isReturningCustomer,
       tierMultiplier,
     });
+
+    // Global kill-switch: SuperAdmin can disable PawBucks earning for pet owners platform-wide
+    {
+      const { data: earnSetting } = await supabaseAdmin
+        .from('platform_settings')
+        .select('value')
+        .eq('key', 'pet_owner_pawbucks_earning_enabled')
+        .maybeSingle();
+      const v: any = earnSetting?.value;
+      const enabled = v == null ? true : (v === true || v === 'true' || v?.enabled === true);
+      if (!enabled) {
+        logStep('PawBucks earning disabled platform-wide; overriding to 0');
+        pawbucksEarned = 0;
+      }
+    }
 
     logStep("Fee calculation", { 
       feeModel,

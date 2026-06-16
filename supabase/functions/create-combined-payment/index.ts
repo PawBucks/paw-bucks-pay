@@ -636,7 +636,22 @@ serve(async (req) => {
 
     // Calculate amounts - PawBucks earned on Stripe portion only
     const stripeAmountInCents = Math.round(stripeAmount * 100);
-    const pawbucksEarned = Math.round(stripeAmount * cashbackRate);
+    let pawbucksEarned = Math.round(stripeAmount * cashbackRate);
+
+    // Global kill-switch: SuperAdmin can disable PawBucks earning for pet owners platform-wide
+    {
+      const { data: earnSetting } = await supabaseAdmin
+        .from('platform_settings')
+        .select('value')
+        .eq('key', 'pet_owner_pawbucks_earning_enabled')
+        .maybeSingle();
+      const v: any = earnSetting?.value;
+      const enabled = v == null ? true : (v === true || v === 'true' || v?.enabled === true);
+      if (!enabled) {
+        logStep('PawBucks earning disabled platform-wide; overriding to 0');
+        pawbucksEarned = 0;
+      }
+    }
     // Success Fee: 3% applies ONLY to the non-tip Stripe portion.
     // Tips are always passed through 100% to the merchant (never charged a Success Fee).
     const feeableStripeAmount = Math.max(0, stripeAmount - tipAmount);
