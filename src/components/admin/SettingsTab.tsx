@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from'@/components/ui/card';
-import { Gift, Loader2, Shield } from "lucide-react";
+import { Gift, Loader2, Shield, Coins } from "lucide-react";
 import { TwoFactorSetup } from'./TwoFactorSetup';
 import { Separator } from'@/components/ui/separator';
 import { Switch } from'@/components/ui/switch';
@@ -16,9 +16,12 @@ export function SettingsTab() {
  const [loading, setLoading] = useState(true);
  const [toggling, setToggling] = useState(false);
  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+ const [petOwnerEarnEnabled, setPetOwnerEarnEnabled] = useState(true);
+ const [earnToggling, setEarnToggling] = useState(false);
 
  useEffect(() => {
  loadWelcomeCreditSetting();
+ loadPetOwnerEarnSetting();
  checkSuperAdmin();
  }, []);
 
@@ -51,6 +54,50 @@ export function SettingsTab() {
  } finally {
  setLoading(false);
  }
+ };
+
+ const loadPetOwnerEarnSetting = async () => {
+  try {
+   const { data } = await supabase
+    .from('platform_settings')
+    .select('value')
+    .eq('key','pet_owner_pawbucks_earning_enabled')
+    .maybeSingle();
+   if (data) {
+    const v: any = data.value;
+    const enabled = v === true || v === 'true' || v?.enabled === true || v == null;
+    setPetOwnerEarnEnabled(enabled);
+   } else {
+    setPetOwnerEarnEnabled(true);
+   }
+  } catch (err) {
+   console.error('Error loading pet owner earn setting:', err);
+  }
+ };
+
+ const handleTogglePetOwnerEarn = async (enabled: boolean) => {
+  setEarnToggling(true);
+  try {
+   const { error } = await supabase
+    .from('platform_settings')
+    .upsert({
+     key:'pet_owner_pawbucks_earning_enabled',
+     value: { enabled, description:'Platform-wide kill switch for pet owner PawBucks earning' } as unknown as any,
+     updated_at: new Date().toISOString(),
+    }, { onConflict:'key' });
+   if (error) throw error;
+   setPetOwnerEarnEnabled(enabled);
+   toast.success(
+    enabled
+     ?'PawBucks earning re-enabled — pet owners will earn PawBucks on purchases again'
+     :'PawBucks earning paused — pet owners will NOT earn PawBucks on new purchases'
+   );
+  } catch (err) {
+   console.error('Error toggling pet owner earn:', err);
+   toast.error('Failed to update PawBucks earning setting');
+  } finally {
+   setEarnToggling(false);
+  }
  };
 
  const handleToggleWelcomeCredit = async (enabled: boolean) => {
@@ -197,6 +244,56 @@ export function SettingsTab() {
  {/* Platform Configuration Section - SuperAdmin Only */}
  {isSuperAdmin && (
  <>
+ <Separator />
+ <div className="space-y-4">
+  <div className="flex items-center gap-2">
+   <Coins className="h-5 w-5 text-primary" aria-hidden="true" />
+   <h3 className="text-xl font-semibold">Pet Owner Rewards</h3>
+  </div>
+  <Card>
+   <CardHeader>
+    <CardTitle className="flex items-center justify-between">
+     <span>PawBucks Earning (Pet Owners)</span>
+     <Badge
+      variant="outline"
+      className={
+       petOwnerEarnEnabled
+        ?'bg-success/10 text-success border-success/30'
+        :'bg-destructive/10 text-destructive border-destructive/30'
+      }
+     >
+      {petOwnerEarnEnabled ?'Active' :'Paused'}
+     </Badge>
+    </CardTitle>
+    <CardDescription>
+     Global kill switch for PawBucks earning on pet owner purchases. When paused, pet owners
+     will earn 0 PawBucks on all new transactions across the platform. Existing balances are not affected.
+    </CardDescription>
+   </CardHeader>
+   <CardContent>
+    <div className="flex items-center justify-between">
+     <div className="space-y-1">
+      <p className="font-medium">
+       {petOwnerEarnEnabled ?'Earning is active' :'Earning is paused'}
+      </p>
+      <p className="text-sm text-muted-foreground">
+       {petOwnerEarnEnabled
+        ?'Pet owners earn PawBucks at their tier multiplier on all qualifying purchases.'
+        :'Pet owners will NOT earn any PawBucks on new purchases until this is re-enabled.'}
+      </p>
+     </div>
+     <div className="flex items-center gap-2">
+      {earnToggling && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+      <Switch
+       checked={petOwnerEarnEnabled}
+       onCheckedChange={handleTogglePetOwnerEarn}
+       disabled={earnToggling}
+      />
+     </div>
+    </div>
+   </CardContent>
+  </Card>
+ </div>
  <Separator />
  <PlatformConfigSection />
  </>
