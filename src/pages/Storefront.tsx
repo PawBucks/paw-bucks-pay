@@ -343,7 +343,7 @@ const Storefront = memo(() => {
  <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
  <SEO 
  title={`${merchantName ||"Store"} - Shop Products`}
- description={`Browse and purchase products from ${merchantName ||"this store"}. Earn PawBucks on every purchase!`}
+ description={`Browse and purchase products from ${merchantName ||"this store"}.${paymentsActive ? " Earn PawBucks on every purchase!" : ""}`}
          noIndex
         ogImage={merchantLogo || undefined}
         jsonLd={merchantName ? {
