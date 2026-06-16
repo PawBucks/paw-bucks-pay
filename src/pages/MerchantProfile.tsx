@@ -427,7 +427,7 @@ const MerchantProfile = memo(() => {
               {/* Status row */}
               <div className="flex items-center gap-3 mt-4 text-sm">
                 <OpenStatusBadge merchantId={merchant.id} />
-                {merchant.accepts_pawbucks && (
+                {merchant.accepts_pawbucks && paymentsActive && (
                   <>
                     <span aria-hidden="true" className="text-white/80">·</span>
                     <span className="inline-flex items-center gap-1.5 text-primary font-medium">
@@ -552,7 +552,7 @@ const MerchantProfile = memo(() => {
               {/* ─── ABOUT ─── */}
               <TabsContent value="about" className="mt-2 space-y-5 focus-visible:ring-0">
                 {/* Earn PawBucks here info card */}
-                {merchant.accepts_pawbucks && (
+                {merchant.accepts_pawbucks && paymentsActive && (
                   <div className="rounded-2xl bg-[hsl(218_35%_10%)] text-white p-4 flex items-start gap-3 shadow-lg">
                     <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center flex-shrink-0">
                       <PawBucksLogo className="w-6 h-6 text-primary" />
@@ -692,6 +692,7 @@ const MerchantProfile = memo(() => {
                         </div>
                         <Badge variant="outline" className="text-xs">Available</Badge>
                       </div>
+                      {paymentsActive && (
                       <div className="flex items-center justify-between p-3 bg-muted/40 rounded-lg">
                         <div className="flex items-center gap-3">
                           <PawBucksLogo className="w-5 h-5 text-primary" />
@@ -704,11 +705,14 @@ const MerchantProfile = memo(() => {
                           {merchant.accepts_pawbucks ? "Accepted" : "Not Accepted"}
                         </Badge>
                       </div>
+                      )}
+                      {paymentsActive && merchant.accepts_pawbucks && (
                       <div className="mt-2 p-3 bg-primary/5 rounded-lg border border-primary/10">
                         <p className="text-sm text-primary font-medium flex items-center gap-2">
                           <span className="text-base leading-none" aria-hidden="true">✨</span> Earn {merchant.cashback_rate}x PawBucks on every purchase!
                         </p>
                       </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -773,7 +777,9 @@ const MerchantProfile = memo(() => {
                     </div>
                     <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">Subscription Plans</h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Subscribe and earn <span className="font-semibold text-primary">{merchant.cashback_rate}x PawBucks</span> on every billing cycle.
+                      {paymentsActive
+                        ? <>Subscribe and earn <span className="font-semibold text-primary">{merchant.cashback_rate}x PawBucks</span> on every billing cycle.</>
+                        : <>Subscribe to this merchant's plans.</>}
                     </p>
 
                     <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -841,7 +847,7 @@ const MerchantProfile = memo(() => {
                               }`}
                               variant={isBest ? "default" : "outline"}
                             >
-                              Subscribe &amp; Earn PawBucks
+                              {paymentsActive ? "Subscribe & Earn PawBucks" : "Subscribe"}
                             </Button>
                           </div>
                         );
@@ -967,11 +973,11 @@ const MerchantProfile = memo(() => {
             >
               <PawBucksLogo className="w-4 h-4" />
               {hasBookableServices
-                ? "Book & Earn PawBucks"
-                : !merchant.accepts_pawbucks
-                  ? "Doesn't accept PawBucks"
-                  : !paymentsActive
-                    ? "Pay In-Store"
+                ? (paymentsActive ? "Book & Earn PawBucks" : "Book")
+                : !paymentsActive
+                  ? "Pay In-Store"
+                  : !merchant.accepts_pawbucks
+                    ? "Doesn't accept PawBucks"
                     : "Pay & Earn PawBucks"}
             </button>
           </div>
