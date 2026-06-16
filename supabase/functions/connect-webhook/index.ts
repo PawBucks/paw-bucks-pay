@@ -337,6 +337,14 @@ serve(async (req) => {
             }
 
             pawbucksEarned = Math.floor(stripeAmountForRewards * pawbucksMultiplier);
+            {
+              const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
+              const earnEnabled = await isPetOwnerPawBucksEarningEnabled(supabaseAdmin);
+              if (!earnEnabled) {
+                logStep("Pet-owner PawBucks earning disabled platform-wide (invoice); overriding to 0");
+                pawbucksEarned = 0;
+              }
+            }
 
             if (pawbucksEarned > 0) {
               // Get or create wallet
@@ -707,7 +715,15 @@ serve(async (req) => {
         }
 
         // PawBucks earned on Stripe amount only
-        const pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
+        let pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
+        {
+          const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
+          const earnEnabled = await isPetOwnerPawBucksEarningEnabled(supabaseAdmin);
+          if (!earnEnabled) {
+            logStep("Pet-owner PawBucks earning disabled platform-wide (direct PI); overriding to 0");
+            pawbucksEarned = 0;
+          }
+        }
 
         // Create transaction record
         if (userId && merchantId) {

@@ -286,6 +286,16 @@ serve(async (req) => {
     // PawBucks earn: only on the cash portion
     let pawbucksEarned = Math.floor(cashPortionUsd * (cashbackRate / 100));
 
+    // Global kill switch: SuperAdmin can pause pet-owner PawBucks earning platform-wide
+    {
+      const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
+      const earnEnabled = await isPetOwnerPawBucksEarningEnabled(supabaseAdmin);
+      if (!earnEnabled) {
+        console.log('[CLOVER] Pet-owner PawBucks earning disabled platform-wide; overriding to 0');
+        pawbucksEarned = 0;
+      }
+    }
+
     // Acquisition-Only enforcement: only first-visit customers earn PawBucks.
     try {
       const { data: merchantFee } = await supabaseAdmin

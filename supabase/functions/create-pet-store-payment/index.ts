@@ -519,7 +519,15 @@ serve(async (req) => {
         console.error('Error checking subscription tier:', e);
       }
     }
-    const pawbucksEarned = Math.round(totalAmount * pawbucksMultiplier);
+    let pawbucksEarned = Math.round(totalAmount * pawbucksMultiplier);
+    {
+      const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
+      const earnEnabled = await isPetOwnerPawBucksEarningEnabled(supabaseAdmin);
+      if (!earnEnabled) {
+        console.log('[CREATE-PET-STORE] Pet-owner PawBucks earning disabled platform-wide; overriding to 0');
+        pawbucksEarned = 0;
+      }
+    }
 
     console.log('Creating pet store payment:', {
       cartItems: cartItems.map(ci => ({ itemId: ci.itemId, quantity: ci.quantity })),

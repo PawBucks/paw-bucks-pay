@@ -276,8 +276,18 @@ async function creditPawBucksToUser(
   merchantName: string,
   paymentIntentId: string
 ): Promise<number> {
-  const pawbucksEarned = Math.floor(amountInDollars * multiplier);
-  
+  let pawbucksEarned = Math.floor(amountInDollars * multiplier);
+
+  // Global kill switch: SuperAdmin can pause pet-owner PawBucks earning platform-wide
+  try {
+    const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
+    const earnEnabled = await isPetOwnerPawBucksEarningEnabled(supabaseAdmin);
+    if (!earnEnabled) {
+      logStep("Pet-owner PawBucks earning disabled platform-wide (subscription); overriding to 0");
+      pawbucksEarned = 0;
+    }
+  } catch (_e) { /* default to enabled on lookup failure */ }
+
   if (pawbucksEarned <= 0) {
     return 0;
   }
