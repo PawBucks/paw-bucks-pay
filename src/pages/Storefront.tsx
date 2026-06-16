@@ -412,6 +412,7 @@ const Storefront = memo(() => {
     </div>
 
     {/* Earn banner */}
+    {paymentsActive && (
     <div className="bg-primary/10 border border-primary/20 rounded-xl my-3.5 px-3.5 py-2.5 flex items-center justify-between">
      <div className="flex items-center gap-2">
       <PawBucksIcon className="h-8 w-8 rounded-lg" />
@@ -422,6 +423,7 @@ const Storefront = memo(() => {
      </div>
      <div className="text-[10px] text-primary/70 text-right">PawPass+ subscribers earn most</div>
     </div>
+    )}
    </div>
 
    {/* Trust strip */}
@@ -436,9 +438,11 @@ const Storefront = memo(() => {
      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-warning/40 bg-card text-[11px] font-semibold text-warning whitespace-nowrap">
       <BadgeCheck className="h-3 w-3" /> Verified Merchant
      </span>
+     {paymentsActive && (
      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border bg-card text-[11px] font-medium text-muted-foreground whitespace-nowrap">
       <PawBucksIcon className="h-3 w-3" /> PawBucks Partner
      </span>
+     )}
     </div>
    </div>
   </div>
@@ -542,7 +546,7 @@ const Storefront = memo(() => {
   <div>
   <div className="text-[26px] font-extrabold text-foreground leading-none tracking-tight">{formattedPrice} <span className="text-sm font-normal text-muted-foreground">/ {intervalLabel}</span></div>
   </div>
-  {estPb > 0 && (
+  {estPb > 0 && paymentsActive && (
   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-[12px] font-bold text-primary whitespace-nowrap">
   <PawBucksIcon className="h-3 w-3" /> +{Formatters.number(estPb)} PB
   </span>
@@ -576,7 +580,7 @@ const Storefront = memo(() => {
   <Package className="h-14 w-14 text-muted-foreground/40" />
  </div>
  )}
- {estimatedPawBucks > 0 && (
+ {estimatedPawBucks > 0 && paymentsActive && (
   <div className="absolute bottom-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-foreground/75 text-background text-[12px] font-bold">
   <PawBucksIcon className="h-3 w-3" /> +{Formatters.number(estimatedPawBucks)} PB
  </div>
