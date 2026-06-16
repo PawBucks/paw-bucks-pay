@@ -272,7 +272,22 @@ serve(async (req) => {
     // PawBucks earned is based on the STRIPE portion only (not the welcome credit)
     // This prevents gaming by using welcome credit to earn rewards
     const stripeAmountDollars = stripeAmountInCents / 100;
-    const pawbucksEarned = stripeAmountInCents > 0 ? Math.round(stripeAmountDollars * cashbackRate) : 0;
+    let pawbucksEarned = stripeAmountInCents > 0 ? Math.round(stripeAmountDollars * cashbackRate) : 0;
+
+    // Global kill-switch: SuperAdmin can disable PawBucks earning for pet owners platform-wide
+    {
+      const { data: earnSetting } = await supabaseAdmin
+        .from('platform_settings')
+        .select('value')
+        .eq('key', 'pet_owner_pawbucks_earning_enabled')
+        .maybeSingle();
+      const v: any = earnSetting?.value;
+      const enabled = v == null ? true : (v === true || v === 'true' || v?.enabled === true);
+      if (!enabled) {
+        logStep('PawBucks earning disabled platform-wide; overriding to 0');
+        pawbucksEarned = 0;
+      }
+    }
     
     // Platform fee: 3% of STRIPE portion only (welcome credit has 0 fee)
     const platformFeeInCents = stripeAmountInCents > 0 ? Math.round(stripeAmountDollars * 0.03 * 100) : 0;
