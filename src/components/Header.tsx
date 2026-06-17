@@ -1,5 +1,5 @@
 import { memo } from"react";
-import { useNavigate } from"react-router-dom";
+import { useNavigate, useLocation } from"react-router-dom";
 import { Button } from"@/components/ui/button";
 import { LogOut, Menu } from"lucide-react";
 import {
@@ -27,6 +27,9 @@ interface HeaderProps {
 
 const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId, variant ="petowner" }: HeaderProps) => {
  const navigate = useNavigate();
+ const location = useLocation();
+ const isActive = (path: string) =>
+ location.pathname === path || location.pathname.startsWith(path +"/");
  
  const defaultMenuItems: MenuItem[] = [
  { label:"For Pet Owners", path:"/" },
@@ -82,60 +85,30 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  {/* Desktop Navigation Links for Authenticated Users */}
  {isAuthenticated && variant ==="petowner" && (
  <div className="hidden md:flex items-center gap-1">
+ {petOwnerMenuItems.map((item) => (
  <Button
+ key={item.path}
  variant="ghost"
- onClick={() => navigate("/home")}
- className="text-sm font-medium hover:text-accent"
+ onClick={() => navigate(item.path)}
+ aria-current={isActive(item.path) ?"page" : undefined}
+ className="text-sm font-medium hover:text-accent aria-[current=page]:text-accent aria-[current=page]:font-semibold"
  >
- Home
+ {item.label ==="Pet Store" ?"Store" : item.label}
  </Button>
- <Button
- variant="ghost"
- onClick={() => navigate("/discover")}
- className="text-sm font-medium hover:text-accent"
- >
- Discover
- </Button>
- <Button
- variant="ghost"
- onClick={() => navigate("/pet-store")}
- className="text-sm font-medium hover:text-accent"
- >
- Store
- </Button>
- <Button
- variant="ghost"
- onClick={() => navigate("/lost-pets")}
- className="text-sm font-medium hover:text-accent"
- >
- Lost Pets
- </Button>
- <Button
- variant="ghost"
- onClick={() => navigate("/pawbucks/wallet")}
- className="text-sm font-medium hover:text-accent"
- >
- PawBucks Wallet
- </Button>
- <Button
- variant="ghost"
- onClick={() => navigate("/profile")}
- className="text-sm font-medium hover:text-accent"
- >
- Profile
- </Button>
+ ))}
  </div>
  )}
 
  {/* Desktop Navigation Links for Authenticated Merchants */}
  {isAuthenticated && variant ==="merchant" && (
  <div className="hidden md:flex items-center gap-1">
- {merchantMenuItems.map((item, index) => (
+ {merchantMenuItems.map((item) => (
  <Button
- key={index}
+ key={item.path}
  variant="ghost"
  onClick={() => navigate(item.path)}
- className="text-sm font-medium hover:text-accent"
+ aria-current={isActive(item.path) ?"page" : undefined}
+ className="text-sm font-medium hover:text-accent aria-[current=page]:text-accent aria-[current=page]:font-semibold"
  >
  {item.label}
  </Button>
@@ -146,12 +119,13 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  {/* Desktop Navigation Links for Unauthenticated Users */}
  {!isAuthenticated && (
  <div className="hidden md:flex items-center gap-2">
- {(menuItems || defaultMenuItems).map((item, index) => (
+ {(menuItems || defaultMenuItems).map((item) => (
  <Button
- key={index}
+ key={item.path}
  variant="ghost"
  onClick={() => navigate(item.path)}
- className="text-sm font-medium hover:text-accent"
+ aria-current={isActive(item.path) ?"page" : undefined}
+ className="text-sm font-medium hover:text-accent aria-[current=page]:text-accent aria-[current=page]:font-semibold"
  >
  {item.label}
  </Button>
@@ -167,9 +141,8 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  onClick={onLogout}
  variant="ghost"
  className="hidden md:inline-flex gap-2 min-h-[44px] touch-manipulation text-muted-foreground hover:text-destructive"
- aria-label="Logout"
  >
- <LogOut className="h-4 w-4" />
+ <LogOut className="h-4 w-4" aria-hidden="true" />
  <span>Logout</span>
  </Button>
  {/* Mobile hamburger: nav links + logout */}
@@ -186,10 +159,11 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  </Button>
  </DropdownMenuTrigger>
  <DropdownMenuContent align="end" sideOffset={8} aria-label="Pet owner navigation" className="w-56 bg-card z-50">
- {(variant ==="merchant" ? merchantMenuItems : petOwnerMenuItems).map((item, index) => (
+ {(variant ==="merchant" ? merchantMenuItems : petOwnerMenuItems).map((item) => (
  <DropdownMenuItem
- key={index}
+ key={item.path}
  onClick={() => navigate(item.path)}
+ aria-current={isActive(item.path) ?"page" : undefined}
  className="cursor-pointer min-h-[44px] touch-manipulation"
  >
  {item.label}
@@ -200,7 +174,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  onClick={onLogout}
  className="cursor-pointer min-h-[44px] touch-manipulation text-destructive focus:text-destructive"
  >
- <LogOut className="h-4 w-4 mr-2" />
+ <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
  Logout
  </DropdownMenuItem>
  </DropdownMenuContent>
@@ -220,10 +194,11 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  </Button>
  </DropdownMenuTrigger>
  <DropdownMenuContent align="end" sideOffset={8} aria-label="Main navigation" className="w-56 bg-card z-50">
- {(menuItems || defaultMenuItems).map((item, index) => (
+ {(menuItems || defaultMenuItems).map((item) => (
  <DropdownMenuItem
- key={index}
+ key={item.path}
  onClick={() => navigate(item.path)}
+ aria-current={isActive(item.path) ?"page" : undefined}
  className="cursor-pointer min-h-[44px] touch-manipulation"
  >
  {item.label}
