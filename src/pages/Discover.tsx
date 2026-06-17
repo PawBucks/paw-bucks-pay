@@ -54,6 +54,7 @@ type MerchantWithRating = {
   average_rating: number;
   review_count: number;
   fee_model?: string | null;
+  stripe_account_status?: string | null;
 };
 
 const businessTypes = [
@@ -768,6 +769,7 @@ type MerchantListItemProps = {
     logo_url?: string;
     distance?: number;
     fee_model?: string | null;
+    stripe_account_status?: string | null;
   };
   isVerified: boolean;
   isSponsored: boolean;
