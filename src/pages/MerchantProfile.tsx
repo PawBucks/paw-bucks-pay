@@ -32,7 +32,7 @@ import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscri
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Founding50Badge } from "@/components/shared/Founding50Badge";
 import { MerchantTypeBadge, isAcquisitionOnly } from "@/components/shared/MerchantTypeBadge";
-import { ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard, Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, MapPin, MessageSquare, Phone, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter, Sparkles } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard, Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, MapPin, MessageSquare, Phone, QrCode, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter, Sparkles } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
@@ -534,6 +534,12 @@ const MerchantProfile = memo(() => {
                     This merchant offers exclusive intro deals for first-time customers.
                     They don't accept PawBucks as payment, and purchases here do not earn PawBucks.
                   </p>
+                  <div className="mt-2 flex items-start gap-2 rounded-md bg-accent/10 border border-accent/20 px-2.5 py-2">
+                    <QrCode className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" aria-hidden="true" />
+                    <p className="text-xs text-foreground leading-snug">
+                      <span className="font-semibold">How to redeem:</span> Visit the store and scan the merchant's QR code in person to unlock your New Customer deal.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
