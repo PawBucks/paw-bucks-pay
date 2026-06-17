@@ -391,7 +391,11 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
  <div className="flex items-start justify-between w-full gap-2">
  <span className="font-medium text-sm">{notification.title}</span>
  {!notification.is_read && (
- <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1" />
+ <span
+ className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1"
+ role="img"
+ aria-label="Unread"
+ />
  )}
  </div>
  <p className="text-xs text-muted-foreground line-clamp-2">{renderMessageLinks(notification.message)}</p>
