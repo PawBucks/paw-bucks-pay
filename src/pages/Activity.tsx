@@ -171,7 +171,6 @@ const Activity = () => {
                 const redeemedRefundUsd =
                   Number(v.pawbucks_refunded ?? 0) * PB_TO_USD;
                 const cashUsd = Number(v.stripe_amount ?? 0);
-                const fee = Number(v.application_fee ?? 0);
                 const savedThisVisit =
                   earnedUsd + Math.max(0, redeemedUsd - redeemedRefundUsd);
                 const isOpen = openId === v.id;
