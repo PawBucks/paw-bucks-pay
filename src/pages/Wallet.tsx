@@ -312,20 +312,31 @@ const Wallet = () => {
  </div>
  )}
 
- {/* Quick Action - View Detailed Breakdown */}
- <div className="mb-6">
- <Button 
- onClick={() => navigate('/spending-breakdown')} 
- variant="outline" 
- className="w-full justify-between"
- >
- <span className="flex items-center gap-2">
- <span className="w-4 h-4" aria-hidden="true">📊</span>
- View Detailed Spending Breakdown
- </span>
- <ArrowUpRight className="w-4 h-4" />
- </Button>
- </div>
+  {/* Quick Actions */}
+  <div className="grid gap-3 sm:grid-cols-2 mb-6">
+  <Button 
+  onClick={() => navigate('/spending-breakdown')} 
+  variant="outline" 
+  className="w-full justify-between"
+  >
+  <span className="flex items-center gap-2">
+  <span className="w-4 h-4" aria-hidden="true">📊</span>
+  View Detailed Spending Breakdown
+  </span>
+  <ArrowUpRight className="w-4 h-4" />
+  </Button>
+  <Button 
+  onClick={() => navigate('/my-deals')} 
+  variant="outline" 
+  className="w-full justify-between border-accent/30 text-accent hover:bg-accent/5 hover:text-accent"
+  >
+  <span className="flex items-center gap-2">
+  <span className="w-4 h-4" aria-hidden="true">🎁</span>
+  My New Customer Deals
+  </span>
+  <ArrowUpRight className="w-4 h-4" />
+  </Button>
+  </div>
 
  {/* Smart Insights */}
  <div className="mb-6">
