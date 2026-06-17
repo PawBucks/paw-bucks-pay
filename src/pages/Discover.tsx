@@ -885,11 +885,7 @@ const MerchantListItem = ({ merchant, isVerified, isSponsored, isFeatured, onCli
             <span className="bg-primary/10 text-primary ring-1 ring-inset ring-primary/20 px-2 py-0.5 rounded-full text-[10px] font-semibold">
               {merchant.cashback_rate}x PB
             </span>
-          ) : (
-            <span className="bg-muted text-muted-foreground/70 px-2 py-0.5 rounded-full text-[10px]">
-              No PawBucks
-            </span>
-          )}
+          ) : null}
         </div>
 
         {/* Description */}
