@@ -31,6 +31,7 @@ import { schedulingService } from "@/services/api/scheduling.service";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Founding50Badge } from "@/components/shared/Founding50Badge";
+import { MerchantTypeBadge, isAcquisitionOnly } from "@/components/shared/MerchantTypeBadge";
 import { ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard, Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, MapPin, MessageSquare, Phone, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter, Sparkles } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
@@ -119,7 +120,7 @@ const MerchantProfile = memo(() => {
         queryFn: async () => {
           const { data, error } = await supabase
             .from("merchants_public")
-            .select("id, business_name, business_type, description, logo_url, address, phone, cashback_rate, accepts_pawbucks, storefront_slug, price_range, facebook_url, instagram_url, twitter_url, linkedin_url, website_url, stripe_account_status")
+            .select("id, business_name, business_type, description, logo_url, address, phone, cashback_rate, accepts_pawbucks, storefront_slug, price_range, facebook_url, instagram_url, twitter_url, linkedin_url, website_url, stripe_account_status, fee_model")
             .eq("id", merchantId)
             .single();
           if (error) throw error;
@@ -153,7 +154,11 @@ const MerchantProfile = memo(() => {
   const merchantStripeInfo = queryResults[2].data as { accountId?: string } | null;
   const connectedAccountId = merchantStripeInfo?.accountId || null;
   const hasBookableServices = merchantServices.length > 0;
-  const paymentsActive = merchant?.stripe_account_status === "active";
+  const acquisitionOnly = isAcquisitionOnly((merchant as any)?.fee_model);
+  const stripeActive = merchant?.stripe_account_status === "active";
+  // Acquisition-only merchants never participate in PawBucks pay/earn flows,
+  // even if their Stripe account is active.
+  const paymentsActive = stripeActive && !acquisitionOnly;
   const canPay = !!merchant?.accepts_pawbucks && paymentsActive;
 
   // If user arrived with intent=book (e.g. from "Schedule Visit"), auto-open the booking tab.
@@ -404,6 +409,7 @@ const MerchantProfile = memo(() => {
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-primary/60 text-primary font-medium capitalize">
                       {merchant.business_type.replace(/_/g, " ")}
                     </span>
+                    <MerchantTypeBadge feeModel={(merchant as any).fee_model} size="md" />
                     {merchant.address && (
                       <span className="text-white/80 truncate">{merchant.address.split(",").slice(-3, -1).join(",").trim()}</span>
                     )}
@@ -512,6 +518,26 @@ const MerchantProfile = memo(() => {
               </div>
             </div>
           </section>
+
+          {/* ══════ Acquisition-only notice ══════ */}
+          {acquisitionOnly && (
+            <div className="bg-accent/5 border-b border-accent/20 px-4 py-3">
+              <div className="flex items-start gap-3 max-w-3xl">
+                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-accent" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">
+                    New Customer Deals Only
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-snug mt-0.5">
+                    This merchant offers exclusive intro deals for first-time customers.
+                    They don't accept PawBucks as payment, and purchases here do not earn PawBucks.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ══════ TABS ══════ */}
           <div className="bg-card px-4">
