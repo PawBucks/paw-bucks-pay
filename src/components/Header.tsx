@@ -62,12 +62,10 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  }}
  >
  <nav className="container mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3" aria-label="Main navigation">
- <div 
- className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity duration-150 active:scale-[0.98] touch-manipulation group shrink-0"
+ <button
+ type="button"
+ className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity duration-150 active:scale-[0.98] touch-manipulation group shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
  onClick={() => navigate(variant ==="merchant" ?"/merchant-dashboard" :"/")}
- role="button"
- tabIndex={0}
- onKeyDown={(e) => e.key ==='Enter' && navigate(variant ==="merchant" ?"/merchant-dashboard" :"/")}
  aria-label={variant ==="merchant" ?"Go to merchant dashboard" :"Go to home page"}
  >
  <img 
@@ -78,7 +76,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  height={80}
  loading="eager"
  />
- </div>
+ </button>
  
  <div className="flex items-center gap-1 sm:gap-3">
  {/* Desktop Navigation Links for Authenticated Users */}
@@ -181,12 +179,13 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  size="icon"
  variant="outline"
  className="md:hidden h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation"
- aria-label="Open menu"
+ aria-label="Open navigation menu"
+ aria-haspopup="menu"
  >
  <Menu className="h-5 w-5" />
  </Button>
  </DropdownMenuTrigger>
- <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-card z-50">
+ <DropdownMenuContent align="end" sideOffset={8} aria-label="Pet owner navigation" className="w-56 bg-card z-50">
  {(variant ==="merchant" ? merchantMenuItems : petOwnerMenuItems).map((item, index) => (
  <DropdownMenuItem
  key={index}
@@ -214,12 +213,13 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  size="icon"
  variant="outline"
  className="md:hidden h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation"
- aria-label="Open menu"
+ aria-label="Open navigation menu"
+ aria-haspopup="menu"
  >
  <Menu className="h-5 w-5" />
  </Button>
  </DropdownMenuTrigger>
- <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-card z-50">
+ <DropdownMenuContent align="end" sideOffset={8} aria-label="Main navigation" className="w-56 bg-card z-50">
  {(menuItems || defaultMenuItems).map((item, index) => (
  <DropdownMenuItem
  key={index}
