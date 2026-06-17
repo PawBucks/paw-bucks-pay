@@ -191,11 +191,11 @@ const SimpleHome = () => {
             onClick={() => navigate("/my-deals")}
           >
             <div className="flex items-center gap-3.5">
-              <div className="h-11 w-11 rounded-xl bg-accent/15 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
-                🎁
+              <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold text-accent-foreground text-sm sm:text-base flex items-center gap-1.5">
+                <h3 className="font-semibold text-primary text-sm sm:text-base flex items-center gap-1.5">
                   My New Customer Deals
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
@@ -203,7 +203,7 @@ const SimpleHome = () => {
                 </p>
               </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-accent/70 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+            <ChevronRight className="h-5 w-5 text-primary/70 shrink-0 group-hover:translate-x-0.5 transition-transform" />
           </motion.div>
         </div>
 

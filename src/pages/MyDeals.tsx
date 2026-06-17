@@ -74,7 +74,7 @@ type BrandedActivityRow = {
 
 const MyDeals = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { userLocation, requestLocation } = useUserLocation();
   const [asked, setAsked] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -270,7 +270,7 @@ const MyDeals = () => {
         title="My New Customer Deals — PawBucks"
         description="Track the New Customer deals you've unlocked and find new ones to scan in-store."
       />
-      <Header />
+      <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
       <main className="container mx-auto px-4 py-6 max-w-4xl space-y-8">
         {/* Hero / summary */}
