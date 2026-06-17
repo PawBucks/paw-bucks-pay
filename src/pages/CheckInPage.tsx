@@ -315,6 +315,33 @@ export default function CheckInPage() {
  </ul>
  </div>
  )}
+ {unlockedOffers.length > 0 && (
+ <div className="rounded-lg border border-accent/40 bg-accent/5 p-4 text-left space-y-3">
+ <div className="flex items-center justify-between">
+ <p className="text-sm font-semibold text-foreground">🎟️ New Customer Deal Unlocked</p>
+ <span className="text-[10px] uppercase tracking-wide font-semibold text-accent">In-store</span>
+ </div>
+ <ul className="space-y-3">
+ {unlockedOffers.map((o) => (
+ <li key={o.offer_id} className="space-y-1">
+ <p className="text-sm font-medium text-foreground">{o.title}</p>
+ <div className="flex items-center justify-between rounded-md border border-dashed border-accent/40 bg-background px-3 py-2">
+ <span className="text-xs text-muted-foreground">Show this code</span>
+ <span className="font-mono text-base font-bold tracking-widest text-foreground">
+ {o.redemption_code}
+ </span>
+ </div>
+ {o.redeemed && (
+ <p className="text-xs text-muted-foreground">Already redeemed.</p>
+ )}
+ </li>
+ ))}
+ </ul>
+ <p className="text-xs text-muted-foreground">
+ Show this code to the cashier to redeem in person.
+ </p>
+ </div>
+ )}
  </>
  ) : (
  <>
