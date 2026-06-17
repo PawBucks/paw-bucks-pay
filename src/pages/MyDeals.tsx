@@ -417,6 +417,116 @@ const MyDeals = () => {
               See all <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
+        </section>
+
+        {/* Branded PawBucks Campaign Activity */}
+        <section className="space-y-3">
+          <div className="flex items-end justify-between gap-2">
+            <div>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <PawBucksLogo className="w-5 h-5" />
+                Branded Campaign Rewards
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                PawBucks you've earned or redeemed from brand-sponsored campaigns.
+              </p>
+            </div>
+          </div>
+
+          {brandedLoading ? (
+            <div className="text-sm text-muted-foreground py-6 text-center">
+              Loading campaign rewards…
+            </div>
+          ) : brandedActivity.length === 0 ? (
+            <GradientCard className="text-sm text-muted-foreground text-center py-6">
+              No branded campaign activity yet. Check in or shop at participating
+              merchants to start earning brand-sponsored PawBucks.
+            </GradientCard>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <GradientCard className="text-center py-3">
+                  <div className="text-2xl font-bold text-success">
+                    +{brandedTotals.earned.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-muted-foreground">PB earned from campaigns</div>
+                </GradientCard>
+                <GradientCard className="text-center py-3">
+                  <div className="text-2xl font-bold">
+                    {brandedTotals.redeemed.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-muted-foreground">PB redeemed</div>
+                </GradientCard>
+              </div>
+
+              <div className="space-y-2">
+                {brandedActivity.map((a) => {
+                  const isEarn = a.type === "earn";
+                  const campaignName = a.brand_campaigns?.name || "Brand campaign";
+                  const brandName = a.brand_campaigns?.brand_accounts?.brand_name;
+                  const logo =
+                    a.brand_campaigns?.campaign_logo_url ||
+                    a.brand_campaigns?.brand_accounts?.logo_url ||
+                    null;
+                  return (
+                    <GradientCard key={a.id} className="py-3">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0 overflow-hidden"
+                          style={
+                            a.brand_campaigns?.campaign_color
+                              ? { backgroundColor: a.brand_campaigns.campaign_color + "22" }
+                              : undefined
+                          }
+                        >
+                          {logo ? (
+                            <img
+                              src={logo}
+                              alt={brandName || campaignName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <PawBucksLogo className="w-5 h-5" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="font-medium truncate text-sm">
+                              {campaignName}
+                            </h3>
+                            <span
+                              className={`font-mono font-semibold text-sm shrink-0 ${
+                                isEarn ? "text-success" : "text-foreground"
+                              }`}
+                            >
+                              {isEarn ? "+" : "−"}
+                              {Number(a.amount || 0).toLocaleString()} PB
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground mt-0.5">
+                            <span className="truncate">
+                              {brandName ? `by ${brandName}` : "Brand campaign"}
+                              {a.description ? ` · ${a.description}` : ""}
+                            </span>
+                            <span className="shrink-0">
+                              {format(new Date(a.created_at), "MMM d")}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </GradientCard>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* Locked (continued) */}
+        <section className="space-y-3">
+          <div className="flex items-end justify-between gap-2">
+            <h2 className="sr-only">Still Locked Near You</h2>
+          </div>
 
           {lockedLoading ? (
             <div className="text-sm text-muted-foreground py-6 text-center">
