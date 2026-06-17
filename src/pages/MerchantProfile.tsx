@@ -519,6 +519,26 @@ const MerchantProfile = memo(() => {
             </div>
           </section>
 
+          {/* ══════ Acquisition-only notice ══════ */}
+          {acquisitionOnly && (
+            <div className="bg-accent/5 border-b border-accent/20 px-4 py-3">
+              <div className="flex items-start gap-3 max-w-3xl">
+                <div className="flex-shrink-0 w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-accent" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">
+                    New Customer Deals Only
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-snug mt-0.5">
+                    This merchant offers exclusive intro deals for first-time customers.
+                    They don't accept PawBucks as payment, and purchases here do not earn PawBucks.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ══════ TABS ══════ */}
           <div className="bg-card px-4">
             <Tabs value={tab} onValueChange={setTab} className="w-full">
