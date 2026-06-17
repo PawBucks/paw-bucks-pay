@@ -181,6 +181,30 @@ const SimpleHome = () => {
               Find a place
             </Button>
           </div>
+
+          {/* My New Customer Deals Banner/Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="rounded-2xl border border-accent/25 bg-accent/5 p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-accent/10 transition-all group"
+            onClick={() => navigate("/my-deals")}
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="h-11 w-11 rounded-xl bg-accent/15 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+                🎁
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-accent-foreground text-sm sm:text-base flex items-center gap-1.5">
+                  My New Customer Deals
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  View unlocked reward codes and locked deals from local pet care merchants.
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-accent/70 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          </motion.div>
         </div>
 
         {/* Right column — recent visits + pets */}
