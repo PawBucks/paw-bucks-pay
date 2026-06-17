@@ -57,11 +57,11 @@ const WelcomeExplore = () => {
     queryFn: async () => {
       if (!petId) return null;
       const { data } = await supabase
-        .from("pets")
+        .from("pet_profiles")
         .select("id, name, photo_url")
         .eq("id", petId)
         .maybeSingle();
-      return data;
+      return data as { id: string; name: string; photo_url: string | null } | null;
     },
     enabled: !!petId,
   });
@@ -69,7 +69,7 @@ const WelcomeExplore = () => {
   const { data: merchants = [], isLoading: merchantsLoading } = useQuery({
     queryKey: ["welcome-explore-merchants"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("merchants")
         .select(
           "id, business_name, business_type, address, latitude, longitude, cashback_rate, logo_url, fee_model, stripe_account_status",
