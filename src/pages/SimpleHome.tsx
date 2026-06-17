@@ -191,8 +191,8 @@ const SimpleHome = () => {
             onClick={() => navigate("/my-deals")}
           >
             <div className="flex items-center gap-3.5">
-              <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                <Sparkles className="h-5 w-5 text-primary" />
+              <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
+                🎁
               </div>
               <div className="text-left">
                 <h3 className="font-semibold text-primary text-sm sm:text-base flex items-center gap-1.5">
