@@ -53,6 +53,7 @@ type MerchantWithRating = {
   price_range?: number;
   average_rating: number;
   review_count: number;
+  fee_model?: string | null;
 };
 
 const businessTypes = [
