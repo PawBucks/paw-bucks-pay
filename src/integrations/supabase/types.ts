@@ -15074,6 +15074,7 @@ export type Database = {
           email: string | null
           entity_type: string | null
           facebook_url: string | null
+          fee_model: string | null
           id: string | null
           instagram_url: string | null
           intro_video_url: string | null
@@ -15127,6 +15128,7 @@ export type Database = {
           email?: string | null
           entity_type?: string | null
           facebook_url?: string | null
+          fee_model?: string | null
           id?: string | null
           instagram_url?: string | null
           intro_video_url?: string | null
@@ -15180,6 +15182,7 @@ export type Database = {
           email?: string | null
           entity_type?: string | null
           facebook_url?: string | null
+          fee_model?: string | null
           id?: string | null
           instagram_url?: string | null
           intro_video_url?: string | null
