@@ -32,7 +32,7 @@ import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscri
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Founding50Badge } from "@/components/shared/Founding50Badge";
 import { MerchantTypeBadge, isAcquisitionOnly } from "@/components/shared/MerchantTypeBadge";
-import { ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard, Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, MapPin, MessageSquare, Phone, QrCode, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter, Sparkles } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard, Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, Lock, MapPin, MessageSquare, Phone, QrCode, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter, Sparkles } from "lucide-react";
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
@@ -595,6 +595,70 @@ const MerchantProfile = memo(() => {
                   </div>
                 </div>
               </div>
+              {acquisitionOffers.length > 0 && (
+                <div className="mt-3 space-y-2 max-w-3xl">
+                  {acquisitionOffers.map((offer: any) => {
+                    const redemption = redemptionByOffer.get(offer.id);
+                    const unlocked = !!redemption;
+                    const redeemed = !!redemption?.redeemed_at;
+                    return (
+                      <div
+                        key={offer.id}
+                        className={`rounded-lg border px-3 py-3 ${
+                          unlocked
+                            ? "border-accent/40 bg-card"
+                            : "border-border bg-muted/30"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
+                              unlocked ? "bg-accent/15" : "bg-muted"
+                            }`}
+                            aria-hidden="true"
+                          >
+                            {unlocked ? (
+                              <Sparkles className="w-4 h-4 text-accent" />
+                            ) : (
+                              <Lock className="w-4 h-4 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-foreground">
+                              {offer.title}
+                            </p>
+                            {offer.description && (
+                              <p className="text-xs text-muted-foreground leading-snug mt-0.5">
+                                {offer.description}
+                              </p>
+                            )}
+                            {unlocked ? (
+                              <div className="mt-2 flex items-center justify-between rounded-md border border-dashed border-accent/40 bg-background px-3 py-2">
+                                <div className="min-w-0">
+                                  <p className="text-[10px] uppercase tracking-wide font-semibold text-muted-foreground">
+                                    {redeemed ? "Redeemed" : "Your code"}
+                                  </p>
+                                  <p className="font-mono text-base font-bold tracking-widest text-foreground truncate">
+                                    {redemption.redemption_code}
+                                  </p>
+                                </div>
+                                <span className="text-[10px] uppercase tracking-wide font-semibold text-accent ml-3">
+                                  {redeemed ? "Used" : "Show in-store"}
+                                </span>
+                              </div>
+                            ) : (
+                              <p className="text-xs font-medium text-muted-foreground mt-2 flex items-center gap-1.5">
+                                <Lock className="w-3 h-3" aria-hidden="true" />
+                                Scan the in-store QR code to unlock this deal.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
