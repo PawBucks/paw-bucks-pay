@@ -312,19 +312,35 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
  <>
  <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
  <DropdownMenuTrigger asChild>
- <Button variant="ghost" size="icon" className="relative min-h-[44px] min-w-[44px]">
+ <Button
+ variant="ghost"
+ size="icon"
+ className="relative min-h-[44px] min-w-[44px]"
+ aria-label={
+ unreadCount > 0
+ ? `Notifications, ${unreadCount} unread`
+ : "Notifications"
+ }
+ aria-haspopup="menu"
+ aria-expanded={dropdownOpen}
+ >
  <span className="h-5 w-5" aria-hidden="true">🔔</span>
  {unreadCount > 0 && (
  <Badge
  variant="destructive"
  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+ aria-hidden="true"
  >
  {unreadCount > 9 ?"9+" : unreadCount}
  </Badge>
  )}
  </Button>
  </DropdownMenuTrigger>
- <DropdownMenuContent align="end" className="w-80 max-h-96 overflow-y-auto">
+ <DropdownMenuContent
+ align="end"
+ aria-label="Notifications"
+ className="w-80 max-h-96 overflow-y-auto"
+ >
  <div className="flex items-center justify-between px-3 py-2">
  <span className="font-semibold">Notifications</span>
  <div className="flex items-center gap-1">
@@ -334,6 +350,7 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
  onClick={() => navigate("/notification-preferences")}
  className="text-xs h-7 gap-1"
  title="Notification preferences"
+ aria-label="Notification preferences"
  >
  <Settings className="h-3 w-3" />
  </Button>
@@ -344,6 +361,7 @@ const NotificationsDropdownComponent = ({ userId }: { userId: string }) => {
  onClick={enableNotifications}
  className="text-xs h-7 gap-1"
  title="Enable browser notifications"
+ aria-label="Enable browser notifications"
  >
  <span className="h-3 w-3" aria-hidden="true">🔔</span>
  Enable
