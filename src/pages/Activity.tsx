@@ -82,8 +82,12 @@ const Activity = () => {
     let totalSpent = 0;
     let totalSaved = 0;
     for (const v of list) {
-      const paid = Number(v.amount ?? 0) - Number(v.amount_refunded ?? 0);
-      totalSpent += paid;
+      // Out-of-pocket cash only (PawBucks redemptions are savings, not spend).
+      const cashPaid = Math.max(
+        0,
+        Number(v.stripe_amount ?? 0) - Number(v.amount_refunded ?? 0),
+      );
+      totalSpent += cashPaid;
       const earnedUsd = Number(v.cashback_earned ?? 0) * PB_TO_USD;
       const redeemedUsd = Number(v.pawbucks_used ?? 0) * PB_TO_USD;
       const refundedUsd = Number(v.pawbucks_refunded ?? 0) * PB_TO_USD;
@@ -202,7 +206,7 @@ const Activity = () => {
                             </div>
                             <div className="text-right shrink-0">
                               <p className="text-sm font-semibold">
-                                {Formatters.currency(net)}
+                                {Formatters.currency(Math.max(0, cashUsd - refunded))}
                               </p>
                               {savedThisVisit > 0 && (
                                 <p className="text-xs text-success font-medium">
@@ -240,13 +244,6 @@ const Activity = () => {
                                 <Row
                                   label={`Paid by ${v.payment_method ?? "card"}`}
                                   value={Formatters.currency(cashUsd)}
-                                />
-                              )}
-                              {fee > 0 && (
-                                <Row
-                                  label="Success fee"
-                                  value={Formatters.currency(fee)}
-                                  muted
                                 />
                               )}
                               {refunded > 0 && (
