@@ -112,14 +112,6 @@ const Activity = () => {
                 Every penny you've spent — and every penny you've saved.
               </p>
             </div>
-            <Button
-              onClick={() => navigate("/my-deals")}
-              variant="outline"
-              size="sm"
-              className="sm:self-end border-accent/30 text-accent hover:bg-accent/5 hover:text-accent shrink-0"
-            >
-              🎁 My New Customer Deals
-            </Button>
           </div>
 
           <div className="grid grid-cols-2 gap-3 lg:gap-4 mb-6">
