@@ -170,13 +170,23 @@ const WelcomeExplore = () => {
                 Visit the store and scan their QR code to unlock.
               </p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/discover")}
-            >
-              See all <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
+            <div className="flex gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/my-deals")}
+                className="border-accent/30 text-accent hover:bg-accent/10"
+              >
+                My Deals
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/discover")}
+              >
+                See all <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
           </div>
 
           {merchantsLoading ? (
@@ -310,6 +320,9 @@ const WelcomeExplore = () => {
           <Button size="lg" onClick={() => navigate("/discover")}>
             Explore the Map
             <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+          <Button size="lg" variant="outline" onClick={() => navigate("/my-deals")} className="border-accent/30 text-accent hover:bg-accent/10">
+            View My Deals
           </Button>
           <Button size="lg" variant="outline" onClick={() => navigate("/home")}>
             Go to Home
