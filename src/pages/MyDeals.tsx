@@ -14,6 +14,8 @@ import { PageLoader } from "@/components/PageLoader";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
 import { toast } from "@/hooks/use-toast";
+import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { format } from "date-fns";
 
 type RedemptionRow = {
   id: string;
@@ -50,6 +52,24 @@ type LockedMerchant = {
   fee_model: string | null;
   offer_count: number;
   distance: number | null;
+};
+
+type BrandedActivityRow = {
+  id: string;
+  type: string;
+  amount: number;
+  description: string | null;
+  created_at: string;
+  campaign_id: string | null;
+  merchant_id: string | null;
+  brand_campaigns: {
+    id: string;
+    name: string;
+    campaign_color: string | null;
+    campaign_logo_url: string | null;
+    brand_id: string;
+    brand_accounts: { id: string; brand_name: string; logo_url: string | null } | null;
+  } | null;
 };
 
 const MyDeals = () => {
@@ -193,6 +213,39 @@ const MyDeals = () => {
       return a.distance - b.distance;
     });
   }, [lockedRaw, unlockedOfferIds, userLocation]);
+
+  // 3) Branded PawBucks campaign activity (earn/redeem) for this user
+  const { data: brandedActivity = [], isLoading: brandedLoading } = useQuery({
+    queryKey: ["my-deals-branded-activity", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("branded_pawbucks_activity")
+        .select(
+          `id, type, amount, description, created_at, campaign_id, merchant_id,
+           brand_campaigns:campaign_id (
+             id, name, campaign_color, campaign_logo_url, brand_id,
+             brand_accounts:brand_id ( id, brand_name, logo_url )
+           )`,
+        )
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data || []) as BrandedActivityRow[];
+    },
+  });
+
+  const brandedTotals = useMemo(() => {
+    let earned = 0;
+    let redeemed = 0;
+    for (const a of brandedActivity) {
+      const amt = Number(a.amount || 0);
+      if (a.type === "earn") earned += amt;
+      else if (a.type === "redeem") redeemed += amt;
+    }
+    return { earned, redeemed };
+  }, [brandedActivity]);
 
   const copyCode = async (code: string) => {
     try {
