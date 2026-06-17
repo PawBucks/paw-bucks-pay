@@ -242,6 +242,7 @@ const AppRoutes = () => {
  <Route path="/badges" element={<ProtectedRoute><PageTransition><BadgesPage /></PageTransition></ProtectedRoute>} />
  <Route path="/pet-personality-quiz" element={<ProtectedRoute><PageTransition><PetPersonalityQuizPage /></PageTransition></ProtectedRoute>} />
  <Route path="/welcome" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><WelcomeExplore /></PageTransition></ProtectedRoute>} />
+ <Route path="/my-deals" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><MyDeals /></PageTransition></ProtectedRoute>} />
  <Route path="/loyalty" element={<ProtectedRoute><PageTransition><LoyaltyPage /></PageTransition></ProtectedRoute>} />
  <Route path="/loyalty-cards" element={<ProtectedRoute><PageTransition><LoyaltyCardsPage /></PageTransition></ProtectedRoute>} />
  <Route path="/my-bookings" element={<ProtectedRoute><PageTransition><MyBookings /></PageTransition></ProtectedRoute>} />
