@@ -205,6 +205,7 @@ export function MerchantWorkspaceLayout({
   children,
 }: MerchantWorkspaceLayoutProps) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { user } = useAuth();
   const [merchant, setMerchant] = useState<{
     id: string;
@@ -300,6 +301,28 @@ export function MerchantWorkspaceLayout({
 
   // Also invalidate any react-query caches for merchant wallet
   useMerchantPawBucksRealtime(merchant?.id);
+
+  // Acquisition-only merchants can only access a stripped allow-list of routes.
+  // Anything else (invoicing, scheduling, wallets, POS, loyalty, etc.) redirects
+  // back to the workspace overview. Full access requires upgrading to Full Ecosystem.
+  useEffect(() => {
+    if (!merchant) return;
+    if (merchant.fee_model !== "acquisition_only") return;
+    const allowed = [
+      "/merchant/workspace",
+      "/merchant-analytics",
+      "/merchant/offers",
+      "/merchant/check-ins",
+      "/merchant/business-profile",
+      "/merchant/support",
+    ];
+    const isAllowed = allowed.some(
+      (base) => pathname === base || pathname.startsWith(base + "/")
+    );
+    if (!isAllowed) {
+      navigate("/merchant/workspace", { replace: true });
+    }
+  }, [merchant, pathname, navigate]);
 
   const businessName = businessNameProp ?? merchant?.business_name ?? "Your Business";
   const logoUrl = logoUrlProp ?? merchant?.logo_url ?? null;
