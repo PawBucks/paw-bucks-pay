@@ -99,13 +99,23 @@ const Activity = () => {
         <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
         <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-12 pb-28 md:pb-10 max-w-4xl">
-          <div className="mb-6">
-            <h1 className="text-2xl lg:text-4xl font-semibold tracking-tight">
-              Your activity
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Every penny you've spent — and every penny you've saved.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl lg:text-4xl font-semibold tracking-tight">
+                Your activity
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Every penny you've spent — and every penny you've saved.
+              </p>
+            </div>
+            <Button
+              onClick={() => navigate("/my-deals")}
+              variant="outline"
+              size="sm"
+              className="sm:self-end border-accent/30 text-accent hover:bg-accent/5 hover:text-accent shrink-0"
+            >
+              🎁 My New Customer Deals
+            </Button>
           </div>
 
           <div className="grid grid-cols-2 gap-3 lg:gap-4 mb-6">
