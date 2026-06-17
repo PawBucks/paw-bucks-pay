@@ -223,6 +223,59 @@ const MerchantProfile = memo(() => {
     return { average: sum / reviews.length, total: reviews.length, distribution };
   }, [reviews]);
 
+  // ── Acquisition-only New Customer deals ──
+  // For acquisition-only merchants, surface their active partner_offers as locked cards
+  // that unlock only after the user scans the merchant's in-store QR code.
+  const { data: acquisitionOffers = [] } = useQuery({
+    queryKey: ["acquisition-offers", merchantId],
+    queryFn: async () => {
+      if (!merchantId) return [];
+      const nowIso = new Date().toISOString();
+      const { data, error } = await supabase
+        .from("partner_offers")
+        .select("id, title, description, end_date, start_date, status, is_active")
+        .eq("partner_id", merchantId)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data || []).filter((o: any) => {
+        if (o.status && o.status !== "active") return false;
+        if (o.start_date && new Date(o.start_date).toISOString() > nowIso) return false;
+        if (o.end_date && new Date(o.end_date).toISOString() < nowIso) return false;
+        return true;
+      });
+    },
+    enabled: !!merchantId && acquisitionOnly,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const acquisitionOfferIds = useMemo(
+    () => acquisitionOffers.map((o: any) => o.id),
+    [acquisitionOffers],
+  );
+
+  const { data: acquisitionRedemptions = [] } = useQuery({
+    queryKey: ["acquisition-offer-redemptions", merchantId, user?.id, acquisitionOfferIds],
+    queryFn: async () => {
+      if (!user || acquisitionOfferIds.length === 0) return [];
+      const { data, error } = await supabase
+        .from("offer_redemptions")
+        .select("id, offer_id, redemption_code, redeemed_at, partner_confirmed, created_at")
+        .eq("user_id", user.id)
+        .in("offer_id", acquisitionOfferIds);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user && acquisitionOnly && acquisitionOfferIds.length > 0,
+    staleTime: 1000 * 30,
+  });
+
+  const redemptionByOffer = useMemo(() => {
+    const m = new Map<string, any>();
+    (acquisitionRedemptions as any[]).forEach((r) => m.set(r.offer_id, r));
+    return m;
+  }, [acquisitionRedemptions]);
+
   const userHasReviewed = useMemo(
     () => (user ? reviews.some(r => r.user_id === user.id) : false),
     [reviews, user]
