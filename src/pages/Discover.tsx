@@ -767,6 +767,7 @@ type MerchantListItemProps = {
     review_count: number;
     logo_url?: string;
     distance?: number;
+    fee_model?: string | null;
   };
   isVerified: boolean;
   isSponsored: boolean;
@@ -871,7 +872,14 @@ const MerchantListItem = ({ merchant, isVerified, isSponsored, isFeatured, onCli
           <span className="bg-muted text-muted-foreground px-2 py-0.5 rounded-full text-[10px] font-medium">
             {merchant.business_type.replace(/_/g, " ")}
           </span>
-          {merchant.accepts_pawbucks && merchant.cashback_rate > 0 ? (
+          {merchant.fee_model === "acquisition_only" ? (
+            <span
+              className="bg-accent/10 text-accent ring-1 ring-inset ring-accent/30 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+              title="New Customer deals only. PawBucks are not accepted or earned here."
+            >
+              New Customer Deal
+            </span>
+          ) : merchant.accepts_pawbucks && merchant.cashback_rate > 0 ? (
             <span className="bg-primary/10 text-primary ring-1 ring-inset ring-primary/20 px-2 py-0.5 rounded-full text-[10px] font-semibold">
               {merchant.cashback_rate}x PB
             </span>
