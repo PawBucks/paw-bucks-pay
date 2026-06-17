@@ -20,7 +20,7 @@ const PetPersonalityQuizPage = () => {
  }, [user, authLoading, navigate]);
 
  const handleComplete = () => {
- navigate("/home");
+    navigate(petId ? `/welcome?petId=${petId}` : "/welcome");
  };
 
  if (authLoading) {
