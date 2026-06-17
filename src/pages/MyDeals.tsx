@@ -402,23 +402,6 @@ const MyDeals = () => {
           )}
         </section>
 
-        {/* Locked */}
-        <section className="space-y-3">
-          <div className="flex items-end justify-between gap-2">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Lock className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
-              Still Locked Near You
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/discover")}
-            >
-              See all <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
-        </section>
-
         {/* Branded PawBucks Campaign Activity */}
         <section className="space-y-3">
           <div className="flex items-end justify-between gap-2">
@@ -522,10 +505,20 @@ const MyDeals = () => {
           )}
         </section>
 
-        {/* Locked (continued) */}
+        {/* Locked */}
         <section className="space-y-3">
           <div className="flex items-end justify-between gap-2">
-            <h2 className="sr-only">Still Locked Near You</h2>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Lock className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
+              Still Locked Near You
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/discover")}
+            >
+              See all <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
           </div>
 
           {lockedLoading ? (
