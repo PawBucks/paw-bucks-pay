@@ -201,7 +201,7 @@ const Discover = () => {
     async () => {
       const { data: merchantData, error: merchantError } = await supabase
         .from("merchants_public")
-        .select("id, business_name, business_type, business_categories, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range, fee_model")
+        .select("id, business_name, business_type, business_categories, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range, fee_model, stripe_account_status")
         .order("business_name");
 
       if (merchantError) throw merchantError;
@@ -879,7 +879,7 @@ const MerchantListItem = ({ merchant, isVerified, isSponsored, isFeatured, onCli
             >
               New Customer Deal
             </span>
-          ) : merchant.accepts_pawbucks && merchant.cashback_rate > 0 ? (
+          ) : merchant.accepts_pawbucks && merchant.cashback_rate > 0 && merchant.stripe_account_status === "active" ? (
             <span className="bg-primary/10 text-primary ring-1 ring-inset ring-primary/20 px-2 py-0.5 rounded-full text-[10px] font-semibold">
               {merchant.cashback_rate}x PB
             </span>
