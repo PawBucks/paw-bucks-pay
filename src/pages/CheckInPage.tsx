@@ -15,6 +15,14 @@ interface BrandedAward {
  brand_logo?: string | null;
 }
 
+interface UnlockedOffer {
+  offer_id: string;
+  title: string;
+  redemption_code: string;
+  already_unlocked: boolean;
+  redeemed: boolean;
+}
+
 const PROCESS_CHECKIN_TIMEOUT_MS = 10000;
 const MAX_TIMEOUT_RETRIES = 2;
 const RETRY_BACKOFF_MS = 750;
@@ -54,6 +62,8 @@ export default function CheckInPage() {
  const [processing, setProcessing] = useState(false);
  const [result, setResult] = useState<{ success: boolean; entityName: string | null; message: string } | null>(null);
  const [brandedAwards, setBrandedAwards] = useState<BrandedAward[]>([]);
+ const [unlockedOffers, setUnlockedOffers] = useState<UnlockedOffer[]>([]);
+ const [unlockMerchantId, setUnlockMerchantId] = useState<string | null>(null);
  const checkinAttempted = useRef(false);
 
  useEffect(() => {
@@ -156,6 +166,34 @@ export default function CheckInPage() {
  const merchantId = (row as any).merchant_id as string | null;
  const checkinId = (row as any).checkin_id as string | null;
  if (merchantId) {
+ // Unlock acquisition-only New Customer deals (no-op for full-ecosystem merchants).
+ if (checkinId) {
+ setUnlockMerchantId(merchantId);
+ supabase.functions
+ .invoke("unlock-acquisition-offers", {
+ body: { merchant_id: merchantId, checkin_id: checkinId },
+ })
+ .then(({ data: unlockData, error: unlockError }) => {
+ if (unlockError) {
+ console.warn("[checkin] unlock-acquisition-offers failed", unlockError);
+ return;
+ }
+ const offers = (unlockData?.unlocked ?? []) as UnlockedOffer[];
+ if (offers.length > 0) {
+ setUnlockedOffers(offers);
+ const newly = offers.filter((o) => !o.already_unlocked);
+ if (newly.length > 0) {
+ toast.success(
+ `🎉 New Customer deal unlocked at ${row.entity_name}!`,
+ { duration: 6000 },
+ );
+ }
+ }
+ })
+ .catch((err) => {
+ console.warn("[checkin] unlock-acquisition-offers threw", err);
+ });
+ }
  console.log("[checkin] invoking distribute-branded-pawbucks", {
  user_id: user.id,
  merchant_id: merchantId,
@@ -275,6 +313,33 @@ export default function CheckInPage() {
  </li>
  ))}
  </ul>
+ </div>
+ )}
+ {unlockedOffers.length > 0 && (
+ <div className="rounded-lg border border-accent/40 bg-accent/5 p-4 text-left space-y-3">
+ <div className="flex items-center justify-between">
+ <p className="text-sm font-semibold text-foreground">🎟️ New Customer Deal Unlocked</p>
+ <span className="text-[10px] uppercase tracking-wide font-semibold text-accent">In-store</span>
+ </div>
+ <ul className="space-y-3">
+ {unlockedOffers.map((o) => (
+ <li key={o.offer_id} className="space-y-1">
+ <p className="text-sm font-medium text-foreground">{o.title}</p>
+ <div className="flex items-center justify-between rounded-md border border-dashed border-accent/40 bg-background px-3 py-2">
+ <span className="text-xs text-muted-foreground">Show this code</span>
+ <span className="font-mono text-base font-bold tracking-widest text-foreground">
+ {o.redemption_code}
+ </span>
+ </div>
+ {o.redeemed && (
+ <p className="text-xs text-muted-foreground">Already redeemed.</p>
+ )}
+ </li>
+ ))}
+ </ul>
+ <p className="text-xs text-muted-foreground">
+ Show this code to the cashier to redeem in person.
+ </p>
  </div>
  )}
  </>
