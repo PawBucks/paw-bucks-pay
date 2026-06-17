@@ -7,6 +7,7 @@ import {
  DropdownMenuContent,
  DropdownMenuItem,
  DropdownMenuTrigger,
+ DropdownMenuSeparator,
 } from"@/components/ui/dropdown-menu";
 import { NotificationsDropdown } from"@/components/NotificationsDropdown";
 import logo from"@/assets/logo.png";
@@ -60,9 +61,9 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  paddingTop:'max(0.5rem, env(safe-area-inset-top))',
  }}
  >
- <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-3" aria-label="Main navigation">
+ <nav className="container mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 sm:gap-3" aria-label="Main navigation">
  <div 
- className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity duration-150 active:scale-[0.98] touch-manipulation group"
+ className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity duration-150 active:scale-[0.98] touch-manipulation group shrink-0"
  onClick={() => navigate(variant ==="merchant" ?"/merchant-dashboard" :"/")}
  role="button"
  tabIndex={0}
@@ -72,14 +73,14 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  <img 
  src={logo} 
  alt="PawBucks Logo - Return to homepage" 
- className="h-16 sm:h-20 w-auto object-contain"
+ className="h-11 sm:h-16 md:h-20 w-auto object-contain"
  width={80}
  height={80}
  loading="eager"
  />
  </div>
  
- <div className="flex items-center gap-3">
+ <div className="flex items-center gap-1 sm:gap-3">
  {/* Desktop Navigation Links for Authenticated Users */}
  {isAuthenticated && variant ==="petowner" && (
  <div className="hidden md:flex items-center gap-1">
@@ -163,31 +164,64 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  {isAuthenticated && onLogout ? (
  <>
  {userId && <NotificationsDropdown userId={userId} />}
- <Button 
+ {/* Desktop logout button */}
+ <Button
  onClick={onLogout}
  variant="ghost"
- className="gap-2 min-h-[44px] touch-manipulation text-muted-foreground hover:text-destructive"
+ className="hidden md:inline-flex gap-2 min-h-[44px] touch-manipulation text-muted-foreground hover:text-destructive"
  aria-label="Logout"
  >
  <LogOut className="h-4 w-4" />
- <span className="hidden sm:inline">Logout</span>
+ <span>Logout</span>
  </Button>
+ {/* Mobile hamburger: nav links + logout */}
+ <DropdownMenu>
+ <DropdownMenuTrigger asChild>
+ <Button
+ size="icon"
+ variant="outline"
+ className="md:hidden h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation"
+ aria-label="Open menu"
+ >
+ <Menu className="h-5 w-5" />
+ </Button>
+ </DropdownMenuTrigger>
+ <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-card z-50">
+ {(variant ==="merchant" ? merchantMenuItems : petOwnerMenuItems).map((item, index) => (
+ <DropdownMenuItem
+ key={index}
+ onClick={() => navigate(item.path)}
+ className="cursor-pointer min-h-[44px] touch-manipulation"
+ >
+ {item.label}
+ </DropdownMenuItem>
+ ))}
+ <DropdownMenuSeparator />
+ <DropdownMenuItem
+ onClick={onLogout}
+ className="cursor-pointer min-h-[44px] touch-manipulation text-destructive focus:text-destructive"
+ >
+ <LogOut className="h-4 w-4 mr-2" />
+ Logout
+ </DropdownMenuItem>
+ </DropdownMenuContent>
+ </DropdownMenu>
  </>
  ) : (
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
- <Button 
+ <Button
  size="icon"
  variant="outline"
- className="md:hidden min-h-[44px] min-w-[44px] touch-manipulation"
+ className="md:hidden h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation"
  aria-label="Open menu"
  >
- <Menu className="h-6 w-6" />
+ <Menu className="h-5 w-5" />
  </Button>
  </DropdownMenuTrigger>
- <DropdownMenuContent align="end" className="w-56 bg-card z-50">
- {(menuItems || (isAuthenticated && variant ==="petowner" ? petOwnerMenuItems : isAuthenticated && variant ==="merchant" ? merchantMenuItems : defaultMenuItems)).map((item, index) => (
- <DropdownMenuItem 
+ <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-card z-50">
+ {(menuItems || defaultMenuItems).map((item, index) => (
+ <DropdownMenuItem
  key={index}
  onClick={() => navigate(item.path)}
  className="cursor-pointer min-h-[44px] touch-manipulation"
