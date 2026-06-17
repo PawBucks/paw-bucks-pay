@@ -409,6 +409,7 @@ const MerchantProfile = memo(() => {
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-primary/60 text-primary font-medium capitalize">
                       {merchant.business_type.replace(/_/g, " ")}
                     </span>
+                    <MerchantTypeBadge feeModel={(merchant as any).fee_model} size="md" />
                     {merchant.address && (
                       <span className="text-white/80 truncate">{merchant.address.split(",").slice(-3, -1).join(",").trim()}</span>
                     )}
