@@ -111,14 +111,45 @@ const NAV: NavSection[] = [
   },
 ];
 
-function WorkspaceSidebar() {
+// Acquisition-only merchants get a stripped-down workspace.
+// Only acquisition tools: Overview, Offers, QR Code (check-ins), Analytics,
+// plus Business Profile and Support.
+const ACQUISITION_NAV: NavSection[] = [
+  {
+    section: "Dashboard",
+    items: [
+      { id: "overview", label: "Overview", icon: LayoutGrid, to: "/merchant/workspace" },
+      { id: "analytics", label: "Analytics", icon: BarChart3, to: "/merchant-analytics" },
+    ],
+  },
+  {
+    section: "Acquisition Tools",
+    items: [
+      { id: "offers", label: "Offers", icon: Tag, to: "/merchant/offers" },
+      { id: "qr-code", label: "QR Code", icon: Activity, to: "/merchant/check-ins" },
+    ],
+  },
+  {
+    section: "Account",
+    items: [
+      { id: "profile", label: "Business Profile", icon: User, to: "/merchant/business-profile" },
+    ],
+  },
+  {
+    section: "Support",
+    items: [{ id: "support", label: "Support Center", icon: HelpCircle, to: "/merchant/support" }],
+  },
+];
+
+function WorkspaceSidebar({ feeModel }: { feeModel: "full_ecosystem" | "acquisition_only" }) {
   const { pathname, search } = useLocation();
   const { signOut } = useAuth();
   const fullPath = pathname + search;
+  const nav = feeModel === "acquisition_only" ? ACQUISITION_NAV : NAV;
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
-        {NAV.map((group) => (
+        {nav.map((group) => (
           <SidebarGroup key={group.section}>
             <SidebarGroupLabel className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground/70">
               {group.section}
@@ -179,6 +210,7 @@ export function MerchantWorkspaceLayout({
     id: string;
     business_name: string | null;
     logo_url: string | null;
+    fee_model: "full_ecosystem" | "acquisition_only";
   } | null>(null);
   const [walletBalance, setWalletBalance] = useState<number>(0);
 
@@ -188,11 +220,19 @@ export function MerchantWorkspaceLayout({
     (async () => {
       const { data } = await supabase
         .from("merchants")
-        .select("id, business_name, logo_url")
+        .select("id, business_name, logo_url, fee_model")
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled || !data) return;
-      setMerchant(data as any);
+      setMerchant({
+        id: (data as any).id,
+        business_name: (data as any).business_name ?? null,
+        logo_url: (data as any).logo_url ?? null,
+        fee_model:
+          (data as any).fee_model === "acquisition_only"
+            ? "acquisition_only"
+            : "full_ecosystem",
+      });
     })();
     return () => {
       cancelled = true;
@@ -276,7 +316,7 @@ export function MerchantWorkspaceLayout({
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-muted/30">
-        <WorkspaceSidebar />
+        <WorkspaceSidebar feeModel={merchant?.fee_model ?? "full_ecosystem"} />
         <div className="flex-1 flex flex-col min-w-0">
           {/* Topbar */}
           <header className="h-14 flex items-center gap-3 border-b bg-card px-3 md:px-4 sticky top-0 z-30">

@@ -432,6 +432,28 @@ export function WorkspaceOverview() {
         {/* Stripe Connect setup / status */}
         <StripeConnectButton />
 
+        {feeModel === "acquisition_only" && (
+          <Card className="border-primary/40 bg-primary/5 shadow-none">
+            <CardContent className="p-4 flex items-center gap-3 flex-wrap">
+              <Sparkles className="h-5 w-5 text-primary shrink-0" />
+              <div className="flex-1 min-w-[200px]">
+                <p className="font-semibold text-sm">Need invoicing? Scheduling?</p>
+                <p className="text-xs text-muted-foreground">
+                  Upgrade to the Full Workspace to unlock invoicing, scheduling,
+                  subscriptions, POS, loyalty, and the full PawBucks ecosystem.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => navigate("/merchant/business-profile?tab=account-type")}
+              >
+                Upgrade to Workspace
+                <ArrowRight className="h-4 w-4 ml-1.5" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Funding banner */}
         {funding.status === "active" ? (
           <Card className="border-[hsl(var(--success)/0.4)] bg-[hsl(var(--success)/0.08)] shadow-none">
