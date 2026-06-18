@@ -93,6 +93,40 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const { user_id, merchant_id, checkin_id, trigger, transaction_amount_usd, transaction_id } = await req.json();
+
+    // ── AUTHENTICATION ──────────────────────────────────────────────────────
+    // Allow either:
+    //   (a) a server-to-server call with the shared internal trigger secret, or
+    //   (b) an authenticated end user whose JWT subject matches the user_id
+    //       being credited (prevents drive-by drains of campaign budgets).
+    const internalSecret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
+    const providedSecret = req.headers.get("x-internal-secret");
+    const isInternal =
+      !!internalSecret && !!providedSecret && providedSecret === internalSecret;
+
+    if (!isInternal) {
+      const authHeader = req.headers.get("Authorization") || "";
+      if (!authHeader.startsWith("Bearer ")) {
+        return new Response(
+          JSON.stringify({ error: "unauthorized" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 },
+        );
+      }
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+      const authedClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const token = authHeader.replace("Bearer ", "");
+      const { data: claimsData, error: claimsError } = await authedClient.auth.getClaims(token);
+      const claimSub = claimsData?.claims?.sub;
+      if (claimsError || !claimSub || claimSub !== user_id) {
+        return new Response(
+          JSON.stringify({ error: "unauthorized" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 401 },
+        );
+      }
+    }
+
     const triggerType: "checkin" | "checkout" = trigger === "checkout" ? "checkout" : "checkin";
     const txAmountUsd = Number(transaction_amount_usd) || 0;
 
