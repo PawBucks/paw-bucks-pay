@@ -172,7 +172,7 @@ serve(async (req) => {
 
     if (channel === "push") {
       // Send in-app push notifications
-      for (const recipient of recipients) {
+      for (const recipient of safeRecipients) {
         try {
           await supabaseAdmin.from("notifications").insert({
             user_id: recipient.userId,
@@ -200,7 +200,7 @@ serve(async (req) => {
       }
     } else if (channel === "email") {
       // Send emails via transactional email system
-      for (const recipient of recipients) {
+      for (const recipient of safeRecipients) {
         try {
           if (!recipient.email) {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
@@ -271,7 +271,7 @@ serve(async (req) => {
         // Update campaign as failed
         await supabaseAdmin.from("merchant_campaigns").update({
           status: "failed",
-          failed_count: recipients.length,
+          failed_count: safeRecipients.length,
         }).eq("id", campaign.id);
 
         return new Response(
@@ -283,7 +283,7 @@ serve(async (req) => {
       const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSettings.twilio_account_sid}/Messages.json`;
       const twilioAuth = btoa(`${twilioSettings.twilio_account_sid}:${twilioSettings.twilio_auth_token}`);
 
-      for (const recipient of recipients) {
+      for (const recipient of safeRecipients) {
         try {
           if (!recipient.phone) {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
