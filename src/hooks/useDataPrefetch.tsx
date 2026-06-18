@@ -24,9 +24,8 @@ export const useDataPrefetch = () => {
  const [merchantsResult, reviewsResult] = await Promise.all([
  supabase
  .from('merchants_public')
- .select('id, business_name, business_type, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range')
- .order('business_name')
- .limit(50),
+ .select('id, business_name, business_type, business_categories, description, address, latitude, longitude, cashback_rate, logo_url, accepts_pawbucks, price_range, fee_model, stripe_account_status')
+ .order('business_name'),
  supabase
  .from('merchant_reviews')
  .select('merchant_id, rating')
