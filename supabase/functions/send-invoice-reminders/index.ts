@@ -344,7 +344,8 @@ serve(async (req) => {
         status,
         merchant_id,
         access_token,
-        currency
+        currency,
+        title
       `)
       .in("status", ["sent", "viewed", "partially_paid", "overdue"])
       .gt("amount_due", 0);
