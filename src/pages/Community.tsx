@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
@@ -280,6 +280,7 @@ const CommentSection = ({
 const PostCard = ({
   post, liked, saved, onToggleLike, onToggleSave,
   authorName, authorRole, authorPhoto,
+  currentUserId, onEdit, onDelete,
 }: {
   post: PostRow;
   liked: boolean;
@@ -287,10 +288,18 @@ const PostCard = ({
   onToggleLike: (id: string) => void;
   onToggleSave: (id: string) => void;
   authorName: string; authorRole: AuthorRole; authorPhoto: string | null;
+  currentUserId?: string;
+  onEdit: (id: string, text: string) => Promise<void> | void;
+  onDelete: (id: string) => Promise<void> | void;
 }) => {
   const [showComments, setShowComments] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(post.text);
+  const [busy, setBusy] = useState(false);
   const { toast } = useToast();
+  const isOwner = !!currentUserId && currentUserId === post.author_id;
 
   const copyLink = async () => {
     const url = `https://pawbucks.app/community#${post.id}`;
@@ -316,9 +325,65 @@ const PostCard = ({
             {post.category !== "general" && (<><span style={{ color: C.borderLight }}>·</span><CategoryTag id={post.category} /></>)}
           </div>
         </div>
+        {isOwner && (
+          <div style={{ position: "relative" }}>
+            <button
+              type="button"
+              onClick={() => setShowMenu((s) => !s)}
+              aria-label="Post options"
+              style={{ background: "none", border: "none", cursor: "pointer", color: C.mutedLight, padding: 4, borderRadius: 6, fontFamily: "inherit" }}
+            >
+              <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            </button>
+            {showMenu && (
+              <div style={{ position: "absolute", right: 0, top: "100%", marginTop: 4, background: C.white, border: `1px solid ${C.border}`, borderRadius: 10, boxShadow: "0 4px 16px rgba(15,23,42,0.08)", zIndex: 5, minWidth: 130, overflow: "hidden" }}>
+                <button
+                  type="button"
+                  onClick={() => { setShowMenu(false); setIsEditing(true); setEditText(post.text); }}
+                  style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 12px", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: C.ink }}
+                >
+                  ✏️ Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setShowMenu(false);
+                    if (!confirm("Delete this post? This cannot be undone.")) return;
+                    setBusy(true);
+                    await onDelete(post.id);
+                    setBusy(false);
+                  }}
+                  style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 12px", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: C.red, borderTop: `1px solid ${C.borderLight}` }}
+                >
+                  🗑 Delete
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div style={{ padding: "10px 14px 0", fontSize: 13.5, color: C.ink, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{post.text}</div>
+      {isEditing ? (
+        <div style={{ padding: "10px 14px 0" }}>
+          <textarea
+            value={editText}
+            maxLength={4000}
+            onChange={(e) => setEditText(e.target.value)}
+            style={{ width: "100%", minHeight: 80, padding: 10, border: `1px solid ${C.border}`, borderRadius: 10, fontFamily: "inherit", fontSize: 13.5, color: C.ink, outline: "none", resize: "vertical" }}
+          />
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+            <button type="button" onClick={() => { setIsEditing(false); setEditText(post.text); }}
+              style={{ padding: "7px 13px", borderRadius: 9, border: `1px solid ${C.border}`, background: C.white, color: C.muted, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>Cancel</button>
+            <button type="button" disabled={busy || !editText.trim() || editText.trim() === post.text}
+              onClick={async () => { setBusy(true); await onEdit(post.id, editText.trim()); setBusy(false); setIsEditing(false); }}
+              style={{ padding: "7px 14px", borderRadius: 9, border: "none", background: editText.trim() && editText.trim() !== post.text && !busy ? C.teal : "#cbd5e1", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+              {busy ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{ padding: "10px 14px 0", fontSize: 13.5, color: C.ink, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{post.text}</div>
+      )}
 
       {post.media_url && (
         <div style={{ margin: "12px 14px 0", borderRadius: 10, overflow: "hidden", border: `1px solid ${C.tealBorder}` }}>
