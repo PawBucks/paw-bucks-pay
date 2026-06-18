@@ -469,10 +469,21 @@ const Community = () => {
     },
   });
 
-  const { data: posts = [], refetch, isLoading } = useQuery({
+  const PAGE_SIZE = 20;
+  const {
+    data: postsPages,
+    refetch,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["community-posts", category, sort],
-    queryFn: async () => {
-      let q = supabase.from("community_posts").select("*").limit(100);
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
+      const from = (pageParam as number) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      let q = supabase.from("community_posts").select("*").range(from, to);
       if (category !== "all") q = q.eq("category", category);
       q = sort === "popular"
         ? q.order("likes_count", { ascending: false }).order("created_at", { ascending: false })
@@ -481,7 +492,66 @@ const Community = () => {
       if (error) throw error;
       return (data || []) as PostRow[];
     },
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < PAGE_SIZE ? undefined : allPages.length,
   });
+  const posts = useMemo(() => (postsPages?.pages.flat() ?? []) as PostRow[], [postsPages]);
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isFetchingNextPage) fetchNextPage();
+    }, { rootMargin: "300px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const updatePost = async (postId: string, text: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("community_posts")
+      .update({ text })
+      .eq("id", postId)
+      .eq("author_id", user.id);
+    if (error) {
+      toast({ title: "Couldn't update", description: error.message, variant: "destructive" });
+      return;
+    }
+    queryClient.setQueryData<any>(["community-posts", category, sort], (prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        pages: prev.pages.map((page: PostRow[]) =>
+          page.map((p) => (p.id === postId ? { ...p, text } : p))
+        ),
+      };
+    });
+    toast({ title: "Post updated" });
+  };
+
+  const deletePost = async (postId: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("community_posts")
+      .delete()
+      .eq("id", postId)
+      .eq("author_id", user.id);
+    if (error) {
+      toast({ title: "Couldn't delete", description: error.message, variant: "destructive" });
+      return;
+    }
+    queryClient.setQueryData<any>(["community-posts", category, sort], (prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        pages: prev.pages.map((page: PostRow[]) => page.filter((p) => p.id !== postId)),
+      };
+    });
+    toast({ title: "Post deleted" });
+  };
 
   const { data: likedSet = new Set<string>() } = useQuery({
     queryKey: ["community-likes", user?.id],
@@ -516,9 +586,15 @@ const Community = () => {
       isLiked ? next.delete(postId) : next.add(postId);
       return next;
     });
-    queryClient.setQueryData<PostRow[]>(["community-posts", category, sort], (prev) =>
-      (prev || []).map((p) => p.id === postId ? { ...p, likes_count: p.likes_count + (isLiked ? -1 : 1) } : p)
-    );
+    queryClient.setQueryData<any>(["community-posts", category, sort], (prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        pages: prev.pages.map((page: PostRow[]) =>
+          page.map((p) => (p.id === postId ? { ...p, likes_count: p.likes_count + (isLiked ? -1 : 1) } : p))
+        ),
+      };
+    });
     const { error } = isLiked
       ? await supabase.from("community_likes").delete().eq("post_id", postId).eq("user_id", user.id)
       : await supabase.from("community_likes").insert({ post_id: postId, user_id: user.id });
@@ -546,7 +622,7 @@ const Community = () => {
     }
   };
 
-  const sorted = useMemo(() => posts, [posts]);
+  const sorted = posts;
 
   const author = me ?? { name: "Member", role: "pet_owner" as AuthorRole, photo: null };
 
@@ -622,8 +698,18 @@ const Community = () => {
               authorName={author.name}
               authorRole={author.role}
               authorPhoto={author.photo}
+              currentUserId={user?.id}
+              onEdit={updatePost}
+              onDelete={deletePost}
             />
           ))
+        )}
+
+        {/* Infinite scroll sentinel + status */}
+        {!isLoading && sorted.length > 0 && (
+          <div ref={sentinelRef} style={{ textAlign: "center", padding: 20, color: C.mutedLight, fontSize: 12 }}>
+            {isFetchingNextPage ? "Loading more…" : hasNextPage ? "" : "You're all caught up 🎉"}
+          </div>
         )}
       </div>
 
