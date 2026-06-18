@@ -45,6 +45,7 @@ interface Invoice {
   merchant_id: string;
   access_token: string;
   currency: string;
+  title?: string | null;
 }
 
 interface Merchant {
@@ -58,6 +59,8 @@ interface InvoiceSettings {
   reminder_enabled: boolean;
   reminder_days_before: number[];
   overdue_reminder_days: number[];
+  logo_url?: string | null;
+  accent_color?: string | null;
 }
 
 import { pawBucksLogoBase64 } from "./logo.ts";
