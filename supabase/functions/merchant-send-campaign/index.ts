@@ -99,6 +99,51 @@ serve(async (req) => {
       );
     }
 
+    // Hard cap blast radius
+    const MAX_RECIPIENTS = 5000;
+    if (recipients.length > MAX_RECIPIENTS) {
+      return new Response(
+        JSON.stringify({ success: false, error: `Too many recipients (max ${MAX_RECIPIENTS})` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Recipient scoping: only allow users who have a prior relationship
+    // (transaction, booking, subscription, loyalty card, or message) with this merchant.
+    const requestedIds = Array.from(
+      new Set(recipients.map((r) => r.userId).filter((id): id is string => !!id))
+    );
+
+    const allowedIds = new Set<string>();
+    if (requestedIds.length > 0) {
+      const [txRes, bkRes, subRes, lcRes, msgRes] = await Promise.all([
+        supabaseAdmin.from("transactions").select("user_id").eq("merchant_id", merchantId).in("user_id", requestedIds),
+        supabaseAdmin.from("service_bookings").select("user_id").eq("merchant_id", merchantId).in("user_id", requestedIds),
+        supabaseAdmin.from("merchant_subscriptions").select("user_id").eq("merchant_id", merchantId).in("user_id", requestedIds),
+        supabaseAdmin.from("customer_punch_cards").select("user_id").eq("merchant_id", merchantId).in("user_id", requestedIds),
+        supabaseAdmin.from("merchant_messages").select("user_id").eq("merchant_id", merchantId).in("user_id", requestedIds),
+      ]);
+      for (const row of txRes.data ?? []) row.user_id && allowedIds.add(row.user_id);
+      for (const row of bkRes.data ?? []) row.user_id && allowedIds.add(row.user_id);
+      for (const row of subRes.data ?? []) row.user_id && allowedIds.add(row.user_id);
+      for (const row of lcRes.data ?? []) row.user_id && allowedIds.add(row.user_id);
+      for (const row of msgRes.data ?? []) row.user_id && allowedIds.add(row.user_id);
+    }
+
+    const safeRecipients = recipients.filter((r) => r.userId && allowedIds.has(r.userId));
+    const skippedCount = recipients.length - safeRecipients.length;
+
+    if (safeRecipients.length === 0) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "No eligible recipients (recipients must be your existing customers).",
+          skippedCount,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Create campaign record
     const { data: campaign, error: campaignError } = await supabaseAdmin
       .from("merchant_campaigns")
@@ -108,7 +153,7 @@ serve(async (req) => {
         message,
         channel,
         recipient_type: recipientType,
-        recipient_count: recipients.length,
+        recipient_count: safeRecipients.length,
         status: "sending",
       })
       .select()
@@ -127,7 +172,7 @@ serve(async (req) => {
 
     if (channel === "push") {
       // Send in-app push notifications
-      for (const recipient of recipients) {
+      for (const recipient of safeRecipients) {
         try {
           await supabaseAdmin.from("notifications").insert({
             user_id: recipient.userId,
@@ -155,7 +200,7 @@ serve(async (req) => {
       }
     } else if (channel === "email") {
       // Send emails via transactional email system
-      for (const recipient of recipients) {
+      for (const recipient of safeRecipients) {
         try {
           if (!recipient.email) {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
@@ -226,7 +271,7 @@ serve(async (req) => {
         // Update campaign as failed
         await supabaseAdmin.from("merchant_campaigns").update({
           status: "failed",
-          failed_count: recipients.length,
+          failed_count: safeRecipients.length,
         }).eq("id", campaign.id);
 
         return new Response(
@@ -238,7 +283,7 @@ serve(async (req) => {
       const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSettings.twilio_account_sid}/Messages.json`;
       const twilioAuth = btoa(`${twilioSettings.twilio_account_sid}:${twilioSettings.twilio_auth_token}`);
 
-      for (const recipient of recipients) {
+      for (const recipient of safeRecipients) {
         try {
           if (!recipient.phone) {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
