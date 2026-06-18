@@ -391,7 +391,7 @@ serve(async (req) => {
     // Get invoice settings for each merchant
     const { data: allSettings, error: settingsError } = await supabase
       .from("invoice_settings")
-      .select("merchant_id, reminder_enabled, reminder_days_before, overdue_reminder_days")
+      .select("merchant_id, reminder_enabled, reminder_days_before, overdue_reminder_days, logo_url, accent_color")
       .in("merchant_id", merchantIds);
 
     if (settingsError) {
