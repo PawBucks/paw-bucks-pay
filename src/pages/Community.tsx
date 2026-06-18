@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
@@ -280,6 +280,7 @@ const CommentSection = ({
 const PostCard = ({
   post, liked, saved, onToggleLike, onToggleSave,
   authorName, authorRole, authorPhoto,
+  currentUserId, onEdit, onDelete,
 }: {
   post: PostRow;
   liked: boolean;
@@ -287,10 +288,18 @@ const PostCard = ({
   onToggleLike: (id: string) => void;
   onToggleSave: (id: string) => void;
   authorName: string; authorRole: AuthorRole; authorPhoto: string | null;
+  currentUserId?: string;
+  onEdit: (id: string, text: string) => Promise<void> | void;
+  onDelete: (id: string) => Promise<void> | void;
 }) => {
   const [showComments, setShowComments] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(post.text);
+  const [busy, setBusy] = useState(false);
   const { toast } = useToast();
+  const isOwner = !!currentUserId && currentUserId === post.author_id;
 
   const copyLink = async () => {
     const url = `https://pawbucks.app/community#${post.id}`;
@@ -316,9 +325,65 @@ const PostCard = ({
             {post.category !== "general" && (<><span style={{ color: C.borderLight }}>·</span><CategoryTag id={post.category} /></>)}
           </div>
         </div>
+        {isOwner && (
+          <div style={{ position: "relative" }}>
+            <button
+              type="button"
+              onClick={() => setShowMenu((s) => !s)}
+              aria-label="Post options"
+              style={{ background: "none", border: "none", cursor: "pointer", color: C.mutedLight, padding: 4, borderRadius: 6, fontFamily: "inherit" }}
+            >
+              <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            </button>
+            {showMenu && (
+              <div style={{ position: "absolute", right: 0, top: "100%", marginTop: 4, background: C.white, border: `1px solid ${C.border}`, borderRadius: 10, boxShadow: "0 4px 16px rgba(15,23,42,0.08)", zIndex: 5, minWidth: 130, overflow: "hidden" }}>
+                <button
+                  type="button"
+                  onClick={() => { setShowMenu(false); setIsEditing(true); setEditText(post.text); }}
+                  style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 12px", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: C.ink }}
+                >
+                  ✏️ Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setShowMenu(false);
+                    if (!confirm("Delete this post? This cannot be undone.")) return;
+                    setBusy(true);
+                    await onDelete(post.id);
+                    setBusy(false);
+                  }}
+                  style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 12px", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 12, color: C.red, borderTop: `1px solid ${C.borderLight}` }}
+                >
+                  🗑 Delete
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      <div style={{ padding: "10px 14px 0", fontSize: 13.5, color: C.ink, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{post.text}</div>
+      {isEditing ? (
+        <div style={{ padding: "10px 14px 0" }}>
+          <textarea
+            value={editText}
+            maxLength={4000}
+            onChange={(e) => setEditText(e.target.value)}
+            style={{ width: "100%", minHeight: 80, padding: 10, border: `1px solid ${C.border}`, borderRadius: 10, fontFamily: "inherit", fontSize: 13.5, color: C.ink, outline: "none", resize: "vertical" }}
+          />
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+            <button type="button" onClick={() => { setIsEditing(false); setEditText(post.text); }}
+              style={{ padding: "7px 13px", borderRadius: 9, border: `1px solid ${C.border}`, background: C.white, color: C.muted, fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit" }}>Cancel</button>
+            <button type="button" disabled={busy || !editText.trim() || editText.trim() === post.text}
+              onClick={async () => { setBusy(true); await onEdit(post.id, editText.trim()); setBusy(false); setIsEditing(false); }}
+              style={{ padding: "7px 14px", borderRadius: 9, border: "none", background: editText.trim() && editText.trim() !== post.text && !busy ? C.teal : "#cbd5e1", color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+              {busy ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div style={{ padding: "10px 14px 0", fontSize: 13.5, color: C.ink, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{post.text}</div>
+      )}
 
       {post.media_url && (
         <div style={{ margin: "12px 14px 0", borderRadius: 10, overflow: "hidden", border: `1px solid ${C.tealBorder}` }}>
@@ -404,10 +469,21 @@ const Community = () => {
     },
   });
 
-  const { data: posts = [], refetch, isLoading } = useQuery({
+  const PAGE_SIZE = 20;
+  const {
+    data: postsPages,
+    refetch,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["community-posts", category, sort],
-    queryFn: async () => {
-      let q = supabase.from("community_posts").select("*").limit(100);
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
+      const from = (pageParam as number) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      let q = supabase.from("community_posts").select("*").range(from, to);
       if (category !== "all") q = q.eq("category", category);
       q = sort === "popular"
         ? q.order("likes_count", { ascending: false }).order("created_at", { ascending: false })
@@ -416,7 +492,66 @@ const Community = () => {
       if (error) throw error;
       return (data || []) as PostRow[];
     },
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < PAGE_SIZE ? undefined : allPages.length,
   });
+  const posts = useMemo(() => (postsPages?.pages.flat() ?? []) as PostRow[], [postsPages]);
+
+  // Infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !isFetchingNextPage) fetchNextPage();
+    }, { rootMargin: "300px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const updatePost = async (postId: string, text: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("community_posts")
+      .update({ text })
+      .eq("id", postId)
+      .eq("author_id", user.id);
+    if (error) {
+      toast({ title: "Couldn't update", description: error.message, variant: "destructive" });
+      return;
+    }
+    queryClient.setQueryData<any>(["community-posts", category, sort], (prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        pages: prev.pages.map((page: PostRow[]) =>
+          page.map((p) => (p.id === postId ? { ...p, text } : p))
+        ),
+      };
+    });
+    toast({ title: "Post updated" });
+  };
+
+  const deletePost = async (postId: string) => {
+    if (!user) return;
+    const { error } = await supabase
+      .from("community_posts")
+      .delete()
+      .eq("id", postId)
+      .eq("author_id", user.id);
+    if (error) {
+      toast({ title: "Couldn't delete", description: error.message, variant: "destructive" });
+      return;
+    }
+    queryClient.setQueryData<any>(["community-posts", category, sort], (prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        pages: prev.pages.map((page: PostRow[]) => page.filter((p) => p.id !== postId)),
+      };
+    });
+    toast({ title: "Post deleted" });
+  };
 
   const { data: likedSet = new Set<string>() } = useQuery({
     queryKey: ["community-likes", user?.id],
@@ -451,9 +586,15 @@ const Community = () => {
       isLiked ? next.delete(postId) : next.add(postId);
       return next;
     });
-    queryClient.setQueryData<PostRow[]>(["community-posts", category, sort], (prev) =>
-      (prev || []).map((p) => p.id === postId ? { ...p, likes_count: p.likes_count + (isLiked ? -1 : 1) } : p)
-    );
+    queryClient.setQueryData<any>(["community-posts", category, sort], (prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        pages: prev.pages.map((page: PostRow[]) =>
+          page.map((p) => (p.id === postId ? { ...p, likes_count: p.likes_count + (isLiked ? -1 : 1) } : p))
+        ),
+      };
+    });
     const { error } = isLiked
       ? await supabase.from("community_likes").delete().eq("post_id", postId).eq("user_id", user.id)
       : await supabase.from("community_likes").insert({ post_id: postId, user_id: user.id });
@@ -481,7 +622,7 @@ const Community = () => {
     }
   };
 
-  const sorted = useMemo(() => posts, [posts]);
+  const sorted = posts;
 
   const author = me ?? { name: "Member", role: "pet_owner" as AuthorRole, photo: null };
 
@@ -557,8 +698,18 @@ const Community = () => {
               authorName={author.name}
               authorRole={author.role}
               authorPhoto={author.photo}
+              currentUserId={user?.id}
+              onEdit={updatePost}
+              onDelete={deletePost}
             />
           ))
+        )}
+
+        {/* Infinite scroll sentinel + status */}
+        {!isLoading && sorted.length > 0 && (
+          <div ref={sentinelRef} style={{ textAlign: "center", padding: 20, color: C.mutedLight, fontSize: 12 }}>
+            {isFetchingNextPage ? "Loading more…" : hasNextPage ? "" : "You're all caught up 🎉"}
+          </div>
         )}
       </div>
 
