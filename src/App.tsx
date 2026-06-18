@@ -133,6 +133,7 @@ const Privacy = lazyWithRetry(() => import("./pages/Privacy"),"Privacy");
 const Terms = lazyWithRetry(() => import("./pages/Terms"),"Terms");
 const PetDigitalId = lazyWithRetry(() => import("./pages/PetDigitalId"),"PetDigitalId");
 const PetDigitalIdPublic = lazyWithRetry(() => import("./pages/PetDigitalIdPublic"),"PetDigitalIdPublic");
+const Community = lazyWithRetry(() => import("./pages/Community"),"Community");
 
 const createQueryClient = () => new QueryClient({
  defaultOptions: {
@@ -247,6 +248,7 @@ const AppRoutes = () => {
  <Route path="/loyalty-cards" element={<ProtectedRoute><PageTransition><LoyaltyCardsPage /></PageTransition></ProtectedRoute>} />
  <Route path="/my-bookings" element={<ProtectedRoute><PageTransition><MyBookings /></PageTransition></ProtectedRoute>} />
  <Route path="/bookings/:id" element={<ProtectedRoute><PageTransition><BookingStatus /></PageTransition></ProtectedRoute>} />
+ <Route path="/community" element={<ProtectedRoute allowedRoles={['pet_owner','merchant']}><PageTransition><Community /></PageTransition></ProtectedRoute>} />
 
  {/* Admin routes - requires admin or superadmin role */}
  <Route path="/admin" element={<PageTransition><AdminLogin /></PageTransition>} />
