@@ -8,7 +8,6 @@ const navItems = [
   { title: "Discover", to: "/discover", emoji: "🧭", ariaLabel: "Discover places" },
   { title: "Community", to: "/community", emoji: "💬", ariaLabel: "Community forum" },
   { title: "Activity", to: "/activity", emoji: "🧾", ariaLabel: "Your activity" },
-  { title: "Profile", to: "/profile", emoji: "👤", ariaLabel: "Profile" },
 ];
 
 const BottomNavComponent = () => {
