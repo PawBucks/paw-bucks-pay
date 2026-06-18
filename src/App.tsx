@@ -133,6 +133,7 @@ const Privacy = lazyWithRetry(() => import("./pages/Privacy"),"Privacy");
 const Terms = lazyWithRetry(() => import("./pages/Terms"),"Terms");
 const PetDigitalId = lazyWithRetry(() => import("./pages/PetDigitalId"),"PetDigitalId");
 const PetDigitalIdPublic = lazyWithRetry(() => import("./pages/PetDigitalIdPublic"),"PetDigitalIdPublic");
+const Community = lazyWithRetry(() => import("./pages/Community"),"Community");
 
 const createQueryClient = () => new QueryClient({
  defaultOptions: {
