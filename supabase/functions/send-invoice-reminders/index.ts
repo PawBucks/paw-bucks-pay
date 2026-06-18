@@ -60,130 +60,250 @@ interface InvoiceSettings {
   overdue_reminder_days: number[];
 }
 
+import { pawBucksLogoBase64 } from "./logo.ts";
+
 function generateEmailHtml(
   type: "reminder" | "overdue",
   invoice: Invoice,
   merchant: Merchant,
   daysUntilDue: number,
-  paymentUrl: string
+  paymentUrl: string,
+  logoUrl?: string | null,
+  accentColor?: string | null
 ): string {
   const isOverdue = type === "overdue";
-  const headerColor = isOverdue ? "#EF4444" : "#7DD4D4";
-  const headerText = isOverdue ? "PAYMENT OVERDUE" : "PAYMENT REMINDER";
-  const daysText = isOverdue 
-    ? `This invoice is ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) !== 1 ? 's' : ''} overdue.`
-    : daysUntilDue === 0 
-      ? "This invoice is due today."
-      : `This invoice is due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}.`;
+  const daysOverdue = Math.abs(daysUntilDue);
+  
+  // Extract merchant initials
+  const initials = (merchant.business_name || "")
+    .split(/\s+/)
+    .map(w => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "M";
 
-  return `
-<!DOCTYPE html>
+  // Escalation tiers
+  let headerGradient = "linear-gradient(135deg, #12a8b3 0%, #0a8f9a 100%)";
+  let headerText = "PAYMENT REMINDER";
+  let statusText = daysUntilDue === 0 
+    ? "This invoice is due today."
+    : `This invoice is due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}.`;
+  let escalationText = "A friendly reminder that your payment is due. Please settle this invoice when you have a moment.";
+  let calloutBg = "#ecfeff";
+  let calloutBorder = "#cffafe";
+  let calloutColor = "#0891b2";
+
+  if (isOverdue) {
+    headerText = "PAYMENT OVERDUE";
+    if (daysOverdue <= 3) {
+      headerGradient = "linear-gradient(135deg, #f97316 0%, #ea580c 100%)";
+      statusText = `This invoice is ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} overdue.`;
+      escalationText = "A friendly reminder — this happens! Please settle this invoice when you have a moment.";
+      calloutBg = "#fff7ed";
+      calloutBorder = "#fed7aa";
+      calloutColor = "#ea580c";
+    } else if (daysOverdue <= 14) {
+      headerGradient = "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)";
+      statusText = `This invoice is ${daysOverdue} days overdue.`;
+      escalationText = "Payment is now urgently required. Please settle this outstanding balance immediately.";
+      calloutBg = "#fef2f2";
+      calloutBorder = "#fecaca";
+      calloutColor = "#dc2626";
+    } else {
+      headerGradient = "linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%)";
+      headerText = "FINAL NOTICE";
+      statusText = `This invoice is ${daysOverdue} days overdue.`;
+      escalationText = "This is a final notice. Unpaid invoices may be referred to collections. Please pay now to avoid service interruption.";
+      calloutBg = "#fef2f2";
+      calloutBorder = "#fecaca";
+      calloutColor = "#991b1b";
+    }
+  }
+
+  // Brand colors (Teal fallback)
+  const brandColor = accentColor || "#12a8b3";
+  const brandDark = accentColor ? `${accentColor}cc` : "#0a8f9a"; // slight opacity or fallback dark
+
+  // Display logo or initial circle
+  const logoHtml = logoUrl 
+    ? `<img src="${logoUrl}" alt="${merchant.business_name}" style="max-height:44px;max-width:150px;border-radius:6px;vertical-align:middle;" />`
+    : `<table role="presentation" cellspacing="0" cellpadding="0">
+        <tr><td style="width:44px;height:44px;border-radius:10px;background:${brandColor};text-align:center;vertical-align:middle;font-size:15px;font-weight:800;color:#ffffff;font-family:-apple-system,sans-serif;">
+          ${initials}
+        </td></tr>
+      </table>`;
+
+  const serviceName = invoice.title || `Invoice #${invoice.invoice_number}`;
+  const formattedDueDate = formatLocalDateOnly(invoice.due_date);
+  const formattedAmount = `$${Number(invoice.amount_due).toFixed(2)}`;
+
+  return `<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${headerText}</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>${headerText} — ${merchant.business_name}</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f4f4f5;">
-    <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-          <!-- Header -->
-          <tr>
-            <td style="background: linear-gradient(135deg, ${headerColor} 0%, ${isOverdue ? '#DC2626' : '#5BC0C0'} 100%); padding: 30px 40px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 2px;">
-                ${headerText}
-              </h1>
-            </td>
-          </tr>
-          
-          <!-- Content -->
-          <tr>
-            <td style="padding: 40px;">
-              <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                Hi ${invoice.client_name},
-              </p>
-              
-              <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                ${isOverdue 
-                  ? `This is a reminder that your invoice from <strong>${merchant.business_name}</strong> is now overdue.`
-                  : `This is a friendly reminder about your upcoming invoice from <strong>${merchant.business_name}</strong>.`
-                }
-              </p>
-              
-              <!-- Invoice Details Box -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f9fafb; border-radius: 8px; margin: 24px 0;">
-                <tr>
-                  <td style="padding: 24px;">
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                      <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                          <span style="color: #6b7280; font-size: 14px;">Invoice Number</span>
-                        </td>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
-                          <strong style="color: #111827; font-size: 14px;">${invoice.invoice_number}</strong>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
-                          <span style="color: #6b7280; font-size: 14px;">Due Date</span>
-                        </td>
-                        <td style="padding: 8px 0; border-bottom: 1px solid #e5e7eb; text-align: right;">
-                          <strong style="color: ${isOverdue ? '#EF4444' : '#111827'}; font-size: 14px;">${formatLocalDateOnly(invoice.due_date)}</strong>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 8px 0;">
-                          <span style="color: #6b7280; font-size: 14px;">Amount Due</span>
-                        </td>
-                        <td style="padding: 8px 0; text-align: right;">
-                          <strong style="color: #111827; font-size: 20px;">$${Number(invoice.amount_due).toFixed(2)}</strong>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Status Message -->
-              <p style="color: ${isOverdue ? '#EF4444' : '#6b7280'}; font-size: 14px; text-align: center; margin: 0 0 24px; font-weight: ${isOverdue ? 'bold' : 'normal'};">
-                ${daysText}
-              </p>
-              
-              <!-- CTA Button -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                <tr>
-                  <td align="center">
-                    <a href="${paymentUrl}" style="display: inline-block; background: linear-gradient(135deg, #7DD4D4 0%, #5BC0C0 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: bold;">
-                      Pay Now
-                    </a>
-                  </td>
-                </tr>
-              </table>
-              
-              <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 24px 0 0; text-align: center;">
-                If you have any questions about this invoice, please contact us at<br>
-                <a href="mailto:${merchant.email || 'support@pawbucks.app'}" style="color: #7DD4D4;">${merchant.email || merchant.business_name}</a>
-              </p>
-            </td>
-          </tr>
-          
-          <!-- Footer -->
-          <tr>
-            <td style="background-color: #f9fafb; padding: 24px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
-              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                This is an automated reminder from ${merchant.business_name} via PawBucks.
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f4f4f5;">
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f4f5;">
+<tr>
+<td align="center" style="padding:40px 20px;">
+<table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(10,31,38,0.1);max-width:600px;">
+
+  <!-- PAWBUCKS LOGO STRIP -->
+  <tr>
+    <td style="padding:18px 40px;text-align:center;border-bottom:1px solid #f1f5f9;">
+      <img src="data:image/png;base64,${pawBucksLogoBase64}" alt="PawBucks" style="height:24px;display:inline-block;" />
+    </td>
+  </tr>
+
+  <!-- HEADER — color escalates by tier or uses friendly brand theme -->
+  <tr>
+    <td style="background:${headerGradient};padding:28px 40px;text-align:center;">
+      <h1 style="color:#ffffff;margin:0;font-size:21px;font-weight:800;letter-spacing:0.05em;">
+        ${headerText}
+      </h1>
+    </td>
+  </tr>
+
+  <!-- MERCHANT STRIP -->
+  <tr>
+    <td style="padding:20px 40px 0;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="44" style="vertical-align:middle;">
+            ${logoHtml}
+          </td>
+          <td style="padding-left:12px;vertical-align:middle;">
+            <div style="font-size:15px;font-weight:700;color:#0f172a;">${merchant.business_name}</div>
+            <div style="font-size:12px;color:#94a3b8;">
+              ${merchant.email || ''} ${merchant.phone ? `· ${merchant.phone}` : ''}
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <!-- CONTENT -->
+  <tr>
+    <td style="padding:24px 40px 40px;">
+      <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 18px;">Hi ${invoice.client_name},</p>
+
+      <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 18px;">
+        This is a reminder that your invoice from <strong>${merchant.business_name}</strong> is ${isOverdue ? "now overdue" : "due soon"}.
+      </p>
+
+      <!-- Invoice Details Box -->
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;border-radius:10px;margin:20px 0;border:1px solid #f1f5f9;">
+        <tr>
+          <td style="padding:20px 22px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+              <tr>
+                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
+                  <span style="color:#6b7280;font-size:13px;">Service</span>
+                </td>
+                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
+                  <strong style="color:#111827;font-size:13px;">${serviceName}</strong>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
+                  <span style="color:#6b7280;font-size:13px;">Invoice Number</span>
+                </td>
+                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
+                  <strong style="color:#111827;font-size:13px;font-family:monospace;">${invoice.invoice_number}</strong>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
+                  <span style="color:#6b7280;font-size:13px;">Due Date</span>
+                </td>
+                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
+                  <strong style="color:${isOverdue ? '#ea580c' : '#111827'};font-size:13px;">${formattedDueDate}</strong>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0 0;">
+                  <span style="color:#6b7280;font-size:13px;">Amount Due</span>
+                </td>
+                <td style="padding:10px 0 0;text-align:right;">
+                  <strong style="color:#111827;font-size:22px;">${formattedAmount}</strong>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Status callout — escalates by tier -->
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
+        <tr>
+          <td style="background-color:${calloutBg};border:1px solid ${calloutBorder};border-radius:8px;padding:12px 16px;text-align:center;">
+            <p style="color:${calloutColor};font-size:13px;margin:0;font-weight:700;">
+              ${statusText}
+            </p>
+            <p style="color:${calloutColor};font-size:12px;margin:6px 0 0;opacity:0.85;">
+              ${escalationText}
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- CTA Button — always brand color, never the alert color -->
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td align="center">
+            <a href="${paymentUrl}"
+              style="display:inline-block;background:linear-gradient(135deg,${brandColor} 0%,${brandDark} 100%);color:#ffffff;text-decoration:none;padding:15px 44px;border-radius:10px;font-size:15px;font-weight:700;">
+              Pay Now — ${formattedAmount}
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Secondary actions -->
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:14px;">
+        <tr>
+          <td align="center">
+            <a href="${paymentUrl.replace('/pay', '')}"
+              style="display:inline-block;color:#64748b;text-decoration:none;font-size:13px;padding:8px 14px;border:1px solid #e2e8f0;border-radius:8px;margin:0 4px;">
+              View Full Invoice
+            </a>
+            ${merchant.email ? `
+            <a href="mailto:${merchant.email}"
+              style="display:inline-block;color:#64748b;text-decoration:none;font-size:13px;padding:8px 14px;border:1px solid #e2e8f0;border-radius:8px;margin:0 4px;">
+              Message ${merchant.business_name}
+            </a>` : ''}
+          </td>
+        </tr>
+      </table>
+
+      ${merchant.email ? `
+      <p style="color:#9ca3af;font-size:12px;line-height:1.6;margin:24px 0 0;text-align:center;">
+        Questions about this invoice? Contact ${merchant.business_name} directly at<br />
+        <a href="mailto:${merchant.email}" style="color:${brandColor};">${merchant.email}</a>
+      </p>` : ''}
+    </td>
+  </tr>
+
+  <!-- FOOTER -->
+  <tr>
+    <td style="background-color:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
+      <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.6;">
+        This is an automated reminder from ${merchant.business_name} via PawBucks.<br/>
+        PawBucks, Inc. · <a href="mailto:support@pawbucks.app" style="color:#9ca3af;">support@pawbucks.app</a>
+      </p>
+    </td>
+  </tr>
+
+</table>
+</td>
+</tr>
+</table>
 </body>
-</html>
-  `;
+</html>`;
 }
 
 serve(async (req) => {
