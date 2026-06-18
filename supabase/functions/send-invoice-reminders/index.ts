@@ -501,7 +501,9 @@ serve(async (req) => {
         invoice,
         merchant,
         daysUntilDue,
-        paymentUrl
+        paymentUrl,
+        settings.logo_url,
+        settings.accent_color
       );
 
       try {
