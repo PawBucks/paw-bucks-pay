@@ -3,6 +3,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { calculateApplicationFee, calculatePawBucksEarned, type FeeModel } from "./fee-logic.ts";
+import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -112,29 +113,18 @@ serve(async (req) => {
 
     // Determine the user's PawBucks earning multiplier from their subscription tier.
     // Free = 10x, PawPass = 20x, PawPass+ = 30x.
-    let tierMultiplier = 10;
-    let subscriptionTier = 'Free';
+    // Uses resolveUserEarnTier so a stale/unset DB `subscription_tier` falls back
+    // to a live Stripe product-name lookup (prevents silently underpaying).
     const { data: subscription } = await supabaseAdmin
       .from('subscriptions')
-      .select('subscription_tier, is_manual_upgrade, expires_at, status')
+      .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
       .eq('user_id', user.id)
       .in('status', ['active', 'trialing'])
       .maybeSingle();
 
-    if (subscription?.subscription_tier) {
-      const expiresAt = subscription.expires_at ? new Date(subscription.expires_at) : null;
-      const stillValid = !expiresAt || expiresAt > new Date();
-      if (stillValid) {
-        const tier = String(subscription.subscription_tier).toLowerCase();
-        if (tier === 'pawpass_plus' || tier === 'plus') {
-          tierMultiplier = 30;
-          subscriptionTier = 'PawPass+';
-        } else if (tier === 'pawpass' || tier === 'basic') {
-          tierMultiplier = 20;
-          subscriptionTier = 'PawPass';
-        }
-      }
-    }
+    const resolvedTier = await resolveUserEarnTier(stripe, subscription);
+    const tierMultiplier = resolvedTier.multiplier;
+    const subscriptionTier = resolvedTier.label;
 
     // PawBucks earning rules:
     // - full_ecosystem merchants: customer earns on every purchase (tierMultiplier x $).
