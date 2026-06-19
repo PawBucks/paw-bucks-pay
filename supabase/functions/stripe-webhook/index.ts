@@ -1240,12 +1240,25 @@ serve(async (req) => {
         
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
-        // Update subscription record
+        // Update subscription record (also re-sync tier in case the product
+        // changed — prevents stale `subscription_tier` from underpaying users).
+        let renewalTierKey: 'pawpass' | 'pawpass_plus' | null = null;
+        try {
+          const productId = subscription.items.data[0]?.price?.product as string | undefined;
+          if (productId) {
+            const product = await stripe.products.retrieve(productId);
+            renewalTierKey = tierKeyFromProductName(product?.name);
+          }
+        } catch (tierErr) {
+          console.error('Error resolving tier on renewal:', tierErr);
+        }
+
         const { error: updateError } = await supabaseAdmin
           .from('subscriptions')
           .update({
             status: subscription.status,
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            ...(renewalTierKey ? { subscription_tier: renewalTierKey } : {}),
           })
           .eq('stripe_subscription_id', subscriptionId);
 
