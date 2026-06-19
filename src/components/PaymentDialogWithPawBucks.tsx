@@ -601,7 +601,7 @@ export const PaymentDialogWithPawBucks = ({
  // Full PawBucks payment - no Stripe needed
  if (data.paymentMethod ==='pawbucks_only') {
  toast.success(`Payment of ${Formatters.currency(totalAmount)} completed using ${pawbucksToUse} PawBucks!`);
- handleSuccess();
+ handleSuccess({ pawbucksEarned: 0, amountPaid: totalAmount, paymentIntentId: data?.paymentIntentId || '' });
  return;
  }
 
@@ -638,7 +638,7 @@ export const PaymentDialogWithPawBucks = ({
  }
  };
 
- const handleSuccess = () => {
+ const handleSuccess = (details?: { pawbucksEarned: number; amountPaid: number; paymentIntentId: string }) => {
  setAmount("");
  setDescription("");
  setLineItems([]);
@@ -650,7 +650,7 @@ export const PaymentDialogWithPawBucks = ({
  setShowPaymentForm(false);
  setPaymentData(null);
  onOpenChange(false);
- onSuccess();
+ onSuccess(details);
  };
 
  const handleCancel = () => {
