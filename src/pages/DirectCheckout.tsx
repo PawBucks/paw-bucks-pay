@@ -240,9 +240,15 @@ export default function DirectCheckout() {
           userId={user.id}
           initialAmount={prefilledAmount}
           initialTip={prefilledTip}
-          onSuccess={() => {
+          onSuccess={(details) => {
             setDialogOpen(false);
-            setSuccess(true);
+            const params = new URLSearchParams();
+            params.set("merchant", merchant.business_name);
+            params.set("mid", merchant.id);
+            if (details?.amountPaid) params.set("paid", details.amountPaid.toFixed(2));
+            if (details?.pawbucksEarned) params.set("pb", String(details.pawbucksEarned));
+            if (details?.paymentIntentId) params.set("tx", details.paymentIntentId);
+            navigate(`/saved?${params.toString()}`);
           }}
         />
       )}

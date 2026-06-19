@@ -91,7 +91,7 @@ type PaymentFormProps = {
  totalAmount: number;
  paymentIntentId: string;
  connectedAccountId: string;
- onSuccess: () => void;
+ onSuccess: (details?: { pawbucksEarned: number; amountPaid: number; paymentIntentId: string }) => void;
  onCancel: () => void;
 };
 
@@ -175,7 +175,11 @@ const StripePaymentForm = ({
      finalStatus.pawbucksEarned ??
      Math.round(stripeAmount * cashbackRate);
    toast.success(`Payment successful! You earned ${cashbackPawBucks} PawBucks!`);
-   onSuccess();
+    onSuccess({
+      pawbucksEarned: cashbackPawBucks,
+      amountPaid: totalAmount,
+      paymentIntentId,
+    });
    return;
  }
 
@@ -185,7 +189,11 @@ const StripePaymentForm = ({
  toast.success('Payment received! Your PawBucks will appear in a moment.', {
    duration: 6000,
  });
- onSuccess();
+  onSuccess({
+    pawbucksEarned: Math.round(stripeAmount * cashbackRate),
+    amountPaid: totalAmount,
+    paymentIntentId,
+  });
  } catch (error: any) {
  console.error("Payment error:", error);
  toast.error(error.message ||"Payment failed");
@@ -282,7 +290,7 @@ type PaymentDialogWithPawBucksProps = {
  cashbackRate: number;
  acceptsPawbucks: boolean;
  userId: string;
- onSuccess: () => void;
+ onSuccess: (details?: { pawbucksEarned: number; amountPaid: number; paymentIntentId: string }) => void;
  /** Optional prefilled bill amount (USD). When set, the user does not need to retype it. */
  initialAmount?: number;
  /** Optional prefilled tip (USD). */
@@ -593,7 +601,7 @@ export const PaymentDialogWithPawBucks = ({
  // Full PawBucks payment - no Stripe needed
  if (data.paymentMethod ==='pawbucks_only') {
  toast.success(`Payment of ${Formatters.currency(totalAmount)} completed using ${pawbucksToUse} PawBucks!`);
- handleSuccess();
+ handleSuccess({ pawbucksEarned: 0, amountPaid: totalAmount, paymentIntentId: data?.paymentIntentId || '' });
  return;
  }
 
@@ -630,7 +638,7 @@ export const PaymentDialogWithPawBucks = ({
  }
  };
 
- const handleSuccess = () => {
+ const handleSuccess = (details?: { pawbucksEarned: number; amountPaid: number; paymentIntentId: string }) => {
  setAmount("");
  setDescription("");
  setLineItems([]);
@@ -642,7 +650,7 @@ export const PaymentDialogWithPawBucks = ({
  setShowPaymentForm(false);
  setPaymentData(null);
  onOpenChange(false);
- onSuccess();
+ onSuccess(details);
  };
 
  const handleCancel = () => {
