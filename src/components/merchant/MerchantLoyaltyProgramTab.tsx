@@ -411,8 +411,76 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  maxLength={200}
  />
  <p className="text-xs text-muted-foreground">
- Every completed transaction through PawBucks Pay automatically counts as a punch
+ Customer-facing label. The actual rules below decide whether a transaction earns a verified punch.
  </p>
+ </div>
+
+ <Separator />
+
+ <div className="space-y-2">
+   <Label>Qualifying Services</Label>
+   <p className="text-xs text-muted-foreground">
+     Only transactions that include at least one of the selected services (or any service in the selected categories below) count as a verified punch. Leave both empty to accept all services.
+   </p>
+   <div className="max-h-40 overflow-y-auto rounded-md border p-2 space-y-1">
+     {merchantServices.length === 0 ? (
+       <p className="text-xs text-muted-foreground py-2 text-center">No active services yet</p>
+     ) : (
+       merchantServices.map((s) => {
+         const checked = formServices.includes(s.id);
+         return (
+           <label key={s.id} className="flex items-center gap-2 text-sm cursor-pointer">
+             <input
+               type="checkbox"
+               checked={checked}
+               onChange={(e) =>
+                 setFormServices((prev) =>
+                   e.target.checked ? [...prev, s.id] : prev.filter((id) => id !== s.id)
+                 )
+               }
+             />
+             <span className="flex-1">{s.name}</span>
+             {s.category && <span className="text-xs text-muted-foreground">{s.category}</span>}
+           </label>
+         );
+       })
+     )}
+   </div>
+ </div>
+
+ <div className="space-y-2">
+   <Label>Qualifying Categories</Label>
+   <div className="flex flex-wrap gap-2">
+     {Array.from(new Set(merchantServices.map((s) => s.category).filter(Boolean) as string[])).map((cat) => {
+       const checked = formCategories.includes(cat);
+       return (
+         <button
+           type="button"
+           key={cat}
+           onClick={() =>
+             setFormCategories((prev) =>
+               checked ? prev.filter((c) => c !== cat) : [...prev, cat]
+             )
+           }
+           className={`px-3 py-1 rounded-full text-xs border transition-colors ${
+             checked ? "bg-primary text-primary-foreground border-primary" : "border-border hover:border-primary"
+           }`}
+         >
+           {cat}
+         </button>
+       );
+     })}
+   </div>
+ </div>
+
+ <div className="flex items-center justify-between rounded-md border p-3">
+   <div className="space-y-0.5">
+     <Label className="text-sm">Exclude PawBucks-only payments</Label>
+     <p className="text-xs text-muted-foreground">
+       When on, transactions paid entirely with PawBucks won't earn a punch.
+     </p>
+   </div>
+   <Switch checked={formExcludePawBucksOnly} onCheckedChange={setFormExcludePawBucksOnly} />
  </div>
 
  <Button onClick={handleSave} disabled={saving} className="w-full">
