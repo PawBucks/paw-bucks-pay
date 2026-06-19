@@ -36,6 +36,45 @@ serve(async (req) => {
       );
     }
 
+    // Load the transaction (need stripe_amount to detect PawBucks-only payments)
+    const { data: transaction, error: txErr } = await supabaseAdmin
+      .from("transactions")
+      .select("id, stripe_amount, amount, pawbucks_used, payment_method, status")
+      .eq("id", transaction_id)
+      .maybeSingle();
+
+    if (txErr || !transaction) {
+      console.error("Transaction not found:", txErr);
+      return new Response(
+        JSON.stringify({ error: "Transaction not found" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+      );
+    }
+
+    // Load line items once — used to verify qualifying services/categories
+    const { data: items } = await supabaseAdmin
+      .from("transaction_items")
+      .select("source_type, source_id")
+      .eq("transaction_id", transaction_id);
+
+    const serviceIdsInTx = (items || [])
+      .filter((i: any) => i.source_type === "service" && i.source_id)
+      .map((i: any) => i.source_id as string);
+
+    let txServiceCategories: string[] = [];
+    if (serviceIdsInTx.length > 0) {
+      const { data: svcRows } = await supabaseAdmin
+        .from("merchant_services")
+        .select("id, category")
+        .in("id", serviceIdsInTx);
+      txServiceCategories = (svcRows || [])
+        .map((s: any) => s.category)
+        .filter(Boolean) as string[];
+    }
+
+    const stripeAmt = Number(transaction.stripe_amount ?? 0);
+    const isPawBucksOnly = stripeAmt <= 0;
+
     // Get all active loyalty programs for this merchant
     const { data: programs, error: progError } = await supabaseAdmin
       .from("merchant_loyalty_programs")
@@ -58,6 +97,30 @@ serve(async (req) => {
     const results = [];
 
     for (const program of programs) {
+      // Verification rules
+      if (program.exclude_pawbucks_only && isPawBucksOnly) {
+        results.push({ program_id: program.id, status: "skipped_pawbucks_only" });
+        continue;
+      }
+
+      const requiredServiceIds: string[] = Array.isArray(program.qualifying_service_ids)
+        ? program.qualifying_service_ids
+        : [];
+      const requiredCategories: string[] = Array.isArray(program.qualifying_categories)
+        ? program.qualifying_categories
+        : [];
+
+      const hasServiceRule = requiredServiceIds.length > 0 || requiredCategories.length > 0;
+
+      if (hasServiceRule) {
+        const matchService = requiredServiceIds.some((id) => serviceIdsInTx.includes(id));
+        const matchCategory = requiredCategories.some((c) => txServiceCategories.includes(c));
+        if (!matchService && !matchCategory) {
+          results.push({ program_id: program.id, status: "skipped_no_qualifying_item" });
+          continue;
+        }
+      }
+
       // Check if this transaction already awarded a punch for this program
       const { data: existingPunch } = await supabaseAdmin
         .from("punch_card_events")
