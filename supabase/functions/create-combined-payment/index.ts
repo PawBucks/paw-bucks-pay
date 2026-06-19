@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { z } from "https://esm.sh/zod@3.22.4";
+import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
 import {
   effectivePawBucksCapPct,
   clampManualPawBucks,
@@ -606,33 +607,11 @@ serve(async (req) => {
       .in('status', ['active', 'trialing'])
       .maybeSingle();
 
-    let cashbackRate = 10;
-    let subscriptionTier = 'Free';
-
-    // Check for manual subscription first
-    if (subscription?.is_manual_upgrade && subscription?.subscription_tier) {
-      const expiresAt = subscription.expires_at ? new Date(subscription.expires_at) : null;
-      if (!expiresAt || expiresAt > new Date()) {
-        if (subscription.subscription_tier === 'pawpass_plus') {
-          cashbackRate = 30;
-          subscriptionTier = 'PawPass+';
-        } else if (subscription.subscription_tier === 'pawpass') {
-          cashbackRate = 20;
-          subscriptionTier = 'PawPass';
-        }
-      }
-    } else if (subscription?.stripe_subscription_id) {
-      const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
-      const productId = stripeSubscription.items.data[0]?.price?.product;
-      
-      if (productId === 'prod_TQyZjYzt9DwoIK') {
-        cashbackRate = 30;
-        subscriptionTier = 'PawPass+';
-      } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-        cashbackRate = 20;
-        subscriptionTier = 'PawPass';
-      }
-    }
+    // Resolve tier with fallback to live Stripe product-name lookup so stale
+    // or empty DB `subscription_tier` rows never silently underpay subscribers.
+    const resolvedTier = await resolveUserEarnTier(stripe, subscription);
+    const cashbackRate = resolvedTier.multiplier;
+    const subscriptionTier = resolvedTier.label;
 
     // Calculate amounts - PawBucks earned on Stripe portion only
     const stripeAmountInCents = Math.round(stripeAmount * 100);
