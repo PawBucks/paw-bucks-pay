@@ -419,12 +419,100 @@ const MyDeals = () => {
               })}
             </div>
           )}
+
+          {/* Locked nearby — same feature */}
+          <div className="space-y-3 pt-3 border-t border-accent/15">
+            <div className="flex items-end justify-between gap-2">
+              <h3 className="text-base font-semibold flex items-center gap-2">
+                <Lock className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                Still Locked Near You
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/discover")}
+              >
+                See all <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+
+            {lockedLoading ? (
+              <div className="text-sm text-muted-foreground py-6 text-center">
+                Loading nearby deals…
+              </div>
+            ) : lockedMerchants.length === 0 ? (
+              <Card className="p-4 text-sm text-muted-foreground text-center py-6 bg-background">
+                {unlockedMerchantIds.size > 0
+                  ? "You've unlocked every nearby New Customer deal — nice work!"
+                  : "No locked New Customer deals nearby right now."}
+              </Card>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {lockedMerchants.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => navigate(`/merchant/${m.id}`)}
+                    className="text-left"
+                  >
+                    <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center shrink-0">
+                          <Lock
+                            className="w-5 h-5 text-muted-foreground"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold truncate">
+                            {m.business_name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {m.offer_count} New Customer{" "}
+                            {m.offer_count === 1 ? "deal" : "deals"} to unlock
+                          </p>
+                          {m.address && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
+                              <MapPin className="w-3 h-3" aria-hidden="true" />
+                              <span className="truncate">{m.address}</span>
+                              {m.distance != null && (
+                                <span className="ml-1 shrink-0">
+                                  · {m.distance.toFixed(1)} mi
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1 text-xs text-accent mt-2 font-medium">
+                            Scan in-store QR to unlock
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
 
-        {/* Branded PawBucks Campaign Activity */}
-        <section className="space-y-3">
+        {/* Visual separator between the two distinct features */}
+        <div className="flex items-center gap-3" aria-hidden="true">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            And
+          </span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        {/* ============================================================ */}
+        {/* FEATURE 2 — Branded Campaign Rewards (sponsor PawBucks)       */}
+        {/* ============================================================ */}
+        <section className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
           <div className="flex items-end justify-between gap-2">
-            <div>
+            <div className="space-y-1">
+              <Badge className="bg-primary/15 text-primary border-primary/30">
+                <PawBucksLogo className="w-3 h-3 mr-1" />
+                Sponsor Rewards
+              </Badge>
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <PawBucksLogo className="w-5 h-5" />
                 Branded Campaign Rewards
@@ -433,6 +521,20 @@ const MyDeals = () => {
                 PawBucks you've earned or redeemed from brand-sponsored campaigns.
               </p>
             </div>
+            <button
+              type="button"
+              onClick={() =>
+                toast({
+                  title: "About Branded Campaigns",
+                  description:
+                    "Brands sponsor extra PawBucks on top of merchant cashback. Earn at participating stores; redeem like normal PawBucks.",
+                })
+              }
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="About branded campaigns"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
           </div>
 
           {brandedLoading ? (
