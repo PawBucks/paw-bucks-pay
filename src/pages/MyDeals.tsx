@@ -21,7 +21,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GradientCard } from "@/components/ui/gradient-card";
+import { Card } from "@/components/ui/card";
 import { PageLoader } from "@/components/PageLoader";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
