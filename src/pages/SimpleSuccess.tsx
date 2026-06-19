@@ -4,19 +4,12 @@ import { Check, X, FileText, Info, ChevronRight } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { useUserEarnRate } from "@/hooks/useUserEarnRate";
 import { useUserLocation } from "@/hooks/useUserLocation";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import {
+  useFeaturedPartnerMerchants,
+  usePremiumAdMerchants,
+} from "@/hooks/useMerchantServices";
 import { calculateDistance, formatDistance } from "@/lib/geo";
 import { getCategoryEmoji, getCategoryLabel } from "@/lib/categoryMapping";
-
-type NearbyMerchant = {
-  id: string;
-  business_name: string;
-  business_type: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  cashback_rate: number | null;
-};
 
 const SimpleSuccess = () => {
   const navigate = useNavigate();
@@ -38,37 +31,38 @@ const SimpleSuccess = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const { data: nearbyRaw = [] } = useQuery({
-    queryKey: ["success-nearby", excludeId],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("merchants")
-        .select("id, business_name, business_type, latitude, longitude, cashback_rate")
-        .eq("onboarding_complete", true)
-        .eq("stripe_account_status", "active")
-        .neq("id", excludeId || "00000000-0000-0000-0000-000000000000")
-        .limit(40);
-      return (data || []) as NearbyMerchant[];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+  // Pull merchants running Featured Partner + Premium Ad placements
+  const { data: featured = [] } = useFeaturedPartnerMerchants();
+  const { data: premium = [] } = usePremiumAdMerchants();
 
   const nearbyMerchants = useMemo(() => {
-    const list = nearbyRaw.map((m) => {
+    // Merge featured + premium, prioritising featured, dedupe, exclude current merchant
+    const seen = new Set<string>();
+    const ordered = [...featured, ...premium].filter((m) => {
+      if (!m?.id) return false;
+      if (excludeId && m.id === excludeId) return false;
+      if (seen.has(m.id)) return false;
+      seen.add(m.id);
+      return true;
+    });
+    const list = ordered.map((m) => {
       const d =
         userLocation && m.latitude != null && m.longitude != null
           ? calculateDistance(userLocation.latitude, userLocation.longitude, m.latitude, m.longitude)
           : null;
-      return { ...m, distance: d };
+      const isFeatured = featured.some((f) => f.id === m.id);
+      return { ...m, distance: d, isFeatured };
     });
     list.sort((a, b) => {
+      // Featured first, then by distance
+      if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
       if (a.distance == null && b.distance == null) return 0;
       if (a.distance == null) return 1;
       if (b.distance == null) return -1;
       return a.distance - b.distance;
     });
     return list.slice(0, 8);
-  }, [nearbyRaw, userLocation]);
+  }, [featured, premium, userLocation, excludeId]);
 
   const earnRateLabel = `${earnMultiplier}x`;
 
