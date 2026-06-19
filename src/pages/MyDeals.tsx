@@ -299,20 +299,20 @@ const MyDeals = () => {
           </p>
 
           <div className="grid grid-cols-3 gap-2 pt-3">
-            <GradientCard className="text-center py-3">
+            <Card className="text-center py-3">
               <div className="text-2xl font-bold">{unlockedCount}</div>
               <div className="text-xs text-muted-foreground">Unlocked</div>
-            </GradientCard>
-            <GradientCard className="text-center py-3">
+            </Card>
+            <Card className="text-center py-3">
               <div className="text-2xl font-bold text-success">{readyCount}</div>
               <div className="text-xs text-muted-foreground">Ready to use</div>
-            </GradientCard>
-            <GradientCard className="text-center py-3">
+            </Card>
+            <Card className="text-center py-3">
               <div className="text-2xl font-bold text-muted-foreground">
                 {redeemedCount}
               </div>
               <div className="text-xs text-muted-foreground">Redeemed</div>
-            </GradientCard>
+            </Card>
           </div>
         </section>
 
@@ -328,10 +328,10 @@ const MyDeals = () => {
               Loading your unlocked deals…
             </div>
           ) : acquisitionRedemptions.length === 0 ? (
-            <GradientCard className="text-sm text-muted-foreground text-center py-6">
+            <Card className="text-sm text-muted-foreground text-center py-6">
               You haven't unlocked any New Customer deals yet. Visit a
               participating store and scan their QR code to unlock.
-            </GradientCard>
+            </Card>
           ) : (
             <div className="space-y-3">
               {acquisitionRedemptions.map((r) => {
@@ -339,7 +339,7 @@ const MyDeals = () => {
                 const m = offer?.merchants;
                 const redeemed = !!r.redeemed_at;
                 return (
-                  <GradientCard key={r.id} className="space-y-3">
+                  <Card key={r.id} className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold truncate">
@@ -408,7 +408,7 @@ const MyDeals = () => {
                         Expires {new Date(offer.end_date).toLocaleDateString()}
                       </p>
                     )}
-                  </GradientCard>
+                  </Card>
                 );
               })}
             </div>
@@ -434,25 +434,25 @@ const MyDeals = () => {
               Loading campaign rewards…
             </div>
           ) : brandedActivity.length === 0 ? (
-            <GradientCard className="text-sm text-muted-foreground text-center py-6">
+            <Card className="text-sm text-muted-foreground text-center py-6">
               No branded campaign activity yet. Check in or shop at participating
               merchants to start earning brand-sponsored PawBucks.
-            </GradientCard>
+            </Card>
           ) : (
             <>
               <div className="grid grid-cols-2 gap-2">
-                <GradientCard className="text-center py-3">
+                <Card className="text-center py-3">
                   <div className="text-2xl font-bold text-success">
                     +{brandedTotals.earned.toLocaleString()}
                   </div>
                   <div className="text-xs text-muted-foreground">PB earned from campaigns</div>
-                </GradientCard>
-                <GradientCard className="text-center py-3">
+                </Card>
+                <Card className="text-center py-3">
                   <div className="text-2xl font-bold">
                     {brandedTotals.redeemed.toLocaleString()}
                   </div>
                   <div className="text-xs text-muted-foreground">PB redeemed</div>
-                </GradientCard>
+                </Card>
               </div>
 
               <div className="space-y-2">
@@ -465,7 +465,7 @@ const MyDeals = () => {
                     a.brand_campaigns?.brand_accounts?.logo_url ||
                     null;
                   return (
-                    <GradientCard key={a.id} className="py-3">
+                    <Card key={a.id} className="py-3">
                       <div className="flex items-center gap-3">
                         <div
                           className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0 overflow-hidden"
@@ -510,7 +510,7 @@ const MyDeals = () => {
                           </div>
                         </div>
                       </div>
-                    </GradientCard>
+                    </Card>
                   );
                 })}
               </div>
@@ -539,11 +539,11 @@ const MyDeals = () => {
               Loading nearby deals…
             </div>
           ) : lockedMerchants.length === 0 ? (
-            <GradientCard className="text-sm text-muted-foreground text-center py-6">
+            <Card className="text-sm text-muted-foreground text-center py-6">
               {unlockedMerchantIds.size > 0
                 ? "You've unlocked every nearby New Customer deal — nice work!"
                 : "No locked New Customer deals nearby right now."}
-            </GradientCard>
+            </Card>
           ) : (
             <div className="grid sm:grid-cols-2 gap-3">
               {lockedMerchants.map((m) => (
@@ -552,7 +552,7 @@ const MyDeals = () => {
                   onClick={() => navigate(`/merchant/${m.id}`)}
                   className="text-left"
                 >
-                  <GradientCard className="h-full hover:shadow-[var(--shadow-medium)] transition-all">
+                  <Card className="h-full hover:shadow-[var(--shadow-medium)] transition-all">
                     <div className="flex items-start gap-3">
                       <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center shrink-0">
                         <Lock
@@ -584,7 +584,7 @@ const MyDeals = () => {
                         </div>
                       </div>
                     </div>
-                  </GradientCard>
+                  </Card>
                 </button>
               ))}
             </div>
