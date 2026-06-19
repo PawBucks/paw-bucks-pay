@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Check, X, FileText, Info, ChevronRight } from "lucide-react";
 import { SEO } from "@/components/SEO";
-import { useAuth } from "@/hooks/useAuth";
 import { useUserEarnRate } from "@/hooks/useUserEarnRate";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +20,6 @@ type NearbyMerchant = {
 
 const SimpleSuccess = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [params] = useSearchParams();
   const { rate: earnMultiplier } = useUserEarnRate();
   const { userLocation, requestLocation } = useUserLocation();
