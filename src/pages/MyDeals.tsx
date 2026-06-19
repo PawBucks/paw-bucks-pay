@@ -21,7 +21,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GradientCard } from "@/components/ui/gradient-card";
+import { Card } from "@/components/ui/card";
 import { PageLoader } from "@/components/PageLoader";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
@@ -285,53 +285,59 @@ const MyDeals = () => {
       />
       <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
-      <main className="container mx-auto px-4 py-6 max-w-4xl space-y-8">
+      <main className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
         {/* Hero / summary */}
         <section className="space-y-2">
-          <Badge className="bg-accent/10 text-accent border-accent/30">
-            <Sparkles className="w-3 h-3 mr-1" aria-hidden="true" />
-            New Customer Deals
-          </Badge>
           <h1 className="text-3xl font-bold">My Deals</h1>
           <p className="text-muted-foreground">
-            Codes you've unlocked by scanning a merchant's in-store QR — plus
-            deals still waiting for you to visit.
+            Two ways to save: in-store deal codes you've unlocked, plus PawBucks earned from brand-sponsored campaigns.
           </p>
 
           <div className="grid grid-cols-3 gap-2 pt-3">
-            <GradientCard className="text-center py-3">
+            <Card className="p-4 text-center py-3">
               <div className="text-2xl font-bold">{unlockedCount}</div>
               <div className="text-xs text-muted-foreground">Unlocked</div>
-            </GradientCard>
-            <GradientCard className="text-center py-3">
+            </Card>
+            <Card className="p-4 text-center py-3">
               <div className="text-2xl font-bold text-success">{readyCount}</div>
               <div className="text-xs text-muted-foreground">Ready to use</div>
-            </GradientCard>
-            <GradientCard className="text-center py-3">
+            </Card>
+            <Card className="p-4 text-center py-3">
               <div className="text-2xl font-bold text-muted-foreground">
                 {redeemedCount}
               </div>
               <div className="text-xs text-muted-foreground">Redeemed</div>
-            </GradientCard>
+            </Card>
           </div>
         </section>
 
-        {/* Unlocked */}
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-success" aria-hidden="true" />
-            Unlocked Codes
-          </h2>
+        {/* ============================================================ */}
+        {/* FEATURE 1 — New Customer Deals (in-store QR unlocks)          */}
+        {/* ============================================================ */}
+        <section className="space-y-5 rounded-2xl border border-accent/20 bg-accent/5 p-4 sm:p-5">
+          <div className="space-y-1">
+            <Badge className="bg-accent/15 text-accent border-accent/30">
+              <Sparkles className="w-3 h-3 mr-1" aria-hidden="true" />
+              New Customer Deals
+            </Badge>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-success" aria-hidden="true" />
+              Unlocked Codes
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Scan a merchant's in-store QR to unlock their welcome offer.
+            </p>
+          </div>
 
           {redLoading ? (
             <div className="text-sm text-muted-foreground py-6 text-center">
               Loading your unlocked deals…
             </div>
           ) : acquisitionRedemptions.length === 0 ? (
-            <GradientCard className="text-sm text-muted-foreground text-center py-6">
+            <Card className="p-4 text-sm text-muted-foreground text-center py-6">
               You haven't unlocked any New Customer deals yet. Visit a
               participating store and scan their QR code to unlock.
-            </GradientCard>
+            </Card>
           ) : (
             <div className="space-y-3">
               {acquisitionRedemptions.map((r) => {
@@ -339,7 +345,7 @@ const MyDeals = () => {
                 const m = offer?.merchants;
                 const redeemed = !!r.redeemed_at;
                 return (
-                  <GradientCard key={r.id} className="space-y-3">
+                  <Card key={r.id} className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold truncate">
@@ -408,17 +414,105 @@ const MyDeals = () => {
                         Expires {new Date(offer.end_date).toLocaleDateString()}
                       </p>
                     )}
-                  </GradientCard>
+                  </Card>
                 );
               })}
             </div>
           )}
+
+          {/* Locked nearby — same feature */}
+          <div className="space-y-3 pt-3 border-t border-accent/15">
+            <div className="flex items-end justify-between gap-2">
+              <h3 className="text-base font-semibold flex items-center gap-2">
+                <Lock className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                Still Locked Near You
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/discover")}
+              >
+                See all <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+
+            {lockedLoading ? (
+              <div className="text-sm text-muted-foreground py-6 text-center">
+                Loading nearby deals…
+              </div>
+            ) : lockedMerchants.length === 0 ? (
+              <Card className="p-4 text-sm text-muted-foreground text-center py-6 bg-background">
+                {unlockedMerchantIds.size > 0
+                  ? "You've unlocked every nearby New Customer deal — nice work!"
+                  : "No locked New Customer deals nearby right now."}
+              </Card>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {lockedMerchants.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => navigate(`/merchant/${m.id}`)}
+                    className="text-left"
+                  >
+                    <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center shrink-0">
+                          <Lock
+                            className="w-5 h-5 text-muted-foreground"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold truncate">
+                            {m.business_name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {m.offer_count} New Customer{" "}
+                            {m.offer_count === 1 ? "deal" : "deals"} to unlock
+                          </p>
+                          {m.address && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
+                              <MapPin className="w-3 h-3" aria-hidden="true" />
+                              <span className="truncate">{m.address}</span>
+                              {m.distance != null && (
+                                <span className="ml-1 shrink-0">
+                                  · {m.distance.toFixed(1)} mi
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1 text-xs text-accent mt-2 font-medium">
+                            Scan in-store QR to unlock
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
 
-        {/* Branded PawBucks Campaign Activity */}
-        <section className="space-y-3">
+        {/* Visual separator between the two distinct features */}
+        <div className="flex items-center gap-3" aria-hidden="true">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            And
+          </span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        {/* ============================================================ */}
+        {/* FEATURE 2 — Branded Campaign Rewards (sponsor PawBucks)       */}
+        {/* ============================================================ */}
+        <section className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
           <div className="flex items-end justify-between gap-2">
-            <div>
+            <div className="space-y-1">
+              <Badge className="bg-primary/15 text-primary border-primary/30">
+                <PawBucksLogo className="w-3 h-3 mr-1" />
+                Sponsor Rewards
+              </Badge>
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <PawBucksLogo className="w-5 h-5" />
                 Branded Campaign Rewards
@@ -427,6 +521,20 @@ const MyDeals = () => {
                 PawBucks you've earned or redeemed from brand-sponsored campaigns.
               </p>
             </div>
+            <button
+              type="button"
+              onClick={() =>
+                toast({
+                  title: "About Branded Campaigns",
+                  description:
+                    "Brands sponsor extra PawBucks on top of merchant cashback. Earn at participating stores; redeem like normal PawBucks.",
+                })
+              }
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="About branded campaigns"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
           </div>
 
           {brandedLoading ? (
@@ -434,25 +542,25 @@ const MyDeals = () => {
               Loading campaign rewards…
             </div>
           ) : brandedActivity.length === 0 ? (
-            <GradientCard className="text-sm text-muted-foreground text-center py-6">
+            <Card className="p-4 text-sm text-muted-foreground text-center py-6">
               No branded campaign activity yet. Check in or shop at participating
               merchants to start earning brand-sponsored PawBucks.
-            </GradientCard>
+            </Card>
           ) : (
             <>
               <div className="grid grid-cols-2 gap-2">
-                <GradientCard className="text-center py-3">
+                <Card className="p-4 text-center py-3">
                   <div className="text-2xl font-bold text-success">
                     +{brandedTotals.earned.toLocaleString()}
                   </div>
                   <div className="text-xs text-muted-foreground">PB earned from campaigns</div>
-                </GradientCard>
-                <GradientCard className="text-center py-3">
+                </Card>
+                <Card className="p-4 text-center py-3">
                   <div className="text-2xl font-bold">
                     {brandedTotals.redeemed.toLocaleString()}
                   </div>
                   <div className="text-xs text-muted-foreground">PB redeemed</div>
-                </GradientCard>
+                </Card>
               </div>
 
               <div className="space-y-2">
@@ -465,7 +573,7 @@ const MyDeals = () => {
                     a.brand_campaigns?.brand_accounts?.logo_url ||
                     null;
                   return (
-                    <GradientCard key={a.id} className="py-3">
+                    <Card key={a.id} className="p-3">
                       <div className="flex items-center gap-3">
                         <div
                           className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0 overflow-hidden"
@@ -510,7 +618,7 @@ const MyDeals = () => {
                           </div>
                         </div>
                       </div>
-                    </GradientCard>
+                    </Card>
                   );
                 })}
               </div>
@@ -518,78 +626,6 @@ const MyDeals = () => {
           )}
         </section>
 
-        {/* Locked */}
-        <section className="space-y-3">
-          <div className="flex items-end justify-between gap-2">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Lock className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
-              Still Locked Near You
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/discover")}
-            >
-              See all <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
-
-          {lockedLoading ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">
-              Loading nearby deals…
-            </div>
-          ) : lockedMerchants.length === 0 ? (
-            <GradientCard className="text-sm text-muted-foreground text-center py-6">
-              {unlockedMerchantIds.size > 0
-                ? "You've unlocked every nearby New Customer deal — nice work!"
-                : "No locked New Customer deals nearby right now."}
-            </GradientCard>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-3">
-              {lockedMerchants.map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => navigate(`/merchant/${m.id}`)}
-                  className="text-left"
-                >
-                  <GradientCard className="h-full hover:shadow-[var(--shadow-medium)] transition-all">
-                    <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center shrink-0">
-                        <Lock
-                          className="w-5 h-5 text-muted-foreground"
-                          aria-hidden="true"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate">
-                          {m.business_name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {m.offer_count} New Customer{" "}
-                          {m.offer_count === 1 ? "deal" : "deals"} to unlock
-                        </p>
-                        {m.address && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-                            <MapPin className="w-3 h-3" aria-hidden="true" />
-                            <span className="truncate">{m.address}</span>
-                            {m.distance != null && (
-                              <span className="ml-1 shrink-0">
-                                · {m.distance.toFixed(1)} mi
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1 text-xs text-accent mt-2 font-medium">
-                          Scan in-store QR to unlock
-                        </div>
-                      </div>
-                    </div>
-                  </GradientCard>
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
       </main>
 
       <BottomNav />
