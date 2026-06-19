@@ -41,6 +41,9 @@ type LoyaltyProgram = {
  qualifying_description: string | null;
  is_active: boolean;
  created_at: string;
+ qualifying_service_ids: string[] | null;
+ qualifying_categories: string[] | null;
+ exclude_pawbucks_only: boolean;
 };
 
 type ProgramStats = {
@@ -82,6 +85,10 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  const [formPunches, setFormPunches] = useState(10);
  const [formReward, setFormReward] = useState("");
  const [formQualifying, setFormQualifying] = useState("");
+ const [formServices, setFormServices] = useState<string[]>([]);
+ const [formCategories, setFormCategories] = useState<string[]>([]);
+ const [formExcludePawBucksOnly, setFormExcludePawBucksOnly] = useState(true);
+ const [merchantServices, setMerchantServices] = useState<{ id: string; name: string; category: string | null }[]>([]);
 
  const loadPrograms = async () => {
  try {
@@ -126,6 +133,18 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  useEffect(() => {
  loadPrograms();
  }, [merchantId]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("merchant_services")
+        .select("id, name, category")
+        .eq("merchant_id", merchantId)
+        .eq("is_active", true)
+        .order("name");
+      setMerchantServices((data || []) as any);
+    })();
+  }, [merchantId]);
 
   const loadCustomersForProgram = async (program: LoyaltyProgram) => {
     setLoadingCustomers(program.id);
@@ -185,6 +204,9 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  setFormPunches(10);
  setFormReward("");
  setFormQualifying("");
+ setFormServices([]);
+ setFormCategories([]);
+ setFormExcludePawBucksOnly(true);
  setEditingProgram(null);
  };
 
@@ -201,6 +223,9 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  setFormPunches(program.punches_required);
  setFormReward(program.reward_description);
  setFormQualifying(program.qualifying_description ||"");
+ setFormServices(program.qualifying_service_ids || []);
+ setFormCategories(program.qualifying_categories || []);
+ setFormExcludePawBucksOnly(program.exclude_pawbucks_only ?? true);
  setDialogOpen(true);
  };
 
@@ -225,6 +250,9 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  reward_description: formReward.trim(),
  reward_type:"free_service",
  qualifying_description: formQualifying.trim() || null,
+  qualifying_service_ids: formServices,
+  qualifying_categories: formCategories,
+  exclude_pawbucks_only: formExcludePawBucksOnly,
  };
 
  if (editingProgram) {
@@ -383,8 +411,76 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  maxLength={200}
  />
  <p className="text-xs text-muted-foreground">
- Every completed transaction through PawBucks Pay automatically counts as a punch
+ Customer-facing label. The actual rules below decide whether a transaction earns a verified punch.
  </p>
+ </div>
+
+ <Separator />
+
+ <div className="space-y-2">
+   <Label>Qualifying Services</Label>
+   <p className="text-xs text-muted-foreground">
+     Only transactions that include at least one of the selected services (or any service in the selected categories below) count as a verified punch. Leave both empty to accept all services.
+   </p>
+   <div className="max-h-40 overflow-y-auto rounded-md border p-2 space-y-1">
+     {merchantServices.length === 0 ? (
+       <p className="text-xs text-muted-foreground py-2 text-center">No active services yet</p>
+     ) : (
+       merchantServices.map((s) => {
+         const checked = formServices.includes(s.id);
+         return (
+           <label key={s.id} className="flex items-center gap-2 text-sm cursor-pointer">
+             <input
+               type="checkbox"
+               checked={checked}
+               onChange={(e) =>
+                 setFormServices((prev) =>
+                   e.target.checked ? [...prev, s.id] : prev.filter((id) => id !== s.id)
+                 )
+               }
+             />
+             <span className="flex-1">{s.name}</span>
+             {s.category && <span className="text-xs text-muted-foreground">{s.category}</span>}
+           </label>
+         );
+       })
+     )}
+   </div>
+ </div>
+
+ <div className="space-y-2">
+   <Label>Qualifying Categories</Label>
+   <div className="flex flex-wrap gap-2">
+     {Array.from(new Set(merchantServices.map((s) => s.category).filter(Boolean) as string[])).map((cat) => {
+       const checked = formCategories.includes(cat);
+       return (
+         <button
+           type="button"
+           key={cat}
+           onClick={() =>
+             setFormCategories((prev) =>
+               checked ? prev.filter((c) => c !== cat) : [...prev, cat]
+             )
+           }
+           className={`px-3 py-1 rounded-full text-xs border transition-colors ${
+             checked ? "bg-primary text-primary-foreground border-primary" : "border-border hover:border-primary"
+           }`}
+         >
+           {cat}
+         </button>
+       );
+     })}
+   </div>
+ </div>
+
+ <div className="flex items-center justify-between rounded-md border p-3">
+   <div className="space-y-0.5">
+     <Label className="text-sm">Exclude PawBucks-only payments</Label>
+     <p className="text-xs text-muted-foreground">
+       When on, transactions paid entirely with PawBucks won't earn a punch.
+     </p>
+   </div>
+   <Switch checked={formExcludePawBucksOnly} onCheckedChange={setFormExcludePawBucksOnly} />
  </div>
 
  <Button onClick={handleSave} disabled={saving} className="w-full">
