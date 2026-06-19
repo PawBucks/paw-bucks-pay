@@ -292,10 +292,18 @@ const MerchantProfile = memo(() => {
     return [...plans].sort((a, b) => b.amount - a.amount)[0].id;
   }, [plans]);
 
-  const handlePaymentSuccess = useCallback(() => {
-    toast.success("Redirecting to wallet...");
-    setTimeout(() => navigate(ROUTES.WALLET), 1000);
-  }, [navigate]);
+  const handlePaymentSuccess = useCallback(
+    (details?: { pawbucksEarned: number; amountPaid: number; paymentIntentId: string }) => {
+      const params = new URLSearchParams();
+      if (merchant?.business_name) params.set("merchant", merchant.business_name);
+      if (merchant?.id) params.set("mid", merchant.id);
+      if (details?.amountPaid) params.set("paid", details.amountPaid.toFixed(2));
+      if (details?.pawbucksEarned) params.set("pb", String(details.pawbucksEarned));
+      if (details?.paymentIntentId) params.set("tx", details.paymentIntentId);
+      navigate(`/saved?${params.toString()}`);
+    },
+    [navigate, merchant?.business_name, merchant?.id],
+  );
 
   const handleLogout = useCallback(async () => {
     await signOut();
