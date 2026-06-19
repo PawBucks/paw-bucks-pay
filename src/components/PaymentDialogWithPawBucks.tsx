@@ -282,7 +282,7 @@ type PaymentDialogWithPawBucksProps = {
  cashbackRate: number;
  acceptsPawbucks: boolean;
  userId: string;
- onSuccess: () => void;
+ onSuccess: (details?: { pawbucksEarned: number; amountPaid: number; paymentIntentId: string }) => void;
  /** Optional prefilled bill amount (USD). When set, the user does not need to retype it. */
  initialAmount?: number;
  /** Optional prefilled tip (USD). */
