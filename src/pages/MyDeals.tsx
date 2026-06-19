@@ -339,7 +339,7 @@ const MyDeals = () => {
                 const m = offer?.merchants;
                 const redeemed = !!r.redeemed_at;
                 return (
-                  <Card key={r.id} className="space-y-3">
+                  <Card key={r.id} className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold truncate">
@@ -465,7 +465,7 @@ const MyDeals = () => {
                     a.brand_campaigns?.brand_accounts?.logo_url ||
                     null;
                   return (
-                    <Card key={a.id} className="py-3">
+                    <Card key={a.id} className="p-3">
                       <div className="flex items-center gap-3">
                         <div
                           className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0 overflow-hidden"
