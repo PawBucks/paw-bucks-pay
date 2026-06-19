@@ -7,6 +7,7 @@ import {
   planPawBucksDebit,
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
+import { tierKeyFromProductName } from "../_shared/resolve-tier.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -596,21 +597,36 @@ serve(async (req) => {
             });
             
             const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-            
+
+            // Resolve tier from the Stripe product name so the DB row reflects
+            // the user's true plan. Without this, `subscription_tier` defaults
+            // to "free" and downstream earning logic underpays the user.
+            let resolvedTierKey: 'pawpass' | 'pawpass_plus' | null = null;
+            try {
+              const productId = subscription.items.data[0]?.price?.product as string | undefined;
+              if (productId) {
+                const product = await stripe.products.retrieve(productId);
+                resolvedTierKey = tierKeyFromProductName(product?.name);
+              }
+            } catch (tierErr) {
+              console.error('[SUBSCRIPTION] Error resolving tier from product:', tierErr);
+            }
+
             const { error: subError } = await supabaseAdmin
               .from('subscriptions')
-              .insert({
+              .upsert({
                 user_id: userId,
                 stripe_subscription_id: subscriptionId,
                 status: subscription.status,
                 start_date: new Date(subscription.start_date * 1000).toISOString(),
                 current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-              });
+                ...(resolvedTierKey ? { subscription_tier: resolvedTierKey } : {}),
+              }, { onConflict: 'stripe_subscription_id' });
 
             if (subError) {
               console.error('[SUBSCRIPTION] Error creating subscription record:', subError);
             } else {
-              console.log('[SUBSCRIPTION] ✅ Subscription record created');
+              console.log('[SUBSCRIPTION] ✅ Subscription record upserted', { resolvedTierKey });
             }
 
             // Log subscription event (non-critical)
