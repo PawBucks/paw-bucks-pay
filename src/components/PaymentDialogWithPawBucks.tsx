@@ -175,7 +175,11 @@ const StripePaymentForm = ({
      finalStatus.pawbucksEarned ??
      Math.round(stripeAmount * cashbackRate);
    toast.success(`Payment successful! You earned ${cashbackPawBucks} PawBucks!`);
-   onSuccess();
+    onSuccess({
+      pawbucksEarned: cashbackPawBucks,
+      amountPaid: totalAmount,
+      paymentIntentId,
+    });
    return;
  }
 
@@ -185,7 +189,11 @@ const StripePaymentForm = ({
  toast.success('Payment received! Your PawBucks will appear in a moment.', {
    duration: 6000,
  });
- onSuccess();
+  onSuccess({
+    pawbucksEarned: Math.round(stripeAmount * cashbackRate),
+    amountPaid: totalAmount,
+    paymentIntentId,
+  });
  } catch (error: any) {
  console.error("Payment error:", error);
  toast.error(error.message ||"Payment failed");
