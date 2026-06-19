@@ -91,7 +91,7 @@ type PaymentFormProps = {
  totalAmount: number;
  paymentIntentId: string;
  connectedAccountId: string;
- onSuccess: () => void;
+ onSuccess: (details?: { pawbucksEarned: number; amountPaid: number; paymentIntentId: string }) => void;
  onCancel: () => void;
 };
 
