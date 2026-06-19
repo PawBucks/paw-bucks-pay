@@ -41,6 +41,9 @@ type LoyaltyProgram = {
  qualifying_description: string | null;
  is_active: boolean;
  created_at: string;
+ qualifying_service_ids: string[] | null;
+ qualifying_categories: string[] | null;
+ exclude_pawbucks_only: boolean;
 };
 
 type ProgramStats = {
@@ -82,6 +85,10 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  const [formPunches, setFormPunches] = useState(10);
  const [formReward, setFormReward] = useState("");
  const [formQualifying, setFormQualifying] = useState("");
+ const [formServices, setFormServices] = useState<string[]>([]);
+ const [formCategories, setFormCategories] = useState<string[]>([]);
+ const [formExcludePawBucksOnly, setFormExcludePawBucksOnly] = useState(true);
+ const [merchantServices, setMerchantServices] = useState<{ id: string; name: string; category: string | null }[]>([]);
 
  const loadPrograms = async () => {
  try {
@@ -126,6 +133,18 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  useEffect(() => {
  loadPrograms();
  }, [merchantId]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("merchant_services")
+        .select("id, name, category")
+        .eq("merchant_id", merchantId)
+        .eq("is_active", true)
+        .order("name");
+      setMerchantServices((data || []) as any);
+    })();
+  }, [merchantId]);
 
   const loadCustomersForProgram = async (program: LoyaltyProgram) => {
     setLoadingCustomers(program.id);
@@ -185,6 +204,9 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  setFormPunches(10);
  setFormReward("");
  setFormQualifying("");
+ setFormServices([]);
+ setFormCategories([]);
+ setFormExcludePawBucksOnly(true);
  setEditingProgram(null);
  };
 
@@ -201,6 +223,9 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  setFormPunches(program.punches_required);
  setFormReward(program.reward_description);
  setFormQualifying(program.qualifying_description ||"");
+ setFormServices(program.qualifying_service_ids || []);
+ setFormCategories(program.qualifying_categories || []);
+ setFormExcludePawBucksOnly(program.exclude_pawbucks_only ?? true);
  setDialogOpen(true);
  };
 
@@ -225,6 +250,9 @@ export function MerchantLoyaltyProgramTab({ merchantId }: MerchantLoyaltyProgram
  reward_description: formReward.trim(),
  reward_type:"free_service",
  qualifying_description: formQualifying.trim() || null,
+  qualifying_service_ids: formServices,
+  qualifying_categories: formCategories,
+  exclude_pawbucks_only: formExcludePawBucksOnly,
  };
 
  if (editingProgram) {
