@@ -1,7 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Check, CheckCircle2, Copy, Lock, MapPin, Sparkles, Store } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowDownRight,
+  ArrowUpRight,
+  Check,
+  CheckCircle2,
+  Copy,
+  HelpCircle,
+  Lock,
+  MapPin,
+  Sparkles,
+  Store,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
@@ -9,12 +21,12 @@ import { BottomNav } from "@/components/BottomNav";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GradientCard } from "@/components/ui/gradient-card";
 import { PageLoader } from "@/components/PageLoader";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
 import { toast } from "@/hooks/use-toast";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { getCategoryEmoji } from "@/lib/categoryMapping";
 import { format } from "date-fns";
 
 type RedemptionRow = {
