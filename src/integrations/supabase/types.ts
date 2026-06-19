@@ -6023,12 +6023,15 @@ export type Database = {
           created_at: string
           description: string | null
           emoji: string | null
+          exclude_pawbucks_only: boolean
           id: string
           is_active: boolean
           merchant_id: string
           name: string
           punches_required: number
+          qualifying_categories: string[]
           qualifying_description: string | null
+          qualifying_service_ids: string[]
           reward_description: string
           reward_type: string
           updated_at: string
@@ -6037,12 +6040,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           emoji?: string | null
+          exclude_pawbucks_only?: boolean
           id?: string
           is_active?: boolean
           merchant_id: string
           name: string
           punches_required: number
+          qualifying_categories?: string[]
           qualifying_description?: string | null
+          qualifying_service_ids?: string[]
           reward_description: string
           reward_type?: string
           updated_at?: string
@@ -6051,12 +6057,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           emoji?: string | null
+          exclude_pawbucks_only?: boolean
           id?: string
           is_active?: boolean
           merchant_id?: string
           name?: string
           punches_required?: number
+          qualifying_categories?: string[]
           qualifying_description?: string | null
+          qualifying_service_ids?: string[]
           reward_description?: string
           reward_type?: string
           updated_at?: string
