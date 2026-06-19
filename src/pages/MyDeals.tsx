@@ -285,17 +285,12 @@ const MyDeals = () => {
       />
       <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
-      <main className="container mx-auto px-4 py-6 max-w-4xl space-y-8">
+      <main className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
         {/* Hero / summary */}
         <section className="space-y-2">
-          <Badge className="bg-accent/10 text-accent border-accent/30">
-            <Sparkles className="w-3 h-3 mr-1" aria-hidden="true" />
-            New Customer Deals
-          </Badge>
           <h1 className="text-3xl font-bold">My Deals</h1>
           <p className="text-muted-foreground">
-            Codes you've unlocked by scanning a merchant's in-store QR — plus
-            deals still waiting for you to visit.
+            Two ways to save: in-store deal codes you've unlocked, plus PawBucks earned from brand-sponsored campaigns.
           </p>
 
           <div className="grid grid-cols-3 gap-2 pt-3">
@@ -316,12 +311,23 @@ const MyDeals = () => {
           </div>
         </section>
 
-        {/* Unlocked */}
-        <section className="space-y-3">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-success" aria-hidden="true" />
-            Unlocked Codes
-          </h2>
+        {/* ============================================================ */}
+        {/* FEATURE 1 — New Customer Deals (in-store QR unlocks)          */}
+        {/* ============================================================ */}
+        <section className="space-y-5 rounded-2xl border border-accent/20 bg-accent/5 p-4 sm:p-5">
+          <div className="space-y-1">
+            <Badge className="bg-accent/15 text-accent border-accent/30">
+              <Sparkles className="w-3 h-3 mr-1" aria-hidden="true" />
+              New Customer Deals
+            </Badge>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-success" aria-hidden="true" />
+              Unlocked Codes
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Scan a merchant's in-store QR to unlock their welcome offer.
+            </p>
+          </div>
 
           {redLoading ? (
             <div className="text-sm text-muted-foreground py-6 text-center">
