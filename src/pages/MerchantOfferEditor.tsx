@@ -227,37 +227,62 @@ const handleSignOut = async () => {
 
  <Card>
  <CardHeader>
- <CardTitle>{isEditMode ?"Edit Offer" :"Create New Offer"}</CardTitle>
- <CardDescription>
- {isEditMode ?"Update your offer details" :"Create a new PawBucks redemption offer for your customers"}
- </CardDescription>
+                  <CardTitle>
+                    {isAcquisitionOnly
+                      ? (isEditMode ? "Edit New Customer Deal" : "Create New Customer Deal")
+                      : (isEditMode ? "Edit Offer" : "Create New Offer")}
+                  </CardTitle>
+                  <CardDescription>
+                    {isAcquisitionOnly
+                      ? "Acquisition-only merchants create New Customer Deals — first-visit incentives unlocked when a new customer scans your in-store QR code."
+                      : (isEditMode ? "Update your offer details" : "Create a new PawBucks redemption offer for your customers")}
+                  </CardDescription>
  </CardHeader>
  <CardContent>
  <form onSubmit={handleSubmit} className="space-y-6">
+                    {isAcquisitionOnly && (
+                      <div className="rounded-md border bg-muted/40 p-4 flex gap-3">
+                        <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" aria-hidden="true" />
+                        <div className="text-sm">
+                          <p className="font-medium mb-1">New Customer Deal</p>
+                          <p className="text-muted-foreground">
+                            Describe the first-visit incentive — examples: "$10 off 1st visit",
+                            "20% off 1st order", "Free nail trim with grooming". No PawBucks
+                            price is required; the deal unlocks after a verified in-store QR scan.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
  <div className="space-y-2">
  <Label htmlFor="title">Title *</Label>
  <Input
  id="title"
  value={formData.title}
  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
- placeholder="e.g., $10 Off Grooming Service"
+                        placeholder={isAcquisitionOnly ? "e.g., $10 off 1st visit" : "e.g., $10 Off Grooming Service"}
  required
  />
  </div>
 
  <div className="space-y-2">
- <Label htmlFor="description">Description *</Label>
+                      <Label htmlFor="description">
+                        {isAcquisitionOnly ? "Deal Description *" : "Description *"}
+                      </Label>
  <Textarea
  id="description"
  value={formData.description}
  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
- placeholder="Describe your offer..."
+                        placeholder={isAcquisitionOnly
+                          ? "Describe the first-visit deal customers will see after scanning..."
+                          : "Describe your offer..."}
  rows={4}
  required
  />
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {!isAcquisitionOnly && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  <div className="space-y-2">
  <Label htmlFor="coins_required">PawBucks Required *</Label>
  <Input
@@ -266,7 +291,7 @@ const handleSignOut = async () => {
  min="1"
  value={formData.coins_required}
  onChange={(e) => setFormData({ ...formData, coins_required: e.target.value })}
- required
+                          required={!isAcquisitionOnly}
  />
  </div>
 
@@ -282,9 +307,10 @@ const handleSignOut = async () => {
  />
  </div>
  </div>
+                    )}
 
  <div className="space-y-2">
- <Label>Offer Image</Label>
+                      <Label>{isAcquisitionOnly ? "Deal Image (optional)" : "Offer Image"}</Label>
  <ProductImageUpload
  imageUrls={formData.image_url ? [formData.image_url] : []}
  onChange={(urls) => setFormData({ ...formData, image_url: urls[0] ||'' })}
@@ -349,19 +375,21 @@ const handleSignOut = async () => {
  <Label htmlFor="require_approval">Require Admin Approval</Label>
  </div>
 
-  <div className="space-y-2">
-  <Label htmlFor="brand_id">Brand Tag</Label>
-  <BrandSelector
-  value={formData.brand_id}
-  onChange={(brandId) => setFormData({ ...formData, brand_id: brandId })}
-  merchantId={merchantId ?? null}
-  placeholder="No brand (general offer)"
-  />
-  <p className="text-xs text-muted-foreground">
-  Tagging this offer to a brand makes branded PawBucks from that brand's
-  campaigns redeemable here. Leave unset for general offers.
-  </p>
-  </div>
+                    {!isAcquisitionOnly && (
+                      <div className="space-y-2">
+                        <Label htmlFor="brand_id">Brand Tag</Label>
+                        <BrandSelector
+                          value={formData.brand_id}
+                          onChange={(brandId) => setFormData({ ...formData, brand_id: brandId })}
+                          merchantId={merchantId ?? null}
+                          placeholder="No brand (general offer)"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Tagging this offer to a brand makes branded PawBucks from that brand's
+                          campaigns redeemable here. Leave unset for general offers.
+                        </p>
+                      </div>
+                    )}
 
  <div className="flex gap-4">
  <Button type="submit" disabled={loading}>
