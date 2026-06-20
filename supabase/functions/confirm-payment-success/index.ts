@@ -11,6 +11,7 @@ import {
   itemsToReceiptItems,
   type IncomingTransactionItem,
 } from "../_shared/transaction-items.ts";
+import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -195,44 +196,23 @@ serve(async (req) => {
     const pawbucksUsdValue = pawbucksAmount * 0.001;
 
     // CRITICAL: Determine PawBucks multiplier based on user's subscription tier
-    // Default 10x for Free, 20x for PawPass, 30x for PawPass+
+    // Default 10x for Free, 20x for PawPass, 30x for PawPass+.
+    // Uses shared resolveUserEarnTier so new/renamed Stripe products are
+    // recognized by name (avoids silently underpaying paying subscribers).
     let pawbucksMultiplier = 10;
     let tierName = 'Free';
 
     try {
       const { data: platformSub } = await supabaseAdmin
         .from('subscriptions')
-        .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at')
+        .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
         .eq('user_id', userId)
         .in('status', ['active', 'trialing'])
         .maybeSingle();
 
-      if (platformSub) {
-        // Check manual upgrade first
-        if (platformSub.is_manual_upgrade && platformSub.subscription_tier) {
-          const expiresAt = platformSub.expires_at ? new Date(platformSub.expires_at) : null;
-          if (!expiresAt || expiresAt > new Date()) {
-            if (platformSub.subscription_tier === 'pawpass_plus') {
-              pawbucksMultiplier = 30;
-              tierName = 'PawPass+';
-            } else if (platformSub.subscription_tier === 'pawpass') {
-              pawbucksMultiplier = 20;
-              tierName = 'PawPass';
-            }
-          }
-        } else if (platformSub.stripe_subscription_id) {
-          const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
-          const productId = platformSubscription.items.data[0]?.price?.product;
-          
-          if (productId === 'prod_TQyZjYzt9DwoIK') {
-            pawbucksMultiplier = 30; // PawPass+
-            tierName = 'PawPass+';
-          } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-            pawbucksMultiplier = 20; // PawPass
-            tierName = 'PawPass';
-          }
-        }
-      }
+      const resolvedTier = await resolveUserEarnTier(stripe, platformSub);
+      pawbucksMultiplier = resolvedTier.multiplier;
+      tierName = resolvedTier.label;
       logStep("User subscription tier determined", { tierName, pawbucksMultiplier });
     } catch (tierError) {
       logStep("Error determining tier (using default 10x)", { error: String(tierError) });
