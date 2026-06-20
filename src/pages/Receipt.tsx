@@ -46,6 +46,8 @@ type ReceiptData = {
     latitude: number | null;
     longitude: number | null;
     logo_url: string | null;
+    phone: string | null;
+    storefront_slug: string | null;
   } | null;
   items: ItemRow[];
 };
@@ -73,8 +75,8 @@ export default function Receipt() {
 
       const [{ data: merchant }, { data: items }] = await Promise.all([
         supabase
-          .from("merchants")
-          .select("id, business_name, address, latitude, longitude, logo_url")
+          .from("merchants_public")
+          .select("id, business_name, address, latitude, longitude, logo_url, phone, storefront_slug")
           .eq("id", tx.merchant_id)
           .maybeSingle(),
         supabase
@@ -99,6 +101,8 @@ export default function Receipt() {
           latitude: merchant.latitude == null ? null : Number(merchant.latitude),
           longitude: merchant.longitude == null ? null : Number(merchant.longitude),
           logo_url: merchant.logo_url,
+          phone: (merchant as any).phone ?? null,
+          storefront_slug: (merchant as any).storefront_slug ?? null,
         } : null,
         items: (items ?? []).map((r) => ({
           name: r.name ?? "Item",
