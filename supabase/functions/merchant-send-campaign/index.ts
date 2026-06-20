@@ -230,7 +230,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId,
-              email: recipient.email,
+              // email omitted (resolved server-side, not stored as raw PII),
               status: "failed",
               error_message: "No email address",
             });
@@ -267,7 +267,7 @@ serve(async (req) => {
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
             user_id: recipient.userId,
-            email: recipient.email,
+            // email omitted (resolved server-side, not stored as raw PII),
             status: "sent",
             sent_at: new Date().toISOString(),
           });
@@ -276,7 +276,7 @@ serve(async (req) => {
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
             user_id: recipient.userId,
-            email: recipient.email,
+            // email omitted (resolved server-side, not stored as raw PII),
             status: "failed",
             error_message: err instanceof Error ? err.message : "Unknown error",
           });
@@ -313,7 +313,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId,
-              phone: recipient.phone,
+              // phone omitted (resolved server-side, not stored as raw PII),
               status: "failed",
               error_message: "No phone number",
             });
@@ -348,7 +348,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId,
-              phone: recipient.phone,
+              // phone omitted (resolved server-side, not stored as raw PII),
               status: "sent",
               sent_at: new Date().toISOString(),
             });
@@ -357,7 +357,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId,
-              phone: recipient.phone,
+              // phone omitted (resolved server-side, not stored as raw PII),
               status: "failed",
               error_message: result.message || "Twilio error",
             });
@@ -368,7 +368,7 @@ serve(async (req) => {
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
             user_id: recipient.userId,
-            phone: recipient.phone,
+            // phone omitted (resolved server-side, not stored as raw PII),
             status: "failed",
             error_message: errorMessage,
           });
