@@ -271,6 +271,17 @@ export default function PetStoreAdmin() {
  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
  />
  </div>
+ <div>
+   <Label htmlFor="sku">SKU / Item Number *</Label>
+   <Input
+     id="sku"
+     required
+     maxLength={64}
+     value={formData.sku}
+     onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+     placeholder="e.g., DOG-FOOD-001"
+   />
+ </div>
 
  <div>
  <Label htmlFor="item_type">Type</Label>
