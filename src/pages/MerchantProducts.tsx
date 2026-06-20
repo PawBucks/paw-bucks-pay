@@ -317,6 +317,7 @@ const MerchantProducts = () => {
  priceInCents,
  currency:"usd",
  imageUrl: productImageUrls[0] || undefined,
+          imageUrls: productImageUrls,
  },
  });
 
