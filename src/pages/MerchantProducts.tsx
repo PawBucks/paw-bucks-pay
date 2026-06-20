@@ -698,6 +698,31 @@ const MerchantProducts = () => {
  />
  </div>
  <div>
+   <Label htmlFor="sku">SKU / Item Number *</Label>
+   <Input
+     id="sku"
+     value={productSku}
+     onChange={(e) => setProductSku(e.target.value)}
+     placeholder="e.g., DOG-FOOD-001"
+     maxLength={64}
+     required
+   />
+   <p className="text-xs text-muted-foreground mt-1">
+     Unique identifier for this item in your catalog. Must be unique within your store.
+   </p>
+ </div>
+ <div>
+   <Label>Brand (optional)</Label>
+   <BrandSelector
+     value={productBrandId}
+     onChange={setProductBrandId}
+     merchantId={merchant?.id ?? null}
+   />
+   <p className="text-xs text-muted-foreground mt-1">
+     Tag this item with a brand you're enrolled with to unlock that brand's PawBucks at checkout.
+   </p>
+ </div>
+ <div>
  <Label htmlFor="item-type">Type *</Label>
  <Select value={productItemType} onValueChange={(v:"product" |"service") => setProductItemType(v)}>
  <SelectTrigger>
