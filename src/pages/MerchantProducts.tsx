@@ -39,6 +39,7 @@ import { buildAppUrl } from"@/lib/url";
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { BrandSelector } from "@/components/brand/BrandSelector";
 type Product = {
  id: string;
  name: string;
@@ -172,6 +173,8 @@ const MerchantProducts = () => {
  const [listInPetStore, setListInPetStore] = useState(false);
  const [pawbucksPrice, setPawbucksPrice] = useState("");
  const [productImageUrls, setProductImageUrls] = useState<string[]>([]);
+ const [productSku, setProductSku] = useState("");
+ const [productBrandId, setProductBrandId] = useState<string | null>(null);
 
  useEffect(() => {
  if (!authLoading && !user) {
@@ -277,6 +280,16 @@ const MerchantProducts = () => {
  return;
  }
 
+ const skuTrimmed = productSku.trim();
+ if (!skuTrimmed) {
+   toast.error("SKU / Item number is required");
+   return;
+ }
+ if (skuTrimmed.length > 64) {
+   toast.error("SKU must be 64 characters or fewer");
+   return;
+ }
+
  const priceInCents = Math.round(parseFloat(productPrice) * 100);
  if (isNaN(priceInCents) || priceInCents < 50) {
  toast.error("Price must be at least $0.50");
@@ -326,6 +339,8 @@ const MerchantProducts = () => {
  stock_quantity: 999,
  image_url: productImageUrls[0] || null,
  image_urls: productImageUrls,
+ sku: skuTrimmed,
+ brand_id: productBrandId,
  });
 
  if (petStoreError) {
@@ -346,6 +361,8 @@ const MerchantProducts = () => {
  setListInPetStore(false);
  setPawbucksPrice("");
  setProductImageUrls([]);
+ setProductSku("");
+ setProductBrandId(null);
  await loadProducts(merchant.id);
  } else {
  throw new Error(data.error ||"Failed to create product");
@@ -679,6 +696,31 @@ const MerchantProducts = () => {
  onChange={(e) => setProductName(e.target.value)}
  placeholder="e.g., Premium Dog Food"
  />
+ </div>
+ <div>
+   <Label htmlFor="sku">SKU / Item Number *</Label>
+   <Input
+     id="sku"
+     value={productSku}
+     onChange={(e) => setProductSku(e.target.value)}
+     placeholder="e.g., DOG-FOOD-001"
+     maxLength={64}
+     required
+   />
+   <p className="text-xs text-muted-foreground mt-1">
+     Unique identifier for this item in your catalog. Must be unique within your store.
+   </p>
+ </div>
+ <div>
+   <Label>Brand (optional)</Label>
+   <BrandSelector
+     value={productBrandId}
+     onChange={setProductBrandId}
+     merchantId={merchant?.id ?? null}
+   />
+   <p className="text-xs text-muted-foreground mt-1">
+     Tag this item with a brand you're enrolled with to unlock that brand's PawBucks at checkout.
+   </p>
  </div>
  <div>
  <Label htmlFor="item-type">Type *</Label>

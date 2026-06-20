@@ -9777,6 +9777,7 @@ export type Database = {
           price_pawbucks: number
           rating_avg: number | null
           rating_count: number | null
+          sku: string | null
           stock_quantity: number
           updated_at: string
         }
@@ -9796,6 +9797,7 @@ export type Database = {
           price_pawbucks?: number
           rating_avg?: number | null
           rating_count?: number | null
+          sku?: string | null
           stock_quantity?: number
           updated_at?: string
         }
@@ -9815,6 +9817,7 @@ export type Database = {
           price_pawbucks?: number
           rating_avg?: number | null
           rating_count?: number | null
+          sku?: string | null
           stock_quantity?: number
           updated_at?: string
         }

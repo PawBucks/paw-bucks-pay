@@ -56,6 +56,7 @@ export default function PetStoreAdmin() {
  image_urls: [] as string[],
  is_active: true,
   brand_id: null as string | null,
+  sku: "",
  });
 
  // Check if user is admin or superadmin
@@ -161,11 +162,17 @@ export default function PetStoreAdmin() {
  image_urls: [] as string[],
  is_active: true,
   brand_id: null,
+  sku: "",
  });
  };
 
  const handleSubmit = (e: React.FormEvent) => {
  e.preventDefault();
+ const skuTrimmed = formData.sku.trim();
+ if (!skuTrimmed) {
+   toast.error("SKU / Item number is required");
+   return;
+ }
  
  const itemData = {
  name: formData.name,
@@ -179,6 +186,7 @@ export default function PetStoreAdmin() {
  image_urls: formData.image_urls || [],
  is_active: formData.is_active,
   brand_id: formData.brand_id,
+  sku: skuTrimmed,
  };
 
  if (editingItem) {
@@ -202,6 +210,7 @@ export default function PetStoreAdmin() {
  image_urls: item.image_urls || (item.image_url ? [item.image_url] : []),
  is_active: item.is_active,
   brand_id: item.brand_id ?? null,
+  sku: item.sku ?? "",
  });
  setIsDialogOpen(true);
  };
@@ -261,6 +270,17 @@ export default function PetStoreAdmin() {
  value={formData.name}
  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
  />
+ </div>
+ <div>
+   <Label htmlFor="sku">SKU / Item Number *</Label>
+   <Input
+     id="sku"
+     required
+     maxLength={64}
+     value={formData.sku}
+     onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+     placeholder="e.g., DOG-FOOD-001"
+   />
  </div>
 
  <div>
