@@ -160,20 +160,6 @@ export default function Receipt() {
   const feesAndTip = Math.max(0, data.amount - itemsTotal - (data.application_fee ?? 0));
   const showFees = (data.application_fee ?? 0) > 0 || feesAndTip > 0.005;
 
-  const onShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `Receipt — ${m?.business_name ?? "PawBucks"}`,
-          text: `My ${m?.business_name ?? ""} receipt: $${data.amount.toFixed(2)}`,
-          url: window.location.href,
-        });
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-      }
-    } catch { /* dismissed */ }
-  };
-
   const onViewMerchant = () => m && navigate(`/merchant/${m.id}`);
 
   return (
@@ -189,9 +175,6 @@ export default function Receipt() {
 
         <button onClick={() => navigate(-1)} aria-label="Back" style={{ position: "absolute", top: 16, left: 16, width: 40, height: 40, borderRadius: "50%", background: "rgba(10,31,38,0.45)", backdropFilter: "blur(4px)", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <I d="M19 12H5M12 19l-7-7 7-7" size={18} stroke={2.5} />
-        </button>
-        <button onClick={onShare} aria-label="Share" style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: "50%", background: "rgba(10,31,38,0.45)", backdropFilter: "blur(4px)", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <I d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" size={16} stroke={2.2} />
         </button>
 
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "rgba(10,31,38,0.7)", backdropFilter: "blur(2px)", border: "1.5px solid rgba(255,255,255,0.5)", padding: "14px 22px", textAlign: "center", maxWidth: "78%" }}>
@@ -303,12 +286,9 @@ export default function Receipt() {
       )}
 
       {/* ACTIONS */}
-      <div style={{ padding: "0 16px 40px", display: "flex", gap: 10 }}>
-        <button onClick={onViewMerchant} disabled={!m} style={{ flex: 1, padding: "13px", borderRadius: 12, border: `1px solid ${C.border}`, background: C.white, color: C.ink, fontSize: 13, fontWeight: 600, cursor: m ? "pointer" : "default", fontFamily: "inherit", opacity: m ? 1 : 0.6 }}>
+      <div style={{ padding: "0 16px 40px", display: "flex" }}>
+        <button onClick={onViewMerchant} disabled={!m} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "none", background: C.teal, color: "#fff", fontSize: 13, fontWeight: 600, cursor: m ? "pointer" : "default", fontFamily: "inherit", opacity: m ? 1 : 0.6 }}>
           View Merchant
-        </button>
-        <button onClick={onShare} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "none", background: C.teal, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-          Share Receipt
         </button>
       </div>
     </div>
