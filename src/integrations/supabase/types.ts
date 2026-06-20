@@ -7959,6 +7959,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          offer_type: string
           partner_id: string
           per_user_limit: number | null
           product_id: string | null
@@ -7980,6 +7981,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          offer_type?: string
           partner_id: string
           per_user_limit?: number | null
           product_id?: string | null
@@ -8001,6 +8003,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          offer_type?: string
           partner_id?: string
           per_user_limit?: number | null
           product_id?: string | null

@@ -16,6 +16,7 @@ import { toast } from"sonner";
 import { ErrorHandler } from"@/utils/errorHandler";
 import { BrandSelector } from"@/components/brand/BrandSelector";
 import { useMerchantContext } from"@/hooks/useMerchantContext";
+import { Sparkles } from"lucide-react";
 
 export default function MerchantOfferEditor() {
  const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function MerchantOfferEditor() {
 
  const [user, setUser] = useState<any>(null);
  const [loading, setLoading] = useState(false);
+  const [isAcquisitionOnly, setIsAcquisitionOnly] = useState(false);
  const [formData, setFormData] = useState({
  title:"",
  description:"",
@@ -39,6 +41,7 @@ export default function MerchantOfferEditor() {
  per_user_limit:"" as string | number,
   require_approval: false,
   brand_id: null as string | null,
+    offer_type: "pawbucks_redemption" as "pawbucks_redemption" | "new_customer",
  });
 
  useEffect(() => {
@@ -52,6 +55,29 @@ export default function MerchantOfferEditor() {
 
  return () => subscription.unsubscribe();
  }, []);
+
+  // Detect acquisition-only merchants — they may only create New Customer Deals.
+  useEffect(() => {
+    if (!merchantId) return;
+    supabase
+      .from("merchants")
+      .select("fee_model")
+      .eq("id", merchantId)
+      .maybeSingle()
+      .then(({ data }) => {
+        const acquisitionOnly = data?.fee_model === "acquisition_only";
+        setIsAcquisitionOnly(acquisitionOnly);
+        if (acquisitionOnly) {
+          setFormData((prev) => ({
+            ...prev,
+            offer_type: "new_customer",
+            coins_required: 0,
+            cash_equivalent: "",
+            brand_id: null,
+          }));
+        }
+      });
+  }, [merchantId]);
 
  useEffect(() => {
  if (isEditMode && user) {
@@ -88,6 +114,7 @@ export default function MerchantOfferEditor() {
  per_user_limit: data.per_user_limit || 1,
   require_approval: data.require_approval || false,
   brand_id: data.brand_id ?? null,
+        offer_type: (data.offer_type as any) || "pawbucks_redemption",
  });
  } catch (error) {
  ErrorHandler.handle(error);
@@ -97,13 +124,22 @@ export default function MerchantOfferEditor() {
 
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
- 
- const coinsRequired = typeof formData.coins_required ==='string' ? parseInt(formData.coins_required) : formData.coins_required;
- 
- if (!formData.title || !formData.description || !coinsRequired || coinsRequired <= 0) {
- toast.error("Please fill in all required fields");
- return;
- }
+
+    const isNewCustomer = isAcquisitionOnly || formData.offer_type === "new_customer";
+    const coinsRequired = isNewCustomer
+      ? 0
+      : (typeof formData.coins_required === 'string'
+          ? parseInt(formData.coins_required)
+          : formData.coins_required);
+
+    if (!formData.title || !formData.description) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    if (!isNewCustomer && (!coinsRequired || coinsRequired <= 0)) {
+      toast.error("PawBucks required must be greater than 0");
+      return;
+    }
 
  try {
  setLoading(true);
@@ -116,12 +152,19 @@ export default function MerchantOfferEditor() {
  const payload = {
  ...formData,
  coins_required: coinsRequired,
- cash_equivalent: formData.cash_equivalent ? (typeof formData.cash_equivalent ==='string' ? parseFloat(formData.cash_equivalent) : formData.cash_equivalent) : null,
+        cash_equivalent: isNewCustomer
+          ? null
+          : (formData.cash_equivalent
+              ? (typeof formData.cash_equivalent === 'string'
+                  ? parseFloat(formData.cash_equivalent)
+                  : formData.cash_equivalent)
+              : null),
  redemption_cap: formData.redemption_cap ? (typeof formData.redemption_cap ==='string' ? parseInt(formData.redemption_cap) : formData.redemption_cap) : null,
  per_user_limit: formData.per_user_limit ? (typeof formData.per_user_limit ==='string' ? parseInt(formData.per_user_limit) : formData.per_user_limit) : 1,
  start_date: formData.start_date || null,
   end_date: formData.end_date || null,
-  brand_id: formData.brand_id || null,
+        brand_id: isNewCustomer ? null : (formData.brand_id || null),
+        offer_type: isNewCustomer ? "new_customer" : "pawbucks_redemption",
  };
 
  if (isEditMode) {
@@ -184,37 +227,62 @@ const handleSignOut = async () => {
 
  <Card>
  <CardHeader>
- <CardTitle>{isEditMode ?"Edit Offer" :"Create New Offer"}</CardTitle>
- <CardDescription>
- {isEditMode ?"Update your offer details" :"Create a new PawBucks redemption offer for your customers"}
- </CardDescription>
+                  <CardTitle>
+                    {isAcquisitionOnly
+                      ? (isEditMode ? "Edit New Customer Deal" : "Create New Customer Deal")
+                      : (isEditMode ? "Edit Offer" : "Create New Offer")}
+                  </CardTitle>
+                  <CardDescription>
+                    {isAcquisitionOnly
+                      ? "Acquisition-only merchants create New Customer Deals — first-visit incentives unlocked when a new customer scans your in-store QR code."
+                      : (isEditMode ? "Update your offer details" : "Create a new PawBucks redemption offer for your customers")}
+                  </CardDescription>
  </CardHeader>
  <CardContent>
  <form onSubmit={handleSubmit} className="space-y-6">
+                    {isAcquisitionOnly && (
+                      <div className="rounded-md border bg-muted/40 p-4 flex gap-3">
+                        <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" aria-hidden="true" />
+                        <div className="text-sm">
+                          <p className="font-medium mb-1">New Customer Deal</p>
+                          <p className="text-muted-foreground">
+                            Describe the first-visit incentive — examples: "$10 off 1st visit",
+                            "20% off 1st order", "Free nail trim with grooming". No PawBucks
+                            price is required; the deal unlocks after a verified in-store QR scan.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
  <div className="space-y-2">
  <Label htmlFor="title">Title *</Label>
  <Input
  id="title"
  value={formData.title}
  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
- placeholder="e.g., $10 Off Grooming Service"
+                        placeholder={isAcquisitionOnly ? "e.g., $10 off 1st visit" : "e.g., $10 Off Grooming Service"}
  required
  />
  </div>
 
  <div className="space-y-2">
- <Label htmlFor="description">Description *</Label>
+                      <Label htmlFor="description">
+                        {isAcquisitionOnly ? "Deal Description *" : "Description *"}
+                      </Label>
  <Textarea
  id="description"
  value={formData.description}
  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
- placeholder="Describe your offer..."
+                        placeholder={isAcquisitionOnly
+                          ? "Describe the first-visit deal customers will see after scanning..."
+                          : "Describe your offer..."}
  rows={4}
  required
  />
  </div>
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {!isAcquisitionOnly && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  <div className="space-y-2">
  <Label htmlFor="coins_required">PawBucks Required *</Label>
  <Input
@@ -223,7 +291,7 @@ const handleSignOut = async () => {
  min="1"
  value={formData.coins_required}
  onChange={(e) => setFormData({ ...formData, coins_required: e.target.value })}
- required
+                          required={!isAcquisitionOnly}
  />
  </div>
 
@@ -239,9 +307,10 @@ const handleSignOut = async () => {
  />
  </div>
  </div>
+                    )}
 
  <div className="space-y-2">
- <Label>Offer Image</Label>
+                      <Label>{isAcquisitionOnly ? "Deal Image (optional)" : "Offer Image"}</Label>
  <ProductImageUpload
  imageUrls={formData.image_url ? [formData.image_url] : []}
  onChange={(urls) => setFormData({ ...formData, image_url: urls[0] ||'' })}
@@ -306,19 +375,21 @@ const handleSignOut = async () => {
  <Label htmlFor="require_approval">Require Admin Approval</Label>
  </div>
 
-  <div className="space-y-2">
-  <Label htmlFor="brand_id">Brand Tag</Label>
-  <BrandSelector
-  value={formData.brand_id}
-  onChange={(brandId) => setFormData({ ...formData, brand_id: brandId })}
-  merchantId={merchantId ?? null}
-  placeholder="No brand (general offer)"
-  />
-  <p className="text-xs text-muted-foreground">
-  Tagging this offer to a brand makes branded PawBucks from that brand's
-  campaigns redeemable here. Leave unset for general offers.
-  </p>
-  </div>
+                    {!isAcquisitionOnly && (
+                      <div className="space-y-2">
+                        <Label htmlFor="brand_id">Brand Tag</Label>
+                        <BrandSelector
+                          value={formData.brand_id}
+                          onChange={(brandId) => setFormData({ ...formData, brand_id: brandId })}
+                          merchantId={merchantId ?? null}
+                          placeholder="No brand (general offer)"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Tagging this offer to a brand makes branded PawBucks from that brand's
+                          campaigns redeemable here. Leave unset for general offers.
+                        </p>
+                      </div>
+                    )}
 
  <div className="flex gap-4">
  <Button type="submit" disabled={loading}>

@@ -28,6 +28,7 @@ interface Offer {
  start_date?: string;
  end_date?: string;
  created_at: string;
+  offer_type?: string;
 }
 
 export default function MerchantOffers() {
@@ -229,6 +230,9 @@ const handleSignOut = async () => {
  <div className="flex items-center gap-2 mb-2">
  <CardTitle>{offer.title}</CardTitle>
  {getStatusBadge(offer.status)}
+                            {offer.offer_type === "new_customer" && (
+                              <Badge variant="outline">New Customer Deal</Badge>
+                            )}
  </div>
  <CardDescription className="line-clamp-2">
  {offer.description}
@@ -238,10 +242,16 @@ const handleSignOut = async () => {
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
- <div>
- <p className="text-sm text-muted-foreground">PawBucks Required</p>
- <p className="text-lg font-semibold">{offer.coins_required.toLocaleString()}</p>
- </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            {offer.offer_type === "new_customer" ? "Type" : "PawBucks Required"}
+                          </p>
+                          <p className="text-lg font-semibold">
+                            {offer.offer_type === "new_customer"
+                              ? "New Customer"
+                              : offer.coins_required.toLocaleString()}
+                          </p>
+                        </div>
  <div>
  <p className="text-sm text-muted-foreground">Redemptions</p>
  <p className="text-lg font-semibold">
