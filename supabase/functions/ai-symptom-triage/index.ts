@@ -39,7 +39,7 @@ serve(async (req) => {
       throw new Error("Missing required field: assessment_id");
     }
 
-    // Fetch the assessment data
+    // Fetch the assessment data and verify ownership (owner or assigned vet)
     const { data: assessment, error: fetchError } = await supabase
       .from("symptom_triage_assessments")
       .select(`
@@ -51,6 +51,13 @@ serve(async (req) => {
 
     if (fetchError || !assessment) {
       throw new Error("Assessment not found");
+    }
+
+    if (assessment.owner_id !== user.id && assessment.vet_id !== user.id) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     console.log(`Processing symptom triage for assessment ${assessment_id}`);
