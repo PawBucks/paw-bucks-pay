@@ -158,7 +158,9 @@ export default function Receipt() {
   const pbAppliedUsd = data.pawbucks_used * PB_TO_USD;
   const itemsTotal = data.items.reduce((s, it) => s + (it.total || it.unit_price * it.quantity), 0);
   const feesAndTip = Math.max(0, data.amount - itemsTotal - (data.application_fee ?? 0));
-  const showFees = (data.application_fee ?? 0) > 0 || feesAndTip > 0.005;
+  // Only show fees/tip when we have a real itemized subtotal to subtract from —
+  // otherwise the math collapses to the full bill total and is misleading.
+  const showFees = itemsTotal > 0 && ((data.application_fee ?? 0) > 0 || feesAndTip > 0.005);
 
   const onViewMerchant = () => m && navigate(`/merchant/${m.id}`);
 
@@ -167,7 +169,7 @@ export default function Receipt() {
       <SEO title={`Receipt — ${m?.business_name ?? "PawBucks"}`} noIndex />
 
       {/* HERO */}
-      <div style={{ height: 240, position: "relative", overflow: "hidden", background: "linear-gradient(160deg, #e8c9a0 0%, #c9986b 40%, #a87a52 100%)" }}>
+      <div style={{ height: 240, position: "relative", overflow: "hidden", background: `linear-gradient(160deg, ${C.teal} 0%, ${C.tealDark} 55%, ${C.dark} 100%)` }}>
         {m?.logo_url && (
           <img src={m.logo_url} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
         )}
