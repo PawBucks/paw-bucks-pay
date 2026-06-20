@@ -35,6 +35,7 @@ const Index = lazyWithRetry(() => import("./pages/Index"),"Index");
 const SimpleHome = lazyWithRetry(() => import("./pages/SimpleHome"),"SimpleHome");
 const SimpleSavings = lazyWithRetry(() => import("./pages/SimpleSavings"),"SimpleSavings");
 const Activity = lazyWithRetry(() => import("./pages/Activity"),"Activity");
+const Receipt = lazyWithRetry(() => import("./pages/Receipt"),"Receipt");
 const SimplePay = lazyWithRetry(() => import("./pages/SimplePay"),"SimplePay");
 const SimpleSuccess = lazyWithRetry(() => import("./pages/SimpleSuccess"),"SimpleSuccess");
 const CreatePetProfile = lazyWithRetry(() => import("./pages/CreatePetProfile"),"CreatePetProfile");
@@ -209,6 +210,7 @@ const AppRoutes = () => {
 <Route path="/savings" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleSavings /></PageTransition></ProtectedRoute>} />
 <Route path="/visits" element={<Navigate to="/activity" replace />} />
 <Route path="/activity" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><Activity /></PageTransition></ProtectedRoute>} />
+<Route path="/receipt/:txId" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><Receipt /></PageTransition></ProtectedRoute>} />
  <Route path="/pay" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimplePay /></PageTransition></ProtectedRoute>} />
  <Route path="/saved" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleSuccess /></PageTransition></ProtectedRoute>} />
  <Route path="/create-pet-profile" element={<ProtectedRoute><PageTransition><CreatePetProfile /></PageTransition></ProtectedRoute>} />
