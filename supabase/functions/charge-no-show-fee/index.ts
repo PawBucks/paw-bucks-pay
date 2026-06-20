@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -159,30 +160,17 @@ serve(async (req) => {
           .maybeSingle();
 
         if (!existingEarn) {
-          // Determine tier multiplier (mirrors connect-webhook logic)
-          let multiplier = 10;
-          let tierName = "Free";
+          // Determine tier multiplier via shared resolver (resilient to new
+          // Stripe product IDs — recognizes PawPass / PawPass+ by name).
           const { data: platformSub } = await adminClient
             .from("subscriptions")
-            .select("stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at")
+            .select("stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status")
             .eq("user_id", booking.user_id)
             .in("status", ["active", "trialing"])
             .maybeSingle();
-
-          if (platformSub?.is_manual_upgrade && platformSub?.subscription_tier) {
-            const expiresAt = platformSub.expires_at ? new Date(platformSub.expires_at) : null;
-            if (!expiresAt || expiresAt > new Date()) {
-              if (platformSub.subscription_tier === "pawpass_plus") { multiplier = 30; tierName = "PawPass+"; }
-              else if (platformSub.subscription_tier === "pawpass") { multiplier = 20; tierName = "PawPass"; }
-            }
-          } else if (platformSub?.stripe_subscription_id) {
-            try {
-              const sub = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
-              const productId = sub.items.data[0]?.price?.product;
-              if (productId === "prod_TQyZjYzt9DwoIK") { multiplier = 30; tierName = "PawPass+"; }
-              else if (productId === "prod_TJVK9ZhLiJnnpm") { multiplier = 20; tierName = "PawPass"; }
-            } catch (_) { /* ignore */ }
-          }
+          const resolvedTier = await resolveUserEarnTier(stripe, platformSub);
+          const multiplier = resolvedTier.multiplier;
+          const tierName = resolvedTier.label;
 
           pawbucksEarned = Math.floor(feeAmount * multiplier);
 

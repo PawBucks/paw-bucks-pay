@@ -6,6 +6,7 @@ import {
   planPawBucksDebit,
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
+import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -359,26 +360,9 @@ serve(async (req) => {
       .in('status', ['active', 'trialing'])
       .maybeSingle();
 
-    // Check for manual subscription first
-    if (subscription?.is_manual_upgrade && subscription?.subscription_tier) {
-      const expiresAt = subscription.expires_at ? new Date(subscription.expires_at) : null;
-      if (!expiresAt || expiresAt > new Date()) {
-        if (subscription.subscription_tier === 'pawpass_plus') {
-          userCashbackRate = 30;
-        } else if (subscription.subscription_tier === 'pawpass') {
-          userCashbackRate = 20;
-        }
-      }
-    } else if (subscription?.stripe_subscription_id) {
-      const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
-      const productId = stripeSubscription.items.data[0]?.price?.product;
-      
-      if (productId === 'prod_TQyZjYzt9DwoIK') {
-        userCashbackRate = 30;
-      } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-        userCashbackRate = 20;
-      }
-    }
+    // Resolve tier via shared resolver (recognizes new Stripe product IDs by name).
+    const _resolvedTier = await resolveUserEarnTier(stripe, subscription);
+    userCashbackRate = _resolvedTier.multiplier;
 
     // PawBucks earned based on remaining Stripe amount only
     const estimatedPawBucks = Math.floor(finalAmountDollars * userCashbackRate);

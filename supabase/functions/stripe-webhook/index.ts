@@ -7,7 +7,7 @@ import {
   planPawBucksDebit,
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
-import { tierKeyFromProductName } from "../_shared/resolve-tier.ts";
+import { tierKeyFromProductName, resolveUserEarnTier } from "../_shared/resolve-tier.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -657,34 +657,23 @@ serve(async (req) => {
         });
         
         if (userId && merchantId && totalAmount > 0) {
-          // Determine PawBucks earned based on STRIPE amount only
+          // Determine PawBucks earned based on STRIPE amount only.
+          // Uses shared resolver so new Stripe product IDs are recognized by name.
           let pawbucksMultiplier = 10;
           let tierName = 'Free';
-          
-          // Check user's platform subscription tier (non-blocking)
           try {
             const { data: platformSub } = await supabaseAdmin
               .from('subscriptions')
-              .select('stripe_subscription_id')
+              .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
               .eq('user_id', userId)
               .in('status', ['active', 'trialing'])
               .maybeSingle();
-
-            if (platformSub?.stripe_subscription_id) {
-              const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-                apiVersion: '2024-12-18.acacia',
-              });
-              const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
-              const productId = platformSubscription.items.data[0]?.price?.product;
-              
-              if (productId === 'prod_TQyZjYzt9DwoIK') {
-                pawbucksMultiplier = 30;
-                tierName = 'PawPass+';
-              } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-                pawbucksMultiplier = 20;
-                tierName = 'PawPass';
-              }
-            }
+            const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+              apiVersion: '2024-12-18.acacia',
+            });
+            const t = await resolveUserEarnTier(stripe, platformSub);
+            pawbucksMultiplier = t.multiplier;
+            tierName = t.label;
           } catch (tierError) {
             console.error('[SUBSCRIPTION] Error determining tier (using default):', tierError);
           }
@@ -1029,29 +1018,18 @@ serve(async (req) => {
           }
 
           if (resolvedPayerUserId && stripeAmountForRewards > 0) {
-            // Determine PawBucks multiplier based on subscription tier
-            let pawbucksMultiplier = 10; // Default 10x for free accounts
-            
+            // Determine PawBucks multiplier via shared resolver (recognizes new product IDs by name).
+            let pawbucksMultiplier = 10;
             try {
               const { data: platformSub } = await supabaseAdmin
                 .from('subscriptions')
-                .select('stripe_subscription_id')
+                .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
                 .eq('user_id', resolvedPayerUserId)
                 .in('status', ['active', 'trialing'])
                 .maybeSingle();
-
-              if (platformSub?.stripe_subscription_id) {
-                const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
-                const productId = platformSubscription.items.data[0]?.price?.product;
-                
-                if (productId === 'prod_TQyZjYzt9DwoIK') {
-                  pawbucksMultiplier = 30; // PawPass+
-                  tierName = 'PawPass+';
-                } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-                  pawbucksMultiplier = 20; // PawPass
-                  tierName = 'PawPass';
-                }
-              }
+              const t = await resolveUserEarnTier(stripe, platformSub);
+              pawbucksMultiplier = t.multiplier;
+              tierName = t.label;
             } catch (tierError) {
               console.error('[INVOICE_PAYMENT] Error determining tier (using default):', tierError);
             }
@@ -1314,33 +1292,21 @@ serve(async (req) => {
           }
 
           if (userId && merchantId) {
-            // Determine PawBucks multiplier based on subscription tier
-            let pawbucksMultiplier = 10; // Default 10x for free accounts
+            // Determine PawBucks multiplier via shared resolver.
+            let pawbucksMultiplier = 10;
             let tierName = 'Free';
-
-            // Check user's platform subscription tier (PawPass/PawPass+)
-            const { data: platformSub } = await supabaseAdmin
-              .from('subscriptions')
-              .select('stripe_subscription_id')
-              .eq('user_id', userId)
-              .in('status', ['active', 'trialing'])
-              .maybeSingle();
-
-            if (platformSub?.stripe_subscription_id) {
-              try {
-                const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
-                const productId = platformSubscription.items.data[0]?.price?.product;
-                
-                if (productId === 'prod_TQyZjYzt9DwoIK') {
-                  pawbucksMultiplier = 30; // PawPass+
-                  tierName = 'PawPass+';
-                } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-                  pawbucksMultiplier = 20; // PawPass
-                  tierName = 'PawPass';
-                }
-              } catch (e) {
-                console.error('Error fetching platform subscription:', e);
-              }
+            try {
+              const { data: platformSub } = await supabaseAdmin
+                .from('subscriptions')
+                .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
+                .eq('user_id', userId)
+                .in('status', ['active', 'trialing'])
+                .maybeSingle();
+              const t = await resolveUserEarnTier(stripe, platformSub);
+              pawbucksMultiplier = t.multiplier;
+              tierName = t.label;
+            } catch (e) {
+              console.error('Error fetching platform subscription:', e);
             }
 
             let pawbucksEarned = Math.floor(amount * pawbucksMultiplier);
@@ -1632,34 +1598,16 @@ serve(async (req) => {
       let tierName = 'Free';
       
       if (enrichedUserId) {
-        // Check user's subscription tier
         const { data: subscription } = await supabaseAdmin
           .from('subscriptions')
-          .select('stripe_subscription_id')
+          .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
           .eq('user_id', enrichedUserId)
           .in('status', ['active', 'trialing'])
           .maybeSingle();
-
-        if (subscription?.stripe_subscription_id) {
-          // Get subscription details from Stripe to check product
-          const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
-          const productId = stripeSubscription.items.data[0]?.price?.product;
-          
-          console.log('User subscription found:', { productId });
-          
-          // Set multiplier based on product
-          if (productId === 'prod_TQyZjYzt9DwoIK') {
-            pawbucksMultiplier = 30; // PawPass+ gets 30x
-            tierName = 'PawPass+';
-            console.log('PawPass+ subscriber - 30x PawBucks');
-          } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-            pawbucksMultiplier = 20; // PawPass gets 20x
-            tierName = 'PawPass';
-            console.log('PawPass subscriber - 20x PawBucks');
-          }
-        } else {
-          console.log('Free account - 10x PawBucks');
-        }
+        const t = await resolveUserEarnTier(stripe, subscription);
+        pawbucksMultiplier = t.multiplier;
+        tierName = t.label;
+        console.log(`User tier resolved: ${tierName} (${pawbucksMultiplier}x)`);
       }
 
       // Calculate PawBucks earned: amount × multiplier
