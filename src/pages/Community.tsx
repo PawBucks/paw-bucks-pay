@@ -641,7 +641,7 @@ const Community = () => {
 
       {/* Page header */}
       <div style={{ background: C.white, borderBottom: `1px solid ${C.border}`, padding: "16px 16px 0" }}>
-        <div style={{ maxWidth: 600, margin: "0 auto" }}>
+        <div style={{ maxWidth: 896, margin: "0 auto" }}>
           <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: C.teal, marginBottom: 4 }}>COMMUNITY RESOURCES</div>
           <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, letterSpacing: "-0.02em", marginBottom: 4 }}>Connect with pet owners and merchants near you</div>
           <div style={{ fontSize: 12, color: C.mutedLight, marginBottom: 14 }}>Ask questions, share moments, and discover local pet care tips.</div>
@@ -668,7 +668,7 @@ const Community = () => {
       </div>
 
       {/* Feed */}
-      <div style={{ padding: "16px 16px 80px", maxWidth: 600, margin: "0 auto" }}>
+      <div style={{ padding: "16px 16px 80px", maxWidth: 896, margin: "0 auto" }}>
         {user && (
           <Composer
             authorName={author.name}
