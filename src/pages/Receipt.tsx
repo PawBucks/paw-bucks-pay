@@ -176,9 +176,6 @@ export default function Receipt() {
         <button onClick={() => navigate(-1)} aria-label="Back" style={{ position: "absolute", top: 16, left: 16, width: 40, height: 40, borderRadius: "50%", background: "rgba(10,31,38,0.45)", backdropFilter: "blur(4px)", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <I d="M19 12H5M12 19l-7-7 7-7" size={18} stroke={2.5} />
         </button>
-        <button onClick={onShare} aria-label="Share" style={{ position: "absolute", top: 16, right: 16, width: 40, height: 40, borderRadius: "50%", background: "rgba(10,31,38,0.45)", backdropFilter: "blur(4px)", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <I d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" size={16} stroke={2.2} />
-        </button>
 
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", background: "rgba(10,31,38,0.7)", backdropFilter: "blur(2px)", border: "1.5px solid rgba(255,255,255,0.5)", padding: "14px 22px", textAlign: "center", maxWidth: "78%" }}>
           <div style={{ fontSize: 15, fontWeight: 800, color: "#fff", letterSpacing: "0.02em", lineHeight: 1.3 }}>
