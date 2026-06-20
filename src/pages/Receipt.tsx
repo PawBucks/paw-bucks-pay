@@ -101,6 +101,8 @@ export default function Receipt() {
           latitude: merchant.latitude == null ? null : Number(merchant.latitude),
           longitude: merchant.longitude == null ? null : Number(merchant.longitude),
           logo_url: merchant.logo_url,
+          phone: (merchant as any).phone ?? null,
+          storefront_slug: (merchant as any).storefront_slug ?? null,
         } : null,
         items: (items ?? []).map((r) => ({
           name: r.name ?? "Item",
