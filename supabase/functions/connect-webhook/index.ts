@@ -6,6 +6,7 @@ import {
   planPawBucksDebit,
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
+import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -304,34 +305,14 @@ serve(async (req) => {
             try {
               const { data: platformSub } = await supabaseAdmin
                 .from('subscriptions')
-                .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at')
+                .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
                 .eq('user_id', invoicePayerUserId)
                 .in('status', ['active', 'trialing'])
                 .maybeSingle();
 
-              if (platformSub?.is_manual_upgrade && platformSub?.subscription_tier) {
-                const expiresAt = platformSub.expires_at ? new Date(platformSub.expires_at) : null;
-                if (!expiresAt || expiresAt > new Date()) {
-                  if (platformSub.subscription_tier === 'pawpass_plus') {
-                    pawbucksMultiplier = 30;
-                    tierName = 'PawPass+';
-                  } else if (platformSub.subscription_tier === 'pawpass') {
-                    pawbucksMultiplier = 20;
-                    tierName = 'PawPass';
-                  }
-                }
-              } else if (platformSub?.stripe_subscription_id) {
-                const stripeSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
-                const productId = stripeSubscription.items.data[0]?.price?.product;
-
-                if (productId === 'prod_TQyZjYzt9DwoIK') {
-                  pawbucksMultiplier = 30;
-                  tierName = 'PawPass+';
-                } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-                  pawbucksMultiplier = 20;
-                  tierName = 'PawPass';
-                }
-              }
+              const resolvedTier = await resolveUserEarnTier(stripe, platformSub);
+              pawbucksMultiplier = resolvedTier.multiplier;
+              tierName = resolvedTier.label;
             } catch (tierError) {
               logStep("Error determining tier", { error: String(tierError) });
             }
@@ -680,34 +661,14 @@ serve(async (req) => {
             // Check for manual subscription first
             const { data: platformSub } = await supabaseAdmin
               .from('subscriptions')
-              .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at')
+              .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
               .eq('user_id', userId)
               .in('status', ['active', 'trialing'])
               .maybeSingle();
 
-            if (platformSub?.is_manual_upgrade && platformSub?.subscription_tier) {
-              const expiresAt = platformSub.expires_at ? new Date(platformSub.expires_at) : null;
-              if (!expiresAt || expiresAt > new Date()) {
-                if (platformSub.subscription_tier === 'pawpass_plus') {
-                  pawbucksMultiplier = 30;
-                  tierName = 'PawPass+';
-                } else if (platformSub.subscription_tier === 'pawpass') {
-                  pawbucksMultiplier = 20;
-                  tierName = 'PawPass';
-                }
-              }
-            } else if (platformSub?.stripe_subscription_id) {
-              const stripeSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
-              const productId = stripeSubscription.items.data[0]?.price?.product;
-              
-              if (productId === 'prod_TQyZjYzt9DwoIK') {
-                pawbucksMultiplier = 30;
-                tierName = 'PawPass+';
-              } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-                pawbucksMultiplier = 20;
-                tierName = 'PawPass';
-              }
-            }
+            const resolvedTier = await resolveUserEarnTier(stripe, platformSub);
+            pawbucksMultiplier = resolvedTier.multiplier;
+            tierName = resolvedTier.label;
             logStep("Subscription tier determined", { tierName, pawbucksMultiplier });
           } catch (subError) {
             logStep("Error determining subscription tier", { error: String(subError) });
