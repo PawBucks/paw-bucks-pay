@@ -144,6 +144,30 @@ serve(async (req) => {
       );
     }
 
+    // SECURITY: never trust merchant-supplied phone/email. Resolve contact details
+    // server-side from the verified user's profile so messages can only ever go
+    // to the legitimate owner of each userId.
+    const safeUserIds = safeRecipients.map((r) => r.userId);
+    const { data: profileRows } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name, email, phone")
+      .in("id", safeUserIds);
+    const profileById = new Map<string, { full_name: string | null; email: string | null; phone: string | null }>();
+    for (const row of profileRows ?? []) {
+      profileById.set(row.id as string, {
+        full_name: (row as any).full_name ?? null,
+        email: (row as any).email ?? null,
+        phone: (row as any).phone ?? null,
+      });
+    }
+    // Override any client-supplied contact fields with server-side values.
+    for (const r of safeRecipients) {
+      const p = profileById.get(r.userId);
+      r.email = p?.email ?? undefined;
+      r.phone = p?.phone ?? undefined;
+      if (!r.name) r.name = p?.full_name ?? "";
+    }
+
     // Create campaign record
     const { data: campaign, error: campaignError } = await supabaseAdmin
       .from("merchant_campaigns")
@@ -206,7 +230,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId,
-              email: recipient.email,
+              // email omitted (resolved server-side, not stored as raw PII),
               status: "failed",
               error_message: "No email address",
             });
@@ -243,7 +267,7 @@ serve(async (req) => {
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
             user_id: recipient.userId,
-            email: recipient.email,
+            // email omitted (resolved server-side, not stored as raw PII),
             status: "sent",
             sent_at: new Date().toISOString(),
           });
@@ -252,7 +276,7 @@ serve(async (req) => {
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
             user_id: recipient.userId,
-            email: recipient.email,
+            // email omitted (resolved server-side, not stored as raw PII),
             status: "failed",
             error_message: err instanceof Error ? err.message : "Unknown error",
           });
@@ -289,7 +313,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId,
-              phone: recipient.phone,
+              // phone omitted (resolved server-side, not stored as raw PII),
               status: "failed",
               error_message: "No phone number",
             });
@@ -324,7 +348,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId,
-              phone: recipient.phone,
+              // phone omitted (resolved server-side, not stored as raw PII),
               status: "sent",
               sent_at: new Date().toISOString(),
             });
@@ -333,7 +357,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId,
-              phone: recipient.phone,
+              // phone omitted (resolved server-side, not stored as raw PII),
               status: "failed",
               error_message: result.message || "Twilio error",
             });
@@ -344,7 +368,7 @@ serve(async (req) => {
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
             user_id: recipient.userId,
-            phone: recipient.phone,
+            // phone omitted (resolved server-side, not stored as raw PII),
             status: "failed",
             error_message: errorMessage,
           });

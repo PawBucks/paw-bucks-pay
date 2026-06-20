@@ -41,6 +41,30 @@ serve(async (req) => {
 
     console.log(`Processing SOAP draft ${draft_id} with transcription length: ${transcription.length}`);
 
+    // Verify ownership: requesting user must be the vet that owns the draft
+    const { data: draftRow, error: draftErr } = await supabase
+      .from("ai_soap_drafts")
+      .select("id, vet_id")
+      .eq("id", draft_id)
+      .maybeSingle();
+    if (draftErr || !draftRow) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const { data: vetRow } = await supabase
+      .from("partner_vets")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!vetRow || vetRow.id !== draftRow.vet_id) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Update status to generating
     await supabase
       .from("ai_soap_drafts")
