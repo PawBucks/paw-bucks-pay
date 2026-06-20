@@ -286,12 +286,9 @@ export default function Receipt() {
       )}
 
       {/* ACTIONS */}
-      <div style={{ padding: "0 16px 40px", display: "flex", gap: 10 }}>
-        <button onClick={onViewMerchant} disabled={!m} style={{ flex: 1, padding: "13px", borderRadius: 12, border: `1px solid ${C.border}`, background: C.white, color: C.ink, fontSize: 13, fontWeight: 600, cursor: m ? "pointer" : "default", fontFamily: "inherit", opacity: m ? 1 : 0.6 }}>
+      <div style={{ padding: "0 16px 40px", display: "flex" }}>
+        <button onClick={onViewMerchant} disabled={!m} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "none", background: C.teal, color: "#fff", fontSize: 13, fontWeight: 600, cursor: m ? "pointer" : "default", fontFamily: "inherit", opacity: m ? 1 : 0.6 }}>
           View Merchant
-        </button>
-        <button onClick={onShare} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "none", background: C.teal, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
-          Share Receipt
         </button>
       </div>
     </div>
