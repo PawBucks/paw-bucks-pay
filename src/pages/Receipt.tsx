@@ -46,6 +46,8 @@ type ReceiptData = {
     latitude: number | null;
     longitude: number | null;
     logo_url: string | null;
+    phone: string | null;
+    storefront_slug: string | null;
   } | null;
   items: ItemRow[];
 };
