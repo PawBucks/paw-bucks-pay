@@ -76,6 +76,10 @@ serve(async (req) => {
         name: name,
         description: description || undefined,
         images: images.length > 0 ? images : undefined,
+        metadata: {
+          platform: 'pawbucks_storefront',
+          image_urls: JSON.stringify(images),
+        },
         
         // Create the default price inline with the product
         // This is more efficient than creating product and price separately
