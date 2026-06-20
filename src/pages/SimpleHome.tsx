@@ -150,6 +150,13 @@ const SimpleHome = () => {
             </div>
           )}
 
+          {/* Post check-in follow-up: "Did you make a purchase?" */}
+          {user?.id && (
+            <div className="mb-6">
+              <CheckInFollowupBanner userId={user.id} />
+            </div>
+          )}
+
       <div className="grid gap-6 lg:gap-10 lg:grid-cols-5">
         {/* Left column — hero + actions */}
         <div className="lg:col-span-3 space-y-5 lg:space-y-6">
