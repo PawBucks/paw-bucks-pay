@@ -28,7 +28,7 @@ serve(async (req) => {
     // Get merchant for this user
     const { data: merchant, error: merchantError } = await supabaseClient
       .from("merchants")
-      .select("id")
+      .select("id, fee_model")
       .eq("user_id", user.id)
       .single();
 
@@ -71,6 +71,7 @@ serve(async (req) => {
       per_user_limit,
       image_url,
       brand_id,
+      offer_type,
     } = body;
 
     // Normalization: convert empty strings to null for nullable fields
@@ -79,8 +80,18 @@ serve(async (req) => {
     const normalizedEndDate = end_date === "" ? null : end_date;
 
     // Validations
-    if (coins_required !== undefined && coins_required <= 0) {
-      throw new Error("Coins required must be greater than 0");
+    const isAcquisitionOnly = merchant.fee_model === "acquisition_only";
+    const effectiveOfferType =
+      isAcquisitionOnly
+        ? "new_customer"
+        : (offer_type ?? existingOffer.offer_type ?? "pawbucks_redemption");
+
+    if (
+      effectiveOfferType === "pawbucks_redemption" &&
+      coins_required !== undefined &&
+      coins_required <= 0
+    ) {
+      throw new Error("PawBucks required must be greater than 0");
     }
 
     if (normalizedStartDate && normalizedEndDate && new Date(normalizedStartDate) >= new Date(normalizedEndDate)) {
@@ -126,6 +137,15 @@ serve(async (req) => {
     if (per_user_limit !== undefined) updates.per_user_limit = per_user_limit;
     if (image_url !== undefined) updates.image_url = image_url;
     if (normalizedBrandId !== undefined) updates.brand_id = normalizedBrandId;
+    if (offer_type !== undefined) updates.offer_type = effectiveOfferType;
+
+    // Force New Customer Deal shape for acquisition-only merchants.
+    if (isAcquisitionOnly) {
+      updates.offer_type = "new_customer";
+      updates.coins_required = 0;
+      updates.cash_equivalent = null;
+      updates.brand_id = null;
+    }
 
     // Update status if start_date changed
     if (start_date && new Date(start_date) > new Date()) {
