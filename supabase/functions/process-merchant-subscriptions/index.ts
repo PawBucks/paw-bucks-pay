@@ -225,66 +225,21 @@ async function getUserTierMultiplier(
   stripe: Stripe,
   userId: string
 ): Promise<{ multiplier: number; tierName: string }> {
-  let pawbucksMultiplier = 10; // Default 10x for Free tier
-  let tierName = 'Free';
-
   try {
-    // First, check for active subscription in database (handles both manual and Stripe upgrades)
     const { data: platformSub } = await supabaseAdmin
       .from('subscriptions')
-      .select('stripe_subscription_id, subscription_tier, is_manual_upgrade')
+      .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
       .eq('user_id', userId)
       .in('status', ['active', 'trialing'])
       .maybeSingle();
-
-    if (platformSub) {
-      // Check for manual upgrade tier first (takes priority as it's directly set)
-      if (platformSub.is_manual_upgrade && platformSub.subscription_tier) {
-        const tier = platformSub.subscription_tier.toLowerCase();
-        if (tier === 'pawpass_plus' || tier === 'plus') {
-          pawbucksMultiplier = 30; // PawPass+
-          tierName = 'PawPass+';
-          console.log(`[PROCESS-MERCHANT-SUBSCRIPTIONS] Manual upgrade tier detected: ${platformSub.subscription_tier} -> ${pawbucksMultiplier}x`);
-        } else if (tier === 'pawpass' || tier === 'basic') {
-          pawbucksMultiplier = 20; // PawPass
-          tierName = 'PawPass';
-          console.log(`[PROCESS-MERCHANT-SUBSCRIPTIONS] Manual upgrade tier detected: ${platformSub.subscription_tier} -> ${pawbucksMultiplier}x`);
-        }
-      } 
-      // If not a manual upgrade, check Stripe subscription
-      else if (platformSub.stripe_subscription_id) {
-        const platformSubscription = await stripe.subscriptions.retrieve(platformSub.stripe_subscription_id);
-        const productId = platformSubscription.items.data[0]?.price?.product;
-        
-        if (productId === PAWPASS_PLUS_PRODUCT_ID) {
-          pawbucksMultiplier = 30; // PawPass+
-          tierName = 'PawPass+';
-        } else if (productId === PAWPASS_PRODUCT_ID) {
-          pawbucksMultiplier = 20; // PawPass
-          tierName = 'PawPass';
-        }
-        console.log(`[PROCESS-MERCHANT-SUBSCRIPTIONS] Stripe subscription tier detected: ${productId} -> ${pawbucksMultiplier}x`);
-      }
-      // Also check subscription_tier field even for non-manual upgrades (fallback)
-      else if (platformSub.subscription_tier) {
-        const tier = platformSub.subscription_tier.toLowerCase();
-        if (tier === 'pawpass_plus' || tier === 'plus') {
-          pawbucksMultiplier = 30;
-          tierName = 'PawPass+';
-        } else if (tier === 'pawpass' || tier === 'basic') {
-          pawbucksMultiplier = 20;
-          tierName = 'PawPass';
-        }
-        console.log(`[PROCESS-MERCHANT-SUBSCRIPTIONS] Subscription tier field used as fallback: ${platformSub.subscription_tier} -> ${pawbucksMultiplier}x`);
-      }
-    }
-    
-    logStep("User subscription tier determined", { userId, tierName, pawbucksMultiplier });
+    const { resolveUserEarnTier } = await import("../_shared/resolve-tier.ts");
+    const t = await resolveUserEarnTier(stripe, platformSub);
+    logStep("User subscription tier determined", { userId, tierName: t.label, pawbucksMultiplier: t.multiplier });
+    return { multiplier: t.multiplier, tierName: t.label };
   } catch (tierError) {
     logStep("Error determining tier (using default 10x)", { userId, error: String(tierError) });
+    return { multiplier: 10, tierName: 'Free' };
   }
-
-  return { multiplier: pawbucksMultiplier, tierName };
 }
 
 // Helper function to credit PawBucks to user
