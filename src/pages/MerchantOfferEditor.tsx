@@ -16,6 +16,7 @@ import { toast } from"sonner";
 import { ErrorHandler } from"@/utils/errorHandler";
 import { BrandSelector } from"@/components/brand/BrandSelector";
 import { useMerchantContext } from"@/hooks/useMerchantContext";
+import { Sparkles } from"lucide-react";
 
 export default function MerchantOfferEditor() {
  const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function MerchantOfferEditor() {
 
  const [user, setUser] = useState<any>(null);
  const [loading, setLoading] = useState(false);
+  const [isAcquisitionOnly, setIsAcquisitionOnly] = useState(false);
  const [formData, setFormData] = useState({
  title:"",
  description:"",
@@ -39,6 +41,7 @@ export default function MerchantOfferEditor() {
  per_user_limit:"" as string | number,
   require_approval: false,
   brand_id: null as string | null,
+    offer_type: "pawbucks_redemption" as "pawbucks_redemption" | "new_customer",
  });
 
  useEffect(() => {
@@ -52,6 +55,29 @@ export default function MerchantOfferEditor() {
 
  return () => subscription.unsubscribe();
  }, []);
+
+  // Detect acquisition-only merchants — they may only create New Customer Deals.
+  useEffect(() => {
+    if (!merchantId) return;
+    supabase
+      .from("merchants")
+      .select("fee_model")
+      .eq("id", merchantId)
+      .maybeSingle()
+      .then(({ data }) => {
+        const acquisitionOnly = data?.fee_model === "acquisition_only";
+        setIsAcquisitionOnly(acquisitionOnly);
+        if (acquisitionOnly) {
+          setFormData((prev) => ({
+            ...prev,
+            offer_type: "new_customer",
+            coins_required: 0,
+            cash_equivalent: "",
+            brand_id: null,
+          }));
+        }
+      });
+  }, [merchantId]);
 
  useEffect(() => {
  if (isEditMode && user) {
@@ -88,6 +114,7 @@ export default function MerchantOfferEditor() {
  per_user_limit: data.per_user_limit || 1,
   require_approval: data.require_approval || false,
   brand_id: data.brand_id ?? null,
+        offer_type: (data.offer_type as any) || "pawbucks_redemption",
  });
  } catch (error) {
  ErrorHandler.handle(error);
@@ -97,13 +124,22 @@ export default function MerchantOfferEditor() {
 
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
- 
- const coinsRequired = typeof formData.coins_required ==='string' ? parseInt(formData.coins_required) : formData.coins_required;
- 
- if (!formData.title || !formData.description || !coinsRequired || coinsRequired <= 0) {
- toast.error("Please fill in all required fields");
- return;
- }
+
+    const isNewCustomer = isAcquisitionOnly || formData.offer_type === "new_customer";
+    const coinsRequired = isNewCustomer
+      ? 0
+      : (typeof formData.coins_required === 'string'
+          ? parseInt(formData.coins_required)
+          : formData.coins_required);
+
+    if (!formData.title || !formData.description) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    if (!isNewCustomer && (!coinsRequired || coinsRequired <= 0)) {
+      toast.error("PawBucks required must be greater than 0");
+      return;
+    }
 
  try {
  setLoading(true);
@@ -116,12 +152,19 @@ export default function MerchantOfferEditor() {
  const payload = {
  ...formData,
  coins_required: coinsRequired,
- cash_equivalent: formData.cash_equivalent ? (typeof formData.cash_equivalent ==='string' ? parseFloat(formData.cash_equivalent) : formData.cash_equivalent) : null,
+        cash_equivalent: isNewCustomer
+          ? null
+          : (formData.cash_equivalent
+              ? (typeof formData.cash_equivalent === 'string'
+                  ? parseFloat(formData.cash_equivalent)
+                  : formData.cash_equivalent)
+              : null),
  redemption_cap: formData.redemption_cap ? (typeof formData.redemption_cap ==='string' ? parseInt(formData.redemption_cap) : formData.redemption_cap) : null,
  per_user_limit: formData.per_user_limit ? (typeof formData.per_user_limit ==='string' ? parseInt(formData.per_user_limit) : formData.per_user_limit) : 1,
  start_date: formData.start_date || null,
   end_date: formData.end_date || null,
-  brand_id: formData.brand_id || null,
+        brand_id: isNewCustomer ? null : (formData.brand_id || null),
+        offer_type: isNewCustomer ? "new_customer" : "pawbucks_redemption",
  };
 
  if (isEditMode) {
