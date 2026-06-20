@@ -23,6 +23,7 @@ import { ConfettiCanvas } from "@/components/birthday/ConfettiCanvas";
 import { BirthdayOverlay } from "@/components/birthday/BirthdayOverlay";
 import { BirthdayBanner } from "@/components/birthday/BirthdayBanner";
 import { getTodayBirthdays } from "@/components/birthday/birthdayUtils";
+import { CheckInFollowupBanner } from "@/components/checkin";
 
 const PB_TO_USD = 0.001;
 
