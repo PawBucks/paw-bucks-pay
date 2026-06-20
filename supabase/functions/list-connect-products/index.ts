@@ -94,12 +94,22 @@ serve(async (req) => {
     // STEP 6: Transform the products data
     const productsData = oneTimeProducts.map((product: Stripe.Product) => {
       const defaultPrice = product.default_price as Stripe.Price | null;
+      let metadataImages: string[] = [];
+      try {
+        const parsed = product.metadata?.image_urls ? JSON.parse(product.metadata.image_urls) : [];
+        metadataImages = Array.isArray(parsed)
+          ? parsed.filter((url): url is string => typeof url === 'string' && /^https?:\/\//i.test(url))
+          : [];
+      } catch (_error) {
+        metadataImages = [];
+      }
+      const images = product.images?.length ? product.images : metadataImages;
       
       return {
         id: product.id,
         name: product.name,
         description: product.description,
-        images: product.images,
+        images,
         active: product.active,
         price: defaultPrice ? {
           id: defaultPrice.id,
