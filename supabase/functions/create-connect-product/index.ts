@@ -44,7 +44,7 @@ serve(async (req) => {
     }
 
     // STEP 4: Parse request body with product details
-    const { accountId, name, description, priceInCents, currency } = await req.json();
+    const { accountId, name, description, priceInCents, currency, imageUrl, imageUrls } = await req.json();
 
     // Validate required fields
     if (!accountId) {
@@ -57,7 +57,15 @@ serve(async (req) => {
       throw new Error('Price must be at least $0.50 (50 cents)');
     }
 
-    console.log(`Creating product "${name}" for connected account:`, accountId);
+    // Build images array for Stripe (max 8, must be publicly reachable HTTPS URLs)
+    const rawImages: string[] = Array.isArray(imageUrls)
+      ? imageUrls
+      : (imageUrl ? [imageUrl] : []);
+    const images = rawImages
+      .filter((u): u is string => typeof u === 'string' && /^https?:\/\//i.test(u))
+      .slice(0, 8);
+
+    console.log(`Creating product "${name}" for connected account:`, accountId, `with ${images.length} image(s)`);
 
     // STEP 5: Create product on the CONNECTED ACCOUNT (not platform)
     // CRITICAL: Use the stripeAccount parameter to create on connected account
@@ -67,6 +75,7 @@ serve(async (req) => {
         // Product details
         name: name,
         description: description || undefined,
+        images: images.length > 0 ? images : undefined,
         
         // Create the default price inline with the product
         // This is more efficient than creating product and price separately
