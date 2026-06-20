@@ -160,20 +160,6 @@ export default function Receipt() {
   const feesAndTip = Math.max(0, data.amount - itemsTotal - (data.application_fee ?? 0));
   const showFees = (data.application_fee ?? 0) > 0 || feesAndTip > 0.005;
 
-  const onShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `Receipt — ${m?.business_name ?? "PawBucks"}`,
-          text: `My ${m?.business_name ?? ""} receipt: $${data.amount.toFixed(2)}`,
-          url: window.location.href,
-        });
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-      }
-    } catch { /* dismissed */ }
-  };
-
   const onViewMerchant = () => m && navigate(`/merchant/${m.id}`);
 
   return (
