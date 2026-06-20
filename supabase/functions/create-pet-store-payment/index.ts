@@ -7,6 +7,7 @@ import {
   planPawBucksDebit,
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
+import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -485,40 +486,16 @@ serve(async (req) => {
 
     const amountInCents = finalAmountCents;
 
-    // Check subscription status for multiplier (3-tier: Free=10x, PawPass=20x, PawPass+=30x)
-    let pawbucksMultiplier = 10;
-    
+    // Check subscription status for multiplier (3-tier: Free=10x, PawPass=20x, PawPass+=30x).
+    // Uses shared resolver so new Stripe product IDs are recognized by name.
     const { data: subscription } = await supabaseAdmin
       .from('subscriptions')
       .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
       .eq('user_id', user.id)
       .in('status', ['active', 'trialing'])
       .maybeSingle();
-
-    // Check manual upgrade first
-    if (subscription?.is_manual_upgrade && subscription?.subscription_tier) {
-      const expiresAt = subscription.expires_at ? new Date(subscription.expires_at) : null;
-      if (!expiresAt || expiresAt > new Date()) {
-        if (subscription.subscription_tier === 'pawpass_plus') {
-          pawbucksMultiplier = 30;
-        } else if (subscription.subscription_tier === 'pawpass') {
-          pawbucksMultiplier = 20;
-        }
-      }
-    } else if (subscription?.stripe_subscription_id) {
-      try {
-        const stripeSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id);
-        const productId = stripeSubscription.items.data[0]?.price?.product;
-        
-        if (productId === 'prod_TQyZjYzt9DwoIK') {
-          pawbucksMultiplier = 30; // PawPass+
-        } else if (productId === 'prod_TJVK9ZhLiJnnpm') {
-          pawbucksMultiplier = 20; // PawPass
-        }
-      } catch (e) {
-        console.error('Error checking subscription tier:', e);
-      }
-    }
+    const _resolvedTier = await resolveUserEarnTier(stripe, subscription);
+    const pawbucksMultiplier = _resolvedTier.multiplier;
     let pawbucksEarned = Math.round(totalAmount * pawbucksMultiplier);
     {
       const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
