@@ -5717,10 +5717,8 @@ export type Database = {
         Row: {
           campaign_id: string
           created_at: string
-          email: string | null
           error_message: string | null
           id: string
-          phone: string | null
           sent_at: string | null
           status: string
           user_id: string
@@ -5728,10 +5726,8 @@ export type Database = {
         Insert: {
           campaign_id: string
           created_at?: string
-          email?: string | null
           error_message?: string | null
           id?: string
-          phone?: string | null
           sent_at?: string | null
           status?: string
           user_id: string
@@ -5739,10 +5735,8 @@ export type Database = {
         Update: {
           campaign_id?: string
           created_at?: string
-          email?: string | null
           error_message?: string | null
           id?: string
-          phone?: string | null
           sent_at?: string | null
           status?: string
           user_id?: string
