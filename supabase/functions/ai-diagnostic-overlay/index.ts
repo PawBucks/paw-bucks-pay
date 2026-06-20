@@ -51,6 +51,30 @@ serve(async (req) => {
 
     console.log(`Processing diagnostic analysis ${analysis_id} for ${analysis_type}`);
 
+    // Verify ownership: caller must be the vet that owns this analysis
+    const { data: analysisRow, error: analysisErr } = await supabase
+      .from("diagnostic_ai_analyses")
+      .select("id, vet_id")
+      .eq("id", analysis_id)
+      .maybeSingle();
+    if (analysisErr || !analysisRow) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const { data: vetRow } = await supabase
+      .from("partner_vets")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!vetRow || vetRow.id !== analysisRow.vet_id) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Update status to analyzing
     await supabase
       .from("diagnostic_ai_analyses")
