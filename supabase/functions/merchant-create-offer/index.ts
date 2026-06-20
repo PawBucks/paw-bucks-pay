@@ -11,7 +11,7 @@ const corsHeaders = {
 const createOfferSchema = z.object({
   title: z.string().min(1).max(200).transform(val => val.trim()),
   description: z.string().min(1).max(2000).transform(val => val.trim()),
-  coins_required: z.number().int().positive().max(1000000),
+  coins_required: z.number().int().min(0).max(1000000).optional().default(0),
   cash_equivalent: z.number().positive().max(100000).optional().nullable(),
   product_id: z.string().max(255).optional().nullable(),
   start_date: z.string().optional().nullable(),
@@ -21,6 +21,7 @@ const createOfferSchema = z.object({
   image_url: z.string().url().max(2000).optional().nullable(),
   require_approval: z.boolean().optional().default(false),
   brand_id: z.string().uuid().optional().nullable(),
+  offer_type: z.enum(["pawbucks_redemption", "new_customer"]).optional(),
 });
 
 // Sanitize text to prevent XSS
@@ -65,7 +66,7 @@ serve(async (req) => {
     // Get merchant for this user
     const { data: merchant, error: merchantError } = await supabaseClient
       .from("merchants")
-      .select("id")
+      .select("id, fee_model")
       .eq("user_id", user.id)
       .single();
 
@@ -89,7 +90,7 @@ serve(async (req) => {
       );
     }
 
-    const {
+    let {
       title,
       description,
       coins_required,
@@ -102,7 +103,26 @@ serve(async (req) => {
       image_url,
       require_approval,
       brand_id,
+      offer_type,
     } = validationResult.data;
+
+    // Acquisition-only merchants can ONLY create New Customer Deals.
+    // These deals don't require a PawBucks price or cash equivalent.
+    const isAcquisitionOnly = merchant.fee_model === "acquisition_only";
+    if (isAcquisitionOnly) {
+      offer_type = "new_customer";
+      coins_required = 0;
+      cash_equivalent = null;
+      brand_id = null;
+    } else {
+      offer_type = offer_type ?? "pawbucks_redemption";
+      if (offer_type === "pawbucks_redemption" && (!coins_required || coins_required <= 0)) {
+        return new Response(
+          JSON.stringify({ error: "PawBucks required must be greater than 0" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        );
+      }
+    }
 
     // Sanitize text fields
     const sanitizedTitle = sanitizeText(title);
@@ -166,7 +186,7 @@ serve(async (req) => {
         partner_id: merchant.id,
         title: sanitizedTitle,
         description: sanitizedDescription,
-        coins_required,
+        coins_required: coins_required ?? 0,
         cash_equivalent: cash_equivalent || null,
         product_id: product_id || null,
         image_url: image_url || null,
@@ -178,6 +198,7 @@ serve(async (req) => {
         status,
         require_approval: require_approval || false,
         brand_id: validatedBrandId,
+        offer_type,
       })
       .select()
       .single();
