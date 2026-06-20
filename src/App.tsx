@@ -35,6 +35,7 @@ const Index = lazyWithRetry(() => import("./pages/Index"),"Index");
 const SimpleHome = lazyWithRetry(() => import("./pages/SimpleHome"),"SimpleHome");
 const SimpleSavings = lazyWithRetry(() => import("./pages/SimpleSavings"),"SimpleSavings");
 const Activity = lazyWithRetry(() => import("./pages/Activity"),"Activity");
+const Receipt = lazyWithRetry(() => import("./pages/Receipt"),"Receipt");
 const SimplePay = lazyWithRetry(() => import("./pages/SimplePay"),"SimplePay");
 const SimpleSuccess = lazyWithRetry(() => import("./pages/SimpleSuccess"),"SimpleSuccess");
 const CreatePetProfile = lazyWithRetry(() => import("./pages/CreatePetProfile"),"CreatePetProfile");
