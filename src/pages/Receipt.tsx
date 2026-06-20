@@ -73,8 +73,8 @@ export default function Receipt() {
 
       const [{ data: merchant }, { data: items }] = await Promise.all([
         supabase
-          .from("merchants")
-          .select("id, business_name, address, latitude, longitude, logo_url")
+          .from("merchants_public")
+          .select("id, business_name, address, latitude, longitude, logo_url, phone, storefront_slug")
           .eq("id", tx.merchant_id)
           .maybeSingle(),
         supabase
