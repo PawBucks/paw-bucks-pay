@@ -91,6 +91,19 @@ serve(async (req) => {
       return product.metadata?.platform !== "pawbucks";
     });
 
+    const { data: imageFiles } = await supabaseAdmin.storage
+      .from('product-images')
+      .list(merchantId, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+
+    const fallbackImages = (imageFiles || [])
+      .filter((file) => file.name && file.created_at)
+      .map((file) => {
+        const path = `${merchantId}/${file.name}`;
+        const { data } = supabaseAdmin.storage.from('product-images').getPublicUrl(path);
+        return { url: data.publicUrl, createdMs: new Date(file.created_at).getTime() };
+      })
+      .filter((file) => Number.isFinite(file.createdMs));
+
     // STEP 6: Transform the products data
     const productsData = oneTimeProducts.map((product: Stripe.Product) => {
       const defaultPrice = product.default_price as Stripe.Price | null;
@@ -103,7 +116,13 @@ serve(async (req) => {
       } catch (_error) {
         metadataImages = [];
       }
-      const images = product.images?.length ? product.images : metadataImages;
+      const productCreatedMs = product.created * 1000;
+      const storageImages = fallbackImages
+        .filter((file) => file.createdMs >= productCreatedMs - 10 * 60 * 1000 && file.createdMs <= productCreatedMs + 2 * 60 * 1000)
+        .sort((a, b) => Math.abs(a.createdMs - productCreatedMs) - Math.abs(b.createdMs - productCreatedMs))
+        .slice(0, 8)
+        .map((file) => file.url);
+      const images = product.images?.length ? product.images : (metadataImages.length ? metadataImages : storageImages);
       
       return {
         id: product.id,
