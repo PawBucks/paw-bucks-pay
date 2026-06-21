@@ -10,11 +10,12 @@ import {
 } from "@/hooks/useMerchantServices";
 import { calculateDistance, formatDistance } from "@/lib/geo";
 import { getCategoryEmoji, getCategoryLabel } from "@/lib/categoryMapping";
+import { POINTS_MULTIPLIER } from "@/lib/constants";
 
 const SimpleSuccess = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { rate: earnMultiplier } = useUserEarnRate();
+  const { rate: earnMultiplier, tierLabel } = useUserEarnRate();
   const { userLocation, requestLocation } = useUserLocation();
   const [infoOpen, setInfoOpen] = useState(false);
 
@@ -65,6 +66,21 @@ const SimpleSuccess = () => {
   }, [featured, premium, userLocation, excludeId]);
 
   const earnRateLabel = `${earnMultiplier}x`;
+
+  // Post-transaction upsell: show what they'd have earned at the next tier.
+  // Only relevant for Free + PawPass users with a non-trivial PB earning event.
+  const upsellTarget =
+    tierLabel === "Free"
+      ? { name: "PawPass", price: 10, multiplier: POINTS_MULTIPLIER.PAWPASS, route: "/profile" }
+      : tierLabel === "PawPass"
+      ? { name: "PawPass+", price: 20, multiplier: POINTS_MULTIPLIER.PAWPASS_PLUS, route: "/profile" }
+      : null;
+
+  const wouldHaveEarned =
+    upsellTarget && pbEarned > 0 && earnMultiplier > 0
+      ? Math.round((pbEarned / earnMultiplier) * upsellTarget.multiplier)
+      : 0;
+  const extraPb = wouldHaveEarned - pbEarned;
 
   const onClose = () => navigate("/home");
   const onViewReceipt = () => navigate(receiptId ? `/activity?tx=${receiptId}` : "/activity");
@@ -150,6 +166,38 @@ const SimpleSuccess = () => {
                 PawBucks are earned on the USD portion of every purchase. They're automatically credited to your wallet and can be redeemed at any PawBucks merchant.
               </div>
             )}
+          </div>
+        )}
+
+        {/* Post-transaction upgrade upsell — concrete reward delta */}
+        {upsellTarget && extraPb > 0 && (
+          <div className="px-5 pt-3">
+            <button
+              type="button"
+              onClick={() => navigate(upsellTarget.route)}
+              className="w-full text-left rounded-[14px] border-[1.5px] border-primary/40 bg-[image:linear-gradient(135deg,hsl(var(--primary)/0.10),hsl(var(--primary)/0.03))] px-4 py-3.5 hover:border-primary transition-colors"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary mb-1">
+                    On {upsellTarget.name} you'd have earned
+                  </div>
+                  <div className="text-[18px] font-extrabold text-foreground leading-tight">
+                    {wouldHaveEarned.toLocaleString()} PawBucks
+                    <span className="ml-2 text-[13px] font-bold text-success">
+                      +{extraPb.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="text-[12px] text-muted-foreground mt-1">
+                    {upsellTarget.multiplier}× rewards from ${upsellTarget.price}/mo
+                    {upsellTarget.name === "PawPass+" ? " · ad-free" : ""}
+                  </div>
+                </div>
+                <div className="flex-shrink-0 self-center">
+                  <ChevronRight className="h-5 w-5 text-primary" strokeWidth={2.5} />
+                </div>
+              </div>
+            </button>
           </div>
         )}
 

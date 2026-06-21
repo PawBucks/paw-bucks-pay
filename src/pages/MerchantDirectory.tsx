@@ -478,7 +478,7 @@ const MerchantDirectory = () => {
                       onClick={() => navigate("/profile")}
                       className="text-[10px] font-medium text-primary hover:underline"
                     >
-                      Remove Ads with PawPass+ →
+                      Upgrade from $10/mo →
                     </button>
                   </div>
                   <div className="flex items-center gap-3 px-4 pb-3 pt-1">
@@ -643,7 +643,7 @@ const MerchantDirectory = () => {
                   onClick={() => navigate("/profile")}
                   className="text-[10px] font-medium text-primary hover:underline"
                 >
-                  Remove Ads with PawPass+ →
+                  Upgrade from $10/mo →
                 </button>
               </div>
               <div className="flex items-center gap-3 px-4 pb-3 pt-1">
@@ -859,7 +859,7 @@ const InlineAdBanner = ({
           onClick={() => navigate("/profile")}
           className="text-[10px] font-medium text-primary hover:underline"
         >
-          Remove Ads with PawPass+ →
+          Upgrade from $10/mo →
         </button>
       </div>
       <div className="flex items-center gap-3 px-3.5 py-3">

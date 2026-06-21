@@ -108,7 +108,7 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  )}
  {!isPawPass && (
  <p className="text-xs text-muted-foreground italic pt-1">
- Upgrade to PawPass+ for 30x points and an ad-free experience!
+                    Upgrade from $10/mo — PawPass earns 20× points, PawPass+ 30× and ad-free.
  </p>
  )}
  </div>
@@ -126,7 +126,7 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  className="whitespace-nowrap"
  >
  <span className="text-xs mr-1">👑</span>
- Remove Ads
+                {isPawPass ? "Upgrade to+" : "Upgrade from $10/mo"}
  </Button>
  </div>
  </div>
@@ -170,10 +170,10 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  <div className="flex-1">
  <div className="flex items-center gap-2 mb-1">
  <span className="text-lg text-primary">👑</span>
- <h4 className="font-semibold text-foreground">Upgrade to Remove Ads</h4>
+            <h4 className="font-semibold text-foreground">Earn 2–3× More PawBucks</h4>
  </div>
  <p className="text-sm text-muted-foreground">
- Get PawPass for 20x points or PawPass+ for 30x points, plus an ad-free experience!
+            PawPass at $10/mo earns 20× points. PawPass+ at $20/mo earns 30× and removes ads.
  </p>
  </div>
  <Button
@@ -181,7 +181,7 @@ const AdPlacementComponent = ({ position ='top' }: AdPlacementProps) => {
  className="bg-primary hover:bg-primary/90 whitespace-nowrap"
  >
  <span className="text-base mr-2">👑</span>
- Upgrade Now
+          Upgrade from $10/mo
  </Button>
  </div>
  </Card>

@@ -102,9 +102,9 @@ export function SponsoredAdBar({ variant }: SponsoredAdBarProps) {
       : {
           icon: <Star className="w-7 h-7 text-amber-500 fill-amber-400" />,
           iconBg: "bg-primary/10 border border-primary/20",
-          title: "Earn More with PawPass+",
-          description: "Upgrade to PawPass+ for 30x PawBucks, ad-free browsing, and exclusive deals.",
-          ctaLabel: "Upgrade",
+          title: "Earn 2× More with PawPass",
+          description: "From $10/mo: 20× PawBucks on every purchase. Or PawPass+ for 30× and ad-free.",
+          ctaLabel: "Upgrade from $10/mo",
           onCta: () => navigate("/profile"),
         };
 
@@ -123,7 +123,7 @@ export function SponsoredAdBar({ variant }: SponsoredAdBarProps) {
             onClick={() => navigate("/profile")}
             className="text-[11px] font-semibold text-primary hover:underline inline-flex items-center gap-1"
           >
-            Remove Ads with PawPass+ <ArrowRight className="w-3 h-3" />
+            Upgrade from $10/mo <ArrowRight className="w-3 h-3" />
           </button>
         </div>
 
