@@ -15,8 +15,7 @@ import { POINTS_MULTIPLIER } from "@/lib/constants";
 const SimpleSuccess = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { rate: earnMultiplier } = useUserEarnRate();
-  const tierLabel = useUserEarnRate().tierLabel;
+  const { rate: earnMultiplier, tierLabel } = useUserEarnRate();
   const { userLocation, requestLocation } = useUserLocation();
   const [infoOpen, setInfoOpen] = useState(false);
 
