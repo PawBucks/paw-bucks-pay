@@ -67,6 +67,27 @@ type LockedMerchant = {
   distance: number | null;
 };
 
+type FullEcosystemOffer = {
+  id: string;
+  title: string;
+  description: string | null;
+  coins_required: number | null;
+  end_date: string | null;
+  partner_id: string;
+  merchants: {
+    id: string;
+    business_name: string;
+    business_type: string | null;
+    address: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    fee_model: string | null;
+    stripe_account_status: string | null;
+    is_active: boolean | null;
+  } | null;
+  distance: number | null;
+};
+
 type BrandedActivityRow = {
   id: string;
   type: string;
