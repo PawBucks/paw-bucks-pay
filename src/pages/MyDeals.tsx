@@ -270,6 +270,64 @@ const MyDeals = () => {
     },
   });
 
+  // 4) Full Ecosystem merchant offers (active partner_offers at full-ecosystem stores)
+  const { data: fullEcoOffersRaw = [], isLoading: fullEcoLoading } = useQuery({
+    queryKey: ["my-deals-full-ecosystem-offers"],
+    queryFn: async () => {
+      const nowIso = new Date().toISOString();
+      const { data, error } = await (supabase as any)
+        .from("partner_offers")
+        .select(
+          `id, title, description, coins_required, end_date, start_date, partner_id, is_active, status,
+           merchants:partner_id ( id, business_name, business_type, address, latitude, longitude, fee_model, stripe_account_status, is_active )`,
+        )
+        .eq("is_active", true);
+      if (error) throw error;
+      const rows = (data || []) as any[];
+      return rows.filter(
+        (r) =>
+          (!r.status || r.status === "active") &&
+          (!r.start_date || r.start_date <= nowIso) &&
+          (!r.end_date || r.end_date >= nowIso) &&
+          r.merchants?.is_active &&
+          r.merchants?.fee_model !== "acquisition_only" &&
+          r.merchants?.stripe_account_status === "active",
+      );
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const fullEcosystemOffers: FullEcosystemOffer[] = useMemo(() => {
+    const list = fullEcoOffersRaw.map((r: any) => {
+      const m = r.merchants;
+      const distance =
+        userLocation && m?.latitude != null && m?.longitude != null
+          ? calculateDistance(
+              userLocation.latitude,
+              userLocation.longitude,
+              m.latitude,
+              m.longitude,
+            )
+          : null;
+      return {
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        coins_required: r.coins_required,
+        end_date: r.end_date,
+        partner_id: r.partner_id,
+        merchants: m,
+        distance,
+      } as FullEcosystemOffer;
+    });
+    return list.sort((a, b) => {
+      if (a.distance == null && b.distance == null) return 0;
+      if (a.distance == null) return 1;
+      if (b.distance == null) return -1;
+      return a.distance - b.distance;
+    });
+  }, [fullEcoOffersRaw, userLocation]);
+
   const brandedTotals = useMemo(() => {
     let earned = 0;
     let redeemed = 0;
