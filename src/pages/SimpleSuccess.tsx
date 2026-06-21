@@ -169,6 +169,38 @@ const SimpleSuccess = () => {
           </div>
         )}
 
+        {/* Post-transaction upgrade upsell — concrete reward delta */}
+        {upsellTarget && extraPb > 0 && (
+          <div className="px-5 pt-3">
+            <button
+              type="button"
+              onClick={() => navigate(upsellTarget.route)}
+              className="w-full text-left rounded-[14px] border-[1.5px] border-primary/40 bg-[image:linear-gradient(135deg,hsl(var(--primary)/0.10),hsl(var(--primary)/0.03))] px-4 py-3.5 hover:border-primary transition-colors"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary mb-1">
+                    On {upsellTarget.name} you'd have earned
+                  </div>
+                  <div className="text-[18px] font-extrabold text-foreground leading-tight">
+                    {wouldHaveEarned.toLocaleString()} PawBucks
+                    <span className="ml-2 text-[13px] font-bold text-success">
+                      +{extraPb.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="text-[12px] text-muted-foreground mt-1">
+                    {upsellTarget.multiplier}× rewards from ${upsellTarget.price}/mo
+                    {upsellTarget.name === "PawPass+" ? " · ad-free" : ""}
+                  </div>
+                </div>
+                <div className="flex-shrink-0 self-center">
+                  <ChevronRight className="h-5 w-5 text-primary" strokeWidth={2.5} />
+                </div>
+              </div>
+            </button>
+          </div>
+        )}
+
         {/* View receipt */}
         <div className="px-5 pt-3">
           <button
