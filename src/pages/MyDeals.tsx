@@ -583,6 +583,118 @@ const MyDeals = () => {
         </div>
 
         {/* ============================================================ */}
+        {/* FEATURE 1.5 — Offers from Full Ecosystem Merchants            */}
+        {/* ============================================================ */}
+        <section className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
+          <div className="flex items-end justify-between gap-2">
+            <div className="space-y-1">
+              <Badge className="bg-primary/15 text-primary border-primary/30">
+                <PawBucksLogo className="w-3 h-3 mr-1" />
+                Full Ecosystem
+              </Badge>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Store className="w-5 h-5 text-primary" aria-hidden="true" />
+                Offers from Full Ecosystem Merchants
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Redeem PawBucks for exclusive offers at partners where you also
+                earn PawBucks every visit.
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/discover")}
+            >
+              See all <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+
+          {fullEcoLoading ? (
+            <div className="text-sm text-muted-foreground py-6 text-center">
+              Loading offers…
+            </div>
+          ) : fullEcosystemOffers.length === 0 ? (
+            <Card className="p-4 text-sm text-muted-foreground text-center py-6 bg-background">
+              No Full Ecosystem offers available right now — check back soon.
+            </Card>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {fullEcosystemOffers.slice(0, 8).map((o) => {
+                const m = o.merchants;
+                return (
+                  <button
+                    key={o.id}
+                    onClick={() => m && navigate(`/merchant/${m.id}`)}
+                    className="text-left"
+                  >
+                    <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                          <Store
+                            className="w-6 h-6 text-primary"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="font-semibold truncate">
+                              {o.title}
+                            </h4>
+                            {o.coins_required != null && (
+                              <Badge className="bg-primary/10 text-primary border-primary/20 shrink-0 flex items-center gap-1">
+                                <PawBucksLogo className="w-3 h-3" />
+                                {Number(o.coins_required).toLocaleString()}
+                              </Badge>
+                            )}
+                          </div>
+                          {m && (
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                              at {m.business_name}
+                            </p>
+                          )}
+                          {o.description && (
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {o.description}
+                            </p>
+                          )}
+                          {m?.address && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
+                              <MapPin className="w-3 h-3" aria-hidden="true" />
+                              <span className="truncate">{m.address}</span>
+                              {o.distance != null && (
+                                <span className="ml-1 shrink-0">
+                                  · {o.distance.toFixed(1)} mi
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {o.end_date && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Expires{" "}
+                              {new Date(o.end_date).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* Visual separator */}
+        <div className="flex items-center gap-3" aria-hidden="true">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            And
+          </span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        {/* ============================================================ */}
         {/* FEATURE 2 — Branded Campaign Rewards (sponsor PawBucks)       */}
         {/* ============================================================ */}
         <section className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
