@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Check, X, FileText, Info, ChevronRight } from "lucide-react";
+import { Check, X, FileText, Info, ChevronRight, TrendingUp, Sparkles } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { useUserEarnRate } from "@/hooks/useUserEarnRate";
 import { useUserLocation } from "@/hooks/useUserLocation";
@@ -169,35 +169,59 @@ const SimpleSuccess = () => {
           </div>
         )}
 
-        {/* Post-transaction upgrade upsell — concrete reward delta */}
+        {/* Post-transaction upgrade upsell — side-by-side reward delta */}
         {upsellTarget && extraPb > 0 && (
-          <div className="px-5 pt-3">
-            <button
-              type="button"
-              onClick={() => navigate(upsellTarget.route)}
-              className="w-full text-left rounded-[14px] border-[1.5px] border-primary/40 bg-[image:linear-gradient(135deg,hsl(var(--primary)/0.10),hsl(var(--primary)/0.03))] px-4 py-3.5 hover:border-primary transition-colors"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary mb-1">
-                    On {upsellTarget.name} you'd have earned
+          <div className="px-5 pt-4">
+            <div className="relative overflow-hidden rounded-[16px] border-[1.5px] border-primary/40 bg-[image:linear-gradient(135deg,hsl(var(--primary)/0.12),hsl(var(--primary)/0.02))] p-4">
+              {/* Header row */}
+              <div className="flex items-center gap-1.5 mb-3">
+                <TrendingUp className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+                <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
+                  Earn more on every purchase
+                </span>
+              </div>
+
+              {/* Side-by-side comparison */}
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="rounded-xl border border-border bg-card/60 px-3 py-2.5">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {tierLabel} (now)
                   </div>
-                  <div className="text-[18px] font-extrabold text-foreground leading-tight">
-                    {wouldHaveEarned.toLocaleString()} PawBucks
-                    <span className="ml-2 text-[13px] font-bold text-success">
+                  <div className="mt-1 text-[17px] font-extrabold text-muted-foreground line-through decoration-muted-foreground/50">
+                    {pbEarned.toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground -mt-0.5">PawBucks</div>
+                </div>
+                <div className="relative rounded-xl border-[1.5px] border-primary bg-primary/8 px-3 py-2.5 shadow-[0_4px_14px_hsl(var(--primary)/0.18)]">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                    {upsellTarget.name}
+                  </div>
+                  <div className="mt-1 flex items-baseline gap-1.5">
+                    <span className="text-[17px] font-extrabold text-foreground">
+                      {wouldHaveEarned.toLocaleString()}
+                    </span>
+                    <span className="text-[11px] font-bold text-success">
                       +{extraPb.toLocaleString()}
                     </span>
                   </div>
-                  <div className="text-[12px] text-muted-foreground mt-1">
-                    {upsellTarget.multiplier}× rewards from ${upsellTarget.price}/mo
-                    {upsellTarget.name === "PawPass+" ? " · ad-free" : ""}
-                  </div>
-                </div>
-                <div className="flex-shrink-0 self-center">
-                  <ChevronRight className="h-5 w-5 text-primary" strokeWidth={2.5} />
+                  <div className="text-[10px] text-muted-foreground -mt-0.5">PawBucks</div>
                 </div>
               </div>
-            </button>
+
+              {/* CTA */}
+              <button
+                type="button"
+                onClick={() => navigate(upsellTarget.route)}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-[14px] font-bold text-primary-foreground hover:bg-primary/90 active:scale-[0.99] transition-all shadow-[0_6px_18px_hsl(var(--primary)/0.30)]"
+              >
+                <Sparkles className="h-4 w-4" strokeWidth={2.5} />
+                Upgrade to {upsellTarget.name} — ${upsellTarget.price}/mo
+              </button>
+              <div className="mt-2 text-center text-[10.5px] text-muted-foreground">
+                {upsellTarget.multiplier}× PawBucks on every purchase
+                {upsellTarget.name === "PawPass+" ? " · ad-free" : ""} · Cancel anytime
+              </div>
+            </div>
           </div>
         )}
 
