@@ -10,11 +10,13 @@ import {
 } from "@/hooks/useMerchantServices";
 import { calculateDistance, formatDistance } from "@/lib/geo";
 import { getCategoryEmoji, getCategoryLabel } from "@/lib/categoryMapping";
+import { POINTS_MULTIPLIER } from "@/lib/constants";
 
 const SimpleSuccess = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { rate: earnMultiplier } = useUserEarnRate();
+  const tierLabel = useUserEarnRate().tierLabel;
   const { userLocation, requestLocation } = useUserLocation();
   const [infoOpen, setInfoOpen] = useState(false);
 
@@ -65,6 +67,21 @@ const SimpleSuccess = () => {
   }, [featured, premium, userLocation, excludeId]);
 
   const earnRateLabel = `${earnMultiplier}x`;
+
+  // Post-transaction upsell: show what they'd have earned at the next tier.
+  // Only relevant for Free + PawPass users with a non-trivial PB earning event.
+  const upsellTarget =
+    tierLabel === "Free"
+      ? { name: "PawPass", price: 10, multiplier: POINTS_MULTIPLIER.PAWPASS, route: "/profile" }
+      : tierLabel === "PawPass"
+      ? { name: "PawPass+", price: 20, multiplier: POINTS_MULTIPLIER.PAWPASS_PLUS, route: "/profile" }
+      : null;
+
+  const wouldHaveEarned =
+    upsellTarget && pbEarned > 0 && earnMultiplier > 0
+      ? Math.round((pbEarned / earnMultiplier) * upsellTarget.multiplier)
+      : 0;
+  const extraPb = wouldHaveEarned - pbEarned;
 
   const onClose = () => navigate("/home");
   const onViewReceipt = () => navigate(receiptId ? `/activity?tx=${receiptId}` : "/activity");
