@@ -67,6 +67,27 @@ type LockedMerchant = {
   distance: number | null;
 };
 
+type FullEcosystemOffer = {
+  id: string;
+  title: string;
+  description: string | null;
+  coins_required: number | null;
+  end_date: string | null;
+  partner_id: string;
+  merchants: {
+    id: string;
+    business_name: string;
+    business_type: string | null;
+    address: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    fee_model: string | null;
+    stripe_account_status: string | null;
+    is_active: boolean | null;
+  } | null;
+  distance: number | null;
+};
+
 type BrandedActivityRow = {
   id: string;
   type: string;
@@ -248,6 +269,64 @@ const MyDeals = () => {
       return (data || []) as BrandedActivityRow[];
     },
   });
+
+  // 4) Full Ecosystem merchant offers (active partner_offers at full-ecosystem stores)
+  const { data: fullEcoOffersRaw = [], isLoading: fullEcoLoading } = useQuery({
+    queryKey: ["my-deals-full-ecosystem-offers"],
+    queryFn: async () => {
+      const nowIso = new Date().toISOString();
+      const { data, error } = await (supabase as any)
+        .from("partner_offers")
+        .select(
+          `id, title, description, coins_required, end_date, start_date, partner_id, is_active, status,
+           merchants:partner_id ( id, business_name, business_type, address, latitude, longitude, fee_model, stripe_account_status, is_active )`,
+        )
+        .eq("is_active", true);
+      if (error) throw error;
+      const rows = (data || []) as any[];
+      return rows.filter(
+        (r) =>
+          (!r.status || r.status === "active") &&
+          (!r.start_date || r.start_date <= nowIso) &&
+          (!r.end_date || r.end_date >= nowIso) &&
+          r.merchants?.is_active &&
+          r.merchants?.fee_model !== "acquisition_only" &&
+          r.merchants?.stripe_account_status === "active",
+      );
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const fullEcosystemOffers: FullEcosystemOffer[] = useMemo(() => {
+    const list = fullEcoOffersRaw.map((r: any) => {
+      const m = r.merchants;
+      const distance =
+        userLocation && m?.latitude != null && m?.longitude != null
+          ? calculateDistance(
+              userLocation.latitude,
+              userLocation.longitude,
+              m.latitude,
+              m.longitude,
+            )
+          : null;
+      return {
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        coins_required: r.coins_required,
+        end_date: r.end_date,
+        partner_id: r.partner_id,
+        merchants: m,
+        distance,
+      } as FullEcosystemOffer;
+    });
+    return list.sort((a, b) => {
+      if (a.distance == null && b.distance == null) return 0;
+      if (a.distance == null) return 1;
+      if (b.distance == null) return -1;
+      return a.distance - b.distance;
+    });
+  }, [fullEcoOffersRaw, userLocation]);
 
   const brandedTotals = useMemo(() => {
     let earned = 0;
@@ -495,6 +574,118 @@ const MyDeals = () => {
         </section>
 
         {/* Visual separator between the two distinct features */}
+        <div className="flex items-center gap-3" aria-hidden="true">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+            And
+          </span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        {/* ============================================================ */}
+        {/* FEATURE 1.5 — Offers from Full Ecosystem Merchants            */}
+        {/* ============================================================ */}
+        <section className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
+          <div className="flex items-end justify-between gap-2">
+            <div className="space-y-1">
+              <Badge className="bg-primary/15 text-primary border-primary/30">
+                <PawBucksLogo className="w-3 h-3 mr-1" />
+                Full Ecosystem
+              </Badge>
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Store className="w-5 h-5 text-primary" aria-hidden="true" />
+                Offers from Full Ecosystem Merchants
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Redeem PawBucks for exclusive offers at partners where you also
+                earn PawBucks every visit.
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/discover")}
+            >
+              See all <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+
+          {fullEcoLoading ? (
+            <div className="text-sm text-muted-foreground py-6 text-center">
+              Loading offers…
+            </div>
+          ) : fullEcosystemOffers.length === 0 ? (
+            <Card className="p-4 text-sm text-muted-foreground text-center py-6 bg-background">
+              No Full Ecosystem offers available right now — check back soon.
+            </Card>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {fullEcosystemOffers.slice(0, 8).map((o) => {
+                const m = o.merchants;
+                return (
+                  <button
+                    key={o.id}
+                    onClick={() => m && navigate(`/merchant/${m.id}`)}
+                    className="text-left"
+                  >
+                    <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                          <Store
+                            className="w-6 h-6 text-primary"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="font-semibold truncate">
+                              {o.title}
+                            </h4>
+                            {o.coins_required != null && (
+                              <Badge className="bg-primary/10 text-primary border-primary/20 shrink-0 flex items-center gap-1">
+                                <PawBucksLogo className="w-3 h-3" />
+                                {Number(o.coins_required).toLocaleString()}
+                              </Badge>
+                            )}
+                          </div>
+                          {m && (
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                              at {m.business_name}
+                            </p>
+                          )}
+                          {o.description && (
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {o.description}
+                            </p>
+                          )}
+                          {m?.address && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
+                              <MapPin className="w-3 h-3" aria-hidden="true" />
+                              <span className="truncate">{m.address}</span>
+                              {o.distance != null && (
+                                <span className="ml-1 shrink-0">
+                                  · {o.distance.toFixed(1)} mi
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {o.end_date && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Expires{" "}
+                              {new Date(o.end_date).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        {/* Visual separator */}
         <div className="flex items-center gap-3" aria-hidden="true">
           <div className="h-px flex-1 bg-border" />
           <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
