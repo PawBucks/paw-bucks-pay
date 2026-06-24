@@ -15913,7 +15913,6 @@ export type Database = {
           transaction_count: number
         }[]
       }
-      normalize_earned_pawbucks_expiration: { Args: never; Returns: number }
       normalize_email: { Args: { raw_email: string }; Returns: string }
       process_checkin: {
         Args: { p_token: string; p_user_id: string }
