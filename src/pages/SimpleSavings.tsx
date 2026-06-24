@@ -32,6 +32,8 @@ const SimpleSavings = () => {
     petFundBalance,
     welcomeCreditBalance,
     earnedNextExpiresAt,
+    earnedNextExpiringAmount,
+    earnedNextEarnedAt,
     promotionalNextExpiresAt,
   } = useSpendablePawBucks(user?.id);
 
@@ -136,9 +138,9 @@ const SimpleSavings = () => {
                 {earnedUsd > 0 && earnedNextExpiresAt && (
                   <li>
                     <span className="text-foreground font-medium">
-                      {Formatters.currency(earnedUsd)}
+                      {Formatters.currency(earnedNextExpiringAmount * PB_TO_USD)}
                     </span>{" "}
-                    earned · {expiryLine(earnedNextExpiresAt)}
+                    earned {earnedNextEarnedAt ? `on ${format(new Date(earnedNextEarnedAt), "MMM d")}` : "batch"} · {expiryLine(earnedNextExpiresAt)}
                   </li>
                 )}
               </ul>
