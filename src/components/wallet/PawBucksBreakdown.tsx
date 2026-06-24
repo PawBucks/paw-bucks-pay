@@ -193,6 +193,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  <div className="flex-1">
  <p className="text-sm font-medium">{item.description ||"Earned PawBucks"}</p>
  <p className={`text-xs ${isUrgent ?'text-destructive font-medium' :'text-muted-foreground'}`}>
+ Earned {format(new Date(item.created_at),'MMM d')} · {' '}
  {daysLeft === 0 
  ?'Expires today!' 
  : daysLeft === 1 
