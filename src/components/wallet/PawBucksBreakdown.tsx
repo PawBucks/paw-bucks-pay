@@ -5,7 +5,7 @@ import { Badge } from"@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from"@/components/ui/tooltip";
 import { CheckCircle, Info, Loader2, AlertTriangle } from "lucide-react";
 import { Formatters } from"@/utils/formatters";
-import { format, formatDistanceToNow, differenceInDays } from"date-fns";
+import { format, formatDistanceToNow } from"date-fns";
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
 
 interface PendingPawBucks {
@@ -28,6 +28,11 @@ interface ExpiringPawBucks {
 interface PawBucksBreakdownProps {
  userId: string;
 }
+
+const getDaysUntilExpiration = (expiresAt: string) => {
+ const msRemaining = new Date(expiresAt).getTime() - Date.now();
+ return Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
+};
 
 export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  const [availableBalance, setAvailableBalance] = useState<number>(0);
@@ -91,14 +96,14 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  if (expiringResult.data) {
   // Show all upcoming expirations (not yet expired)
   const upcoming = expiringResult.data
-    .filter(item => differenceInDays(new Date(item.expires_at), new Date()) >= 0)
+    .filter(item => new Date(item.expires_at).getTime() >= Date.now())
     .map(item => ({ ...item, source: "earned" as const }));
   setExpiringItems(upcoming);
  }
 
   if (petFundReleasesResult.data) {
   const promo = petFundReleasesResult.data
-    .filter((r: any) => r.expires_at && differenceInDays(new Date(r.expires_at), new Date()) >= 0)
+    .filter((r: any) => r.expires_at && new Date(r.expires_at).getTime() >= Date.now())
     .map((r: any) => ({
       id: r.id,
       amount: r.amount,
@@ -174,7 +179,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
  </h4>
  <div className="space-y-2">
  {expiringItems.map((item) => {
- const daysLeft = differenceInDays(new Date(item.expires_at), new Date());
+ const daysLeft = getDaysUntilExpiration(item.expires_at);
  const isUrgent = daysLeft <= 3;
  return (
  <div
@@ -230,7 +235,7 @@ export const PawBucksBreakdown = ({ userId }: PawBucksBreakdownProps) => {
    </h4>
    <div className="space-y-2">
    {promotionalExpiring.map((item) => {
-   const daysLeft = differenceInDays(new Date(item.expires_at), new Date());
+    const daysLeft = getDaysUntilExpiration(item.expires_at);
    const isUrgent = daysLeft <= 3;
    return (
    <div

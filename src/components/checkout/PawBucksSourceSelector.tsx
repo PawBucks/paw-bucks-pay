@@ -7,7 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { differenceInDays, format } from "date-fns";
+import { format } from "date-fns";
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
@@ -29,7 +29,7 @@ interface PawBucksSourceSelectorProps {
 
 const ExpiryLine = ({ iso, tone }: { iso: string; tone:"earned" |"promotional" }) => {
   const date = new Date(iso);
-  const days = differenceInDays(date, new Date());
+   const days = Math.max(0, Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
   const urgent = days <= 7;
   const colorClass = urgent
     ? "text-destructive"
