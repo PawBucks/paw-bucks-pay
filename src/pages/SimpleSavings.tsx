@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { Formatters } from "@/utils/formatters";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
 import { ChevronRight, Info } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 
@@ -81,7 +81,7 @@ const SimpleSavings = () => {
   const expiryLine = (iso?: string | null) => {
     if (!iso) return null;
     const d = new Date(iso);
-    const days = differenceInDays(d, new Date());
+    const days = Math.max(0, Math.ceil((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
     return days <= 0
       ? "Expires today"
       : days === 1
