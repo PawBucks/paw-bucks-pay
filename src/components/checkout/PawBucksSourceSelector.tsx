@@ -23,6 +23,10 @@ interface PawBucksSourceSelectorProps {
  promotionalLabel?: string;
  /** ISO date when the soonest-expiring earned PawBucks expire. */
  earnedNextExpiresAt?: string | null;
+ /** Raw PB amount in the soonest-expiring earned batch. */
+ earnedNextExpiringAmount?: number;
+ /** ISO date when the soonest-expiring earned batch was earned. */
+ earnedNextEarnedAt?: string | null;
  /** ISO date when the soonest-expiring promotional credit expires. */
  promotionalNextExpiresAt?: string | null;
 }
@@ -46,6 +50,29 @@ const ExpiryLine = ({ iso, tone }: { iso: string; tone:"earned" |"promotional" }
   );
 };
 
+const EarnedExpiryLine = ({
+  amount,
+  earnedAt,
+  expiresAt,
+}: {
+  amount: number;
+  earnedAt?: string | null;
+  expiresAt: string;
+}) => {
+  const date = new Date(expiresAt);
+  const days = Math.max(0, Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+  const urgent = days <= 7;
+  const label = days <= 0 ? "Expires today" : days === 1 ? "Expires tomorrow" : `Expires in ${days} days`;
+  const amountText = amount > 0 ? `${Formatters.number(amount)} PB` : "Next batch";
+  const earnedText = earnedAt ? ` earned ${format(new Date(earnedAt), "MMM d")}` : "";
+  return (
+    <p className={`text-[11px] flex items-center gap-1 mt-0.5 ${urgent ? "text-destructive" : "text-primary"}`}>
+      <span className="w-3 h-3" aria-hidden="true">⏰</span>
+      {amountText}{earnedText}: {label} · {format(date, "MMM d")}
+    </p>
+  );
+};
+
 export const PawBucksSourceSelector = ({
  earnedBalance,
  promotionalBalance,
@@ -53,6 +80,8 @@ export const PawBucksSourceSelector = ({
  onSourceChange,
  promotionalLabel ="Pet Fund Credit",
  earnedNextExpiresAt = null,
+ earnedNextExpiringAmount = 0,
+ earnedNextEarnedAt = null,
  promotionalNextExpiresAt = null,
 }: PawBucksSourceSelectorProps) => {
  return (
@@ -129,7 +158,11 @@ export const PawBucksSourceSelector = ({
  {earnedBalance.toLocaleString()} PB ({Formatters.currency((earnedBalance * PAWBUCKS_TO_USD))})
  </p>
   {earnedNextExpiresAt && earnedBalance > 0 && (
-    <ExpiryLine iso={earnedNextExpiresAt} tone="earned" />
+     <EarnedExpiryLine
+       amount={earnedNextExpiringAmount}
+       earnedAt={earnedNextEarnedAt}
+       expiresAt={earnedNextExpiresAt}
+     />
   )}
  </div>
  </label>
