@@ -13,6 +13,10 @@ interface SpendablePawBucksResult {
  petFundMinTransactionUsd: number;
  /** Soonest-expiring date for earned PawBucks (ISO string), if any. */
  earnedNextExpiresAt: string | null;
+ /** Amount in the soonest-expiring earned PawBucks batch, in raw PB. */
+ earnedNextExpiringAmount: number;
+ /** Original earned timestamp for the soonest-expiring earned batch. */
+ earnedNextEarnedAt: string | null;
  /** Soonest-expiring date for promotional credit (ISO string), if any. */
  promotionalNextExpiresAt: string | null;
  isLoading: boolean;
@@ -34,6 +38,8 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  const [welcomeCreditBalance, setWelcomeCreditBalance] = useState(0);
  const [hasWelcomeCredit, setHasWelcomeCredit] = useState(false);
  const [earnedNextExpiresAt, setEarnedNextExpiresAt] = useState<string | null>(null);
+ const [earnedNextExpiringAmount, setEarnedNextExpiringAmount] = useState(0);
+ const [earnedNextEarnedAt, setEarnedNextEarnedAt] = useState<string | null>(null);
  const [promotionalNextExpiresAt, setPromotionalNextExpiresAt] = useState<string | null>(null);
  const [isLoading, setIsLoading] = useState(true);
  const [error, setError] = useState<Error | null>(null);
@@ -50,6 +56,8 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  setWelcomeCreditBalance(0);
  setHasWelcomeCredit(false);
  setEarnedNextExpiresAt(null);
+ setEarnedNextExpiringAmount(0);
+ setEarnedNextEarnedAt(null);
  setPromotionalNextExpiresAt(null);
  setIsLoading(false);
  return;
@@ -87,7 +95,7 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  .maybeSingle(),
   supabase
   .from("pawbucks_activity")
-  .select("expires_at")
+  .select("amount, created_at, expires_at")
   .eq("user_id", effectiveUserId)
   .eq("pawbucks_status","available")
   .eq("type","earn")
@@ -107,7 +115,10 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  setSpendableBalance(spendable);
  setLockedBalance(locked);
 
-  setEarnedNextExpiresAt(earnedExpiryResult.data?.[0]?.expires_at ?? null);
+  const nextEarnedExpiry = earnedExpiryResult.data?.[0] ?? null;
+  setEarnedNextExpiresAt(nextEarnedExpiry?.expires_at ?? null);
+  setEarnedNextExpiringAmount(nextEarnedExpiry?.amount ?? 0);
+  setEarnedNextEarnedAt(nextEarnedExpiry?.created_at ?? null);
 
  // Check Pet Fund (new system)
  if (petFundResult.data && petFundResult.data.status ==="active") {
@@ -196,6 +207,8 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  hasPetFund,
  petFundMinTransactionUsd,
  earnedNextExpiresAt,
+ earnedNextExpiringAmount,
+ earnedNextEarnedAt,
  promotionalNextExpiresAt,
  isLoading: isLoading || sharedAccount.isLoading,
  error,
