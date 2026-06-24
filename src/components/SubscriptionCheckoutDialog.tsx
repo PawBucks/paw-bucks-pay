@@ -92,6 +92,10 @@ const CheckoutForm = ({
  hasPetFund,
  petFundBalance,
  petFundMinTransactionUsd,
+  earnedNextExpiresAt,
+  earnedNextExpiringAmount,
+  earnedNextEarnedAt,
+  promotionalNextExpiresAt,
  isLoading: loadingBalance 
  } = useSpendablePawBucks(user?.id);
 
@@ -338,6 +342,10 @@ const CheckoutForm = ({
  selectedSource={pawbucksSource}
  onSourceChange={handleSourceChange}
  promotionalLabel={hasPetFund ?"Pet Fund Credit" :"Welcome Credit"}
+  earnedNextExpiresAt={earnedNextExpiresAt}
+  earnedNextExpiringAmount={earnedNextExpiringAmount}
+  earnedNextEarnedAt={earnedNextEarnedAt}
+  promotionalNextExpiresAt={promotionalNextExpiresAt}
  />
  )}
 
