@@ -101,8 +101,7 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
   .eq("type","earn")
   .not("expires_at","is", null)
   .gt("expires_at", new Date().toISOString())
-  .order("expires_at", { ascending: true })
-  .limit(1),
+  .order("expires_at", { ascending: false }),
  ]);
 
  if (walletResult.error && walletResult.error.code !=="PGRST116") {
@@ -115,10 +114,30 @@ export function useSpendablePawBucks(userId: string | undefined): SpendablePawBu
  setSpendableBalance(spendable);
  setLockedBalance(locked);
 
-  const nextEarnedExpiry = earnedExpiryResult.data?.[0] ?? null;
-  setEarnedNextExpiresAt(nextEarnedExpiry?.expires_at ?? null);
-  setEarnedNextExpiringAmount(nextEarnedExpiry?.amount ?? 0);
-  setEarnedNextEarnedAt(nextEarnedExpiry?.created_at ?? null);
+  // FIFO-by-expiry accounting: earn rows are not decremented when PawBucks
+  // are spent, so we must reconcile against the wallet balance. Oldest-
+  // expiring batches are assumed spent first, so the remaining wallet
+  // balance maps to the latest-expiring batches. Walk batches from
+  // latest -> soonest expiry, accumulating until we cover the wallet
+  // balance; the last batch added is the soonest-expiring *unspent* batch.
+  const batches = (earnedExpiryResult.data ?? []) as Array<{
+    amount: number; created_at: string; expires_at: string;
+  }>;
+  let remaining = spendable;
+  let nextUnspent: { amount: number; created_at: string; expires_at: string } | null = null;
+  let nextUnspentRemainder = 0;
+  for (const b of batches) {
+    if (remaining <= 0) break;
+    const take = Math.min(remaining, b.amount || 0);
+    if (take > 0) {
+      nextUnspent = b;
+      nextUnspentRemainder = take;
+      remaining -= take;
+    }
+  }
+  setEarnedNextExpiresAt(nextUnspent?.expires_at ?? null);
+  setEarnedNextExpiringAmount(nextUnspentRemainder);
+  setEarnedNextEarnedAt(nextUnspent?.created_at ?? null);
 
  // Check Pet Fund (new system)
  if (petFundResult.data && petFundResult.data.status ==="active") {
