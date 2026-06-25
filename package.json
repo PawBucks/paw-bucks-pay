@@ -65,7 +65,7 @@
     "framer-motion": "^12.23.25",
     "html5-qrcode": "^2.3.8",
     "input-otp": "^1.4.2",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.1.1",
     "jspdf": "4.2.1",
     "lucide-react": "^0.462.0",
     "mapbox-gl": "^3.16.0",
@@ -115,6 +115,7 @@
     "minimatch": "^9.0.5",
     "glob": "^10.4.5",
     "ajv": "^8.17.1",
-    "brace-expansion": "^2.0.1"
+    "brace-expansion": "^2.0.1",
+    "undici": "^7.28.0"
   }
 }
