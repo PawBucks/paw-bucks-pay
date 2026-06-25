@@ -351,6 +351,7 @@ serve(async (req) => {
 
         if (merchantProfile?.email) {
           await supabase.functions.invoke("send-invoice-paid-notification", {
+            headers: { "x-internal-secret": Deno.env.get("INTERNAL_TRIGGER_SECRET") ?? "" },
             body: {
               merchantEmail: merchantProfile.email,
               merchantName: merchantProfile.full_name || merchant.business_name || "Merchant",

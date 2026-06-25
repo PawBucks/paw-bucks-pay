@@ -316,6 +316,7 @@ serve(async (req) => {
           .from('profiles').select('email, full_name').eq('id', transaction.user_id).single();
         if (profile?.email) {
           await supabaseAdmin.functions.invoke('send-refund-email', {
+            headers: { 'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '' },
             body: {
               email: profile.email,
               customerName: profile.full_name,
