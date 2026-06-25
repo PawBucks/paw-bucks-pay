@@ -372,7 +372,7 @@ export function WorkspaceOverview() {
   const updateMerchantSetting = async (patch: Record<string, unknown>) => {
     if (!merchantId) return;
     setSavingSetting(true);
-    const { error } = await supabase.from("merchants").update(patch).eq("id", merchantId);
+    const { error } = await supabase.from("merchants").update(patch as any).eq("id", merchantId);
     setSavingSetting(false);
     if (error) {
       toast({ title: "Couldn't save", description: error.message, variant: "destructive" });

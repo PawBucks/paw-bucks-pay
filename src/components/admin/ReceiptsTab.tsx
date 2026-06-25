@@ -192,7 +192,7 @@ export const ReceiptsTab = () => {
 
  const { error } = await supabase
  .from("receipt_submissions")
- .update(updateData)
+      .update(updateData as any)
  .eq("id", selectedReceipt.id);
 
  if (error) throw error;
