@@ -6,6 +6,47 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Allowlist of acceptable event types to prevent log injection.
+const ALLOWED_EVENT_TYPES = new Set([
+  "login",
+  "logout",
+  "signup",
+  "password_change",
+  "password_reset",
+  "password_reset_request",
+  "mfa_challenge",
+  "mfa_verify",
+  "failed_login",
+  "multiple_failed_logins",
+  "account_locked",
+]);
+
+// Max sizes to prevent DB flooding / abuse.
+const MAX_METADATA_BYTES = 2048;
+const MAX_STRING_LEN = 500;
+
+// Simple in-memory per-IP rate limit (per edge instance).
+const RATE_LIMIT_MAX = 30;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  entry.count += 1;
+  if (entry.count > RATE_LIMIT_MAX) return true;
+  return false;
+}
+
+function clampString(v: unknown, max = MAX_STRING_LEN): string | null {
+  if (typeof v !== "string") return null;
+  return v.slice(0, max);
+}
+
 // Thresholds for detecting suspicious activity
 const FAILED_LOGIN_THRESHOLD = 5;
 const FAILED_LOGIN_WINDOW_MINUTES = 15;
@@ -42,11 +83,57 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const payload: AuthEventPayload = await req.json();
     const ip_address = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
                        req.headers.get("x-real-ip") || 
                        "unknown";
     const user_agent = req.headers.get("user-agent") || "unknown";
+
+    if (isRateLimited(ip_address)) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded" }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const rawPayload = await req.json().catch(() => null) as Record<string, unknown> | null;
+    if (!rawPayload || typeof rawPayload !== "object") {
+      return new Response(
+        JSON.stringify({ error: "Invalid payload" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Allowlist event_type — reject unknown values to prevent log injection.
+    const eventType = typeof rawPayload.event_type === "string" ? rawPayload.event_type : "";
+    if (!ALLOWED_EVENT_TYPES.has(eventType)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid event_type" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Enforce metadata size cap and strip if oversized.
+    let metadata: Record<string, unknown> = {};
+    if (rawPayload.metadata && typeof rawPayload.metadata === "object") {
+      try {
+        const serialized = JSON.stringify(rawPayload.metadata);
+        if (serialized.length <= MAX_METADATA_BYTES) {
+          metadata = rawPayload.metadata as Record<string, unknown>;
+        }
+      } catch {
+        metadata = {};
+      }
+    }
+
+    // Build a sanitized payload — only known fields are forwarded downstream.
+    const payload: AuthEventPayload = {
+      event_type: eventType,
+      user_id: clampString(rawPayload.user_id, 64) ?? undefined,
+      email: clampString(rawPayload.email, 320) ?? undefined,
+      success: rawPayload.success === true,
+      failure_reason: clampString(rawPayload.failure_reason) ?? undefined,
+      metadata,
+    };
 
     // Verify caller identity from JWT to prevent email/user_id spoofing.
     // For unauthenticated callers (e.g. failed-login attempts) we still log
