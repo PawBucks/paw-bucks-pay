@@ -1,8 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { createHash } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 import { prerenderRoutes } from "./plugins/vite-prerender-routes";
@@ -40,22 +38,13 @@ const PWA_ICONS = [
 const rootReact = path.resolve(__dirname, "node_modules/react");
 const rootReactDom = path.resolve(__dirname, "node_modules/react-dom");
 
-const dependencyCacheHash = createHash("sha256");
-for (const fileName of ["package.json", "bun.lock", "package-lock.json"]) {
-  const filePath = path.resolve(__dirname, fileName);
-  if (existsSync(filePath)) {
-    dependencyCacheHash.update(readFileSync(filePath));
-  }
-}
-const dependencyCacheKey = dependencyCacheHash.digest("hex").slice(0, 12);
-
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Use a dependency-hashed Vite cache path so optimized dependency URLs are
-  // invalidated after package/lockfile updates. This prevents browsers/CDNs
-  // from mixing an older React optimized chunk with a newer react-dom chunk,
-  // which causes the `dispatcher.useEffect` invalid-hook-call crash.
-  cacheDir: `node_modules/.vite-pawbucks-react-singleton-${dependencyCacheKey}`,
+  // Keep a single Vite optimized-dependency cache path. React, React DOM, and
+  // React Query must resolve through the same optimized graph; multiple cache
+  // directories can load separate React module instances and trigger
+  // `dispatcher.useEffect` invalid-hook-call crashes.
+  cacheDir: "node_modules/.vite-pawbucks-react-singleton",
   server: {
     host: "::",
     port: 8080,
