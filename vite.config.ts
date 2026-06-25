@@ -35,12 +35,15 @@ const PWA_ICONS = [
   },
 ];
 
+const rootReact = path.resolve(__dirname, "node_modules/react");
+const rootReactDom = path.resolve(__dirname, "node_modules/react-dom");
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   // Use a project-specific Vite cache path so optimized dependency URLs are
   // invalidated when React bundling rules change. This prevents browsers/CDNs
   // from reusing an older `node_modules/.vite/deps` React graph in preview.
-  cacheDir: "node_modules/.vite-pawbucks",
+  cacheDir: "node_modules/.vite-pawbucks-react-singleton",
   server: {
     host: "::",
     port: 8080,
@@ -172,10 +175,17 @@ export default defineConfig(({ mode }) => ({
     faviconManifestCheck(PWA_THEME_COLOR, PWA_ICONS),
   ].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-    // Prevent duplicate React instances causing "Invalid hook call" errors
-    dedupe: ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "react/jsx-dev-runtime"],
+    alias: [
+      { find: /^react$/, replacement: path.join(rootReact, "index.js") },
+      { find: /^react\/jsx-runtime$/, replacement: path.join(rootReact, "jsx-runtime.js") },
+      { find: /^react\/jsx-dev-runtime$/, replacement: path.join(rootReact, "jsx-dev-runtime.js") },
+      { find: /^react-dom$/, replacement: path.join(rootReactDom, "index.js") },
+      { find: /^react-dom\/client$/, replacement: path.join(rootReactDom, "client.js") },
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+    ],
+    // Force every optimized dependency and source module to share the same
+    // root React objects. This prevents the duplicate-React invalid hook call
+    // where QueryClientProvider reads a different dispatcher than react-dom set.
+    dedupe: ["react", "react-dom"],
   },
 }));
