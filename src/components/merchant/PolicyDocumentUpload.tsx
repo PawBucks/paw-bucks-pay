@@ -74,7 +74,7 @@ export const PolicyDocumentUpload = ({
 
  const { error: updateError } = await supabase
  .from(table)
- .update({ [dbField]: urlData.publicUrl })
+        .update({ [dbField]: urlData.publicUrl } as any)
  .eq("id", entityId);
 
  if (updateError) throw updateError;
@@ -96,7 +96,7 @@ export const PolicyDocumentUpload = ({
 
  const { error } = await supabase
  .from(table)
- .update({ [dbField]: null })
+        .update({ [dbField]: null } as any)
  .eq("id", entityId);
 
  if (error) throw error;

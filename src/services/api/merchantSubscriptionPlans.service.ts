@@ -147,7 +147,7 @@ export const merchantSubscriptionPlansService = {
 
  const { data, error } = await supabase
  .from("merchant_subscription_plans")
- .update(updates)
+      .update(updates as any)
  .eq("id", planId)
  .select()
  .single();

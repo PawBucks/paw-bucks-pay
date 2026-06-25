@@ -103,7 +103,7 @@ export const SupportTicketsTab = () => {
  const oldStatus = ticket?.status;
  const { error } = await supabase
  .from('support_tickets')
- .update(updates)
+      .update(updates as any)
  .eq('id', id);
  if (error) throw error;
 
