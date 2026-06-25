@@ -884,6 +884,7 @@ async function handlePaymentSuccess(
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${supabaseAnonKey}`,
+            'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
           },
           body: JSON.stringify({
             merchantEmail: merchantProfile.email,
@@ -1159,6 +1160,7 @@ async function handleFullPawBucksRenewal(
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${supabaseAnonKey}`,
+            'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
           },
           body: JSON.stringify({
             merchantEmail: merchantProfile.email,
