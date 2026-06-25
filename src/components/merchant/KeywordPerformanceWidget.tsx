@@ -350,7 +350,10 @@ export function KeywordPerformanceWidget() {
  outerRadius={100}
  paddingAngle={2}
  dataKey="value"
- label={({ name, percentage }) => `${name}: ${Formatters.number(Math.round(percentage))}%`}
+ label={({ name, percent, payload }) => {
+  const percentage = typeof payload?.percentage === "number" ? payload.percentage : (percent ?? 0) * 100;
+  return `${name}: ${Formatters.number(Math.round(percentage))}%`;
+ }}
  labelLine={false}
  >
  {pieData.map((_, index) => (
