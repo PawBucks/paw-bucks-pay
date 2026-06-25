@@ -107,5 +107,14 @@
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "rollup": "^4.22.4",
+    "fast-uri": "^3.0.1",
+    "picomatch": "^4.0.2",
+    "minimatch": "^9.0.5",
+    "glob": "^10.4.5",
+    "ajv": "^8.17.1",
+    "brace-expansion": "^2.0.1"
   }
 }
