@@ -538,24 +538,36 @@ const Index = () => {
  <div className="pl-tier-name">Free</div>
  <div className="pl-tier-price free-tag">Always free</div>
  </div>
- <div className="pl-tier-price">10 PawBucks per $1 at partners</div>
+ <div className="pl-tier-earn">
+ <b>10</b>
+ <em>PawBucks</em>
+ <span>per $1 at partners</span>
  </div>
- <div className="pl-tier-row">
+ </div>
+ <div className="pl-tier-row featured">
  <div>
  <div className="pl-tier-name">PawPass</div>
  <div className="pl-tier-price free-tag">$10 / month</div>
  </div>
- <div className="pl-tier-price">20 PawBucks per $1 at partners</div>
+ <div className="pl-tier-earn">
+ <b>20</b>
+ <em>PawBucks</em>
+ <span>per $1 at partners</span>
  </div>
- <div className="pl-tier-row featured">
+ </div>
+ <div className="pl-tier-row">
  <div>
  <div className="pl-tier-name">PawPass+</div>
  <div className="pl-tier-price free-tag">$20 / month</div>
  </div>
- <div className="pl-tier-price">30 PawBucks per $1 at partners</div>
+ <div className="pl-tier-earn">
+ <b>30</b>
+ <em>PawBucks</em>
+ <span>per $1 at partners</span>
+ </div>
  </div>
  <div className="pl-earn-example">
- Example: Spend $200 at a partner vet on PawPass+ → earn 6,000 PawBucks ($6 value) redeemable at any partner merchant.
+ <strong>Example:</strong> Spend $200 at a partner vet on PawPass+ → earn <strong>6,000 PawBucks ($6 value)</strong> redeemable at any partner merchant.
  </div>
  </div>
  </div>
