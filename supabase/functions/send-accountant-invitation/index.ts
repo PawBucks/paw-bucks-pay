@@ -42,7 +42,44 @@ serve(async (req: Request) => {
       );
     }
 
-    const { invitationId, accountantEmail, accountantName, businessName, accessToken } = await req.json();
+    const { invitationId } = await req.json();
+    if (!invitationId || typeof invitationId !== "string") {
+      return new Response(
+        JSON.stringify({ error: "invitationId is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Look up the invitation server-side; never trust email/token from the request body.
+    const { data: invitation, error: invErr } = await supabase
+      .from("accountant_invitations")
+      .select("id, merchant_id, accountant_email, accountant_name, access_token")
+      .eq("id", invitationId)
+      .maybeSingle();
+    if (invErr || !invitation) {
+      return new Response(
+        JSON.stringify({ error: "Invitation not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify the caller owns the merchant this invitation belongs to.
+    const { data: merchant, error: merchErr } = await supabase
+      .from("merchants")
+      .select("id, user_id, business_name")
+      .eq("id", invitation.merchant_id)
+      .maybeSingle();
+    if (merchErr || !merchant || merchant.user_id !== userData.user.id) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const accountantEmail = invitation.accountant_email;
+    const accountantName = invitation.accountant_name;
+    const accessToken = invitation.access_token;
+    const businessName = merchant.business_name;
 
     logStep("Sending accountant invitation", { invitationId, accountantEmail, businessName });
 
