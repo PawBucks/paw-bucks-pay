@@ -513,8 +513,9 @@ const Index = () => {
  time you pay using the PawBucks platform. Free forever.
  </p>
  <div className="pl-actions">
- <button className="pl-btn-primary" onClick={goSignup}>Create Free Account</button>
+ <button className="pl-btn-primary" onClick={goSignup}>Start Earning Free</button>
  <button className="pl-btn-ghost" onClick={goDirectory}>Browse Pet Services →</button>
+ <a className="pl-btn-link" onClick={() => document.querySelector('.pl-earn-card')?.scrollIntoView({behavior:'smooth'})}>See how it works</a>
  </div>
  <div className="pl-hero-stats">
  <div className="pl-stat">
