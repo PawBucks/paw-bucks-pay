@@ -419,12 +419,14 @@ const styles = `
  .pl-cta { padding: 4rem 1.5rem; }
  .pl-footer { flex-direction: column; gap: 0.75rem; text-align: center; padding: 2rem 1.5rem; }
  .pl-hero { grid-template-columns: 1fr; min-height: auto; }
- .pl-hero-left { padding: 6rem 1.5rem 2rem; }
- .pl-hero-right { padding: 0 1rem 4rem; justify-content: flex-start; }
- .pl-hero-sub { font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; }
+ .pl-hero-left { padding: 6rem 1.5rem 2rem; max-width: 100%; min-width: 0; }
+ .pl-hero-right { padding: 0 1rem 4rem; justify-content: flex-start; max-width: 100%; min-width: 0; }
+ .pl-hero-title { font-size: clamp(2.2rem, 9vw, 3rem); overflow-wrap: break-word; }
+ .pl-hero-sub { font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; max-width: 100%; }
  .pl-actions { flex-direction: column; align-items: stretch; gap: 1rem; }
  .pl-actions .pl-btn-primary { width: 100%; text-align: center; }
  .pl-actions .pl-btn-ghost { align-self: flex-start; }
+ .pl-hero-stats { display: none; }
  .pl-steps { grid-template-columns: 1fr 1fr; }
  .pl-features-grid { grid-template-columns: 1fr; }
  .pl-lostpet-inner { grid-template-columns: 1fr; gap: 2rem; }
