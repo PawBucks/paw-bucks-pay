@@ -419,15 +419,8 @@ const styles = `
  .pl-cta { padding: 4rem 1.5rem; }
  .pl-footer { flex-direction: column; gap: 0.75rem; text-align: center; padding: 2rem 1.5rem; }
  .pl-hero { grid-template-columns: 1fr; min-height: auto; }
-  .pl-hero-left { padding: 6rem 1.5rem 2rem; min-width: 0; }
-  .pl-hero-right { padding: 0 1.5rem 4rem; min-width: 0; }
-  .pl-hero-sub { max-width: 100%; font-size: 1rem; line-height: 1.65; }
-  .pl-hero-title { font-size: clamp(2rem, 8vw, 2.8rem); }
-  .pl-actions { flex-direction: column; align-items: stretch; gap: 0.75rem; }
-  .pl-actions .pl-btn-primary,
-  .pl-actions .pl-btn-ghost { width: 100%; text-align: center; }
-  .pl-hero-stats { gap: 1rem; }
-  .pl-stat-num { font-size: 1.35rem; }
+ .pl-hero-left { padding: 6rem 1.5rem 2rem; }
+ .pl-hero-right { padding: 0 1.5rem 4rem; }
  .pl-steps { grid-template-columns: 1fr 1fr; }
  .pl-features-grid { grid-template-columns: 1fr; }
  .pl-lostpet-inner { grid-template-columns: 1fr; gap: 2rem; }
