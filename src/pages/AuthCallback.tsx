@@ -23,6 +23,23 @@ const resolveLandingRoute = async (userId: string): Promise<string> => {
 };
 
 /**
+ * Fire-and-forget: trigger the pet-owner welcome email. The edge function
+ * is idempotent (checks `welcome_email_sent_at`) and no-ops for non
+ * pet_owner accounts, so it's always safe to call here.
+ */
+const triggerPetOwnerWelcomeEmail = (userId: string): void => {
+  try {
+    void supabase.functions
+      .invoke("send-pet-owner-welcome", { body: { userId } })
+      .then(({ error }) => {
+        if (error) console.warn("Welcome email invoke failed:", error);
+      });
+  } catch (err) {
+    console.warn("Welcome email invoke threw:", err);
+  }
+};
+
+/**
  * AuthCallback handles all Supabase authentication redirects:
  * - Email confirmation after signup
  * - Password recovery links
@@ -95,6 +112,7 @@ const AuthCallback = () => {
 
   // Regular email confirmation - redirect to persona-specific dashboard
   toast.success("Email confirmed! Welcome to PawBucks.");
+  triggerPetOwnerWelcomeEmail(data.session.user.id);
   const landing = await resolveLandingRoute(data.session.user.id);
   navigate(landing, { replace: true });
  return;
@@ -128,6 +146,7 @@ const AuthCallback = () => {
  }
 
   toast.success("Email confirmed! Welcome to PawBucks.");
+  triggerPetOwnerWelcomeEmail(data.session.user.id);
   const landing = await resolveLandingRoute(data.session.user.id);
   navigate(landing, { replace: true });
  return;
@@ -159,6 +178,7 @@ const AuthCallback = () => {
   toast.success("Welcome to PawBucks!");
   const { data: sess } = await supabase.auth.getSession();
   const uid = sess?.session?.user?.id;
+  if (uid) triggerPetOwnerWelcomeEmail(uid);
   const landing = uid ? await resolveLandingRoute(uid) :"/home";
   navigate(landing, { replace: true });
  return;

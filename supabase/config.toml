@@ -234,6 +234,9 @@ verify_jwt = false
 [functions.send-signup-confirmation]
 verify_jwt = false
 
+[functions.send-pet-owner-welcome]
+verify_jwt = false
+
 [functions.admin-send-email]
 verify_jwt = true
 

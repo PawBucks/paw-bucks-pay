@@ -10681,6 +10681,7 @@ export type Database = {
           timezone: string | null
           updated_at: string
           user_type: Database["public"]["Enums"]["user_type"]
+          welcome_email_sent_at: string | null
         }
         Insert: {
           auto_redeem_max_apply_pct?: number
@@ -10704,6 +10705,7 @@ export type Database = {
           timezone?: string | null
           updated_at?: string
           user_type: Database["public"]["Enums"]["user_type"]
+          welcome_email_sent_at?: string | null
         }
         Update: {
           auto_redeem_max_apply_pct?: number
@@ -10727,6 +10729,7 @@ export type Database = {
           timezone?: string | null
           updated_at?: string
           user_type?: Database["public"]["Enums"]["user_type"]
+          welcome_email_sent_at?: string | null
         }
         Relationships: []
       }
