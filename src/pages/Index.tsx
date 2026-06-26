@@ -526,30 +526,27 @@ const Index = () => {
  <h3 className="pl-earn-title">How it works</h3>
  <div className="pl-tier-row">
  <div>
- <div className="pl-tier-name">1. Create free account</div>
- <div className="pl-tier-price free-tag">Takes under a minute</div>
+ <div className="pl-tier-name">Free</div>
+ <div className="pl-tier-price free-tag">Always free</div>
  </div>
+ <div className="pl-tier-price">10 PawBucks per $1 at partners</div>
  </div>
  <div className="pl-tier-row">
  <div>
- <div className="pl-tier-name">2. Pay for pet care</div>
- <div className="pl-tier-price free-tag">At any partner business</div>
+ <div className="pl-tier-name">PawPass</div>
+ <div className="pl-tier-price free-tag">$10 / month</div>
  </div>
+ <div className="pl-tier-price">20 PawBucks per $1 at partners</div>
  </div>
  <div className="pl-tier-row featured">
  <div>
- <div className="pl-tier-name">3. Save automatically</div>
- <div className="pl-tier-price">PawBucks applied at checkout</div>
+ <div className="pl-tier-name">PawPass+</div>
+ <div className="pl-tier-price free-tag">$20 / month</div>
  </div>
- </div>
- <div className="pl-tier-row">
- <div>
- <div className="pl-tier-name">4. Earn for next visit</div>
- <div className="pl-tier-price free-tag">Rewards keep growing</div>
- </div>
+ <div className="pl-tier-price">30 PawBucks per $1 at partners</div>
  </div>
  <div className="pl-earn-example">
- Free to join. No credit card required. Cancel anytime.
+ Example: Spend $200 at a partner vet on PawPass+ → earn 6,000 PawBucks ($6 value) redeemable at any partner merchant.
  </div>
  </div>
  </div>
