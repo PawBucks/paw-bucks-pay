@@ -173,8 +173,8 @@ const styles = `
  font-size: 1.6rem; font-weight: 700; display: block;
  }
  .pl-tier-earn em {
- font-size: 2rem; font-weight: 700; font-style: normal;
- display: block; margin-top: 0.1rem;
+ font-size: 1.5rem; font-weight: 700; font-style: normal;
+ display: block; margin-top: 0.1rem; white-space: nowrap;
  }
  .pl-tier-earn span {
  font-family:'DM Sans', sans-serif;
