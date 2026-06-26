@@ -146,31 +146,40 @@ const styles = `
  color: var(--ink); margin-bottom: 1.25rem;
  }
  .pl-tier-row {
- display: flex; justify-content: space-between; align-items: center;
- padding: 0.9rem 1rem; border-radius: 4px;
- margin-bottom: 0.6rem; border: 1px solid var(--border);
+ display: grid; grid-template-columns: minmax(110px, auto) 1fr;
+ gap: 1rem; align-items: center;
+ padding: 1.25rem 1.5rem; border-radius: 8px;
+ margin-bottom: 0.9rem; border: 1px solid var(--teal);
  }
  .pl-tier-row:last-child { margin-bottom: 0; }
  .pl-tier-row.featured {
  background: var(--teal-pale); border-color: var(--teal);
  }
- .pl-tier-name { font-size: 0.9rem; font-weight: 500; color: var(--ink); }
- .pl-tier-price { font-size: 0.75rem; color: var(--muted-light); margin-top: 0.15rem; }
+ .pl-tier-name { font-size: 1.15rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+ .pl-tier-price { font-size: 0.95rem; color: var(--muted-light); margin-top: 0.35rem; line-height: 1.3; }
  .pl-tier-price.free-tag { color: var(--teal-dark); font-weight: 500; }
  .pl-tier-earn {
  font-family:'Playfair Display', serif;
- font-size: 1.4rem; font-weight: 900;
- color: var(--teal-dark); text-align: right;
+ color: var(--teal-dark);
+ display: flex; flex-direction: column; align-items: flex-end;
+ line-height: 0.95;
+ }
+ .pl-tier-earn b {
+ font-size: 1.6rem; font-weight: 700; display: block;
+ }
+ .pl-tier-earn em {
+ font-size: 2rem; font-weight: 700; font-style: normal;
+ display: block; margin-top: 0.1rem;
  }
  .pl-tier-earn span {
  font-family:'DM Sans', sans-serif;
- font-size: 0.7rem; color: var(--muted-light);
- font-weight: 400; display: block;
+ font-size: 0.8rem; color: var(--muted-light);
+ font-weight: 400; display: block; margin-top: 0.4rem;
  }
  .pl-earn-example {
  margin-top: 1.25rem; background: var(--teal-pale);
- border-radius: 3px; padding: 1rem 1.25rem;
- font-size: 0.85rem; color: var(--ink); line-height: 1.6;
+ border-radius: 6px; padding: 1.1rem 1.4rem;
+ font-size: 0.95rem; color: var(--ink); line-height: 1.55;
  }
  .pl-earn-example strong { color: var(--teal-dark); }
 
@@ -529,24 +538,36 @@ const Index = () => {
  <div className="pl-tier-name">Free</div>
  <div className="pl-tier-price free-tag">Always free</div>
  </div>
- <div className="pl-tier-price">10 PawBucks per $1 at partners</div>
+ <div className="pl-tier-earn">
+ <b>10</b>
+ <em>PawBucks</em>
+ <span>per $1 at partners</span>
  </div>
- <div className="pl-tier-row">
+ </div>
+ <div className="pl-tier-row featured">
  <div>
  <div className="pl-tier-name">PawPass</div>
  <div className="pl-tier-price free-tag">$10 / month</div>
  </div>
- <div className="pl-tier-price">20 PawBucks per $1 at partners</div>
+ <div className="pl-tier-earn">
+ <b>20</b>
+ <em>PawBucks</em>
+ <span>per $1 at partners</span>
  </div>
- <div className="pl-tier-row featured">
+ </div>
+ <div className="pl-tier-row">
  <div>
  <div className="pl-tier-name">PawPass+</div>
  <div className="pl-tier-price free-tag">$20 / month</div>
  </div>
- <div className="pl-tier-price">30 PawBucks per $1 at partners</div>
+ <div className="pl-tier-earn">
+ <b>30</b>
+ <em>PawBucks</em>
+ <span>per $1 at partners</span>
+ </div>
  </div>
  <div className="pl-earn-example">
- Example: Spend $200 at a partner vet on PawPass+ → earn 6,000 PawBucks ($6 value) redeemable at any partner merchant.
+ <strong>Example:</strong> Spend $200 at a partner vet on PawPass+ → earn <strong>6,000 PawBucks ($6 value)</strong> redeemable at any partner merchant.
  </div>
  </div>
  </div>
