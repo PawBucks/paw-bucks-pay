@@ -81,6 +81,54 @@ serve(async (req) => {
       return jsonResponse({ unlocked: [], skipped: "not_acquisition_only" });
     }
 
+    // First-time customer check: the only checkin this user has at this
+    // merchant must be the one just submitted. Any earlier checkin or any
+    // prior transaction disqualifies them from New Customer Deals.
+    const { count: priorCheckinCount } = await serviceClient
+      .from("checkins")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("merchant_id", merchantId)
+      .neq("id", checkinId);
+
+    const { count: priorTxnCount } = await serviceClient
+      .from("transactions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("merchant_id", merchantId);
+
+    if ((priorCheckinCount ?? 0) > 0 || (priorTxnCount ?? 0) > 0) {
+      return jsonResponse({
+        unlocked: [],
+        skipped: "not_first_time_customer",
+        message: "New Customer Deals are only available on your first visit.",
+      });
+    }
+
+    // One-deal-per-merchant: if the user has already unlocked ANY new-customer
+    // offer at this merchant, return that existing unlock — never grant another.
+    const { data: priorMerchantUnlocks } = await serviceClient
+      .from("offer_redemptions")
+      .select("offer_id, redemption_code, redeemed_at, partner_offers!inner(id, title, partner_id, offer_type)")
+      .eq("user_id", userId)
+      .eq("partner_offers.partner_id", merchantId)
+      .eq("partner_offers.offer_type", "new_customer")
+      .limit(1);
+
+    if (priorMerchantUnlocks && priorMerchantUnlocks.length > 0) {
+      const r = priorMerchantUnlocks[0] as any;
+      return jsonResponse({
+        unlocked: [{
+          offer_id: r.offer_id,
+          title: r.partner_offers?.title,
+          redemption_code: r.redemption_code,
+          already_unlocked: true,
+          redeemed: !!r.redeemed_at,
+        }],
+        merchant_name: merchant.business_name,
+      });
+    }
+
     // 3. Load active offers for this merchant within the active window.
     const nowIso = new Date().toISOString();
     const { data: offers, error: offersError } = await serviceClient
@@ -115,8 +163,14 @@ serve(async (req) => {
       return jsonResponse({ unlocked: [] });
     }
 
-    // 4. Find existing redemptions so we are idempotent.
-    const offerIds = eligibleOffers.map((o) => o.id);
+    // 4. Only unlock a SINGLE New Customer Deal per merchant per user.
+    // Pick the first eligible offer (oldest by id ordering) deterministically.
+    const chosen = eligibleOffers
+      .slice()
+      .sort((a, b) => (a.id < b.id ? -1 : 1))[0];
+    const offerIds = [chosen.id];
+    const singletonEligible = [chosen];
+
     const { data: existing, error: existingError } = await serviceClient
       .from("offer_redemptions")
       .select("id, offer_id, redemption_code, redeemed_at, partner_confirmed, created_at")
@@ -132,7 +186,7 @@ serve(async (req) => {
       (existing ?? []).map((r) => [r.offer_id as string, r]),
     );
 
-    const toCreate = eligibleOffers.filter((o) => !existingByOffer.has(o.id));
+    const toCreate = singletonEligible.filter((o) => !existingByOffer.has(o.id));
 
     // 5. Generate codes for new unlocks.
     const created: Array<{
@@ -189,7 +243,7 @@ serve(async (req) => {
     }
 
     // 6. Combine new + existing for the response.
-    const result = eligibleOffers
+    const result = singletonEligible
       .map((o) => {
         const existingRow = existingByOffer.get(o.id);
         if (existingRow) {

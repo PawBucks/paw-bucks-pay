@@ -42,6 +42,8 @@ export default function MerchantOfferEditor() {
   require_approval: false,
   brand_id: null as string | null,
     offer_type: "pawbucks_redemption" as "pawbucks_redemption" | "new_customer",
+     accepts_pawbucks: true,
+     accepts_usd: false,
  });
 
  useEffect(() => {
@@ -115,6 +117,8 @@ export default function MerchantOfferEditor() {
   require_approval: data.require_approval || false,
   brand_id: data.brand_id ?? null,
         offer_type: (data.offer_type as any) || "pawbucks_redemption",
+        accepts_pawbucks: data.accepts_pawbucks ?? true,
+        accepts_usd: data.accepts_usd ?? false,
  });
  } catch (error) {
  ErrorHandler.handle(error);
@@ -138,6 +142,10 @@ export default function MerchantOfferEditor() {
     }
     if (!isNewCustomer && (!coinsRequired || coinsRequired <= 0)) {
       toast.error("PawBucks required must be greater than 0");
+      return;
+    }
+    if (!isNewCustomer && !formData.accepts_pawbucks && !formData.accepts_usd) {
+      toast.error("Choose at least one redemption method (PawBucks or USD).");
       return;
     }
 
@@ -165,6 +173,8 @@ export default function MerchantOfferEditor() {
   end_date: formData.end_date || null,
         brand_id: isNewCustomer ? null : (formData.brand_id || null),
         offer_type: isNewCustomer ? "new_customer" : "pawbucks_redemption",
+        accepts_pawbucks: isNewCustomer ? false : formData.accepts_pawbucks,
+        accepts_usd: isNewCustomer ? false : formData.accepts_usd,
  };
 
  if (isEditMode) {
@@ -307,6 +317,44 @@ const handleSignOut = async () => {
  />
  </div>
  </div>
+                    )}
+
+                    {!isAcquisitionOnly && (
+                      <div className="space-y-3 rounded-md border p-4">
+                        <div>
+                          <Label className="text-base">Accepted Redemption Methods</Label>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Choose how customers can redeem this offer. Select one or both.
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label htmlFor="accepts_pawbucks">Redeemable with PawBucks</Label>
+                            <p className="text-xs text-muted-foreground">Customers pay using their PawBucks balance.</p>
+                          </div>
+                          <Switch
+                            id="accepts_pawbucks"
+                            checked={formData.accepts_pawbucks}
+                            onCheckedChange={(checked) => setFormData({ ...formData, accepts_pawbucks: checked })}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label htmlFor="accepts_usd">Redeemable with USD</Label>
+                            <p className="text-xs text-muted-foreground">Customers pay the Cash Equivalent in USD at checkout.</p>
+                          </div>
+                          <Switch
+                            id="accepts_usd"
+                            checked={formData.accepts_usd}
+                            onCheckedChange={(checked) => setFormData({ ...formData, accepts_usd: checked })}
+                          />
+                        </div>
+                        {formData.accepts_usd && !formData.cash_equivalent && (
+                          <p className="text-xs text-destructive">
+                            Set a Cash Equivalent (USD) above so customers know the USD price.
+                          </p>
+                        )}
+                      </div>
                     )}
 
  <div className="space-y-2">
