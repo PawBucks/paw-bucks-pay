@@ -319,6 +319,44 @@ const handleSignOut = async () => {
  </div>
                     )}
 
+                    {!isAcquisitionOnly && (
+                      <div className="space-y-3 rounded-md border p-4">
+                        <div>
+                          <Label className="text-base">Accepted Redemption Methods</Label>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Choose how customers can redeem this offer. Select one or both.
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label htmlFor="accepts_pawbucks">Redeemable with PawBucks</Label>
+                            <p className="text-xs text-muted-foreground">Customers pay using their PawBucks balance.</p>
+                          </div>
+                          <Switch
+                            id="accepts_pawbucks"
+                            checked={formData.accepts_pawbucks}
+                            onCheckedChange={(checked) => setFormData({ ...formData, accepts_pawbucks: checked })}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label htmlFor="accepts_usd">Redeemable with USD</Label>
+                            <p className="text-xs text-muted-foreground">Customers pay the Cash Equivalent in USD at checkout.</p>
+                          </div>
+                          <Switch
+                            id="accepts_usd"
+                            checked={formData.accepts_usd}
+                            onCheckedChange={(checked) => setFormData({ ...formData, accepts_usd: checked })}
+                          />
+                        </div>
+                        {formData.accepts_usd && !formData.cash_equivalent && (
+                          <p className="text-xs text-destructive">
+                            Set a Cash Equivalent (USD) above so customers know the USD price.
+                          </p>
+                        )}
+                      </div>
+                    )}
+
  <div className="space-y-2">
                       <Label>{isAcquisitionOnly ? "Deal Image (optional)" : "Offer Image"}</Label>
  <ProductImageUpload
