@@ -576,7 +576,7 @@ const Index = () => {
  {/* HOW IT WORKS */}
  <section className="pl-section pl-how">
  <p className="pl-eyebrow">How It Works</p>
- <h2 className="pl-section-title">Four simple steps.</h2>
+ <h2 className="pl-section-title">Five simple steps.</h2>
  <p className="pl-section-sub">Save automatically on the pet care you already pay for.</p>
  <div className="pl-steps">
  <div className="pl-step">
@@ -586,18 +586,23 @@ const Index = () => {
  </div>
  <div className="pl-step">
  <div className="pl-step-num">02</div>
- <div className="pl-step-title">Pay for pet care</div>
- <div className="pl-step-body">Use PawBucks at any participating groomer, vet, boarder, or pet store.</div>
+ <div className="pl-step-title">Find</div>
+ <div className="pl-step-body">Browse trusted groomers, vets, trainers, boarders, and pet stores near you — all verified PawBucks partners.</div>
  </div>
  <div className="pl-step">
  <div className="pl-step-num">03</div>
- <div className="pl-step-title">Save automatically</div>
- <div className="pl-step-body">PawBucks are applied at checkout — your card is charged less.</div>
+ <div className="pl-step-title">Scan & Unlock</div>
+ <div className="pl-step-body">Walk in and scan the merchant's QR code to instantly unlock exclusive new customer deals. No searching, no clipping coupons.</div>
  </div>
  <div className="pl-step">
  <div className="pl-step-num">04</div>
+ <div className="pl-step-title">Pay & Save</div>
+ <div className="pl-step-body">Pay through PawBucks and save automatically. PawBucks are applied at checkout — your card is charged less.</div>
+ </div>
+ <div className="pl-step">
+ <div className="pl-step-num">05</div>
  <div className="pl-step-title">Earn for next visit</div>
- <div className="pl-step-body">Every payment grows your savings for the next time you care for your pet.</div>
+ <div className="pl-step-body">Every payment grows your savings for the next time you care for your pet. 1,000 PawBucks = $1 off. Rewards keep building.</div>
  </div>
  </div>
   </section>
