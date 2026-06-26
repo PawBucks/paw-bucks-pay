@@ -22,6 +22,8 @@ const createOfferSchema = z.object({
   require_approval: z.boolean().optional().default(false),
   brand_id: z.string().uuid().optional().nullable(),
   offer_type: z.enum(["pawbucks_redemption", "new_customer"]).optional(),
+  accepts_pawbucks: z.boolean().optional(),
+  accepts_usd: z.boolean().optional(),
 });
 
 // Sanitize text to prevent XSS
@@ -104,6 +106,8 @@ serve(async (req) => {
       require_approval,
       brand_id,
       offer_type,
+      accepts_pawbucks,
+      accepts_usd,
     } = validationResult.data;
 
     // Acquisition-only merchants can ONLY create New Customer Deals.
@@ -114,11 +118,27 @@ serve(async (req) => {
       coins_required = 0;
       cash_equivalent = null;
       brand_id = null;
+      accepts_pawbucks = false;
+      accepts_usd = false;
     } else {
       offer_type = offer_type ?? "pawbucks_redemption";
       if (offer_type === "pawbucks_redemption" && (!coins_required || coins_required <= 0)) {
         return new Response(
           JSON.stringify({ error: "PawBucks required must be greater than 0" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        );
+      }
+      // Default to PawBucks if neither flag was specified.
+      if (accepts_pawbucks === undefined && accepts_usd === undefined) {
+        accepts_pawbucks = true;
+        accepts_usd = false;
+      } else {
+        accepts_pawbucks = !!accepts_pawbucks;
+        accepts_usd = !!accepts_usd;
+      }
+      if (offer_type === "pawbucks_redemption" && !accepts_pawbucks && !accepts_usd) {
+        return new Response(
+          JSON.stringify({ error: "Choose at least one redemption method (PawBucks or USD)." }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
         );
       }
@@ -199,6 +219,8 @@ serve(async (req) => {
         require_approval: require_approval || false,
         brand_id: validatedBrandId,
         offer_type,
+        accepts_pawbucks: accepts_pawbucks ?? (offer_type === "pawbucks_redemption"),
+        accepts_usd: accepts_usd ?? false,
       })
       .select()
       .single();
