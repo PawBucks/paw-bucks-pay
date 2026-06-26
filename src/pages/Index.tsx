@@ -492,11 +492,12 @@ const Index = () => {
  <div className="pl-hero-left">
  <p className="pl-eyebrow">For Pet Parents</p>
  <h1 className="pl-hero-title">
-              Discover. Pay. Automatically <em>save</em><br />on local pet care.
+              Find. Try. <em>Trust.</em><br />Local pet care, simplified.
  </h1>
  <p className="pl-hero-sub">
- Earn rewards every time you care for your pet. PawBucks gives you instant
- savings on grooming, vet visits, food, boarding, and more.
+ Discover trusted local pet care providers near you, scan their QR code to
+ unlock exclusive new customer offers, and earn PawBucks automatically every
+ time you pay using the PawBucks platform. Free forever.
  </p>
  <div className="pl-actions">
  <button className="pl-btn-primary" onClick={goSignup}>Create Free Account</button>
