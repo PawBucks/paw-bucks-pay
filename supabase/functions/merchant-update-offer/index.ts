@@ -72,6 +72,8 @@ serve(async (req) => {
       image_url,
       brand_id,
       offer_type,
+      accepts_pawbucks,
+      accepts_usd,
     } = body;
 
     // Normalization: convert empty strings to null for nullable fields
@@ -138,6 +140,8 @@ serve(async (req) => {
     if (image_url !== undefined) updates.image_url = image_url;
     if (normalizedBrandId !== undefined) updates.brand_id = normalizedBrandId;
     if (offer_type !== undefined) updates.offer_type = effectiveOfferType;
+    if (accepts_pawbucks !== undefined) updates.accepts_pawbucks = !!accepts_pawbucks;
+    if (accepts_usd !== undefined) updates.accepts_usd = !!accepts_usd;
 
     // Force New Customer Deal shape for acquisition-only merchants.
     if (isAcquisitionOnly) {
@@ -145,6 +149,14 @@ serve(async (req) => {
       updates.coins_required = 0;
       updates.cash_equivalent = null;
       updates.brand_id = null;
+      updates.accepts_pawbucks = false;
+      updates.accepts_usd = false;
+    } else if (effectiveOfferType === "pawbucks_redemption") {
+      const finalPB = updates.accepts_pawbucks ?? existingOffer.accepts_pawbucks;
+      const finalUSD = updates.accepts_usd ?? existingOffer.accepts_usd;
+      if (!finalPB && !finalUSD) {
+        throw new Error("Choose at least one redemption method (PawBucks or USD).");
+      }
     }
 
     // Update status if start_date changed
