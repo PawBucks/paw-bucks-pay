@@ -109,6 +109,11 @@ const styles = `
  transition: border-color 0.2s, color 0.2s;
  }
  .pl-btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+ .pl-btn-link {
+ color: var(--ink); font-size: 0.9rem; font-weight: 500;
+ cursor: pointer; border-bottom: 1px solid var(--teal);
+ padding-bottom: 2px; align-self: flex-start;
+ }
 
  .pl-hero-stats { display: flex; gap: 2rem; flex-wrap: wrap; align-items: center; }
  .pl-stat { display: flex; flex-direction: column; }
@@ -419,12 +424,14 @@ const styles = `
  .pl-cta { padding: 4rem 1.5rem; }
  .pl-footer { flex-direction: column; gap: 0.75rem; text-align: center; padding: 2rem 1.5rem; }
  .pl-hero { grid-template-columns: 1fr; min-height: auto; }
- .pl-hero-left { padding: 6rem 1.5rem 2rem; }
- .pl-hero-right { padding: 0 1rem 4rem; justify-content: flex-start; }
- .pl-hero-sub { font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; }
+ .pl-hero-left { padding: 6rem 1.5rem 2rem; max-width: 100%; min-width: 0; }
+ .pl-hero-right { padding: 0 1rem 4rem; justify-content: flex-start; max-width: 100%; min-width: 0; }
+ .pl-hero-title { font-size: clamp(2.2rem, 9vw, 3rem); overflow-wrap: break-word; }
+ .pl-hero-sub { font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; max-width: 100%; }
  .pl-actions { flex-direction: column; align-items: stretch; gap: 1rem; }
  .pl-actions .pl-btn-primary { width: 100%; text-align: center; }
  .pl-actions .pl-btn-ghost { align-self: flex-start; }
+ .pl-hero-stats { display: none; }
  .pl-steps { grid-template-columns: 1fr 1fr; }
  .pl-features-grid { grid-template-columns: 1fr; }
  .pl-lostpet-inner { grid-template-columns: 1fr; gap: 2rem; }
@@ -513,8 +520,9 @@ const Index = () => {
  time you pay using the PawBucks platform. Free forever.
  </p>
  <div className="pl-actions">
- <button className="pl-btn-primary" onClick={goSignup}>Create Free Account</button>
+ <button className="pl-btn-primary" onClick={goSignup}>Start Earning Free</button>
  <button className="pl-btn-ghost" onClick={goDirectory}>Browse Pet Services →</button>
+ <a className="pl-btn-link" onClick={() => document.querySelector('.pl-earn-card')?.scrollIntoView({behavior:'smooth'})}>See how it works</a>
  </div>
  <div className="pl-hero-stats">
  <div className="pl-stat">
