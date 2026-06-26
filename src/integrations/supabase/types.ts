@@ -7944,6 +7944,8 @@ export type Database = {
       }
       partner_offers: {
         Row: {
+          accepts_pawbucks: boolean
+          accepts_usd: boolean
           brand_id: string | null
           cash_equivalent: number | null
           coins_required: number
@@ -7966,6 +7968,8 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          accepts_pawbucks?: boolean
+          accepts_usd?: boolean
           brand_id?: string | null
           cash_equivalent?: number | null
           coins_required: number
@@ -7988,6 +7992,8 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          accepts_pawbucks?: boolean
+          accepts_usd?: boolean
           brand_id?: string | null
           cash_equivalent?: number | null
           coins_required?: number
