@@ -109,6 +109,11 @@ const styles = `
  transition: border-color 0.2s, color 0.2s;
  }
  .pl-btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+ .pl-btn-link {
+ color: var(--ink); font-size: 0.9rem; font-weight: 500;
+ cursor: pointer; border-bottom: 1px solid var(--teal);
+ padding-bottom: 2px; align-self: flex-start;
+ }
 
  .pl-hero-stats { display: flex; gap: 2rem; flex-wrap: wrap; align-items: center; }
  .pl-stat { display: flex; flex-direction: column; }
