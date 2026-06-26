@@ -191,10 +191,10 @@ const styles = `
  /* SECTIONS */
  .pl-section { padding: 6rem 5rem; }
  .pl-section-title {
- font-size: clamp(2rem, 3.5vw, 2.8rem);
- font-weight: 900; line-height: 1.1;
- letter-spacing: -0.02em; color: var(--ink);
- margin-bottom: 1.25rem;
+ font-size: clamp(2.8rem, 5vw, 4.2rem);
+ font-weight: 900; line-height: 1.05;
+ letter-spacing: -0.03em; color: var(--ink);
+ margin-bottom: 1.5rem;
  }
  .pl-section-sub {
  font-size: 1rem; color: var(--muted);
