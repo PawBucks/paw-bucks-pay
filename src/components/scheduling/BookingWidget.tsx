@@ -986,7 +986,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
           {/* Request notice */}
           <div className="rounded-md bg-warning/10 border border-warning/30 px-3 py-2.5 flex gap-2">
             <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
-            <p className="text-xs text-warning-foreground/90 leading-relaxed">
+            <p className="text-xs text-foreground leading-relaxed">
               Your booking will be submitted as a <strong>request</strong>. {merchantName} will review and
               confirm it fits their schedule. You won&apos;t be charged until the booking is confirmed.
             </p>
