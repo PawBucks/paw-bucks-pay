@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -106,9 +107,71 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { type, recipientEmail, bookingDate, bookingDateRaw, timeSlot, notes, previousDate, previousTimeSlot, requesterEmail, merchantName }: NotificationRequest = await req.json();
+    // Require an authenticated caller — prevents anonymous abuse of PawBucks-branded email sending.
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const authedClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { persistSession: false },
+    });
+    const { data: claimsData, error: claimsError } = await authedClient.auth.getClaims(
+      authHeader.replace("Bearer ", ""),
+    );
+    if (claimsError || !claimsData?.claims?.sub) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const callerUserId = claimsData.claims.sub as string;
+    const callerEmail = (claimsData.claims.email as string | undefined) ?? null;
 
-    if (!recipientEmail || !bookingDate || !timeSlot) {
+    const body: NotificationRequest = await req.json();
+    const { type, bookingDate, bookingDateRaw, timeSlot, notes, previousDate, previousTimeSlot, merchantName } = body;
+
+    // SECURITY: never trust recipientEmail/requesterEmail from the client body.
+    // - "request" → always admin@pawbucks.app, requester = caller's verified email.
+    // - confirmed/cancelled/rescheduled → admin-only; recipient resolved from caller-supplied email
+    //   only after caller is confirmed to be an admin.
+    const adminClient = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+    const { data: isAdminData } = await adminClient.rpc("has_role", {
+      _user_id: callerUserId,
+      _role: "admin",
+    });
+    const callerIsAdmin = isAdminData === true;
+
+    let recipientEmail: string;
+    let requesterEmail: string | undefined;
+    if (type === "request") {
+      recipientEmail = "admin@pawbucks.app";
+      requesterEmail = callerEmail ?? undefined;
+    } else {
+      if (!callerIsAdmin) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const supplied = (body.recipientEmail || "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supplied)) {
+        return new Response(JSON.stringify({ error: "Invalid recipientEmail" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      recipientEmail = supplied;
+      requesterEmail = body.requesterEmail;
+    }
+
+    if (!bookingDate || !timeSlot) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
