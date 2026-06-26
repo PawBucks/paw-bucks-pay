@@ -9,6 +9,7 @@ import { QRCodeSVG } from"qrcode.react";
 import { Calendar, Clock, Download, Mail, Phone, Search, User, Users } from "lucide-react";
 import { format, subMonths, startOfDay, endOfDay } from"date-fns";
 import { toast } from"sonner";
+import { printMerchantQRFlyer } from "./MerchantQRFlyer";
 
 type CheckIn = {
  id: string;
@@ -178,6 +179,27 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
  img.src ="data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
  };
 
+  const handlePrintFlyer = () => {
+    if (!qrRef.current) return;
+    const svg = qrRef.current.querySelector("svg");
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const qrDataUrl =
+      "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+    const opened = printMerchantQRFlyer({
+      merchantName: entityName,
+      qrImageDataUrl: qrDataUrl,
+      badgeLabel: "PawBucks Partner",
+      headline: "Scan to\nCheck In",
+      subline: "Open your camera. Tap the link.",
+      instruction:
+        "Point your phone camera at the code. Tap the link. You'll automatically check in and unlock today's offer.",
+      earnLeft: "Earn PawBucks on every visit",
+      earnRight: "Up to 30x",
+    });
+    if (!opened) toast.error("Please allow popups to print the flyer");
+  };
+
  // Generate months for selector (last 24 months)
  const months = Array.from({ length: 24 }, (_, i) => {
  const d = subMonths(new Date(), i);
@@ -205,10 +227,20 @@ export function CheckInDashboard({ entityId, entityType, entityName }: CheckInDa
  <p className="text-xs text-muted-foreground mb-4">
  Print and display this QR code for pet owners to scan when they arrive.
  </p>
- <Button onClick={handleDownloadQR} size="sm" className="w-full">
- <Download className="w-4 h-4 mr-2" />
- Download Printable QR
- </Button>
+                <div className="w-full space-y-2">
+                  <Button onClick={handlePrintFlyer} size="sm" className="w-full">
+                    <Download className="w-4 h-4 mr-2" />
+                    Print Merchant Flyer
+                  </Button>
+                  <Button
+                    onClick={handleDownloadQR}
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                  >
+                    QR Image Only (PNG)
+                  </Button>
+                </div>
  </>
  ) : (
  <p className="text-muted-foreground">Loading QR code...</p>
