@@ -94,7 +94,7 @@ export default function Install() {
  <div className="text-center mb-12 animate-fade-in">
  <div className="flex justify-center mb-6">
  <div className="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-md shadow-[var(--shadow-large)] flex items-center justify-center animate-float">
- <img src="/logo.png" alt="PawBucks" className="w-16 h-16" />
+ <img src="/logo.png" alt="PawBucks mobile app logo" className="w-16 h-16" />
  </div>
  </div>
  <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
@@ -126,9 +126,11 @@ export default function Install() {
  ) : (
  <Card className="mb-8 shadow-[var(--shadow-large)] animate-scale-in">
  <CardHeader>
- <CardTitle className="flex items-center gap-3">
+ <CardTitle asChild>
+ <h2 className="flex items-center gap-3 text-2xl font-semibold">
  <Download className="w-6 h-6 text-primary" />
  Install the App
+ </h2>
  </CardTitle>
  <CardDescription>
  Add PawBucks to your home screen for quick access and offline capabilities
@@ -186,7 +188,9 @@ export default function Install() {
  {/* Benefits Section */}
  <Card className="shadow-[var(--shadow-medium)] bg-gradient-to-br from-card via-primary/5 to-accent/5">
  <CardHeader>
- <CardTitle>Why Install?</CardTitle>
+ <CardTitle asChild>
+ <h2 className="text-2xl font-semibold">Why Install?</h2>
+ </CardTitle>
  </CardHeader>
  <CardContent>
  <ul className="space-y-3">
