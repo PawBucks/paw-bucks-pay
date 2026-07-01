@@ -326,7 +326,7 @@ const MerchantLanding = () => {
  <div className="ml-root">
  <nav className="ml-nav">
  <button className="ml-nav-logo" onClick={() => navigate("/")} style={{ background:"none", border:"none", cursor:"pointer", padding: 0 }}>
- <img src={logo} alt="PawBucks" />
+ <img src={logo} alt="PawBucks logo" />
  </button>
  <button className="ml-nav-cta" onClick={goSignin}>Sign In</button>
  </nav>
