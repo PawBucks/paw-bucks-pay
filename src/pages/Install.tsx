@@ -126,12 +126,10 @@ export default function Install() {
  ) : (
  <Card className="mb-8 shadow-[var(--shadow-large)] animate-scale-in">
  <CardHeader>
- <CardTitle asChild>
- <h2 className="flex items-center gap-3 text-2xl font-semibold">
+ <h2 className="flex items-center gap-3 text-2xl font-semibold leading-none tracking-tight">
  <Download className="w-6 h-6 text-primary" />
  Install the App
  </h2>
- </CardTitle>
  <CardDescription>
  Add PawBucks to your home screen for quick access and offline capabilities
  </CardDescription>
@@ -188,9 +186,7 @@ export default function Install() {
  {/* Benefits Section */}
  <Card className="shadow-[var(--shadow-medium)] bg-gradient-to-br from-card via-primary/5 to-accent/5">
  <CardHeader>
- <CardTitle asChild>
- <h2 className="text-2xl font-semibold">Why Install?</h2>
- </CardTitle>
+ <h2 className="text-2xl font-semibold leading-none tracking-tight">Why Install?</h2>
  </CardHeader>
  <CardContent>
  <ul className="space-y-3">
