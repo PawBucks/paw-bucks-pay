@@ -979,7 +979,7 @@ const InvoicePayment = () => {
     {invoice.footer && (
       <p className="text-center text-xs text-muted-foreground pt-2">{invoice.footer}</p>
     )}
-    <p className="text-center text-xs text-muted-foreground/70 pt-1 tracking-wider">pawbucks.app</p>
+    <p className="text-center text-xs text-muted-foreground pt-1 tracking-wider">pawbucks.app</p>
   </div>
   </div>
  );

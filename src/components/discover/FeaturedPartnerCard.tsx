@@ -154,7 +154,7 @@ const FeaturedPartnerCardComponent = ({
  </div>
 
  {merchant.description && (
- <p className="text-xs text-muted-foreground/80 line-clamp-2 mb-2">
+ <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
  {merchant.description}
  </p>
  )}

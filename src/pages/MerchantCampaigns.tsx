@@ -321,7 +321,7 @@ export default function MerchantCampaigns() {
  <CardContent className="py-12 text-center">
  <Send className="w-12 h-12 mx-auto mb-3 text-muted-foreground/40" />
  <p className="text-muted-foreground">No campaigns yet</p>
- <p className="text-sm text-muted-foreground/70 mt-1">Create your first campaign to engage your customers</p>
+ <p className="text-sm text-muted-foreground mt-1">Create your first campaign to engage your customers</p>
  <Button className="mt-4" onClick={() => setShowCreate(true)}>
  <Plus className="w-4 h-4 mr-1" />Create Campaign
  </Button>

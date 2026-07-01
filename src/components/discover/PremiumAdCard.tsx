@@ -149,7 +149,7 @@ const PremiumAdCardComponent = ({
  </div>
 
  {merchant.description && (
- <p className="text-xs text-muted-foreground/80 line-clamp-1 mb-1.5">
+ <p className="text-xs text-muted-foreground line-clamp-1 mb-1.5">
  {merchant.description}
  </p>
  )}
@@ -157,13 +157,13 @@ const PremiumAdCardComponent = ({
  {/* Address */}
  <div className="flex items-center gap-2">
  {merchant.address && (
- <p className="text-[11px] text-muted-foreground/70 line-clamp-1 flex items-center gap-1">
+ <p className="text-[11px] text-muted-foreground line-clamp-1 flex items-center gap-1">
  <span className="w-2.5 h-2.5 flex-shrink-0" aria-hidden="true">📍</span>
  {merchant.address}
  </p>
  )}
  {showDistance && merchant.distance !== undefined && (
- <span className="text-[11px] text-muted-foreground/70 flex items-center gap-0.5 flex-shrink-0">
+ <span className="text-[11px] text-muted-foreground flex items-center gap-0.5 flex-shrink-0">
  <span className="w-2.5 h-2.5" aria-hidden="true">🧭</span>
  {formatDistance(merchant.distance)}
  </span>
