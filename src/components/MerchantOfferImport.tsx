@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/comp
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
 import { Upload, Download } from "lucide-react";
 import { toast } from"sonner";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from"@/integrations/supabase/client";
 import { ErrorHandler } from"@/utils/errorHandler";
 
@@ -17,6 +18,18 @@ export function MerchantOfferImport({ onImportComplete }: { onImportComplete: ()
  const [dialogOpen, setDialogOpen] = useState(false);
  const [importing, setImporting] = useState(false);
  const [result, setResult] = useState<ImportResult | null>(null);
+
+  const getFunctionErrorMessage = async (error: unknown, fallback = "Unable to create offer") => {
+    if (error instanceof FunctionsHttpError) {
+      try {
+        const body = await error.context.json();
+        return body?.error || body?.message || fallback;
+      } catch {
+        return fallback;
+      }
+    }
+    return error instanceof Error && error.message ? error.message : fallback;
+  };
 
  const downloadTemplate = () => {
  const template = [
@@ -103,14 +116,14 @@ export function MerchantOfferImport({ onImportComplete }: { onImportComplete: ()
  require_approval: false
  };
 
- const { error } = await supabase.functions.invoke("merchant-create-offer", {
+  const { error } = await supabase.functions.invoke("merchant-create-offer", {
  body: offerData,
  headers: {
  Authorization: `Bearer ${session.access_token}`
  }
  });
 
- if (error) throw error;
+  if (error) throw new Error(await getFunctionErrorMessage(error));
  
  successCount++;
  } catch (error: any) {

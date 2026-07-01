@@ -1,5 +1,6 @@
 import { useState, useEffect } from"react";
 import { useNavigate, useParams } from"react-router-dom";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from"@/integrations/supabase/client";
 import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SEO } from"@/components/SEO";
@@ -126,7 +127,24 @@ export default function MerchantOfferEditor() {
  }
  };
 
- const handleSubmit = async (e: React.FormEvent) => {
+  const getFunctionErrorMessage = async (error: unknown, fallback = "Unable to save offer. Please check the form and try again.") => {
+    if (error instanceof FunctionsHttpError) {
+      try {
+        const body = await error.context.json();
+        return body?.error || body?.message || fallback;
+      } catch {
+        return fallback;
+      }
+    }
+    return error instanceof Error && error.message ? error.message : fallback;
+  };
+
+  const normalizeOptionalImageUrl = (value: string) => {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
 
     const isNewCustomer = isAcquisitionOnly || formData.offer_type === "new_customer";
@@ -148,6 +166,21 @@ export default function MerchantOfferEditor() {
       toast.error("Choose at least one redemption method (PawBucks or USD).");
       return;
     }
+    const cashEquivalent = isNewCustomer
+      ? null
+      : (formData.cash_equivalent
+          ? (typeof formData.cash_equivalent === 'string'
+              ? parseFloat(formData.cash_equivalent)
+              : formData.cash_equivalent)
+          : null);
+    if (!isNewCustomer && formData.accepts_usd && (!cashEquivalent || cashEquivalent <= 0)) {
+      toast.error("Cash Equivalent (USD) must be greater than 0 when USD redemption is enabled.");
+      return;
+    }
+    if (formData.start_date && formData.end_date && new Date(formData.start_date) >= new Date(formData.end_date)) {
+      toast.error("Start date must be before end date.");
+      return;
+    }
 
  try {
  setLoading(true);
@@ -159,18 +192,16 @@ export default function MerchantOfferEditor() {
 
  const payload = {
  ...formData,
+  title: formData.title.trim(),
+  description: formData.description.trim(),
  coins_required: coinsRequired,
-        cash_equivalent: isNewCustomer
-          ? null
-          : (formData.cash_equivalent
-              ? (typeof formData.cash_equivalent === 'string'
-                  ? parseFloat(formData.cash_equivalent)
-                  : formData.cash_equivalent)
-              : null),
+        cash_equivalent: cashEquivalent,
  redemption_cap: formData.redemption_cap ? (typeof formData.redemption_cap ==='string' ? parseInt(formData.redemption_cap) : formData.redemption_cap) : null,
  per_user_limit: formData.per_user_limit ? (typeof formData.per_user_limit ==='string' ? parseInt(formData.per_user_limit) : formData.per_user_limit) : 1,
- start_date: formData.start_date || null,
-  end_date: formData.end_date || null,
+  image_url: normalizeOptionalImageUrl(formData.image_url),
+  product_id: formData.product_id.trim() || null,
+  start_date: formData.start_date || null,
+   end_date: formData.end_date || null,
         brand_id: isNewCustomer ? null : (formData.brand_id || null),
         offer_type: isNewCustomer ? "new_customer" : "pawbucks_redemption",
         accepts_pawbucks: isNewCustomer ? false : formData.accepts_pawbucks,
@@ -185,10 +216,10 @@ export default function MerchantOfferEditor() {
  },
  });
 
- if (error) {
- console.error("Update offer error:", error, data);
- throw new Error(data?.error || error.message);
- }
+  if (error) {
+  console.error("Update offer error:", error, data);
+  throw new Error(data?.error || await getFunctionErrorMessage(error));
+  }
 
  toast.success("Offer updated successfully");
  } else {
@@ -199,10 +230,10 @@ export default function MerchantOfferEditor() {
  },
  });
 
- if (error) {
- console.error("Create offer error:", error, data);
- throw new Error(data?.error || error.message);
- }
+  if (error) {
+  console.error("Create offer error:", error, data);
+  throw new Error(data?.error || await getFunctionErrorMessage(error));
+  }
 
  toast.success("Offer created successfully");
  }

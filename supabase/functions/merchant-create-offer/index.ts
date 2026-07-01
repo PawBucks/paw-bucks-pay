@@ -7,6 +7,36 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const normalizeOptionalText = (value: unknown) => {
+  if (typeof value !== "string") return value ?? null;
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? null : trimmed;
+};
+
+const isAcceptableImageReference = (value: string) => {
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      new URL(value);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // Allow existing storage object paths in addition to full public URLs.
+  // This keeps legacy/storage-path image references from blocking offer creation.
+  return /^[A-Za-z0-9][A-Za-z0-9/_.,:@+%=-]*\.(jpe?g|png|webp|gif|avif)$/i.test(value);
+};
+
+const optionalImageReferenceSchema = z.preprocess(
+  normalizeOptionalText,
+  z.string()
+    .max(2000)
+    .refine(isAcceptableImageReference, "Invalid image URL")
+    .nullable()
+    .optional(),
+);
+
 // Input validation schema
 const createOfferSchema = z.object({
   title: z.string().min(1).max(200).transform(val => val.trim()),
@@ -18,10 +48,7 @@ const createOfferSchema = z.object({
   end_date: z.string().optional().nullable(),
   redemption_cap: z.number().int().min(0).max(1000000).optional().nullable(),
   per_user_limit: z.number().int().min(1).max(1000).optional().default(1),
-  image_url: z.preprocess(
-    (v) => (v === "" || v === undefined ? null : v),
-    z.string().url().max(2000).nullable().optional(),
-  ),
+  image_url: optionalImageReferenceSchema,
   require_approval: z.boolean().optional().default(false),
   brand_id: z.string().uuid().optional().nullable(),
   offer_type: z.enum(["pawbucks_redemption", "new_customer"]).optional(),
@@ -88,9 +115,16 @@ serve(async (req) => {
     const validationResult = createOfferSchema.safeParse(rawBody);
     
     if (!validationResult.success) {
-      console.error("Validation failed:", validationResult.error.errors);
+      const fieldErrors = validationResult.error.issues.map((issue) => ({
+        field: issue.path.join(".") || "request",
+        message: issue.message,
+      }));
+      console.error("Validation failed:", fieldErrors);
       return new Response(
-        JSON.stringify({ error: "Invalid offer data. Please check your entries." }),
+        JSON.stringify({
+          error: fieldErrors[0]?.message || "Invalid offer data. Please check your entries.",
+          details: fieldErrors,
+        }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
