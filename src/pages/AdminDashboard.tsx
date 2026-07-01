@@ -190,15 +190,15 @@ const NAV_SECTIONS = [
  items: [
  {
  id:"products",
- label:"Pet Store Products",
+  label:"Marketplace Products",
  icon: Package,
- description:"Add, edit, and manage products available in the Pet Store",
+  description:"Add, edit, and manage products available in the Marketplace",
  },
  {
  id:"badge-promotions",
  label:"Guilt-Free Splurge",
  icon: Gift,
- description:"Manage promotional discounts for badge earners in the Pet Store",
+  description:"Manage promotional discounts for badge earners in the Marketplace",
  },
  {
  id:"cms",
@@ -513,7 +513,7 @@ const AdminDashboard = () => {
  onClick={() => navigate("/admin/pet-store")}
  >
  <ExternalLink className="w-4 h-4 mr-2" />
- Pet Store Admin
+  Marketplace Admin
  </Button>
  <Separator />
  <Button

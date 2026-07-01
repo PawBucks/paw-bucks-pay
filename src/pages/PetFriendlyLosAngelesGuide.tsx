@@ -29,7 +29,7 @@ const faqs = [
   {
     question: "How do I earn PawBucks on pet outings in LA?",
     answer:
-      "Book grooming, boarding, day care, training, or vet visits through PawBucks partner merchants in Los Angeles to earn 10–30 PawBucks per $1 spent. Redeem those rewards on future pet care, treats, or the PawBucks Pet Store.",
+      "Book grooming, boarding, day care, training, or vet visits through PawBucks partner merchants in Los Angeles to earn 10–30 PawBucks per $1 spent. Redeem those rewards on future pet care, treats, or the PawBucks Marketplace.",
   },
 ];
 
@@ -222,7 +222,7 @@ const PetFriendlyLosAngelesGuide = () => {
           <p className="text-muted-foreground mb-4">
             Book grooming, boarding, training, day care, or vet visits at PawBucks partner
             merchants across Los Angeles and earn 10–30 PawBucks per $1 — then redeem on future
-            pet care and the PawBucks Pet Store.
+            pet care and the PawBucks Marketplace.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button asChild>

@@ -155,13 +155,13 @@ export default function PetStoreProduct() {
  return (
  <>
  <SEO
- title={`${item.name} | PawBucks Pet Store`}
- description={item.description || `Shop ${item.name} at PawBucks Pet Store`}
+ title={`${item.name} | PawBucks Marketplace`}
+ description={item.description || `Shop ${item.name} at PawBucks Marketplace`}
         type="product"
         ogImage={images[0]}
         jsonLd={createProductSchema({
           name: item.name,
-          description: item.description || `Shop ${item.name} at PawBucks Pet Store`,
+          description: item.description || `Shop ${item.name} at PawBucks Marketplace`,
           price: (item.price ?? 0) / 100,
           image: images[0],
           ...(ratingCount > 0 ? { rating: ratingAvg, reviewCount: ratingCount } : {}),
@@ -173,7 +173,7 @@ export default function PetStoreProduct() {
  <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-6xl">
  {/* Breadcrumb */}
  <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
- <button onClick={() => navigate("/pet-store")} className="hover:text-primary transition-colors">Pet Store</button>
+ <button onClick={() => navigate("/pet-store")} className="hover:text-primary transition-colors">Marketplace</button>
  <span>/</span>
  <span className="capitalize">{item.category}</span>
  <span>/</span>

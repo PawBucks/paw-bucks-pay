@@ -151,7 +151,7 @@ export const Formatters = {
       manual_transaction: 'Manual Transaction',
       Transaction: 'Purchase',
       payment_recovery: 'Payment Recovery',
-      pet_store: 'Pet Store Purchase',
+      pet_store: 'Marketplace Purchase',
       branded: 'Brand Promotion',
       welcome_credit: 'Welcome Credit',
       pet_fund: 'Pet Fund',

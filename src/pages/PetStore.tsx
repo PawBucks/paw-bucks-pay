@@ -501,7 +501,7 @@ export default function PetStore() { const { user, signOut } = useAuth();
  {/* Top bar: Title + wallet + cart */}
  <div className="mb-4">
  <div className="flex justify-between items-center gap-3 mb-1">
- <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">PawBucks Pet Store</h1>
+ <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">PawBucks Marketplace</h1>
  <div className="flex items-center gap-2">
  {user && (
  <div className="flex items-center gap-1.5 bg-primary/10 px-2.5 py-1 rounded-lg">
