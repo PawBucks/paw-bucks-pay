@@ -178,7 +178,7 @@ const DirectoryMerchantCardComponent = ({
 
  {/* Row 5: Address */}
  {merchant.address && (
- <div className="flex items-center gap-1 text-[11px] text-muted-foreground/80">
+ <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
  <span className="text-xs flex-shrink-0">📍</span>
  <span className="line-clamp-1">{merchant.address}</span>
  {merchant.distance !== undefined && (

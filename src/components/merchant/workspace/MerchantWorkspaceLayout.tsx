@@ -151,7 +151,7 @@ function WorkspaceSidebar({ feeModel }: { feeModel: "full_ecosystem" | "acquisit
       <SidebarContent>
         {nav.map((group) => (
           <SidebarGroup key={group.section}>
-            <SidebarGroupLabel className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground/70">
+            <SidebarGroupLabel className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
               {group.section}
             </SidebarGroupLabel>
             <SidebarGroupContent>
