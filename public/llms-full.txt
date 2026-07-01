@@ -16,7 +16,7 @@ Pet owners use PawBucks to:
 - **Track** all pet-related spending with detailed category breakdowns
 - **Manage** pet profiles including health records, vaccinations, and medications
 - **Report** lost pets with community-powered flyer alerts
-- **Shop** the PawBucks Pet Store for products from verified merchants
+ - **Shop** the PawBucks Marketplace for products from verified merchants
 - **Book** services like grooming, training, and vet appointments
 - **Refer** friends and earn bonus PawBucks
 
@@ -126,7 +126,7 @@ PawBucks provides a complete veterinary EMR and practice management suite:
 - Sign Up: https://pawbucks.app/auth
 - Discover Merchants: https://pawbucks.app/discover
 - Merchant Directory: https://pawbucks.app/directory
-- Pet Store: https://pawbucks.app/pet-store
+ - Marketplace: https://pawbucks.app/pet-store
 - Lost Pets: https://pawbucks.app/lost-pets
 - For Merchants: https://pawbucks.app/merchants
 - Install App: https://pawbucks.app/install
