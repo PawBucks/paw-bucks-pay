@@ -18,7 +18,10 @@ const createOfferSchema = z.object({
   end_date: z.string().optional().nullable(),
   redemption_cap: z.number().int().min(0).max(1000000).optional().nullable(),
   per_user_limit: z.number().int().min(1).max(1000).optional().default(1),
-  image_url: z.string().url().max(2000).optional().nullable(),
+  image_url: z.preprocess(
+    (v) => (v === "" || v === undefined ? null : v),
+    z.string().url().max(2000).nullable().optional(),
+  ),
   require_approval: z.boolean().optional().default(false),
   brand_id: z.string().uuid().optional().nullable(),
   offer_type: z.enum(["pawbucks_redemption", "new_customer"]).optional(),
