@@ -11,7 +11,7 @@ PawBucks is a local pet rewards and services platform. Pet owners discover trust
 - **Digital Wallet**: Track and manage all pet-related expenses in one place
 - **Merchant Discovery**: Find trusted pet businesses near you with ratings and reviews
 - **PawBucks Rewards**: Earn 10x-30x PawBucks per dollar spent depending on membership tier
-- **Pet Store**: Shop pet products online from verified merchants with rewards on every purchase
+ - **Marketplace**: Shop pet products online from verified merchants with rewards on every purchase
 - **Lost Pet Alerts**: Community-powered lost pet flyer system with instant notifications
 - **Pet Health Records**: Digital pet profiles with vaccination and health tracking
 - **Spending Breakdown**: Detailed analytics on pet care spending by category
@@ -57,7 +57,7 @@ PawBucks offers a complete veterinary practice management suite:
 - [Sign Up / Sign In](/auth): Create a free PawBucks account or sign in.
 - [Discover Merchants](/discover): Find trusted pet stores, groomers, trainers, and vets near you.
 - [Merchant Directory](/directory): Browse the complete directory of pet businesses on PawBucks.
-- [Pet Store](/pet-store): Shop pet food, toys, and supplies and earn rewards.
+ - [Marketplace](/pet-store): Shop pet food, toys, and supplies and earn rewards.
 - [Lost Pets](/lost-pets): Create and share lost pet flyers and activate the community.
 - [For Pet Merchants](/merchants): Grow your pet business with performance-based customer acquisition.
 - [For Veterinarians](/vets): Vet practice platform — EMR, AI clinical tools, insurance automation.
