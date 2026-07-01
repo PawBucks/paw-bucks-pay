@@ -275,24 +275,42 @@ const MyDeals = () => {
     queryKey: ["my-deals-full-ecosystem-offers"],
     queryFn: async () => {
       const nowIso = new Date().toISOString();
-      const { data, error } = await (supabase as any)
+      // Fetch offers (public RLS allows read)
+      const { data: offers, error } = await (supabase as any)
         .from("partner_offers")
         .select(
-          `id, title, description, coins_required, end_date, start_date, partner_id, is_active, status,
-           merchants:partner_id ( id, business_name, business_type, address, latitude, longitude, fee_model, stripe_account_status, is_active )`,
+          `id, title, description, coins_required, end_date, start_date, partner_id, is_active, status`,
         )
         .eq("is_active", true);
       if (error) throw error;
-      const rows = (data || []) as any[];
-      return rows.filter(
-        (r) =>
+      const activeOffers = (offers || []).filter(
+        (r: any) =>
           (!r.status || r.status === "active") &&
           (!r.start_date || r.start_date <= nowIso) &&
-          (!r.end_date || r.end_date >= nowIso) &&
-          r.merchants?.is_active &&
-          r.merchants?.fee_model !== "acquisition_only" &&
-          r.merchants?.stripe_account_status === "active",
+          (!r.end_date || r.end_date >= nowIso),
       );
+      const partnerIds = [
+        ...new Set(activeOffers.map((o: any) => o.partner_id).filter(Boolean)),
+      ] as string[];
+      if (partnerIds.length === 0) return [];
+      // Join merchant details via the public view (bypasses merchants RLS)
+      const { data: merchants } = await (supabase as any)
+        .from("merchants_public")
+        .select(
+          "id, business_name, business_type, address, latitude, longitude, fee_model, stripe_account_status, is_active",
+        )
+        .in("id", partnerIds);
+      const merchantMap = new Map<string, any>();
+      for (const m of merchants || []) merchantMap.set(m.id, m);
+      return activeOffers
+        .map((r: any) => ({ ...r, merchants: merchantMap.get(r.partner_id) || null }))
+        .filter(
+          (r: any) =>
+            r.merchants &&
+            r.merchants.is_active !== false &&
+            r.merchants.fee_model !== "acquisition_only" &&
+            r.merchants.stripe_account_status === "active",
+        );
     },
     staleTime: 1000 * 60 * 5,
   });
