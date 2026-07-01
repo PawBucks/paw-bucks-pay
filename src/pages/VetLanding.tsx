@@ -167,7 +167,7 @@ const VetLanding = () => {
         {/* NAV */}
         <nav className="nav">
           <Link to="/">
-            <img src={logo} alt="PawBucks" className="nav-logo" />
+            <img src={logo} alt="PawBucks logo" className="nav-logo" />
           </Link>
           <div className="nav-right">
             <Link to="/merchants" className="nav-link">For Merchants</Link>
@@ -355,7 +355,7 @@ const VetLanding = () => {
 
         {/* FOOTER */}
         <div className="footer">
-          <img src={logo} alt="PawBucks" className="footer-logo" />
+          <img src={logo} alt="PawBucks logo" className="footer-logo" />
           <p className="footer-tagline">Empowering veterinary practices with smart payments,<br />rewards, and growth tools.</p>
           <div className="footer-links">
             <Link to="/merchants">For Merchants</Link>

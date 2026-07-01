@@ -453,7 +453,7 @@ const About = () => {
       {/* NAV */}
       <nav className="pa-nav">
         <button className="pa-nav-logo" onClick={goHome} aria-label="PawBucks home">
-          <img src={logo} alt="PawBucks" />
+          <img src={logo} alt="PawBucks logo" />
         </button>
         <div className="pa-nav-links">
           <button onClick={goHome}>Home</button>

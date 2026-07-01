@@ -493,7 +493,7 @@ const Index = () => {
  {/* NAV */}
  <nav className="pl-nav">
  <a href="/" className="pl-nav-logo" aria-label="PawBucks home">
- <img src={logo} alt="PawBucks" width="176" height="44" fetchPriority="high" />
+ <img src={logo} alt="PawBucks logo" width="176" height="44" fetchPriority="high" />
  </a>
  <div className="pl-nav-links">
  <a onClick={goDirectory} role="button" tabIndex={0}>Discover</a>
@@ -544,7 +544,7 @@ const Index = () => {
 
  <div className="pl-hero-right">
  <div className="pl-earn-card">
- <h3 className="pl-earn-title">How it works</h3>
+ <h2 className="pl-earn-title">How it works</h2>
  <div className="pl-tier-row">
  <div>
  <div className="pl-tier-name">Free</div>
