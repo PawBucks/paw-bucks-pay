@@ -317,7 +317,7 @@ export function BadgePromotionsTab() {
  Guilt-Free Splurge Promotions
  </h2>
  <p className="text-muted-foreground">
- Create and manage promotional discounts for badge earners on Pet Store items
+ Create and manage promotional discounts for badge earners on Marketplace items
  </p>
  </div>
  <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -472,7 +472,7 @@ export function BadgePromotionsTab() {
  <div className="flex justify-between items-center">
  <Label className="flex items-center gap-2">
  <Package className="h-4 w-4" aria-hidden="true" />
- Select Pet Store Items
+ Select Marketplace Items
  </Label>
  <Badge variant="outline">
  {formData.selected_items.length} selected
@@ -605,7 +605,7 @@ export function BadgePromotionsTab() {
  <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
  <h3 className="text-lg font-semibold mb-2">No promotions yet</h3>
  <p className="text-muted-foreground mb-4">
- Create your first promotion to reward badge earners with Pet Store discounts
+ Create your first promotion to reward badge earners with Marketplace discounts
  </p>
  <Button onClick={() => setIsDialogOpen(true)}>
  <Plus className="mr-2 h-4 w-4" />

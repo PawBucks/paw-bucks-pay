@@ -189,7 +189,7 @@ export function ProductsTab() {
  <div className="flex justify-between items-center">
  <div>
  <h2 className="text-3xl font-bold">Product Management</h2>
- <p className="text-muted-foreground">Manage Pet Store products</p>
+ <p className="text-muted-foreground">Manage Marketplace products</p>
  </div>
  <Button onClick={newProduct}>
  <Plus className="w-4 h-4 mr-2" />

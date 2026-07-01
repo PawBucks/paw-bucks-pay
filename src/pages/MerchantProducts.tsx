@@ -296,7 +296,7 @@ const MerchantProducts = () => {
  return;
  }
 
- // Validate PawBucks price if listing in Pet Store
+ // Validate PawBucks price if listing in Marketplace
  if (listInPetStore) {
  const pawbucksPriceNum = parseInt(pawbucksPrice);
  if (isNaN(pawbucksPriceNum) || pawbucksPriceNum < 1) {
@@ -324,7 +324,7 @@ const MerchantProducts = () => {
  if (error) throw error;
 
  if (data.success) {
- // If listing in Pet Store, also create a pet_store_items entry
+ // If listing in Marketplace, also create a pet_store_items entry
  if (listInPetStore) {
  const { error: petStoreError } = await supabase
  .from("pet_store_items")
@@ -345,10 +345,10 @@ const MerchantProducts = () => {
  });
 
  if (petStoreError) {
- console.error("Error listing in Pet Store:", petStoreError);
- toast.error("Product created but failed to list in Pet Store");
+ console.error("Error listing in Marketplace:", petStoreError);
+ toast.error("Product created but failed to list in Marketplace");
  } else {
- toast.success("Product created and listed in Pet Store!");
+ toast.success("Product created and listed in Marketplace!");
  }
  } else {
  toast.success("Product created successfully!");
@@ -775,17 +775,17 @@ const MerchantProducts = () => {
  onApplyPrice={(price) => setProductPrice(price)} 
  />
 
- {/* Pet Store Listing Toggle */}
+ {/* Marketplace Listing Toggle */}
  <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <Store className="h-5 w-5 text-primary" aria-hidden="true" />
  <div>
  <Label htmlFor="pet-store-toggle" className="font-medium">
- List in Pet Store
+ List in Marketplace
  </Label>
  <p className="text-xs text-muted-foreground">
- Make this product available in the platform's Pet Store
+ Make this product available in the platform's Marketplace
  </p>
  </div>
  </div>
@@ -800,7 +800,7 @@ const MerchantProducts = () => {
  <div className="pt-2 border-t space-y-3">
  <div className="flex items-center gap-2 text-sm text-warning">
  <PawBucksLogo className="h-4 w-4" />
- <span>Products in Pet Store must accept both USD and PawBucks</span>
+ <span>Products in Marketplace must accept both USD and PawBucks</span>
  </div>
  <div>
  <Label htmlFor="pawbucks-price">PawBucks Price *</Label>

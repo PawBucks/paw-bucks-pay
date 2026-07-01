@@ -411,7 +411,7 @@ export default function PetStoreAdmin() {
  </DialogContent>
  </Dialog>
  </div>
- <h1 className="text-2xl font-bold">Pet Store Management</h1>
+ <h1 className="text-2xl font-bold">Marketplace Management</h1>
  </div>
 
  {isLoading ? (

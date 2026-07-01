@@ -33,7 +33,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  
  const defaultMenuItems: MenuItem[] = [
  { label:"For Pet Owners", path:"/" },
- { label:"Pet Store", path:"/pet-store" },
+ { label:"Marketplace", path:"/pet-store" },
  { label:"Lost Pets", path:"/lost-pets" },
  { label:"For Pet Merchants", path:"/merchants" }
  ];
@@ -42,7 +42,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  { label:"Home", path:"/home" },
  { label:"Discover", path:"/discover" },
  { label:"Community", path:"/community" },
- { label:"Pet Store", path:"/pet-store" },
+ { label:"Marketplace", path:"/pet-store" },
  { label:"Lost Pets", path:"/lost-pets" },
  { label:"PawBucks Wallet", path:"/pawbucks/wallet" },
  { label:"Profile", path:"/profile" }
@@ -95,7 +95,7 @@ const HeaderComponent = ({ menuItems, isAuthenticated = false, onLogout, userId,
  aria-current={isActive(item.path) ?"page" : undefined}
  className="text-sm font-medium hover:text-accent aria-[current=page]:text-accent aria-[current=page]:font-semibold"
  >
- {item.label ==="Pet Store" ?"Store" : item.label}
+ {item.label ==="Marketplace" ?"Market" : item.label}
  </Button>
  ))}
  </div>

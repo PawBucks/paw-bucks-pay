@@ -110,9 +110,9 @@ export const seoMeta = {
  canonical:"/discover",
  },
  petStore: {
- title:"PawBucks Pet Store – Shop & Earn Rewards",
+ title:"PawBucks Marketplace – Shop & Earn Rewards",
  description:
-"Shop pet food, treats, toys, and supplies in the PawBucks Pet Store. Pay with cash or PawBucks, unlock badge discounts, and earn rewards on every order.",
+"Shop pet food, treats, toys, and supplies in the PawBucks Marketplace. Pay with cash or PawBucks, unlock badge discounts, and earn rewards on every order.",
  keywords: [
 "pet store",
 "buy pet supplies online",
