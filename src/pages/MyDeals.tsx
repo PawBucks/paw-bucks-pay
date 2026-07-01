@@ -83,7 +83,6 @@ type FullEcosystemOffer = {
     longitude: number | null;
     fee_model: string | null;
     stripe_account_status: string | null;
-    is_active: boolean | null;
   } | null;
   distance: number | null;
 };
@@ -297,7 +296,7 @@ const MyDeals = () => {
       const { data: merchants } = await (supabase as any)
         .from("merchants_public")
         .select(
-          "id, business_name, business_type, address, latitude, longitude, fee_model, stripe_account_status, is_active",
+          "id, business_name, business_type, address, latitude, longitude, fee_model, stripe_account_status",
         )
         .in("id", partnerIds);
       const merchantMap = new Map<string, any>();
@@ -307,7 +306,6 @@ const MyDeals = () => {
         .filter(
           (r: any) =>
             r.merchants &&
-            r.merchants.is_active !== false &&
             r.merchants.fee_model !== "acquisition_only" &&
             r.merchants.stripe_account_status === "active",
         );
