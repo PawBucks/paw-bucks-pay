@@ -234,7 +234,7 @@ const PawBucksRedeem = () => {
           : 0;
 
  return (
- <GradientCard key={offer.id} className="relative overflow-hidden">
+             <GradientCard key={offer.id} id={`offer-${offer.id}`} className="relative overflow-hidden">
  {!canAfford && (
  <div className="absolute top-2 right-2 bg-destructive/20 text-destructive px-3 py-1 rounded-full text-xs font-semibold">
  Insufficient PawBucks
