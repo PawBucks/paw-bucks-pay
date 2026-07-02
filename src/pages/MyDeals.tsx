@@ -641,7 +641,7 @@ const MyDeals = () => {
                 return (
                   <button
                     key={o.id}
-                    onClick={() => m && navigate(`/merchant/${m.id}`)}
+                    onClick={() => navigate(`/pawbucks/redeem?offer=${o.id}`)}
                     className="text-left"
                   >
                     <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
