@@ -288,6 +288,7 @@ const PawBucksRedeem = () => {
  </Button>
  </div>
  </GradientCard>
+ </div>
  );
  })}
  </div>
