@@ -1,5 +1,5 @@
 import { useEffect, useState } from"react";
-import { useNavigate } from"react-router-dom";
+import { useNavigate, useSearchParams } from"react-router-dom";
 import { useAuth } from"@/hooks/useAuth";
 import { useOptimizedQuery } from"@/hooks/useOptimizedQuery";
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
@@ -45,6 +45,7 @@ type RedemptionResult = {
 const PawBucksRedeem = () => {
  const { user, signOut, loading: authLoading } = useAuth();
  const navigate = useNavigate();
+ const [searchParams] = useSearchParams();
  const [selectedOffer, setSelectedOffer] = useState<PartnerOffer | null>(null);
  const [isRedeeming, setIsRedeeming] = useState(false);
  const [redemptionResult, setRedemptionResult] = useState<RedemptionResult | null>(null);
@@ -80,6 +81,20 @@ const PawBucksRedeem = () => {
  },
  { staleTime: 1000 * 60 * 5 }
  );
+
+  // Auto-open confirmation for offer passed via ?offer=<id>
+  useEffect(() => {
+    const offerId = searchParams.get('offer');
+    if (!offerId || !offers || offers.length === 0 || selectedOffer) return;
+    const match = offers.find((o) => o.id === offerId);
+    if (match) {
+      setSelectedOffer(match);
+      // Scroll card into view
+      requestAnimationFrame(() => {
+        document.getElementById(`offer-${match.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  }, [searchParams, offers, selectedOffer]);
 
   // Branded PB balances per (brand_id, merchant_id) for the offers shown.
   // The product gate already runs server-side; this hook just powers the
