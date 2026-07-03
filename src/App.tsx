@@ -30,6 +30,7 @@ import { PublicOrAuthRoute } from"@/components/PublicOrAuthRoute";
 // Critical pages - Auth loaded immediately, Index lazy (734 lines + heavy images)
 import Auth from"./pages/Auth";
 const Index = lazyWithRetry(() => import("./pages/Index"),"Index");
+const OAuthConsent = lazyWithRetry(() => import("./pages/OAuthConsent"),"OAuthConsent");
 
 // Lazy-loaded pages with retry logic for resilient loading after deploys
 const SimpleHome = lazyWithRetry(() => import("./pages/SimpleHome"),"SimpleHome");
