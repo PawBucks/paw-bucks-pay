@@ -34,6 +34,22 @@ function calculateNextInvoiceDate(fromDate: Date, interval: string): Date {
  }
 }
 
+// Turn Postgres/PostgREST errors from an invoice delete into a friendly toast
+// message. The `protect_paid_invoice_delete` trigger raises detailed messages
+// explaining why a row can't be removed (payments applied, transactions
+// reference it, etc.) — surface those instead of a generic failure string.
+function getInvoiceDeleteErrorMessage(error: unknown): string {
+ const msg = (error as { message?: string } | null)?.message ?? "";
+ if (msg.includes("Cannot delete invoice")) return msg;
+ if (msg.includes("has payments applied")) return msg;
+ if (msg.includes("payment record")) return msg;
+ if (msg.includes("transaction")) return msg;
+ if (msg.includes("foreign key") || msg.includes("violates foreign key")) {
+ return "This invoice is referenced by other records and can't be deleted. Void or refund it instead.";
+ }
+ return "Failed to delete invoice";
+}
+
 const MerchantInvoicing = () => {
  const { user, loading: authLoading } = useAuth();
  const navigate = useNavigate();
@@ -568,7 +584,7 @@ const MerchantInvoicing = () => {
  loadData();
  } catch (error) {
  console.error("Error deleting invoice:", error);
- toast.error("Failed to delete invoice");
+ toast.error(getInvoiceDeleteErrorMessage(error));
  }
  };
 
@@ -595,16 +611,42 @@ const MerchantInvoicing = () => {
  if (error) throw error;
  toast.success("Invoice deleted");
  } else if (choice ==="all_future") {
- // Delete this invoice and all child recurring invoices
- const { error } = await invoicingService.deleteInvoice(deleteTargetInvoice.id);
- if (error) throw error;
- toast.success("Invoice and all future recurring invoices deleted");
+ // "Stop recurring": cancel the recurring schedule and remove any UNPAID
+ // future invoices. Paid historical invoices are always preserved — deleting
+ // rows with payments would violate the paid-invoice protection trigger and
+ // destroy financial history.
+ const parentId = deleteTargetInvoice.parent_invoice_id ?? deleteTargetInvoice.id;
+
+ // 1. Turn off recurrence on the parent so no more invoices are generated.
+ const { error: stopErr } = await supabase
+ .from("invoices")
+ .update({ is_recurring: false, next_invoice_date: null })
+ .eq("id", parentId);
+ if (stopErr) throw stopErr;
+
+ // 2. Delete unpaid children of the parent (safe: no payments applied).
+ const { error: childErr } = await supabase
+ .from("invoices")
+ .delete()
+ .eq("parent_invoice_id", parentId)
+ .eq("amount_paid", 0);
+ if (childErr) throw childErr;
+
+ // 3. If the target itself is a child with no payments, remove it too.
+ if (
+ deleteTargetInvoice.parent_invoice_id &&
+ Number(deleteTargetInvoice.amount_paid ?? 0) === 0
+ ) {
+ await supabase.from("invoices").delete().eq("id", deleteTargetInvoice.id);
+ }
+
+ toast.success("Recurring schedule stopped. Paid invoices were kept for your records.");
  }
 
  loadData();
  } catch (error) {
  console.error("Error deleting invoice:", error);
- toast.error("Failed to delete invoice");
+ toast.error(getInvoiceDeleteErrorMessage(error));
  } finally {
  setIsDeleting(false);
  setDeleteDialogOpen(false);
