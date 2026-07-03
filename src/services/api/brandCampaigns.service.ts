@@ -16,7 +16,7 @@ export interface BrandAccount {
  created_by: string;
  created_at: string;
  updated_at: string;
- invitation_token: string | null;
+ invitation_token?: string | null;
  invitation_email: string | null;
  invitation_sent_at: string | null;
  invitation_claimed_at: string | null;
@@ -179,7 +179,7 @@ export const getBrandAccountForUser = async (userId: string): Promise<ServiceRes
  try {
  const { data, error } = await supabase
  .from("brand_accounts")
- .select("*")
+  .select("id, user_id, brand_name, logo_url, contact_name, contact_email, description, website_url, status, created_by, created_at, updated_at, invitation_email, invitation_sent_at, invitation_claimed_at, legal_business_name, business_type, tax_id, year_founded, industry_category, company_size, address_line1, address_line2, city, state, postal_code, country, contact_phone, contact_title, billing_contact_name, billing_contact_email, billing_contact_phone, marketing_preferences, social_links, setup_completed_at, terms_accepted_at")
  .eq("user_id", userId)
  .maybeSingle();
  return { data, error };
@@ -192,7 +192,7 @@ export const getAllBrandAccounts = async (): Promise<ServiceListResult<BrandAcco
  try {
  const { data, error } = await supabase
  .from("brand_accounts")
- .select("*")
+  .select("id, user_id, brand_name, logo_url, contact_name, contact_email, description, website_url, status, created_by, created_at, updated_at, invitation_email, invitation_sent_at, invitation_claimed_at, legal_business_name, business_type, tax_id, year_founded, industry_category, company_size, address_line1, address_line2, city, state, postal_code, country, contact_phone, contact_title, billing_contact_name, billing_contact_email, billing_contact_phone, marketing_preferences, social_links, setup_completed_at, terms_accepted_at")
  .order("created_at", { ascending: false });
  return { data: data || [], error };
  } catch (error) {
@@ -216,7 +216,7 @@ export const createBrandAccount = async (account: {
  ...account,
  invitation_email: account.contact_email || undefined,
  })
- .select()
+  .select("id, user_id, brand_name, logo_url, contact_name, contact_email, description, website_url, status, created_by, created_at, updated_at, invitation_email, invitation_sent_at, invitation_claimed_at, legal_business_name, business_type, tax_id, year_founded, industry_category, company_size, address_line1, address_line2, city, state, postal_code, country, contact_phone, contact_title, billing_contact_name, billing_contact_email, billing_contact_phone, marketing_preferences, social_links, setup_completed_at, terms_accepted_at")
  .single();
  return { data, error };
  } catch (error) {

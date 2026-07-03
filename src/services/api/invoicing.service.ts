@@ -246,17 +246,21 @@ export const invoicingService = {
  async getSettings(merchantId: string) {
  const { data, error } = await supabase
  .from("invoice_settings")
- .select("*")
+  .select("id, merchant_id, invoice_prefix, next_invoice_number, default_payment_terms, default_tax_rate, default_notes, default_footer, late_fee_enabled, late_fee_type, late_fee_amount, late_fee_grace_days, reminder_enabled, reminder_days_before, overdue_reminder_days, logo_url, accent_color, bank_name, bank_account_name, bank_account_number_last4, paypal_email, venmo_handle, default_currency, created_at, updated_at")
  .eq("merchant_id", merchantId)
  .maybeSingle();
- return { data: data as InvoiceSettings | null, error };
+  if (data) {
+   const { data: routing } = await supabase.rpc("get_my_bank_routing_number", { p_merchant_id: merchantId });
+   (data as any).bank_routing_number = routing ?? null;
+  }
+  return { data: data as InvoiceSettings | null, error };
  },
 
  async upsertSettings(merchantId: string, settings: Partial<InvoiceSettings>) {
  const { data, error } = await supabase
  .from("invoice_settings")
  .upsert({ merchant_id: merchantId, ...settings } as any, { onConflict:'merchant_id' })
- .select()
+  .select("id, merchant_id, invoice_prefix, next_invoice_number, default_payment_terms, default_tax_rate, default_notes, default_footer, late_fee_enabled, late_fee_type, late_fee_amount, late_fee_grace_days, reminder_enabled, reminder_days_before, overdue_reminder_days, logo_url, accent_color, bank_name, bank_account_name, bank_account_number_last4, paypal_email, venmo_handle, default_currency, created_at, updated_at")
  .single();
  return { data: data as InvoiceSettings | null, error };
  },

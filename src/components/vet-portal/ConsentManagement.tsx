@@ -58,7 +58,7 @@ export const ConsentManagement = ({ vetId }: ConsentManagementProps) => {
  const { data, error } = await supabase
  .from("pet_consent_requests")
  .select(`
- *,
+  id, pet_id, vet_id, template_id, owner_id, consent_type, title, description, procedure_details, risks_disclosed, estimated_cost, cost_range_min, cost_range_max, status, signature_data, signed_name, signed_at, signer_ip_address, signer_user_agent, expires_at, sent_via, reminder_sent_at, created_at, updated_at,
  pet_profiles:pet_id (name, type),
  profiles:owner_id (full_name, email)
  `)

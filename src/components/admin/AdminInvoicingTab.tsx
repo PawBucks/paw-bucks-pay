@@ -22,7 +22,7 @@ export function AdminInvoicingTab() {
  setLoading(true);
  const { data, error } = await supabase
  .from("admin_invoices")
- .select("*")
+  .select("id, invoice_number, recipient_type, recipient_id, recipient_name, recipient_email, title, description, status, subtotal, tax_rate, tax_amount, discount_amount, total, amount_paid, amount_due, currency, issue_date, due_date, paid_at, notes, terms_conditions, invoice_type, created_by, created_at, updated_at")
  .order("created_at", { ascending: false });
  if (error) {
  toast.error("Failed to load invoices");
@@ -81,7 +81,7 @@ export function AdminInvoicingTab() {
  if (selectedInvoice) {
  const { data } = await supabase
  .from("admin_invoices")
- .select("*")
+  .select("id, invoice_number, recipient_type, recipient_id, recipient_name, recipient_email, title, description, status, subtotal, tax_rate, tax_amount, discount_amount, total, amount_paid, amount_due, currency, issue_date, due_date, paid_at, notes, terms_conditions, invoice_type, created_by, created_at, updated_at")
  .eq("id", selectedInvoice.id)
  .single();
  if (data) setSelectedInvoice(data as AdminInvoice);

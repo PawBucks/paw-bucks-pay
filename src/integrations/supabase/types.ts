@@ -15614,6 +15614,10 @@ export type Database = {
         Returns: string
       }
       generate_ticket_number: { Args: never; Returns: string }
+      get_accountant_invitation_token: {
+        Args: { p_invitation_id: string }
+        Returns: string
+      }
       get_active_promotion: {
         Args: { p_cluster_id?: string }
         Returns: {
@@ -15677,6 +15681,10 @@ export type Database = {
           invitation_claimed_at: string
           invitation_email: string
         }[]
+      }
+      get_brand_invitation_token: {
+        Args: { p_brand_id: string }
+        Returns: string
       }
       get_checkin_user_emails: {
         Args: {
@@ -15807,6 +15815,10 @@ export type Database = {
       get_monthly_non_partner_pawbucks: {
         Args: { p_user_id: string }
         Returns: number
+      }
+      get_my_bank_routing_number: {
+        Args: { p_merchant_id: string }
+        Returns: string
       }
       get_pawbucks_breakdown: {
         Args: { p_user_id: string }
