@@ -624,23 +624,27 @@ const MerchantInvoicing = () => {
  .eq("id", parentId);
  if (stopErr) throw stopErr;
 
- // 2. Delete unpaid children of the parent (safe: no payments applied).
- const { error: childErr } = await supabase
- .from("invoices")
- .delete()
- .eq("parent_invoice_id", parentId)
- .eq("amount_paid", 0);
- if (childErr) throw childErr;
+        // 2. Delete only future/draft children (not yet sent to the customer).
+        //    Outstanding invoices (already sent, awaiting payment) must remain
+        //    until they're paid or explicitly voided.
+        const { error: childErr } = await supabase
+          .from("invoices")
+          .delete()
+          .eq("parent_invoice_id", parentId)
+          .eq("amount_paid", 0)
+          .eq("status", "draft");
+        if (childErr) throw childErr;
 
- // 3. If the target itself is a child with no payments, remove it too.
- if (
- deleteTargetInvoice.parent_invoice_id &&
- Number(deleteTargetInvoice.amount_paid ?? 0) === 0
- ) {
- await supabase.from("invoices").delete().eq("id", deleteTargetInvoice.id);
- }
+        // 3. If the target itself is a draft child with no payments, remove it too.
+        if (
+          deleteTargetInvoice.parent_invoice_id &&
+          Number(deleteTargetInvoice.amount_paid ?? 0) === 0 &&
+          deleteTargetInvoice.status === "draft"
+        ) {
+          await supabase.from("invoices").delete().eq("id", deleteTargetInvoice.id);
+        }
 
- toast.success("Recurring schedule stopped. Paid invoices were kept for your records.");
+        toast.success("Recurring schedule stopped. Outstanding and paid invoices were kept.");
  }
 
  loadData();

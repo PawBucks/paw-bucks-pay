@@ -70,7 +70,7 @@ export function DeleteRecurringInvoiceDialog({
  <div>
  <p className="font-medium text-sm text-destructive">Stop Recurring</p>
  <p className="text-xs text-muted-foreground font-normal">
- Cancel the schedule and remove upcoming unpaid invoices. Paid invoices are kept for your records.
+                Cancel the schedule and remove unsent draft invoices. Outstanding and paid invoices are kept.
  </p>
  </div>
  </Button>
