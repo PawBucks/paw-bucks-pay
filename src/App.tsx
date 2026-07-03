@@ -176,6 +176,7 @@ const AppRoutes = () => {
  <Route path="/" element={<PageTransition><Index /></PageTransition>} />
  <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
  <Route path="/auth/callback" element={<PageTransition><AuthCallback /></PageTransition>} />
+ <Route path="/.lovable/oauth/consent" element={<PageTransition><OAuthConsent /></PageTransition>} />
  <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
  <Route path="/merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
  <Route path="/merchant-landing" element={<PageTransition><MerchantLanding /></PageTransition>} />
