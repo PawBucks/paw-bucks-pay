@@ -16,7 +16,7 @@ export interface BrandAccount {
  created_by: string;
  created_at: string;
  updated_at: string;
- invitation_token: string | null;
+ invitation_token?: string | null;
  invitation_email: string | null;
  invitation_sent_at: string | null;
  invitation_claimed_at: string | null;
