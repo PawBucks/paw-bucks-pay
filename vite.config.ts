@@ -5,6 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 import { prerenderRoutes } from "./plugins/vite-prerender-routes";
 import { faviconManifestCheck } from "./plugins/vite-favicon-manifest-check";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 // Single source of truth for PWA theme color and icons
 const PWA_THEME_COLOR = "#7DD4D4";
@@ -179,6 +180,7 @@ export default defineConfig(({ mode }) => ({
     }),
     prerenderRoutes(),
     faviconManifestCheck(PWA_THEME_COLOR, PWA_ICONS),
+    mcpPlugin(),
   ].filter(Boolean),
   resolve: {
     alias: [

@@ -30,6 +30,7 @@ import { PublicOrAuthRoute } from"@/components/PublicOrAuthRoute";
 // Critical pages - Auth loaded immediately, Index lazy (734 lines + heavy images)
 import Auth from"./pages/Auth";
 const Index = lazyWithRetry(() => import("./pages/Index"),"Index");
+const OAuthConsent = lazyWithRetry(() => import("./pages/OAuthConsent"),"OAuthConsent");
 
 // Lazy-loaded pages with retry logic for resilient loading after deploys
 const SimpleHome = lazyWithRetry(() => import("./pages/SimpleHome"),"SimpleHome");
@@ -175,6 +176,7 @@ const AppRoutes = () => {
  <Route path="/" element={<PageTransition><Index /></PageTransition>} />
  <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
  <Route path="/auth/callback" element={<PageTransition><AuthCallback /></PageTransition>} />
+ <Route path="/.lovable/oauth/consent" element={<PageTransition><OAuthConsent /></PageTransition>} />
  <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
  <Route path="/merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
  <Route path="/merchant-landing" element={<PageTransition><MerchantLanding /></PageTransition>} />
