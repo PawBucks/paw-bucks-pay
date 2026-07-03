@@ -35,6 +35,7 @@ import { TargetingRulesEditor } from"@/components/brand/TargetingRulesEditor";
 import { CampaignWizard } from"@/components/brand/CampaignWizard";
 import { MerchantMarketplace } from"@/components/brand/MerchantMarketplace";
 import { BrandJoinRequestsInbox } from"@/components/brand/BrandJoinRequestsInbox";
+import { supabase } from"@/integrations/supabase/client";
 
 import { Formatters } from "@/utils/formatters";
 const statusConfig: Record<string, { color: string; label: string; Icon: LucideIcon }> = {
@@ -256,7 +257,11 @@ const BrandDashboard = () => {
  </CardDescription>
  </CardHeader>
  <CardContent className="flex flex-col gap-2">
- <Button onClick={() => navigate(`/brand-setup/${(brandAccount as any).invitation_token}`)}>
+  <Button onClick={async () => {
+   const { data: token, error } = await supabase.rpc('get_brand_invitation_token', { p_brand_id: (brandAccount as any).id });
+   if (error || !token) { toast.error('Unable to load setup link'); return; }
+   navigate(`/brand-setup/${token}`);
+  }}>
  Complete Setup
  </Button>
  <Button variant="outline" onClick={() => { signOut(); navigate("/"); }}>
