@@ -68,9 +68,9 @@ export function DeleteRecurringInvoiceDialog({
  >
  <CalendarX className="h-4 w-4 shrink-0 text-destructive" />
  <div>
- <p className="font-medium text-sm text-destructive">All Future Invoices</p>
+ <p className="font-medium text-sm text-destructive">Stop Recurring</p>
  <p className="text-xs text-muted-foreground font-normal">
- Delete this and all upcoming recurring invoices
+ Cancel the schedule and remove upcoming unpaid invoices. Paid invoices are kept for your records.
  </p>
  </div>
  </Button>
