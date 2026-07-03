@@ -34,6 +34,22 @@ function calculateNextInvoiceDate(fromDate: Date, interval: string): Date {
  }
 }
 
+// Turn Postgres/PostgREST errors from an invoice delete into a friendly toast
+// message. The `protect_paid_invoice_delete` trigger raises detailed messages
+// explaining why a row can't be removed (payments applied, transactions
+// reference it, etc.) — surface those instead of a generic failure string.
+function getInvoiceDeleteErrorMessage(error: unknown): string {
+ const msg = (error as { message?: string } | null)?.message ?? "";
+ if (msg.includes("Cannot delete invoice")) return msg;
+ if (msg.includes("has payments applied")) return msg;
+ if (msg.includes("payment record")) return msg;
+ if (msg.includes("transaction")) return msg;
+ if (msg.includes("foreign key") || msg.includes("violates foreign key")) {
+ return "This invoice is referenced by other records and can't be deleted. Void or refund it instead.";
+ }
+ return "Failed to delete invoice";
+}
+
 const MerchantInvoicing = () => {
  const { user, loading: authLoading } = useAuth();
  const navigate = useNavigate();
