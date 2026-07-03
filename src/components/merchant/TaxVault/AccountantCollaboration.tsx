@@ -26,7 +26,6 @@ interface Invitation {
  id: string;
  accountant_email: string;
  accountant_name: string | null;
- access_token: string;
  permissions: {
  view_expenses: boolean;
  view_income: boolean;
@@ -79,7 +78,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  queryFn: async () => {
  const { data, error } = await supabase
  .from('accountant_invitations')
- .select('*')
+  .select('id, merchant_id, accountant_email, accountant_name, permissions, status, invited_at, accepted_at, expires_at, last_accessed_at, created_at, updated_at')
  .eq('merchant_id', merchantId)
  .order('created_at', { ascending: false });
  
@@ -192,10 +191,17 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  },
  });
 
- const copyPortalLink = (token: string) => {
- const link = buildAppUrl(`/accountant-portal/${token}`);
- navigator.clipboard.writeText(link);
- toast.success('Portal link copied to clipboard');
+ const copyPortalLink = async (invitationId: string) => {
+  const { data, error } = await supabase.rpc('get_accountant_invitation_token', {
+   p_invitation_id: invitationId,
+  });
+  if (error || !data) {
+   toast.error('Unable to retrieve portal link');
+   return;
+  }
+  const link = buildAppUrl(`/accountant-portal/${data}`);
+  navigator.clipboard.writeText(link);
+  toast.success('Portal link copied to clipboard');
  };
 
  const getStatusBadge = (status: string) => {
@@ -408,7 +414,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  <Button
  variant="ghost"
  size="icon"
- onClick={() => copyPortalLink(invitation.access_token)}
+  onClick={() => copyPortalLink(invitation.id)}
  title="Copy portal link"
  >
  <Copy className="h-4 w-4" />
