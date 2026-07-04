@@ -358,7 +358,7 @@ serve(async (req: Request) => {
             <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Service</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;text-decoration:line-through;">${serviceName}</td></tr>
             <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Date</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;text-decoration:line-through;">${dateFormatted}</td></tr>
             <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Time</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;text-decoration:line-through;">${timeFormatted} PT</td></tr>
-            ${body.cancellationReason ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Reason</td><td style="padding:6px 0;color:#111827;text-align:right;">${body.cancellationReason}</td></tr>` : ""}
+            ${cancellationReasonSafe ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Reason</td><td style="padding:6px 0;color:#111827;text-align:right;">${cancellationReasonSafe}</td></tr>` : ""}
           </table>
         </div>
         <p style="color:#6b7280;font-size:14px;">You can rebook anytime from the merchant's page or your dashboard.</p>`;
@@ -516,7 +516,7 @@ serve(async (req: Request) => {
             type === "confirmation"
               ? `${customerLabel} just requested a booking. Please review and confirm in your dashboard.`
               : type === "cancellation"
-              ? `${customerLabel}'s booking has been cancelled${body.cancellationReason ? `: <em>${body.cancellationReason}</em>` : "."}`
+              ? `${customerLabel}'s booking has been cancelled${cancellationReasonSafe ? `: <em>${cancellationReasonSafe}</em>` : "."}`
               : `${customerLabel} rescheduled their appointment. The new time is below.`
           }
         </p>
