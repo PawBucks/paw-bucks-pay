@@ -270,7 +270,7 @@ export function UserDetailProfile({ userId }: { userId: string }) {
  bannedReason={profile.banned_reason ?? null}
  onChange={loadProfile}
  />
- <DeleteUserCard userId={profile.id} userEmail={profile.email} />
+  <DeleteUserCard userId={profile.id} userEmail={profile.email} userType={profile.user_type} />
  </>
  )}
  </div>
