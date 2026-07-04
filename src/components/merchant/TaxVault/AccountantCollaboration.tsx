@@ -123,7 +123,7 @@ export function AccountantCollaboration({ merchantId, businessName }: Accountant
  access_token: accessToken,
  permissions,
  })
- .select()
+ .select('id')
  .single();
  
  if (error) throw error;

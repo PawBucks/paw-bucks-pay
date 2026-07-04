@@ -155,6 +155,7 @@ serve(async (req) => {
           try {
             const bookingUrl = `${supabaseUrl.replace('.supabase.co', '')}/book/${merchant.slug || setting.merchant_id}`;
             await supabase.functions.invoke("send-booking-emails", {
+              headers: { "x-internal-secret": Deno.env.get("INTERNAL_TRIGGER_SECRET") ?? "" },
               body: {
                 type: "rebook_reminder",
                 customerEmail: lastBooking.customer_email,

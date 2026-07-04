@@ -9,9 +9,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface Body {
-  userId?: string;
-}
+// Body is unused now: the target user is always derived from the caller's JWT
+// to prevent an unauthenticated caller from triggering a welcome email to any
+// pet-owner user ID they may have obtained.
 
 function esc(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({
@@ -142,27 +142,26 @@ serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const body = (await req.json().catch(() => ({}))) as Body;
     const admin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { autoRefreshToken: false, persistSession: false } },
     );
 
-    // Resolve user — either explicit userId or from caller's JWT
-    let userId = body.userId;
-    if (!userId) {
-      const authHeader = req.headers.get("Authorization") ?? "";
-      const token = authHeader.replace(/^Bearer\s+/i, "");
-      if (token) {
-        const { data: u } = await admin.auth.getUser(token);
-        userId = u?.user?.id;
-      }
+    // Always derive the target user from the caller's verified JWT so this
+    // function cannot be abused to email arbitrary users a welcome message.
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-
-    if (!userId) {
-      return new Response(JSON.stringify({ error: "Missing userId" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const { data: claimsRes, error: claimsErr } = await admin.auth.getClaims(token);
+    const userId = claimsRes?.claims?.sub;
+    if (claimsErr || !userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
