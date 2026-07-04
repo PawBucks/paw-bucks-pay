@@ -3063,7 +3063,7 @@ export type Database = {
           created_at: string
           estimated_monthly_sales: number
           id: string
-          merchant_id: string
+          merchant_id: string | null
           reason: string
           requested_amount: number
           status: string
@@ -3073,7 +3073,7 @@ export type Database = {
           created_at?: string
           estimated_monthly_sales: number
           id?: string
-          merchant_id: string
+          merchant_id?: string | null
           reason: string
           requested_amount: number
           status?: string
@@ -3083,7 +3083,7 @@ export type Database = {
           created_at?: string
           estimated_monthly_sales?: number
           id?: string
-          merchant_id?: string
+          merchant_id?: string | null
           reason?: string
           requested_amount?: number
           status?: string
@@ -8995,7 +8995,7 @@ export type Database = {
           soap_note_id: string | null
           thumbnail_url: string | null
           updated_at: string
-          vet_id: string
+          vet_id: string | null
           views: string[] | null
         }
         Insert: {
@@ -9015,7 +9015,7 @@ export type Database = {
           soap_note_id?: string | null
           thumbnail_url?: string | null
           updated_at?: string
-          vet_id: string
+          vet_id?: string | null
           views?: string[] | null
         }
         Update: {
@@ -9035,7 +9035,7 @@ export type Database = {
           soap_note_id?: string | null
           thumbnail_url?: string | null
           updated_at?: string
-          vet_id?: string
+          vet_id?: string | null
           views?: string[] | null
         }
         Relationships: [
@@ -9299,7 +9299,7 @@ export type Database = {
           test_date: string
           test_type: string
           updated_at: string
-          vet_id: string
+          vet_id: string | null
         }
         Insert: {
           abnormal_flags?: string[] | null
@@ -9320,7 +9320,7 @@ export type Database = {
           test_date?: string
           test_type: string
           updated_at?: string
-          vet_id: string
+          vet_id?: string | null
         }
         Update: {
           abnormal_flags?: string[] | null
@@ -9341,7 +9341,7 @@ export type Database = {
           test_date?: string
           test_type?: string
           updated_at?: string
-          vet_id?: string
+          vet_id?: string | null
         }
         Relationships: [
           {
@@ -9674,7 +9674,7 @@ export type Database = {
           subjective_history: string | null
           subjective_owner_observations: string | null
           updated_at: string
-          vet_id: string
+          vet_id: string | null
           visit_date: string
         }
         Insert: {
@@ -9705,7 +9705,7 @@ export type Database = {
           subjective_history?: string | null
           subjective_owner_observations?: string | null
           updated_at?: string
-          vet_id: string
+          vet_id?: string | null
           visit_date?: string
         }
         Update: {
@@ -9736,7 +9736,7 @@ export type Database = {
           subjective_history?: string | null
           subjective_owner_observations?: string | null
           updated_at?: string
-          vet_id?: string
+          vet_id?: string | null
           visit_date?: string
         }
         Relationships: [
@@ -9982,7 +9982,7 @@ export type Database = {
           procedure_name: string
           surgery_date: string
           updated_at: string
-          vet_id: string
+          vet_id: string | null
         }
         Insert: {
           anesthesia_duration_minutes?: number | null
@@ -10001,7 +10001,7 @@ export type Database = {
           procedure_name: string
           surgery_date: string
           updated_at?: string
-          vet_id: string
+          vet_id?: string | null
         }
         Update: {
           anesthesia_duration_minutes?: number | null
@@ -10020,7 +10020,7 @@ export type Database = {
           procedure_name?: string
           surgery_date?: string
           updated_at?: string
-          vet_id?: string
+          vet_id?: string | null
         }
         Relationships: [
           {
@@ -13899,7 +13899,7 @@ export type Database = {
           term_months: number
           updated_at: string
           user_id: string
-          vet_id: string
+          vet_id: string | null
         }
         Insert: {
           created_at?: string
@@ -13913,7 +13913,7 @@ export type Database = {
           term_months: number
           updated_at?: string
           user_id: string
-          vet_id: string
+          vet_id?: string | null
         }
         Update: {
           created_at?: string
@@ -13927,7 +13927,7 @@ export type Database = {
           term_months?: number
           updated_at?: string
           user_id?: string
-          vet_id?: string
+          vet_id?: string | null
         }
         Relationships: [
           {
