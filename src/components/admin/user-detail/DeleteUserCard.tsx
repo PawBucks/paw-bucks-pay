@@ -20,13 +20,19 @@ import { toast } from"sonner";
 interface DeleteUserCardProps {
  userId: string;
  userEmail: string;
+ userType?: string | null;
 }
 
-export function DeleteUserCard({ userId, userEmail }: DeleteUserCardProps) {
+export function DeleteUserCard({ userId, userEmail, userType }: DeleteUserCardProps) {
  const navigate = useNavigate();
  const [open, setOpen] = useState(false);
  const [confirmText, setConfirmText] = useState("");
  const [loading, setLoading] = useState(false);
+
+ const isMerchant = userType === "merchant";
+ const isVet = userType === "vet" || userType === "veterinarian";
+ const accountLabel = isMerchant ? "merchant" : isVet ? "vet" : "user";
+ const accountLabelCap = accountLabel.charAt(0).toUpperCase() + accountLabel.slice(1);
 
  const handleDelete = async () => {
  setLoading(true);
@@ -58,8 +64,15 @@ export function DeleteUserCard({ userId, userEmail }: DeleteUserCardProps) {
  </CardHeader>
  <CardContent className="space-y-4">
  <p className="text-sm text-muted-foreground">
- Permanently delete this user account and all associated authentication data.
- This action cannot be undone.
+ Permanently delete this {accountLabel} account and all associated authentication data.
+ {(isMerchant || isVet) && (
+ <>
+ {" "}Their {isMerchant ? "business" : "practice"} profile, directory/discover listing,
+ reviews, offers, bookings, messages, and any other public references will be removed
+ platform-wide.
+ </>
+ )}
+ {" "}This action cannot be undone.
  </p>
  <Button
  variant="destructive"
@@ -68,7 +81,7 @@ export function DeleteUserCard({ userId, userEmail }: DeleteUserCardProps) {
  className="w-full"
  >
  <Trash2 className="w-4 h-4 mr-2" />
- Delete User
+ Delete {accountLabelCap}
  </Button>
  </CardContent>
 
@@ -77,11 +90,19 @@ export function DeleteUserCard({ userId, userEmail }: DeleteUserCardProps) {
  <AlertDialogHeader>
  <AlertDialogTitle className="flex items-center gap-2">
  <AlertTriangle className="w-5 h-5 text-destructive" />
- Delete this user permanently?
+ Delete this {accountLabel} permanently?
  </AlertDialogTitle>
  <AlertDialogDescription>
  This will permanently delete <strong>{userEmail}</strong> and their
- authentication record. This action cannot be undone. Type{""}
+ authentication record.
+ {(isMerchant || isVet) && (
+ <>
+ {" "}Their {isMerchant ? "business" : "practice"} profile will be removed from
+ the directory, discover pages, reviews, offers, bookings, and every other public
+ surface across the platform.
+ </>
+ )}
+ {" "}This action cannot be undone. Type{" "}
  <strong>DELETE</strong> below to confirm.
  </AlertDialogDescription>
  </AlertDialogHeader>
