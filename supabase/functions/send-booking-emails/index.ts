@@ -12,6 +12,20 @@ const corsHeaders = {
 
 const LOGO_URL = "https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png";
 
+// HTML-escape user-controlled values before interpolating into email templates
+// so that names, notes, and other free-text fields cannot inject markup or
+// scripts into the branded email body.
+const escapeHtml = (v: unknown): string => {
+  if (v === null || v === undefined) return "";
+  return String(v).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c] as string));
+};
+
 interface BookingEmailRequest {
   type:
     | "confirmation"
@@ -120,11 +134,50 @@ serve(async (req: Request) => {
   }
 
   try {
+    // ---- AuthZ --------------------------------------------------------------
+    // This function can send PawBucks-branded emails with attacker-controlled
+    // HTML if left open. Accept either an internal cron/edge-function caller
+    // (via the shared secret) or an authenticated user tied to the booking.
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const internalSecret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
+    const providedInternal = req.headers.get("x-internal-secret");
+    const isInternal = !!(providedInternal && internalSecret && providedInternal === internalSecret);
+
+    let callerId: string | null = null;
+    if (!isInternal) {
+      const authHeader = req.headers.get("Authorization") ?? "";
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      if (!token) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: claimsRes, error: claimsErr } = await supabase.auth.getClaims(token);
+      callerId = claimsRes?.claims?.sub ?? null;
+      if (claimsErr || !callerId) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const body: BookingEmailRequest = await req.json();
     let { type } = body;
     // Normalize legacy alias
     if ((type as string) === "reschedule") type = "rescheduled";
     const initiator = body.initiator || "customer";
+
+    // Non-internal callers must reference an existing booking so the recipient
+    // and content fields are re-resolved from the database rather than trusted
+    // from the request body.
+    if (!isInternal && !body.bookingId) {
+      return new Response(JSON.stringify({ error: "bookingId required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     let customerEmail = body.customerEmail;
     let customerName = body.customerName;
@@ -141,11 +194,6 @@ serve(async (req: Request) => {
     let customerUserId: string | null = null;
     let merchantId: string | null = null;
     let serviceId: string | null = null;
-
-    // If bookingId provided, fetch details from DB
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     if (body.bookingId) {
       const { data: booking, error } = await supabase
@@ -164,20 +212,42 @@ serve(async (req: Request) => {
         });
       }
 
-      customerEmail = customerEmail || booking.customer_email;
-      customerName = customerName || booking.customer_name || "Valued Customer";
-      merchantName = merchantName || (booking as any).merchants?.business_name || "Your Provider";
-      serviceName = serviceName || (booking as any).merchant_services?.name || "Service";
-      bookingDate = bookingDate || booking.booking_date;
-      startTime = startTime || booking.start_time;
-      endTime = endTime || booking.end_time;
-      totalPrice = totalPrice ?? booking.total_price;
-      notes = notes || booking.notes;
+      // Always trust DB values for the recipient/content fields when a booking
+      // is referenced; only allow body overrides for internal callers.
+      customerEmail = isInternal ? (customerEmail || booking.customer_email) : booking.customer_email;
+      customerName = isInternal
+        ? (customerName || booking.customer_name || "Valued Customer")
+        : (booking.customer_name || "Valued Customer");
+      merchantName = (booking as any).merchants?.business_name || "Your Provider";
+      serviceName = (booking as any).merchant_services?.name || "Service";
+      bookingDate = booking.booking_date;
+      startTime = booking.start_time;
+      endTime = booking.end_time;
+      totalPrice = booking.total_price;
+      notes = booking.notes;
       merchantEmail = (booking as any).merchants?.email || null;
       merchantOwnerUserId = (booking as any).merchants?.user_id || null;
       merchantId = (booking as any).merchants?.id || null;
       customerUserId = booking.user_id || null;
       serviceId = booking.service_id || null;
+
+      // Ownership check: non-internal callers must be the customer, the
+      // merchant owner, or a platform admin/superadmin.
+      if (!isInternal) {
+        let allowed = callerId === customerUserId || callerId === merchantOwnerUserId;
+        if (!allowed) {
+          const { data: roles } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", callerId!);
+          allowed = !!roles?.some((r: { role: string }) => r.role === "admin" || r.role === "superadmin");
+        }
+        if (!allowed) {
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
     }
 
     if (!customerEmail || !bookingDate || !startTime) {
@@ -185,6 +255,13 @@ serve(async (req: Request) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Escape all free-text values before templating them into the email body.
+    customerName = escapeHtml(customerName);
+    merchantName = escapeHtml(merchantName);
+    serviceName = escapeHtml(serviceName);
+    notes = notes ? escapeHtml(notes) : notes;
+    const cancellationReasonSafe = body.cancellationReason ? escapeHtml(body.cancellationReason) : "";
 
     const dateFormatted = formatDateReadable(bookingDate!);
     const timeFormatted = formatTime12(startTime!);
