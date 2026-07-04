@@ -214,6 +214,44 @@ serve(async (req) => {
       );
     }
 
+    // AuthZ: allow internal cross-function calls via the shared secret, or a
+    // JWT-bearing caller that is either the ticket owner or an admin/superadmin.
+    // Prevents unauthenticated attackers from spamming ticket owners and admins.
+    const internalSecret = Deno.env.get("INTERNAL_TRIGGER_SECRET");
+    const providedInternal = req.headers.get("x-internal-secret");
+    const isInternal = !!(providedInternal && internalSecret && providedInternal === internalSecret);
+
+    if (!isInternal) {
+      const authHeader = req.headers.get("Authorization") ?? "";
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      if (!token) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: claimsRes, error: claimsErr } = await supabaseAdmin.auth.getClaims(token);
+      const callerId = claimsRes?.claims?.sub;
+      if (claimsErr || !callerId) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const isOwner = callerId === ticket.user_id;
+      let isAdmin = false;
+      if (!isOwner) {
+        const { data: roles } = await supabaseAdmin
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", callerId);
+        isAdmin = !!roles?.some((r: { role: string }) => r.role === "admin" || r.role === "superadmin");
+      }
+      if (!isOwner && !isAdmin) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Get ticket owner profile & email
     const { data: ownerProfile } = await supabaseAdmin
       .from("profiles")
