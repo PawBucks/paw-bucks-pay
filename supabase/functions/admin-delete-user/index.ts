@@ -58,6 +58,39 @@ serve(async (req) => {
 
     console.log('Deleting user:', validatedData.user_id);
 
+    // Look up merchant/vet rows tied to this user and delete them first.
+    // Their FKs cascade to directory listings, reviews, analytics, offers,
+    // bookings, invoices, etc., so no public trace of the account remains.
+    const [{ data: merchantRow }, { data: vetRow }, { data: profileRow }] = await Promise.all([
+      supabase.from('merchants').select('id').eq('user_id', validatedData.user_id).maybeSingle(),
+      supabase.from('partner_vets').select('id').eq('user_id', validatedData.user_id).maybeSingle(),
+      supabase.from('profiles').select('user_type').eq('id', validatedData.user_id).maybeSingle(),
+    ]);
+
+    if (merchantRow?.id) {
+      const { error: merchantErr } = await supabase
+        .from('merchants')
+        .delete()
+        .eq('id', merchantRow.id);
+      if (merchantErr) {
+        console.error('Failed to delete merchant row:', merchantErr);
+        throw new Error('Failed to delete user');
+      }
+      console.log('Deleted merchant row:', merchantRow.id);
+    }
+
+    if (vetRow?.id) {
+      const { error: vetErr } = await supabase
+        .from('partner_vets')
+        .delete()
+        .eq('id', vetRow.id);
+      if (vetErr) {
+        console.error('Failed to delete partner_vet row:', vetErr);
+        throw new Error('Failed to delete user');
+      }
+      console.log('Deleted partner_vet row:', vetRow.id);
+    }
+
     // Delete user using admin API
     const { error: deleteError } = await supabase.auth.admin.deleteUser(
       validatedData.user_id
@@ -73,7 +106,12 @@ serve(async (req) => {
       _action: 'DELETE_USER',
       _entity_type: 'user',
       _entity_id: validatedData.user_id,
-      _changes: { deleted_by: user.id },
+      _changes: {
+        deleted_by: user.id,
+        user_type: profileRow?.user_type ?? null,
+        merchant_id: merchantRow?.id ?? null,
+        vet_id: vetRow?.id ?? null,
+      },
     });
 
     console.log('User deleted successfully');
