@@ -30,7 +30,6 @@ import { useServiceConversionTracking } from "@/hooks/useServiceConversionTracki
 import { schedulingService } from "@/services/api/scheduling.service";
 import { merchantSubscriptionPlansService } from "@/services/api/merchantSubscriptionPlans.service";
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { Founding50Badge } from "@/components/shared/Founding50Badge";
 import { MerchantTypeBadge, isAcquisitionOnly } from "@/components/shared/MerchantTypeBadge";
 import { ArrowLeft, BadgeCheck, Ban, Bone, Calendar, Camera, Check, CreditCard, Facebook, Footprints, Globe, Heart, Home, Instagram, Linkedin, Lock, MapPin, MessageSquare, Phone, QrCode, Scissors, Share2, ShoppingBag, Star, Stethoscope, Store, Twitter, Sparkles } from "lucide-react";
 
@@ -463,7 +462,6 @@ const MerchantProfile = memo(() => {
                     {hasVerifiedPro && (
                       <BadgeCheck className="w-5 h-5 text-info flex-shrink-0" aria-label="Verified Pro" />
                     )}
-                    {merchantId && <Founding50Badge entityType="merchant" entityId={merchantId} size="sm" />}
                   </div>
 
                   <div className="flex items-center gap-2 mt-2 flex-wrap text-xs">

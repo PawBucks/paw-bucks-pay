@@ -17,7 +17,6 @@ import { useQuery, useQueries } from"@tanstack/react-query";
 import { merchantSubscriptionPlansService } from"@/services/api/merchantSubscriptionPlans.service";
 import { AskQuestionButton } from"@/components/storefront/AskQuestionButton";
 import { buildAppUrl } from"@/lib/url";
-import { Founding50Badge } from"@/components/shared/Founding50Badge";
 import { useStorefrontCart } from"@/hooks/useStorefrontCart";
 import { StorefrontCartDrawer, type StorefrontCheckoutParams } from"@/components/storefront/StorefrontCartDrawer";
 import { CartIcon } from"@/components/pet-store/CartIcon";
@@ -399,9 +398,6 @@ const Storefront = memo(() => {
         <Badge variant="secondary" className="capitalize text-[11px] font-semibold px-2.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-full">
          {merchantBusinessType.replace(/_/g, ' ')}
         </Badge>
-       )}
-       {merchantIdForProducts && (
-        <Founding50Badge entityType="merchant" entityId={merchantIdForProducts} size="sm" />
        )}
        <span className="text-[11px] text-muted-foreground">· Official Storefront</span>
       </div>
