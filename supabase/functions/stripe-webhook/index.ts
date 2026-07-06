@@ -1653,6 +1653,72 @@ serve(async (req) => {
       console.log('✅ Wallet updated via database trigger');
       console.log('✅ Wallet activity logged');
 
+      // ========================================
+      // CREDIT PAWBUCKS TO PAYER (idempotent)
+      // ========================================
+      // The `log_wallet_activity` trigger only touches the legacy `wallets` /
+      // `wallet_activity` tables. The current PawBucks system reads from
+      // `pawbucks_activity` + `pawbucks_wallet`, so we must also insert the
+      // earn row and update the balance here — otherwise orphan-PI paths
+      // (subscription renewals, backfilled invoice payments, etc.) create a
+      // transaction with rewards_earned > 0 but the user never receives PB.
+      if (enrichedUserId && pawbucksEarned > 0) {
+        try {
+          const { data: existingEarn } = await supabaseAdmin
+            .from('pawbucks_activity')
+            .select('id')
+            .eq('user_id', enrichedUserId)
+            .eq('type', 'earn')
+            .eq('transaction_id', transaction.id)
+            .limit(1);
+
+          if (existingEarn && existingEarn.length > 0) {
+            console.log('[PAYMENT_INTENT] PawBucks already credited for tx, skipping', { transactionId: transaction.id });
+          } else {
+            const earnSource = subscriptionTierLabel ? 'subscription_payment' : 'direct_payment';
+            const earnDescription = subscriptionTierLabel
+              ? `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from ${subscriptionTierLabel} subscription payment`
+              : `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${amount.toFixed(2)} payment`;
+
+            const { error: earnErr } = await supabaseAdmin
+              .from('pawbucks_activity')
+              .insert({
+                user_id: enrichedUserId,
+                amount: pawbucksEarned,
+                type: 'earn',
+                source: earnSource,
+                description: earnDescription,
+                pawbucks_status: 'available',
+                partner_id: merchant_id || null,
+                transaction_id: transaction.id,
+              });
+
+            if (earnErr) {
+              console.error('[PAYMENT_INTENT] Error inserting pawbucks_activity earn:', earnErr);
+            } else {
+              const { data: pbWallet } = await supabaseAdmin
+                .from('pawbucks_wallet')
+                .select('balance')
+                .eq('user_id', enrichedUserId)
+                .maybeSingle();
+              if (pbWallet) {
+                await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .update({ balance: pbWallet.balance + pawbucksEarned })
+                  .eq('user_id', enrichedUserId);
+              } else {
+                await supabaseAdmin
+                  .from('pawbucks_wallet')
+                  .insert({ user_id: enrichedUserId, balance: pawbucksEarned });
+              }
+              console.log(`[PAYMENT_INTENT] ✅ Credited ${pawbucksEarned} PawBucks to ${enrichedUserId}`);
+            }
+          }
+        } catch (pbErr) {
+          console.error('[PAYMENT_INTENT] PawBucks credit exception:', pbErr);
+        }
+      }
+
       // Auto-log success fee as Tax Vault expense
       if (merchant_id) {
         const platformFee = amount * 0.03; // 3% success fee
