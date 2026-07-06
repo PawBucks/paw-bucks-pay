@@ -45,7 +45,7 @@ type RedemptionResult = {
 const PawBucksRedeem = () => {
  const { user, signOut, loading: authLoading } = useAuth();
  const navigate = useNavigate();
- const [searchParams] = useSearchParams();
+ const [searchParams, setSearchParams] = useSearchParams();
  const [selectedOffer, setSelectedOffer] = useState<PartnerOffer | null>(null);
  const [isRedeeming, setIsRedeeming] = useState(false);
  const [redemptionResult, setRedemptionResult] = useState<RedemptionResult | null>(null);
@@ -303,8 +303,19 @@ const PawBucksRedeem = () => {
  )}
  </main>
 
- {/* Confirmation Dialog */}
- <Dialog open={!!selectedOffer} onOpenChange={() => setSelectedOffer(null)}>
+  {/* Confirmation Dialog */}
+ <Dialog
+ open={!!selectedOffer}
+ onOpenChange={(open) => {
+ if (!open) {
+ setSelectedOffer(null);
+ if (searchParams.get('offer')) {
+ searchParams.delete('offer');
+ setSearchParams(searchParams, { replace: true });
+ }
+ }
+ }}
+ >
  <DialogContent>
  <DialogHeader>
           <DialogTitle>Spend PawBucks?</DialogTitle>
@@ -332,7 +343,17 @@ const PawBucksRedeem = () => {
               )}
  </div>
  <div className="flex gap-3">
- <Button variant="outline" onClick={() => setSelectedOffer(null)} className="flex-1">
+ <Button
+ variant="outline"
+ onClick={() => {
+ setSelectedOffer(null);
+ if (searchParams.get('offer')) {
+ searchParams.delete('offer');
+ setSearchParams(searchParams, { replace: true });
+ }
+ }}
+ className="flex-1"
+ >
  Cancel
  </Button>
  <Button onClick={confirmRedemption} disabled={isRedeeming} className="flex-1">
