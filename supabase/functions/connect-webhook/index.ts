@@ -800,6 +800,7 @@ serve(async (req) => {
                 pawbucks_status: "available",
                 partner_id: merchantId,
                 transaction_id: transaction?.id,
+                stripe_payment_intent_id: paymentIntent.id,
               });
 
               // Update wallet balance
