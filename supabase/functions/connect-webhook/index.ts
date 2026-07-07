@@ -594,18 +594,27 @@ serve(async (req) => {
           return new Response(JSON.stringify({ received: true, type: 'invoice_payment' }), { status: 200 });
         }
 
-        // Check if this is a merchant subscription renewal payment
-        if (metadata.subscription_type === "merchant_recurring" && metadata.billing_type === "renewal") {
-          logStep("Subscription renewal payment - handled by cron job", {
-            subscriptionId: metadata.merchant_subscription_id
+        // Skip ALL merchant subscription payments (initial signup AND renewals).
+        // Initial signups are fully handled by create-merchant-subscription
+        // (transaction row, PawBucks earn, SUB-xxx merchant email).
+        // Renewals are handled by process-merchant-subscriptions (RENEWAL-xxx email).
+        // Without this guard, connect-webhook would fire a duplicate PAY-xxx
+        // "Payment Received" email and duplicate PawBucks earn row for the same charge.
+        if (
+          metadata.subscription_type === "merchant_recurring" ||
+          metadata.merchant_subscription_id ||
+          metadata.billing_type === "renewal"
+        ) {
+          logStep("Merchant subscription payment - handled elsewhere, skipping connect-webhook processing", {
+            subscriptionId: metadata.merchant_subscription_id,
+            billingType: metadata.billing_type,
           });
-          
-          // Mark webhook as processed - cron job handles the subscription update
+
           await supabaseAdmin.from('webhook_logs')
             .update({ processed: true })
             .eq('event_id', event.id);
-          
-          return new Response(JSON.stringify({ received: true, type: 'subscription_renewal' }), { status: 200 });
+
+          return new Response(JSON.stringify({ received: true, skipped: 'merchant_subscription_handled_elsewhere' }), { status: 200 });
         }
 
         // Check if transaction already exists (idempotency)
