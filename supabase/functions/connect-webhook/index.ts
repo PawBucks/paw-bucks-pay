@@ -366,6 +366,7 @@ serve(async (req) => {
                   partner_id: merchantId || null,
                   description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${stripeAmountForRewards.toFixed(2)} payment on Invoice #${invoiceNumber}`,
                   pawbucks_status: 'available',
+                  stripe_payment_intent_id: paymentIntent.id,
                 });
 
                 logStep("PawBucks awarded", { pawbucksEarned, tierName });
