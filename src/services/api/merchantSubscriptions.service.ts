@@ -98,6 +98,27 @@ export const merchantSubscriptionsService = {
  });
 
  if (error) {
+ // supabase.functions.invoke throws on non-2xx and hides the JSON body
+ // behind `error.context` (a Response). Extract the real server error so
+ // duplicate-subscription 409s and validation errors surface a useful
+ // message instead of "Edge function returned a non-2xx status code".
+ let serverBody: any = null;
+ try {
+ const ctx: any = (error as any).context;
+ if (ctx && typeof ctx.json === "function") {
+ serverBody = await ctx.clone().json();
+ } else if (ctx && typeof ctx.text === "function") {
+ const t = await ctx.clone().text();
+ try { serverBody = JSON.parse(t); } catch { serverBody = { error: t }; }
+ }
+ } catch { /* fall through to generic message */ }
+
+ if (serverBody && (serverBody.error || serverBody.message || serverBody.duplicatePrevention)) {
+ return {
+ success: false,
+ error: serverBody.error || serverBody.message || "Subscription could not be created.",
+ };
+ }
  return { success: false, error: error.message };
  }
 
