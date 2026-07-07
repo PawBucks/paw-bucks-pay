@@ -248,6 +248,30 @@ async function creditPawBucksToUser(
     return 0;
   }
 
+  // === Idempotency guard: never credit the same Stripe PI twice ===
+  // Defense-in-depth against duplicate function invocations, webhook races,
+  // or retries. Paired with the unique partial index on pawbucks_activity
+  // (user_id, stripe_payment_intent_id, type='earn') so the DB rejects
+  // duplicates even if this check races.
+  if (paymentIntentId) {
+    const { data: existingEarn } = await supabaseAdmin
+      .from("pawbucks_activity")
+      .select("id, amount")
+      .eq("user_id", userId)
+      .eq("type", "earn")
+      .eq("stripe_payment_intent_id", paymentIntentId)
+      .maybeSingle();
+
+    if (existingEarn) {
+      logStep("Skipping duplicate PawBucks earn — already credited for this PaymentIntent", {
+        paymentIntentId,
+        existingActivityId: existingEarn.id,
+        existingAmount: existingEarn.amount,
+      });
+      return 0;
+    }
+  }
+
   // Log activity with type 'earn'
   const { error: activityError } = await supabaseAdmin
     .from("pawbucks_activity")
@@ -259,10 +283,18 @@ async function creditPawBucksToUser(
       description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${multiplier}x) from ${productName} subscription to ${merchantName}`,
       pawbucks_status: "available",
       partner_id: merchantId,
+      stripe_payment_intent_id: paymentIntentId,
     });
 
   if (activityError) {
+    // If the unique index rejected a duplicate, treat as already-credited and exit cleanly.
+    if ((activityError as any).code === "23505") {
+      logStep("Duplicate earn blocked by unique index — already credited", { paymentIntentId });
+      return 0;
+    }
     logStep("Error inserting pawbucks_activity", { error: activityError.message });
+    // Do not update wallet if the ledger insert failed.
+    return 0;
   } else {
     logStep("PawBucks activity logged", { amount: pawbucksEarned, type: "earn" });
   }
