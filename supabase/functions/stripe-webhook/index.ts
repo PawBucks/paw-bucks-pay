@@ -1512,6 +1512,33 @@ serve(async (req) => {
       }
 
       // ========================================
+      // EARLY SKIP: Merchant recurring subscription payments (both the initial
+      // signup handled by `create-merchant-subscription` and cron renewals
+      // handled by `process-merchant-subscriptions`) already:
+      //   - insert the transaction row
+      //   - credit PawBucks with source `subscription_payment` / `subscription_renewal`
+      //   - credit merchant PawBucks wallet
+      //   - log the platform fee to the Tax Vault
+      // If we let this webhook run, the user is credited PawBucks a SECOND time
+      // with source `direct_payment`, producing the duplicate earn rows the
+      // user is seeing on their PawBucks Activity page.
+      // ========================================
+      if (
+        metadata.subscription_type === 'merchant_recurring' ||
+        metadata.merchant_subscription_id
+      ) {
+        console.log('[PAYMENT_INTENT] ⏭️ Skipping merchant recurring subscription - handled by create-merchant-subscription / process-merchant-subscriptions', {
+          paymentIntentId: paymentIntent.id,
+          merchantSubscriptionId: metadata.merchant_subscription_id,
+        });
+        await supabaseAdmin
+          .from('webhook_logs')
+          .update({ processed: true })
+          .eq('event_id', event.id);
+        return new Response(JSON.stringify({ received: true, skipped: 'merchant_recurring_handled_elsewhere' }), { status: 200 });
+      }
+
+      // ========================================
       // DUPLICATE PREVENTION CHECK
       // Skip if this payment was already processed via checkout.session.completed
       // (e.g., subscription payments or other payment types)
