@@ -8220,6 +8220,7 @@ export type Database = {
           redemption_used: boolean | null
           slice_id: string | null
           source: string
+          stripe_payment_intent_id: string | null
           transaction_id: string | null
           type: string
           user_id: string
@@ -8240,6 +8241,7 @@ export type Database = {
           redemption_used?: boolean | null
           slice_id?: string | null
           source: string
+          stripe_payment_intent_id?: string | null
           transaction_id?: string | null
           type: string
           user_id: string
@@ -8260,6 +8262,7 @@ export type Database = {
           redemption_used?: boolean | null
           slice_id?: string | null
           source?: string
+          stripe_payment_intent_id?: string | null
           transaction_id?: string | null
           type?: string
           user_id?: string
