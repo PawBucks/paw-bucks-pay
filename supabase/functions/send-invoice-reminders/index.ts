@@ -209,7 +209,7 @@ function generateEmailHtml(
                   <span style="color:#6b7280;font-size:13px;">Service</span>
                 </td>
                 <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-                  <strong style="color:#111827;font-size:13px;">${serviceName}</strong>
+                  <strong style="color:#111827;font-size:13px;">${escapeHtml(serviceName)}</strong>
                 </td>
               </tr>
               <tr>
