@@ -16,6 +16,8 @@ import { UpgradeSubscriptionDialog } from'./UpgradeSubscriptionDialog';
 
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { PAWBUCKS_CONVERSION } from "@/lib/constants";
+import { Formatters } from "@/utils/formatters";
 type User = {
  id: string;
  email: string;
@@ -373,7 +375,10 @@ export function UsersTab() {
  <TableCell>
  <span className="flex items-center gap-1 text-primary font-medium">
  <PawBucksLogo className="w-3 h-3" />
- {(user.pawbucks_balance ?? 0).toLocaleString()}
+                          {Formatters.currency((user.pawbucks_balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE)}
+                          <span className="text-xs text-muted-foreground ml-1">
+                            ({(user.pawbucks_balance ?? 0).toLocaleString()} PB)
+                          </span>
  {user.shared_with_owner && (
  <span className="text-xs text-muted-foreground ml-1">(shared)</span>
  )}
