@@ -17,7 +17,6 @@ import { UpgradeSubscriptionDialog } from'./UpgradeSubscriptionDialog';
 import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { PAWBUCKS_CONVERSION } from "@/lib/constants";
-import { Formatters } from "@/utils/formatters";
 type User = {
  id: string;
  email: string;
