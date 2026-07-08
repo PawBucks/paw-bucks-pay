@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -61,7 +62,7 @@ serve(async (req) => {
       .sort((a: any, b: any) => a.display_order - b.display_order)
       .map((item: any) => `
         <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; color: #374151;">${item.description}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; color: #374151;">${escapeHtml(item.description)}</td>
           <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center; font-size: 14px; color: #374151;">${item.quantity}</td>
           <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px; color: #374151;">$${Number(item.unit_price).toFixed(2)}</td>
           <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-size: 14px; color: #374151;">$${Number(item.amount).toFixed(2)}</td>
@@ -80,7 +81,7 @@ serve(async (req) => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice ${invoice.invoice_number} from PawBucks</title>
+  <title>Invoice ${escapeHtml(invoice.invoice_number)} from PawBucks</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f5f7fa;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f7fa; padding: 20px;">
@@ -104,8 +105,8 @@ serve(async (req) => {
           <tr>
             <td style="padding: 30px 30px 10px; text-align: center;">
               <p style="margin: 0 0 4px; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px;">Platform Invoice</p>
-              <h1 style="margin: 0; font-size: 22px; color: #111827; font-weight: 700;">${invoice.invoice_number}</h1>
-              ${invoice.title ? `<p style="margin: 8px 0 0; font-size: 15px; color: #6b7280;">${invoice.title}</p>` : ""}
+              <h1 style="margin: 0; font-size: 22px; color: #111827; font-weight: 700;">${escapeHtml(invoice.invoice_number)}</h1>
+              ${invoice.title ? `<p style="margin: 8px 0 0; font-size: 15px; color: #6b7280;">${escapeHtml(invoice.title)}</p>` : ""}
             </td>
           </tr>
 
@@ -131,9 +132,9 @@ serve(async (req) => {
           <tr>
             <td style="padding: 0 30px 20px;">
               <p style="margin: 0; font-size: 11px; color: #9ca3af; text-transform: uppercase;">Bill To</p>
-              <p style="margin: 4px 0 0; font-weight: 600; font-size: 14px; color: #111827;">${invoice.recipient_name}</p>
-              <p style="margin: 2px 0 0; font-size: 13px; color: #6b7280; text-transform: capitalize;">${invoice.recipient_type}</p>
-              <p style="margin: 2px 0 0; font-size: 13px; color: #6b7280;">${invoice.recipient_email}</p>
+              <p style="margin: 4px 0 0; font-weight: 600; font-size: 14px; color: #111827;">${escapeHtml(invoice.recipient_name)}</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #6b7280; text-transform: capitalize;">${escapeHtml(invoice.recipient_type)}</p>
+              <p style="margin: 2px 0 0; font-size: 13px; color: #6b7280;">${escapeHtml(invoice.recipient_email)}</p>
             </td>
           </tr>
 
@@ -141,7 +142,7 @@ serve(async (req) => {
           <tr>
             <td style="padding: 0 30px 20px;">
               <p style="margin: 0; font-size: 11px; color: #9ca3af; text-transform: uppercase;">Description</p>
-              <p style="margin: 4px 0 0; font-size: 14px; color: #374151;">${invoice.description}</p>
+              <p style="margin: 4px 0 0; font-size: 14px; color: #374151;">${escapeHtml(invoice.description)}</p>
             </td>
           </tr>
           ` : ""}
@@ -211,7 +212,7 @@ serve(async (req) => {
                 <tr>
                   <td style="padding: 14px 16px;">
                     <p style="margin: 0 0 4px; font-weight: 600; font-size: 13px; color: #374151;">Notes</p>
-                    <p style="margin: 0; font-size: 13px; color: #6b7280; white-space: pre-wrap;">${invoice.notes}</p>
+                    <p style="margin: 0; font-size: 13px; color: #6b7280; white-space: pre-wrap;">${escapeHtml(invoice.notes)}</p>
                   </td>
                 </tr>
               </table>
@@ -226,7 +227,7 @@ serve(async (req) => {
                 <tr>
                   <td style="padding: 14px 16px;">
                     <p style="margin: 0 0 4px; font-weight: 600; font-size: 13px; color: #374151;">Terms & Conditions</p>
-                    <p style="margin: 0; font-size: 13px; color: #6b7280; white-space: pre-wrap;">${invoice.terms_conditions}</p>
+                    <p style="margin: 0; font-size: 13px; color: #6b7280; white-space: pre-wrap;">${escapeHtml(invoice.terms_conditions)}</p>
                   </td>
                 </tr>
               </table>
