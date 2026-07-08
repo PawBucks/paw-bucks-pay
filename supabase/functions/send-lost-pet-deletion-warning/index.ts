@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
 import { currentHourInTz } from "../_shared/tz.ts";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const TARGET_LOCAL_HOUR = 9; // 9 AM in each pet owner's timezone
 
@@ -150,7 +151,7 @@ Deno.serve(async (req) => {
           <!-- Content -->
           <tr>
             <td style="padding: 40px 30px;">
-              <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 22px;">Hi ${userName},</h2>
+              <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 22px;">Hi ${escapeHtml(userName)},</h2>
               
               <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px 20px; margin-bottom: 24px; border-radius: 0 8px 8px 0;">
                 <p style="color: #92400e; margin: 0; font-size: 14px; font-weight: 600;">⚠️ Action Required</p>
@@ -158,11 +159,11 @@ Deno.serve(async (req) => {
               </div>
               
               <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-                Great news that <strong>${post.pet_name}</strong> has been ${post.status}! 🎉
+                Great news that <strong>${escapeHtml(post.pet_name)}</strong> has been ${escapeHtml(post.status)}! 🎉
               </p>
               
               <p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-                As part of our data cleanup policy, we automatically remove resolved lost pet flyers 7 days after they're marked as found or reunited. Your flyer for <strong>${post.pet_name}</strong> will be deleted on:
+                As part of our data cleanup policy, we automatically remove resolved lost pet flyers 7 days after they're marked as found or reunited. Your flyer for <strong>${escapeHtml(post.pet_name)}</strong> will be deleted on:
               </p>
               
               <div style="background-color: #f3f4f6; padding: 16px 20px; border-radius: 8px; text-align: center; margin-bottom: 24px;">

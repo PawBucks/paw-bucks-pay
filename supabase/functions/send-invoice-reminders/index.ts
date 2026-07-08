@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
 import { currentHourInTz } from "../_shared/tz.ts";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const TARGET_LOCAL_HOUR = 9; // 9 AM in each merchant's timezone
 
@@ -129,7 +130,7 @@ function generateEmailHtml(
 
   // Display logo or initial circle
   const logoHtml = logoUrl 
-    ? `<img src="${logoUrl}" alt="${merchant.business_name}" style="max-height:44px;max-width:150px;border-radius:6px;vertical-align:middle;" />`
+    ? `<img src="${logoUrl}" alt="${escapeHtml(merchant.business_name)}" style="max-height:44px;max-width:150px;border-radius:6px;vertical-align:middle;" />`
     : `<table role="presentation" cellspacing="0" cellpadding="0">
         <tr><td style="width:44px;height:44px;border-radius:10px;background:${brandColor};text-align:center;vertical-align:middle;font-size:15px;font-weight:800;color:#ffffff;font-family:-apple-system,sans-serif;">
           ${initials}
@@ -145,7 +146,7 @@ function generateEmailHtml(
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${headerText} — ${merchant.business_name}</title>
+<title>${escapeHtml(headerText)} — ${escapeHtml(merchant.business_name)}</title>
 </head>
 <body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f4f4f5;">
 
@@ -179,7 +180,7 @@ function generateEmailHtml(
             ${logoHtml}
           </td>
           <td style="padding-left:12px;vertical-align:middle;">
-            <div style="font-size:15px;font-weight:700;color:#0f172a;">${merchant.business_name}</div>
+            <div style="font-size:15px;font-weight:700;color:#0f172a;">${escapeHtml(merchant.business_name)}</div>
             <div style="font-size:12px;color:#94a3b8;">
               ${merchant.email || ''} ${merchant.phone ? `· ${merchant.phone}` : ''}
             </div>
@@ -192,10 +193,10 @@ function generateEmailHtml(
   <!-- CONTENT -->
   <tr>
     <td style="padding:24px 40px 40px;">
-      <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 18px;">Hi ${invoice.client_name},</p>
+      <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 18px;">Hi ${escapeHtml(invoice.client_name)},</p>
 
       <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 18px;">
-        This is a reminder that your invoice from <strong>${merchant.business_name}</strong> is ${isOverdue ? "now overdue" : "due soon"}.
+        This is a reminder that your invoice from <strong>${escapeHtml(merchant.business_name)}</strong> is ${isOverdue ? "now overdue" : "due soon"}.
       </p>
 
       <!-- Invoice Details Box -->
@@ -208,7 +209,7 @@ function generateEmailHtml(
                   <span style="color:#6b7280;font-size:13px;">Service</span>
                 </td>
                 <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-                  <strong style="color:#111827;font-size:13px;">${serviceName}</strong>
+                  <strong style="color:#111827;font-size:13px;">${escapeHtml(serviceName)}</strong>
                 </td>
               </tr>
               <tr>
@@ -216,7 +217,7 @@ function generateEmailHtml(
                   <span style="color:#6b7280;font-size:13px;">Invoice Number</span>
                 </td>
                 <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-                  <strong style="color:#111827;font-size:13px;font-family:monospace;">${invoice.invoice_number}</strong>
+                  <strong style="color:#111827;font-size:13px;font-family:monospace;">${escapeHtml(invoice.invoice_number)}</strong>
                 </td>
               </tr>
               <tr>
@@ -277,7 +278,7 @@ function generateEmailHtml(
             ${merchant.email ? `
             <a href="mailto:${merchant.email}"
               style="display:inline-block;color:#64748b;text-decoration:none;font-size:13px;padding:8px 14px;border:1px solid #e2e8f0;border-radius:8px;margin:0 4px;">
-              Message ${merchant.business_name}
+              Message ${escapeHtml(merchant.business_name)}
             </a>` : ''}
           </td>
         </tr>
@@ -285,7 +286,7 @@ function generateEmailHtml(
 
       ${merchant.email ? `
       <p style="color:#9ca3af;font-size:12px;line-height:1.6;margin:24px 0 0;text-align:center;">
-        Questions about this invoice? Contact ${merchant.business_name} directly at<br />
+        Questions about this invoice? Contact ${escapeHtml(merchant.business_name)} directly at<br />
         <a href="mailto:${merchant.email}" style="color:${brandColor};">${merchant.email}</a>
       </p>` : ''}
     </td>
@@ -295,7 +296,7 @@ function generateEmailHtml(
   <tr>
     <td style="background-color:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
       <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.6;">
-        This is an automated reminder from ${merchant.business_name} via PawBucks.<br/>
+        This is an automated reminder from ${escapeHtml(merchant.business_name)} via PawBucks.<br/>
         PawBucks, Inc. · <a href="mailto:support@pawbucks.app" style="color:#9ca3af;">support@pawbucks.app</a>
       </p>
     </td>

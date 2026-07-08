@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -110,7 +111,7 @@ serve(async (req) => {
     const items = invoice.invoice_items || [];
     const itemsHtml = items.map((item: any) => `
       <tr>
-        <td style="padding: 12px 8px; border-bottom: 1px solid #e6f5f3; color:#1a1a1a; font-size:14px;">${item.description}</td>
+        <td style="padding: 12px 8px; border-bottom: 1px solid #e6f5f3; color:#1a1a1a; font-size:14px;">${escapeHtml(item.description)}</td>
         <td style="padding: 12px 8px; border-bottom: 1px solid #e6f5f3; text-align: center; color:#4a4a4a; font-size:14px;">${item.quantity}</td>
         <td style="padding: 12px 8px; border-bottom: 1px solid #e6f5f3; text-align: right; color:#4a4a4a; font-size:14px;">$${Number(item.unit_price).toFixed(2)}</td>
         <td style="padding: 12px 8px; border-bottom: 1px solid #e6f5f3; text-align: right; color:#1a1a1a; font-size:14px; font-weight:600;">$${(Number(item.quantity) * Number(item.unit_price)).toFixed(2)}</td>
@@ -134,7 +135,7 @@ serve(async (req) => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice from ${merchant.business_name}</title>
+  <title>Invoice from ${escapeHtml(merchant.business_name)}</title>
 </head>
 <body style="margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color:#f5f7f7; color:#1a1a1a;">
   <div style="max-width:600px; margin:0 auto; padding:20px;">
@@ -142,18 +143,18 @@ serve(async (req) => {
       <!-- Header -->
       <div style="background:linear-gradient(135deg, #2E9E8F 0%, #247d72 100%); padding:32px 24px; text-align:center;">
         ${merchant.logo_url
-          ? `<img src="${merchant.logo_url}" alt="${merchant.business_name}" style="height:64px; width:64px; border-radius:50%; background:#fff; padding:4px; margin-bottom:14px; object-fit:cover;">`
-          : `<div style="height:64px; width:64px; line-height:64px; border-radius:50%; background:rgba(255,255,255,0.18); color:#fff; font-weight:800; font-size:22px; margin:0 auto 14px;">${(merchant.business_name || "?").slice(0,2).toUpperCase()}</div>`
+          ? `<img src="${encodeURI(merchant.logo_url)}" alt="${escapeHtml(merchant.business_name)}" style="height:64px; width:64px; border-radius:50%; background:#fff; padding:4px; margin-bottom:14px; object-fit:cover;">`
+          : `<div style="height:64px; width:64px; line-height:64px; border-radius:50%; background:rgba(255,255,255,0.18); color:#fff; font-weight:800; font-size:22px; margin:0 auto 14px;">${escapeHtml((merchant.business_name || "?").slice(0,2).toUpperCase())}</div>`
         }
-        <h1 style="color:#ffffff; margin:0; font-size:22px; font-weight:700;">${merchant.business_name}</h1>
-        ${merchant.address ? `<p style="color:rgba(255,255,255,0.9); margin:6px 0 0; font-size:13px;">${merchant.address}</p>` : ""}
+        <h1 style="color:#ffffff; margin:0; font-size:22px; font-weight:700;">${escapeHtml(merchant.business_name)}</h1>
+        ${merchant.address ? `<p style="color:rgba(255,255,255,0.9); margin:6px 0 0; font-size:13px;">${escapeHtml(merchant.address)}</p>` : ""}
       </div>
 
       <!-- Invoice meta -->
       <div style="padding:28px 24px 8px; text-align:center;">
         <p style="margin:0; font-size:12px; letter-spacing:0.12em; color:#2E9E8F; text-transform:uppercase; font-weight:600;">Invoice</p>
-        <h2 style="margin:6px 0 4px; color:#1a1a1a; font-size:24px; font-weight:700;">#${invoice.invoice_number}</h2>
-        ${invoice.title ? `<p style="margin:0 0 12px; color:#6b7280; font-size:14px;">${invoice.title}</p>` : `<div style="height:8px;"></div>`}
+        <h2 style="margin:6px 0 4px; color:#1a1a1a; font-size:24px; font-weight:700;">#${escapeHtml(invoice.invoice_number)}</h2>
+        ${invoice.title ? `<p style="margin:0 0 12px; color:#6b7280; font-size:14px;">${escapeHtml(invoice.title)}</p>` : `<div style="height:8px;"></div>`}
         <span style="display:inline-block; background:${badgeBg}; color:${badgeColor}; font-weight:600; font-size:13px; padding:6px 14px; border-radius:999px;">${badgeText}</span>
       </div>
 
@@ -176,10 +177,10 @@ serve(async (req) => {
       <!-- Bill To -->
       <div style="padding:0 24px 20px;">
         <p style="margin:0 0 8px; font-size:11px; color:#6b7280; text-transform:uppercase; letter-spacing:0.08em; font-weight:600;">Bill To</p>
-        <p style="margin:0; font-weight:600; color:#1a1a1a; font-size:15px;">${invoice.client_name}</p>
-        ${invoice.client_company ? `<p style="margin:2px 0 0; color:#6b7280; font-size:13px;">${invoice.client_company}</p>` : ""}
-        <p style="margin:2px 0 0; color:#6b7280; font-size:13px;">${invoice.client_email}</p>
-        ${invoice.client_phone ? `<p style="margin:2px 0 0; color:#6b7280; font-size:13px;">${invoice.client_phone}</p>` : ""}
+        <p style="margin:0; font-weight:600; color:#1a1a1a; font-size:15px;">${escapeHtml(invoice.client_name)}</p>
+        ${invoice.client_company ? `<p style="margin:2px 0 0; color:#6b7280; font-size:13px;">${escapeHtml(invoice.client_company)}</p>` : ""}
+        <p style="margin:2px 0 0; color:#6b7280; font-size:13px;">${escapeHtml(invoice.client_email)}</p>
+        ${invoice.client_phone ? `<p style="margin:2px 0 0; color:#6b7280; font-size:13px;">${escapeHtml(invoice.client_phone)}</p>` : ""}
       </div>
 
       <!-- Items -->
@@ -228,12 +229,12 @@ serve(async (req) => {
       ${invoice.notes ? `
       <div style="margin:0 24px 24px; padding:14px 16px; background:#f7fbfa; border-radius:12px;">
         <p style="margin:0 0 4px; font-weight:600; font-size:13px; color:#1a1a1a;">Notes</p>
-        <p style="margin:0; color:#4a4a4a; font-size:13px; white-space:pre-wrap;">${invoice.notes}</p>
+        <p style="margin:0; color:#4a4a4a; font-size:13px; white-space:pre-wrap;">${escapeHtml(invoice.notes)}</p>
       </div>` : ""}
 
       <!-- Thank you -->
       <div style="padding:8px 24px 20px; text-align:center;">
-        <p style="margin:0; color:#1a1a1a; font-size:14px; font-weight:600;">${invoice.footer || "Thank you for your business! 🐾"}</p>
+        <p style="margin:0; color:#1a1a1a; font-size:14px; font-weight:600;">${escapeHtml(invoice.footer || "Thank you for your business! 🐾")}</p>
       </div>
 
       <!-- Footer / contact -->
@@ -241,7 +242,7 @@ serve(async (req) => {
         <p style="margin:0; color:#1a1a1a; font-size:13px; font-weight:600;">Questions about this invoice?</p>
         ${merchant.phone ? `<p style="margin:6px 0 0;"><a href="tel:${merchant.phone}" style="color:#2E9E8F; text-decoration:none; font-weight:600; font-size:14px;">${merchant.phone}</a></p>` : ""}
         ${merchant.email ? `<p style="margin:4px 0 0;"><a href="mailto:${merchant.email}" style="color:#2E9E8F; text-decoration:none; font-size:13px;">${merchant.email}</a></p>` : ""}
-        <p style="margin:14px 0 0; color:#6b7280; font-size:12px;">${merchant.business_name} accepts PawBucks, Cash, Checks,<br>Credit Cards, Venmo and Zelle</p>
+        <p style="margin:14px 0 0; color:#6b7280; font-size:12px;">${escapeHtml(merchant.business_name)} accepts PawBucks, Cash, Checks,<br>Credit Cards, Venmo and Zelle</p>
         <p style="margin:14px 0 0; color:#9ca3af; font-size:12px;">🐾 Powered by <a href="https://pawbucks.app" style="color:#2E9E8F; text-decoration:none; font-weight:600;">pawbucks.app</a></p>
       </div>
     </div>

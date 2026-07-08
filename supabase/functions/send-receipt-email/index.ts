@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -104,8 +105,8 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
     const qty = item.qty && item.qty > 0 ? item.qty : null;
     const unit = item.unit_price ?? (qty ? item.price / qty : undefined);
     const label = qty && qty !== 1
-      ? `${item.name} <span style="color:#94a3b8;font-weight:400;">× ${qty}${unit !== undefined ? ` @ $${unit.toFixed(2)}` : ''}</span>`
-      : item.name;
+      ? `${escapeHtml(item.name)} <span style="color:#94a3b8;font-weight:400;">× ${qty}${unit !== undefined ? ` @ $${unit.toFixed(2)}` : ''}</span>`
+      : escapeHtml(item.name);
     return `
     <tr>
       <td style="padding:6px 0;font-size:14px;color:#0f172a;font-weight:400;">${label}</td>
@@ -184,9 +185,9 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
       <span style="display:inline-block;width:14px;color:#cbd5e1;font-weight:700;">${label}</span> ${value}
     </td></tr>`;
   const merchantContactRows =
-    (merchantLocation ? contactRow('◉', merchantLocation) : '') +
-    (merchantPhone ? contactRow('☏', merchantPhone) : '') +
-    (merchantEmail ? contactRow('✉', merchantEmail) : '');
+    (merchantLocation ? contactRow('◉', escapeHtml(merchantLocation)) : '') +
+    (merchantPhone ? contactRow('☏', escapeHtml(merchantPhone)) : '') +
+    (merchantEmail ? contactRow('✉', escapeHtml(merchantEmail)) : '');
   const merchantSectionHtml = `
   <tr><td style="padding:12px 16px 0;">
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#ffffff;border-radius:14px;">
@@ -199,8 +200,8 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
             </table>
           </td>
           <td valign="top" style="padding-left:12px;">
-            <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#0f172a;">${merchantName}</p>
-            ${merchantDescription ? `<p style="margin:0 0 6px;font-size:12px;color:#64748b;">${merchantDescription}</p>` : ''}
+            <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#0f172a;">${escapeHtml(merchantName)}</p>
+            ${merchantDescription ? `<p style="margin:0 0 6px;font-size:12px;color:#64748b;">${escapeHtml(merchantDescription)}</p>` : ''}
             <table cellpadding="0" cellspacing="0" role="presentation">${merchantContactRows}</table>
             ${merchantProfileUrl ? `<p style="margin:10px 0 0;font-size:12px;"><a href="${merchantProfileUrl}" style="color:#12a8b3;text-decoration:none;font-weight:600;">View Merchant Profile →</a></p>` : ''}
           </td>
@@ -214,7 +215,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Receipt — ${merchantName} — PawBucks</title>
+  <title>Receipt — ${escapeHtml(merchantName)} — PawBucks</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f0f4f5;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;color:#0f172a;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;">
   <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f0f4f5;">
@@ -252,7 +253,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 <tr><td style="padding-bottom:10px;">
                   <p style="margin:0 0 2px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;">Merchant</p>
-                  <p style="margin:0;font-size:13px;font-weight:500;color:#0f172a;">${merchantName}</p>
+                  <p style="margin:0;font-size:13px;font-weight:500;color:#0f172a;">${escapeHtml(merchantName)}</p>
                 </td></tr>
                 <tr><td style="padding-bottom:10px;">
                   <p style="margin:0 0 2px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;">Service</p>
