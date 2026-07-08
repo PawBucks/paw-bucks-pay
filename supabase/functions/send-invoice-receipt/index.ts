@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -50,7 +51,7 @@ function generateReceiptHtml(params: {
   const itemsHtml = items.map(item => `
     <tr>
       <td style="font-size:14px; color:#374151; border-bottom:1px solid #e5e7eb; padding:8px;">
-        ${item.description}
+        ${escapeHtml(item.description)}
       </td>
       <td align="center" style="font-size:14px; color:#374151; border-bottom:1px solid #e5e7eb; padding:8px;">
         ${Number(item.quantity).toFixed(item.unit_type === 'hour' ? 2 : 0)}
@@ -152,7 +153,7 @@ function generateReceiptHtml(params: {
             <td style="padding:24px 20px 16px;">
               <h1 style="margin:0 0 8px 0; font-size:22px; color:#111827;">Thank you for your payment!</h1>
               <p style="margin:0; font-size:14px; color:#6b7280;">
-                This receipt confirms your payment for Invoice <strong>${invoice.invoice_number}</strong>.
+                This receipt confirms your payment for Invoice <strong>${escapeHtml(invoice.invoice_number)}</strong>.
               </p>
             </td>
           </tr>
@@ -164,13 +165,13 @@ function generateReceiptHtml(params: {
                 <tr>
                   <td valign="top" width="50%" style="padding-right:10px;">
                     <p style="margin:0 0 4px 0; font-size:12px; color:#6b7280; text-transform:uppercase;">From</p>
-                    <p style="margin:0; font-size:14px; font-weight:600; color:#111827;">${merchant.business_name}</p>
-                    ${merchant.address ? `<p style="margin:4px 0 0 0; font-size:13px; color:#6b7280;">${merchant.address}</p>` : ''}
-                    ${merchant.phone ? `<p style="margin:2px 0 0 0; font-size:13px; color:#6b7280;">${merchant.phone}</p>` : ''}
+                    <p style="margin:0; font-size:14px; font-weight:600; color:#111827;">${escapeHtml(merchant.business_name)}</p>
+                    ${merchant.address ? `<p style="margin:4px 0 0 0; font-size:13px; color:#6b7280;">${escapeHtml(merchant.address)}</p>` : ''}
+                    ${merchant.phone ? `<p style="margin:2px 0 0 0; font-size:13px; color:#6b7280;">${escapeHtml(merchant.phone)}</p>` : ''}
                   </td>
                   <td valign="top" width="50%" style="padding-left:10px; text-align:right;">
                     <p style="margin:0 0 4px 0; font-size:12px; color:#6b7280; text-transform:uppercase;">Invoice Details</p>
-                    <p style="margin:0; font-size:13px; color:#374151;"><strong>Invoice #:</strong> ${invoice.invoice_number}</p>
+                    <p style="margin:0; font-size:13px; color:#374151;"><strong>Invoice #:</strong> ${escapeHtml(invoice.invoice_number)}</p>
                     <p style="margin:4px 0 0 0; font-size:13px; color:#374151;"><strong>Issue Date:</strong> ${formattedIssueDate}</p>
                     <p style="margin:4px 0 0 0; font-size:13px; color:#374151;"><strong>Paid:</strong> ${formattedPaidDate}</p>
                   </td>
@@ -183,9 +184,9 @@ function generateReceiptHtml(params: {
           <tr>
             <td style="padding:0 20px 20px;">
               <p style="margin:0 0 4px 0; font-size:12px; color:#6b7280; text-transform:uppercase;">Bill To</p>
-              <p style="margin:0; font-size:14px; font-weight:600; color:#111827;">${invoice.client_name}</p>
-              ${invoice.client_company ? `<p style="margin:2px 0 0 0; font-size:13px; color:#6b7280;">${invoice.client_company}</p>` : ''}
-              <p style="margin:2px 0 0 0; font-size:13px; color:#6b7280;">${invoice.client_email}</p>
+              <p style="margin:0; font-size:14px; font-weight:600; color:#111827;">${escapeHtml(invoice.client_name)}</p>
+              ${invoice.client_company ? `<p style="margin:2px 0 0 0; font-size:13px; color:#6b7280;">${escapeHtml(invoice.client_company)}</p>` : ''}
+              <p style="margin:2px 0 0 0; font-size:13px; color:#6b7280;">${escapeHtml(invoice.client_email)}</p>
             </td>
           </tr>
 
@@ -295,7 +296,7 @@ function generateReceiptHtml(params: {
           <tr>
             <td style="padding:20px; background-color:#f9fafb; text-align:center;">
               <p style="margin:0 0 8px 0; font-size:12px; color:#6b7280;">
-                Questions? Contact ${merchant.business_name} or support@pawbucks.app
+                Questions? Contact ${escapeHtml(merchant.business_name)} or support@pawbucks.app
               </p>
               <p style="margin:0; font-size:12px; color:#6b7280;">
                 PawBucks, Inc. • This is an electronically generated receipt.
