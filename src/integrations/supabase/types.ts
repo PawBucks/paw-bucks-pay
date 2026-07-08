@@ -12763,6 +12763,54 @@ export type Database = {
           },
         ]
       }
+      transaction_reconciliation_log: {
+        Row: {
+          action: string
+          amount: number | null
+          created_at: string
+          details: Json
+          error_message: string | null
+          id: string
+          merchant_id: string | null
+          restored_transaction_id: string | null
+          run_id: string
+          stripe_account_id: string | null
+          stripe_payment_intent_id: string | null
+          target_table: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          amount?: number | null
+          created_at?: string
+          details?: Json
+          error_message?: string | null
+          id?: string
+          merchant_id?: string | null
+          restored_transaction_id?: string | null
+          run_id: string
+          stripe_account_id?: string | null
+          stripe_payment_intent_id?: string | null
+          target_table?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          amount?: number | null
+          created_at?: string
+          details?: Json
+          error_message?: string | null
+          id?: string
+          merchant_id?: string | null
+          restored_transaction_id?: string | null
+          run_id?: string
+          stripe_account_id?: string | null
+          stripe_payment_intent_id?: string | null
+          target_table?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
