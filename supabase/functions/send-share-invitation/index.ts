@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -106,12 +107,12 @@ serve(async (req) => {
               <!-- Content -->
               <div style="padding: 32px;">
                 <p style="font-size: 16px; color: #333; margin: 0 0 24px 0;">
-                  <strong>${senderName}</strong> wants to share their PawBucks account with you!
+                  <strong>${escapeHtml(senderName)}</strong> wants to share their PawBucks account with you!
                 </p>
                 
                 <div style="background: #fef3c7; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                   <p style="margin: 0; color: #92400e; font-size: 15px; line-height: 1.6;">
-                    By accepting this invitation, you'll share ${senderName}'s PawBucks wallet and enjoy rewards together as part of their account family.
+                    By accepting this invitation, you'll share ${escapeHtml(senderName)}'s PawBucks wallet and enjoy rewards together as part of their account family.
                   </p>
                 </div>
                 
