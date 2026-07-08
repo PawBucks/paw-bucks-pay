@@ -10,6 +10,18 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Escape user-controlled strings before HTML interpolation to prevent
+// HTML injection into PawBucks-branded emails.
+const escapeHtml = (value: unknown): string => {
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
 interface NotificationRequest {
   type: "confirmed" | "cancelled" | "rescheduled" | "request";
   recipientEmail: string;
@@ -184,6 +196,15 @@ const handler = async (req: Request): Promise<Response> => {
     let html = "";
     let attachments: Array<{ filename: string; content: string }> = [];
 
+    // Pre-escape every user-controlled field once.
+    const safeBookingDate = escapeHtml(bookingDate);
+    const safeTimeSlot = escapeHtml(timeSlot);
+    const safeNotes = notes ? escapeHtml(notes) : "";
+    const safePreviousDate = previousDate ? escapeHtml(previousDate) : "";
+    const safePreviousTimeSlot = previousTimeSlot ? escapeHtml(previousTimeSlot) : "";
+    const safeMerchantName = merchantName ? escapeHtml(merchantName) : "";
+    const safeRequesterEmail = requesterEmail ? escapeHtml(requesterEmail) : "";
+
     if (type === "confirmed") {
       subject = "Your PawBucks Consultation is Confirmed!";
       html = `
@@ -197,10 +218,10 @@ const handler = async (req: Request): Promise<Response> => {
           
           <div style="background: #F3F4F6; border-radius: 12px; padding: 20px; margin: 20px 0;">
             <h3 style="margin: 0 0 15px 0; color: #374151;">📅 Appointment Details</h3>
-            <p style="margin: 5px 0;"><strong>Date:</strong> ${bookingDate}</p>
-            <p style="margin: 5px 0;"><strong>Time:</strong> ${timeSlot} Pacific Time</p>
+            <p style="margin: 5px 0;"><strong>Date:</strong> ${safeBookingDate}</p>
+            <p style="margin: 5px 0;"><strong>Time:</strong> ${safeTimeSlot} Pacific Time</p>
             <p style="margin: 5px 0;"><strong>Duration:</strong> 15 minutes</p>
-            ${notes ? `<p style="margin: 5px 0;"><strong>Notes:</strong> ${notes}</p>` : ""}
+            ${safeNotes ? `<p style="margin: 5px 0;"><strong>Notes:</strong> ${safeNotes}</p>` : ""}
           </div>
           
           <p style="color: #6B7280; font-size: 14px;">A calendar invite is attached. You'll receive a video call link before your appointment.</p>
@@ -231,8 +252,8 @@ const handler = async (req: Request): Promise<Response> => {
           
           <div style="background: #FEF2F2; border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid #FECACA;">
             <h3 style="margin: 0 0 15px 0; color: #991B1B;">❌ Cancelled Appointment</h3>
-            <p style="margin: 5px 0;"><strong>Date:</strong> ${bookingDate}</p>
-            <p style="margin: 5px 0;"><strong>Time:</strong> ${timeSlot} Pacific Time</p>
+            <p style="margin: 5px 0;"><strong>Date:</strong> ${safeBookingDate}</p>
+            <p style="margin: 5px 0;"><strong>Time:</strong> ${safeTimeSlot} Pacific Time</p>
           </div>
           
           <p>If you'd like to reschedule, please visit your merchant dashboard to book a new time.</p>
@@ -252,17 +273,17 @@ const handler = async (req: Request): Promise<Response> => {
           
           <p>Your consultation has been rescheduled to a new time.</p>
           
-          ${previousDate && previousTimeSlot ? `
+          ${safePreviousDate && safePreviousTimeSlot ? `
           <div style="background: #FEF2F2; border-radius: 12px; padding: 15px; margin: 20px 0; border: 1px solid #FECACA;">
             <h4 style="margin: 0 0 10px 0; color: #991B1B;">❌ Previous Time</h4>
-            <p style="margin: 5px 0; text-decoration: line-through; color: #6B7280;">${previousDate} at ${previousTimeSlot} PT</p>
+            <p style="margin: 5px 0; text-decoration: line-through; color: #6B7280;">${safePreviousDate} at ${safePreviousTimeSlot} PT</p>
           </div>
           ` : ""}
           
           <div style="background: #ECFDF5; border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid #A7F3D0;">
             <h3 style="margin: 0 0 15px 0; color: #065F46;">✅ New Appointment</h3>
-            <p style="margin: 5px 0;"><strong>Date:</strong> ${bookingDate}</p>
-            <p style="margin: 5px 0;"><strong>Time:</strong> ${timeSlot} Pacific Time</p>
+            <p style="margin: 5px 0;"><strong>Date:</strong> ${safeBookingDate}</p>
+            <p style="margin: 5px 0;"><strong>Time:</strong> ${safeTimeSlot} Pacific Time</p>
             <p style="margin: 5px 0;"><strong>Duration:</strong> 15 minutes</p>
           </div>
           
@@ -294,11 +315,11 @@ const handler = async (req: Request): Promise<Response> => {
           
           <div style="background: #F3F4F6; border-radius: 12px; padding: 20px; margin: 20px 0;">
             <h3 style="margin: 0 0 15px 0; color: #374151;">📅 Requested Appointment</h3>
-            <p style="margin: 5px 0;"><strong>Date:</strong> ${bookingDate}</p>
-            <p style="margin: 5px 0;"><strong>Time:</strong> ${timeSlot} Pacific Time</p>
+            <p style="margin: 5px 0;"><strong>Date:</strong> ${safeBookingDate}</p>
+            <p style="margin: 5px 0;"><strong>Time:</strong> ${safeTimeSlot} Pacific Time</p>
             <p style="margin: 5px 0;"><strong>Duration:</strong> 15 minutes</p>
-            <p style="margin: 5px 0;"><strong>Requester:</strong> ${requesterEmail || "Unknown"}</p>
-            ${merchantName ? `<p style="margin: 5px 0;"><strong>Business:</strong> ${merchantName}</p>` : ""}
+            <p style="margin: 5px 0;"><strong>Requester:</strong> ${safeRequesterEmail || "Unknown"}</p>
+            ${safeMerchantName ? `<p style="margin: 5px 0;"><strong>Business:</strong> ${safeMerchantName}</p>` : ""}
           </div>
           
           <p>Please confirm this appointment in the Admin Dashboard.</p>
