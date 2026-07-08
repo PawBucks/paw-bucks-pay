@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -336,13 +337,13 @@ function generateInvoicePaidEmailHtml(
                           <tr>
                             <td style="padding:4px 0;">
                               <span style="font-size:11px;color:#9ca3af;text-transform:uppercase;">Merchant</span><br/>
-                              <span style="font-size:15px;font-weight:700;color:#111827;">${displayName}</span>
+                              <span style="font-size:15px;font-weight:700;color:#111827;">${escapeHtml(displayName)}</span>
                             </td>
                           </tr>
                           <tr>
                             <td style="padding:10px 0 4px;">
                               <span style="font-size:11px;color:#9ca3af;text-transform:uppercase;">Customer</span><br/>
-                              <span style="font-size:15px;font-weight:600;color:#111827;">${clientName}</span>
+                              <span style="font-size:15px;font-weight:600;color:#111827;">${escapeHtml(clientName)}</span>
                             </td>
                           </tr>
                           <tr>
@@ -354,13 +355,13 @@ function generateInvoicePaidEmailHtml(
                           ${invoiceTitle ? `<tr>
                             <td style="padding:10px 0 4px;">
                               <span style="font-size:11px;color:#9ca3af;text-transform:uppercase;">Service</span><br/>
-                              <span style="font-size:14px;color:#374151;">${invoiceTitle}</span>
+                              <span style="font-size:14px;color:#374151;">${escapeHtml(invoiceTitle)}</span>
                             </td>
                           </tr>` : ''}
                           <tr>
                             <td style="padding:10px 0 0;">
                               <span style="font-size:11px;color:#9ca3af;text-transform:uppercase;">Receipt ID</span><br/>
-                              <span style="font-size:14px;font-weight:600;color:#374151;font-family:monospace;">${invoiceNumber}</span>
+                              <span style="font-size:14px;font-weight:600;color:#374151;font-family:monospace;">${escapeHtml(invoiceNumber)}</span>
                             </td>
                           </tr>
                         </table>
@@ -407,8 +408,8 @@ function generateInvoicePaidEmailHtml(
                 <tr>${sectionLabel('Customer Info')}</tr>
                 <tr>
                   <td style="padding:4px 32px 0;">
-                    <p style="margin:0;font-size:15px;font-weight:600;color:#111827;">${clientName}</p>
-                    <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">${clientEmail}</p>
+                    <p style="margin:0;font-size:15px;font-weight:600;color:#111827;">${escapeHtml(clientName)}</p>
+                    <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">${escapeHtml(clientEmail)}</p>
                   </td>
                 </tr>
 
