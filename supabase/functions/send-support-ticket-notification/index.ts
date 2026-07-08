@@ -7,6 +7,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Escape user-controlled strings before HTML interpolation to prevent
+// HTML injection into PawBucks-branded support emails.
+const escapeHtml = (value: unknown): string => {
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
 type NotificationType =
   | "ticket_created"
   | "status_changed"
@@ -45,7 +57,17 @@ function buildEmailHtml(data: NotificationRequest & { recipientName: string }): 
 
   let bannerColor = "#3b82f6";
   let bannerTitle = "Support Ticket Update";
-  let bannerSubtitle = data.ticketNumber;
+  // Escape every user-controlled field exactly once so nothing renders as raw HTML.
+  const safeTicketNumber = escapeHtml(data.ticketNumber);
+  const safeTicketSubject = escapeHtml(data.ticketSubject);
+  const safeReplyMessage = escapeHtml(data.replyMessage);
+  const safeSenderName = escapeHtml(data.senderName || "");
+  const safeSubmitterType = escapeHtml(data.submitterType || "");
+  const safeResolutionNotes = escapeHtml(data.resolutionNotes || "");
+  const safeRecipientName = escapeHtml(data.recipientName || "");
+  const safeOldStatusLabel = escapeHtml(STATUS_LABELS[data.oldStatus || ""] || data.oldStatus || "");
+  const safeNewStatusLabel = escapeHtml(STATUS_LABELS[data.newStatus || ""] || data.newStatus || "");
+  let bannerSubtitle = safeTicketNumber;
   let bodyContent = "";
 
   switch (data.type) {
@@ -54,13 +76,13 @@ function buildEmailHtml(data: NotificationRequest & { recipientName: string }): 
       bannerTitle = "Ticket Submitted";
       bodyContent = `
         <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">
-          Your support ticket <strong>${data.ticketNumber}</strong> has been received. Our team will review it and get back to you as soon as possible.
+          Your support ticket <strong>${safeTicketNumber}</strong> has been received. Our team will review it and get back to you as soon as possible.
         </p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; margin: 0 0 24px 0;">
           <tr><td style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
             <table width="100%"><tr>
               <td style="color: #6b7280; font-size: 14px;">Subject</td>
-              <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${data.ticketSubject}</td>
+              <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${safeTicketSubject}</td>
             </tr></table>
           </td></tr>
           <tr><td style="padding: 16px 20px;">
@@ -77,32 +99,32 @@ function buildEmailHtml(data: NotificationRequest & { recipientName: string }): 
       bannerTitle = data.newStatus === "resolved" ? "Ticket Resolved" : "Status Updated";
       bodyContent = `
         <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">
-          The status of your support ticket <strong>${data.ticketNumber}</strong> has been updated.
+          The status of your support ticket <strong>${safeTicketNumber}</strong> has been updated.
         </p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; margin: 0 0 24px 0;">
           <tr><td style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
             <table width="100%"><tr>
               <td style="color: #6b7280; font-size: 14px;">Subject</td>
-              <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${data.ticketSubject}</td>
+              <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${safeTicketSubject}</td>
             </tr></table>
           </td></tr>
           <tr><td style="padding: 16px 20px; border-bottom: 1px solid #e5e7eb;">
             <table width="100%"><tr>
               <td style="color: #6b7280; font-size: 14px;">Previous Status</td>
-              <td style="text-align: right; font-weight: 600; color: #6b7280; font-size: 14px;">${STATUS_LABELS[data.oldStatus || ""] || data.oldStatus}</td>
+              <td style="text-align: right; font-weight: 600; color: #6b7280; font-size: 14px;">${safeOldStatusLabel}</td>
             </tr></table>
           </td></tr>
           <tr><td style="padding: 16px 20px;">
             <table width="100%"><tr>
               <td style="color: #6b7280; font-size: 14px;">New Status</td>
-              <td style="text-align: right; font-weight: 700; color: ${data.newStatus === "resolved" ? "#10b981" : "#f59e0b"}; font-size: 16px;">${STATUS_LABELS[data.newStatus || ""] || data.newStatus}</td>
+              <td style="text-align: right; font-weight: 700; color: ${data.newStatus === "resolved" ? "#10b981" : "#f59e0b"}; font-size: 16px;">${safeNewStatusLabel}</td>
             </tr></table>
           </td></tr>
         </table>
-        ${data.resolutionNotes ? `
+        ${safeResolutionNotes ? `
         <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
           <p style="margin: 0 0 4px 0; font-size: 13px; font-weight: 600; color: #065f46;">Resolution Notes:</p>
-          <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.5;">${data.resolutionNotes}</p>
+          <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.5; white-space: pre-wrap;">${safeResolutionNotes}</p>
         </div>` : ""}`;
       break;
 
@@ -111,11 +133,11 @@ function buildEmailHtml(data: NotificationRequest & { recipientName: string }): 
       bannerTitle = "New Reply from Support";
       bodyContent = `
         <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">
-          Our support team has replied to your ticket <strong>${data.ticketNumber}</strong>.
+          Our support team has replied to your ticket <strong>${safeTicketNumber}</strong>.
         </p>
         <div style="background-color: #eef2ff; border-left: 4px solid #6366f1; border-radius: 0 8px 8px 0; padding: 16px; margin: 0 0 24px 0;">
           <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #4338ca;">🛡️ Support Team</p>
-          <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6; white-space: pre-wrap;">${data.replyMessage}</p>
+          <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6; white-space: pre-wrap;">${safeReplyMessage}</p>
         </div>
         <p style="margin: 0; font-size: 14px; color: #6b7280;">Log in to your account to reply.</p>`;
       break;
@@ -125,19 +147,19 @@ function buildEmailHtml(data: NotificationRequest & { recipientName: string }): 
       bannerTitle = "New Reply on Ticket";
       bodyContent = `
         <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">
-          <strong>${data.senderName || "A user"}</strong> (${data.submitterType || "user"}) has replied to ticket <strong>${data.ticketNumber}</strong>.
+          <strong>${safeSenderName || "A user"}</strong> (${safeSubmitterType || "user"}) has replied to ticket <strong>${safeTicketNumber}</strong>.
         </p>
         <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; margin: 0 0 16px 0;">
           <tr><td style="padding: 16px 20px;">
             <table width="100%"><tr>
               <td style="color: #6b7280; font-size: 14px;">Subject</td>
-              <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${data.ticketSubject}</td>
+              <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${safeTicketSubject}</td>
             </tr></table>
           </td></tr>
         </table>
         <div style="background-color: #f3f4f6; border-left: 4px solid #9ca3af; border-radius: 0 8px 8px 0; padding: 16px; margin: 0 0 24px 0;">
-          <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #6b7280;">👤 ${data.senderName || "User"}</p>
-          <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6; white-space: pre-wrap;">${data.replyMessage}</p>
+          <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #6b7280;">👤 ${safeSenderName || "User"}</p>
+          <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6; white-space: pre-wrap;">${safeReplyMessage}</p>
         </div>
         <p style="margin: 0; font-size: 14px; color: #6b7280;">Log in to the admin dashboard to respond.</p>`;
       break;
@@ -157,12 +179,12 @@ function buildEmailHtml(data: NotificationRequest & { recipientName: string }): 
           <table width="100%" cellpadding="0" cellspacing="0" style="background: ${bannerColor}; border-radius: 12px;">
             <tr><td style="padding: 20px; text-align: center;">
               <p style="margin: 0 0 4px 0; font-size: 14px; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 1px;">${bannerTitle}</p>
-              <p style="margin: 0; font-size: 18px; font-weight: 700; color: #ffffff;">${bannerSubtitle} — ${data.ticketSubject}</p>
+              <p style="margin: 0; font-size: 18px; font-weight: 700; color: #ffffff;">${bannerSubtitle} — ${safeTicketSubject}</p>
             </td></tr>
           </table>
         </td></tr>
         <tr><td style="padding: 32px;">
-          <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">Hi ${data.recipientName || "there"},</p>
+          <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">Hi ${safeRecipientName || "there"},</p>
           ${bodyContent}
         </td></tr>
         <tr><td style="background-color: #f9fafb; padding: 24px 32px; text-align: center; border-radius: 0 0 12px 12px; border-top: 1px solid #e5e7eb;">
