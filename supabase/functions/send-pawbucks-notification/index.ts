@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -70,7 +71,7 @@ function buildCreditEmailHtml(data: PawBucksNotificationRequest): string {
           <tr>
             <td style="padding: 32px;">
               <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">
-                Hi ${data.recipientName || 'there'},
+                Hi ${escapeHtml(data.recipientName || 'there')},
               </p>
               <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">
                 Great news! <strong>${formatPawBucks(data.amount)} PawBucks</strong> have been added to your account. Here are the details of this credit:
@@ -103,7 +104,7 @@ function buildCreditEmailHtml(data: PawBucksNotificationRequest): string {
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="color: #6b7280; font-size: 14px;">Reason</td>
-                        <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${data.reason}</td>
+                        <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${escapeHtml(data.reason)}</td>
                       </tr>
                     </table>
                   </td>
@@ -217,7 +218,7 @@ function buildDebitEmailHtml(data: PawBucksNotificationRequest): string {
           <tr>
             <td style="padding: 32px;">
               <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">
-                Hi ${data.recipientName || 'there'},
+                Hi ${escapeHtml(data.recipientName || 'there')},
               </p>
               <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">
                 This email is to notify you that <strong>${formatPawBucks(data.amount)} PawBucks</strong> have been deducted from your account. Below are the full details of this adjustment:
@@ -250,7 +251,7 @@ function buildDebitEmailHtml(data: PawBucksNotificationRequest): string {
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="color: #6b7280; font-size: 14px;">Reason</td>
-                        <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${data.reason}</td>
+                        <td style="text-align: right; font-weight: 600; color: #111827; font-size: 14px;">${escapeHtml(data.reason)}</td>
                       </tr>
                     </table>
                   </td>
