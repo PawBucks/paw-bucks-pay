@@ -112,13 +112,13 @@ export function UserDetailWallet({ userId }: { userId: string }) {
  <SummaryCard
  icon={<PawBucksLogo className="w-5 h-5 text-primary" />}
  label="PawBucks Balance"
- value={(pawbucksWallet?.balance ?? 0).toLocaleString()}
+          value={`${Formatters.currency(((pawbucksWallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE))} (${(pawbucksWallet?.balance ?? 0).toLocaleString()} PB)`}
  />
- <SummaryCard
- icon={<Wallet className="w-5 h-5 text-success" aria-hidden="true" />}
- label="Cashback Balance"
- value={`${Formatters.currency(((pawbucksWallet?.balance ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE))}`}
- />
+        <SummaryCard
+          icon={<Wallet className="w-5 h-5 text-success" aria-hidden="true" />}
+          label="Cash Wallet Balance"
+          value={Formatters.currency(wallet?.balance ?? 0)}
+        />
  <SummaryCard
  icon={<TrendingDown className="w-5 h-5 text-destructive" aria-hidden="true" />}
  label={isMerchant ?"Total Revenue" :"Total Spent"}
