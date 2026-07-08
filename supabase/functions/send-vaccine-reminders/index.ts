@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
 import { currentHourInTz } from "../_shared/tz.ts";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const TARGET_LOCAL_HOUR = 9; // 9 AM in each recipient's timezone
 
@@ -43,10 +44,12 @@ function formatLocalDate(yyyyMmDd: string): string {
 }
 
 function buildEmailHtml(petName: string, vaccineName: string, dueDate: string, milestone: Milestone, shareUrl: string | null): string {
+  const petNameEsc = escapeHtml(petName);
+  const vaccineNameEsc = escapeHtml(vaccineName);
   const isOverdue = milestone === "overdue";
   const headline = isOverdue
-    ? `${petName}'s ${vaccineName} vaccine is overdue`
-    : `${petName}'s ${vaccineName} vaccine is due ${MILESTONES.find(m => m.key === milestone)?.label}`;
+    ? `${petNameEsc}'s ${vaccineNameEsc} vaccine is overdue`
+    : `${petNameEsc}'s ${vaccineNameEsc} vaccine is due ${MILESTONES.find(m => m.key === milestone)?.label}`;
   const accent = isOverdue ? "#dc2626" : "#0d9488";
   return `
   <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:0 auto;background:#fff;color:#111">
@@ -55,9 +58,9 @@ function buildEmailHtml(petName: string, vaccineName: string, dueDate: string, m
       <h1 style="margin:8px 0 0;font-size:22px;line-height:1.3">${headline}</h1>
     </div>
     <div style="padding:24px;border:1px solid #eee;border-top:none;border-radius:0 0 14px 14px">
-      <p style="margin:0 0 14px;font-size:15px">Hi there — this is a friendly reminder from PawBucks about <strong>${petName}</strong>.</p>
+      <p style="margin:0 0 14px;font-size:15px">Hi there — this is a friendly reminder from PawBucks about <strong>${petNameEsc}</strong>.</p>
       <table style="width:100%;border-collapse:collapse;margin:12px 0">
-        <tr><td style="padding:6px 0;color:#6b7280;font-size:13px">Vaccine</td><td style="padding:6px 0;font-weight:600">${vaccineName}</td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280;font-size:13px">Vaccine</td><td style="padding:6px 0;font-weight:600">${vaccineNameEsc}</td></tr>
         <tr><td style="padding:6px 0;color:#6b7280;font-size:13px">Due date</td><td style="padding:6px 0;font-weight:600;color:${accent}">${formatLocalDate(dueDate)}</td></tr>
       </table>
       <p style="font-size:14px;color:#374151">${isOverdue
