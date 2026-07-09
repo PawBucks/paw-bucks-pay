@@ -772,6 +772,34 @@ serve(async (req) => {
 
     logStep("Subscription created", { subscriptionId: subscription.id });
 
+    // === CRITICAL: Insert transactions row keyed by stripe_payment_intent_id ===
+    // This is the definitive duplicate-guard for connect-webhook / stripe-webhook.
+    // If we skip this, those webhooks fall through their metadata guard on any
+    // race/replay/redeploy and create a second (PAY-xxx) "Payment Received"
+    // email plus a duplicate PawBucks earn row for the same charge.
+    const stripeAmountInDollarsForTx = stripeChargeAmount / 100;
+    const platformFeeUsd = (applicationFee || 0) / 100;
+    const { error: txInsertErr } = await supabaseAdmin
+      .from("transactions")
+      .insert({
+        user_id: user.id,
+        merchant_id: merchantId,
+        amount: amount / 100,
+        stripe_amount: stripeAmountInDollarsForTx,
+        pawbucks_used: actualPawbucksUsed,
+        application_fee: platformFeeUsd,
+        status: "completed",
+        rewards_earned: 0, // filled in below once tier is resolved
+        cashback_earned: 0,
+        stripe_payment_intent_id: paymentIntent.id,
+        description: `${productName} subscription to ${merchant.business_name}`,
+      });
+    if (txInsertErr && (txInsertErr as any).code !== "23505") {
+      logStep("WARN: failed to insert transactions row for subscription", { error: txInsertErr.message });
+    } else {
+      logStep("Transactions row inserted for subscription (idempotency guard)");
+    }
+
     // Log subscription event
     await supabaseAdmin.from("merchant_subscription_events").insert({
       subscription_id: subscription.id,
