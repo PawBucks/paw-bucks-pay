@@ -1538,6 +1538,28 @@ serve(async (req) => {
         return new Response(JSON.stringify({ received: true, skipped: 'merchant_recurring_handled_elsewhere' }), { status: 200 });
       }
 
+      // DB-based fallback guard: skip if a merchant_subscriptions row already
+      // owns this PaymentIntent. Metadata may be missing on replays/edits;
+      // this catches the duplicate regardless.
+      {
+        const { data: existingMerchSub } = await supabaseAdmin
+          .from('merchant_subscriptions')
+          .select('id')
+          .eq('last_payment_intent_id', paymentIntent.id)
+          .maybeSingle();
+        if (existingMerchSub) {
+          console.log('[PAYMENT_INTENT] ⏭️ Skipping merchant recurring subscription (DB guard)', {
+            paymentIntentId: paymentIntent.id,
+            subscriptionId: existingMerchSub.id,
+          });
+          await supabaseAdmin
+            .from('webhook_logs')
+            .update({ processed: true })
+            .eq('event_id', event.id);
+          return new Response(JSON.stringify({ received: true, skipped: 'merchant_recurring_db_guard' }), { status: 200 });
+        }
+      }
+
       // ========================================
       // DUPLICATE PREVENTION CHECK
       // Skip if this payment was already processed via checkout.session.completed
