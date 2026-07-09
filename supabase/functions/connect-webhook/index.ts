@@ -618,6 +618,28 @@ serve(async (req) => {
           return new Response(JSON.stringify({ received: true, skipped: 'merchant_subscription_handled_elsewhere' }), { status: 200 });
         }
 
+        // DB-based fallback guard: if a merchant_subscriptions row already tracks
+        // this PaymentIntent (initial signup or cron renewal), skip regardless of
+        // metadata. Metadata can be stripped by Stripe replays, edited by mistake,
+        // or missing when this webhook is invoked outside the normal flow.
+        {
+          const { data: existingMerchSub } = await supabaseAdmin
+            .from('merchant_subscriptions')
+            .select('id')
+            .eq('last_payment_intent_id', paymentIntent.id)
+            .maybeSingle();
+          if (existingMerchSub) {
+            logStep("Merchant subscription payment detected via DB lookup - skipping", {
+              paymentIntentId: paymentIntent.id,
+              subscriptionId: existingMerchSub.id,
+            });
+            await supabaseAdmin.from('webhook_logs')
+              .update({ processed: true })
+              .eq('event_id', event.id);
+            return new Response(JSON.stringify({ received: true, skipped: 'merchant_subscription_db_guard' }), { status: 200 });
+          }
+        }
+
         // Check if transaction already exists (idempotency)
         const { data: existingTx } = await supabaseAdmin
           .from('transactions')
