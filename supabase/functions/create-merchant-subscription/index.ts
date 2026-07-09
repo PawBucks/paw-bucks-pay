@@ -905,6 +905,14 @@ serve(async (req) => {
       paymentIntent.id
     );
 
+    // Update transactions row with rewards_earned (best-effort)
+    if (pawbucksEarned > 0) {
+      await supabaseAdmin
+        .from("transactions")
+        .update({ rewards_earned: pawbucksEarned, cashback_earned: pawbucksEarned })
+        .eq("stripe_payment_intent_id", paymentIntent.id);
+    }
+
     // Auto-log success fee as Tax Vault expense
     if (applicationFee > 0) {
       const expenseDate = new Date().toISOString().split('T')[0];
