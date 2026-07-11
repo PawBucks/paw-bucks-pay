@@ -3,16 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  ArrowDownRight,
-  ArrowUpRight,
   Check,
-  CheckCircle2,
   Copy,
-  HelpCircle,
   Lock,
   MapPin,
   Sparkles,
   Store,
+  Handshake,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,12 +19,12 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PageLoader } from "@/components/PageLoader";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
 import { toast } from "@/hooks/use-toast";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
-import { getCategoryEmoji } from "@/lib/categoryMapping";
 import { format } from "date-fns";
 
 type RedemptionRow = {
@@ -45,6 +42,7 @@ type RedemptionRow = {
     partner_id: string;
     is_active: boolean | null;
     status: string | null;
+    offer_type: string | null;
     merchants: {
       id: string;
       business_name: string;
