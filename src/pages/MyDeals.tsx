@@ -3,16 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  ArrowDownRight,
-  ArrowUpRight,
   Check,
-  CheckCircle2,
   Copy,
-  HelpCircle,
+  Handshake,
   Lock,
   MapPin,
   Sparkles,
   Store,
+  UserPlus,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,13 +20,20 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
 import { PageLoader } from "@/components/PageLoader";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
 import { toast } from "@/hooks/use-toast";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
-import { getCategoryEmoji } from "@/lib/categoryMapping";
-import { format } from "date-fns";
+
+// --- Data types -----------------------------------------------------------
+type OfferType = "new_customer" | "partner_deal" | "pawbucks_redemption";
 
 type RedemptionRow = {
   id: string;
@@ -45,6 +50,7 @@ type RedemptionRow = {
     partner_id: string;
     is_active: boolean | null;
     status: string | null;
+    offer_type: OfferType | string | null;
     merchants: {
       id: string;
       business_name: string;
@@ -67,30 +73,10 @@ type LockedMerchant = {
   distance: number | null;
 };
 
-type FullEcosystemOffer = {
+type BrandedEarnRow = {
   id: string;
-  title: string;
-  description: string | null;
-  coins_required: number | null;
-  end_date: string | null;
-  partner_id: string;
-  merchants: {
-    id: string;
-    business_name: string;
-    business_type: string | null;
-    address: string | null;
-    latitude: number | null;
-    longitude: number | null;
-    fee_model: string | null;
-    stripe_account_status: string | null;
-  } | null;
-  distance: number | null;
-};
-
-type BrandedActivityRow = {
-  id: string;
-  type: string;
   amount: number;
+  type: string;
   description: string | null;
   created_at: string;
   campaign_id: string | null;
@@ -100,17 +86,70 @@ type BrandedActivityRow = {
     name: string;
     campaign_color: string | null;
     campaign_logo_url: string | null;
+    end_date?: string | null;
     brand_id: string;
-    brand_accounts: { id: string; brand_name: string; logo_url: string | null } | null;
+    brand_accounts: {
+      id: string;
+      brand_name: string;
+      logo_url: string | null;
+    } | null;
   } | null;
 };
 
+// --- Card variant styling per offer type ----------------------------------
+const TYPE_META: Record<
+  OfferType | "branded",
+  {
+    label: string;
+    Icon: typeof UserPlus;
+    badgeClass: string;
+    ringClass: string;
+    iconBgClass: string;
+  }
+> = {
+  new_customer: {
+    label: "NEW CUSTOMER OFFER",
+    Icon: UserPlus,
+    badgeClass: "bg-info/10 text-info border-info/30",
+    ringClass: "border-info/25",
+    iconBgClass: "bg-info/10 text-info",
+  },
+  partner_deal: {
+    label: "PARTNER DEAL",
+    Icon: Handshake,
+    badgeClass: "bg-warning/10 text-warning border-warning/30",
+    ringClass: "border-warning/25",
+    iconBgClass: "bg-warning/10 text-warning",
+  },
+  pawbucks_redemption: {
+    label: "PAWBUCKS OFFER",
+    Icon: PawBucksLogo as unknown as typeof UserPlus,
+    badgeClass: "bg-primary/10 text-primary border-primary/30",
+    ringClass: "border-primary/25",
+    iconBgClass: "bg-primary/10 text-primary",
+  },
+  branded: {
+    label: "BRANDED PAWBUCKS",
+    Icon: PawBucksLogo as unknown as typeof UserPlus,
+    badgeClass: "bg-accent/10 text-accent border-accent/30",
+    ringClass: "border-accent/25",
+    iconBgClass: "bg-accent/10 text-accent",
+  },
+};
+
+function normalizeOfferType(v: string | null | undefined): OfferType {
+  if (v === "new_customer" || v === "partner_deal" || v === "pawbucks_redemption") return v;
+  return "partner_deal";
+}
+
+// --- Page ----------------------------------------------------------------
 const MyDeals = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
   const { userLocation, requestLocation } = useUserLocation();
   const [asked, setAsked] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [tab, setTab] = useState<"active" | "redeemed">("active");
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
@@ -123,7 +162,7 @@ const MyDeals = () => {
     }
   }, [asked, requestLocation]);
 
-  // 1) Unlocked redemptions for this user (acquisition-only only)
+  // 1) All unlocked redemptions for this user (both new_customer & partner_deal)
   const { data: redemptions = [], isLoading: redLoading } = useQuery({
     queryKey: ["my-deals-redemptions", user?.id],
     enabled: !!user?.id,
@@ -133,7 +172,7 @@ const MyDeals = () => {
         .select(
           `id, offer_id, redemption_code, redeemed_at, partner_confirmed, created_at,
            partner_offers:offer_id (
-             id, title, description, end_date, partner_id, is_active, status,
+             id, title, description, end_date, partner_id, is_active, status, offer_type,
              merchants:partner_id ( id, business_name, address, latitude, longitude, fee_model )
            )`,
         )
@@ -144,29 +183,73 @@ const MyDeals = () => {
     },
   });
 
-  const acquisitionRedemptions = useMemo(
-    () =>
-      redemptions.filter(
-        (r) => r.partner_offers?.merchants?.fee_model === "acquisition_only",
-      ),
+  const unlockedOfferIds = useMemo(
+    () => new Set(redemptions.map((r) => r.offer_id)),
     [redemptions],
   );
 
-  const unlockedOfferIds = useMemo(
-    () => new Set(acquisitionRedemptions.map((r) => r.offer_id)),
-    [acquisitionRedemptions],
-  );
-  const unlockedMerchantIds = useMemo(
-    () =>
-      new Set(
-        acquisitionRedemptions
-          .map((r) => r.partner_offers?.merchants?.id)
-          .filter(Boolean) as string[],
-      ),
-    [acquisitionRedemptions],
-  );
+  // 2) Branded PawBucks earn events — surface as "Active" deal cards grouped by campaign
+  const { data: brandedRows = [], isLoading: brandedLoading } = useQuery({
+    queryKey: ["my-deals-branded", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("branded_pawbucks_activity")
+        .select(
+          `id, amount, type, description, created_at, campaign_id, merchant_id,
+           brand_campaigns:campaign_id (
+             id, name, campaign_color, campaign_logo_url, end_date, brand_id,
+             brand_accounts:brand_id ( id, brand_name, logo_url )
+           )`,
+        )
+        .eq("user_id", user!.id)
+        .eq("type", "earn")
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data || []) as BrandedEarnRow[];
+    },
+  });
 
-  // 2) Locked: nearby acquisition-only merchants with active offers that user hasn't unlocked
+  // Group branded earn rows by campaign; one card per campaign showing total earned.
+  const brandedCards = useMemo(() => {
+    const byCampaign = new Map<
+      string,
+      {
+        id: string;
+        name: string;
+        brandName: string | null;
+        logo: string | null;
+        color: string | null;
+        end_date: string | null;
+        totalEarned: number;
+        lastAt: string;
+      }
+    >();
+    for (const r of brandedRows) {
+      const c = r.brand_campaigns;
+      if (!c) continue;
+      const existing = byCampaign.get(c.id);
+      if (existing) {
+        existing.totalEarned += Number(r.amount || 0);
+        if (r.created_at > existing.lastAt) existing.lastAt = r.created_at;
+      } else {
+        byCampaign.set(c.id, {
+          id: c.id,
+          name: c.name,
+          brandName: c.brand_accounts?.brand_name ?? null,
+          logo: c.campaign_logo_url ?? c.brand_accounts?.logo_url ?? null,
+          color: c.campaign_color ?? null,
+          end_date: c.end_date ?? null,
+          totalEarned: Number(r.amount || 0),
+          lastAt: r.created_at,
+        });
+      }
+    }
+    return [...byCampaign.values()].sort((a, b) => (a.lastAt < b.lastAt ? 1 : -1));
+  }, [brandedRows]);
+
+  // 3) Locked nearby: acquisition-only merchants with active offers user hasn't unlocked
   const { data: lockedRaw = [], isLoading: lockedLoading } = useQuery({
     queryKey: ["my-deals-locked"],
     queryFn: async () => {
@@ -174,28 +257,12 @@ const MyDeals = () => {
       const { data, error } = await (supabase as any)
         .from("partner_offers")
         .select(
-          `id, partner_id, end_date, start_date, is_active, status,
+          `id, partner_id, end_date, start_date, is_active, status, offer_type,
            merchants:partner_id ( id, business_name, address, latitude, longitude, fee_model, is_active )`,
         )
         .eq("is_active", true);
       if (error) throw error;
-      const rows = (data || []) as Array<{
-        id: string;
-        partner_id: string;
-        end_date: string | null;
-        start_date: string | null;
-        is_active: boolean | null;
-        status: string | null;
-        merchants: {
-          id: string;
-          business_name: string;
-          address: string | null;
-          latitude: number | null;
-          longitude: number | null;
-          fee_model: string | null;
-          is_active: boolean | null;
-        } | null;
-      }>;
+      const rows = (data || []) as Array<any>;
       return rows.filter(
         (r) =>
           (!r.status || r.status === "active") &&
@@ -210,7 +277,7 @@ const MyDeals = () => {
 
   const lockedMerchants: LockedMerchant[] = useMemo(() => {
     const byMerchant = new Map<string, LockedMerchant>();
-    for (const r of lockedRaw) {
+    for (const r of lockedRaw as any[]) {
       if (unlockedOfferIds.has(r.id)) continue;
       const m = r.merchants;
       if (!m) continue;
@@ -247,113 +314,18 @@ const MyDeals = () => {
     });
   }, [lockedRaw, unlockedOfferIds, userLocation]);
 
-  // 3) Branded PawBucks campaign activity (earn/redeem) for this user
-  const { data: brandedActivity = [], isLoading: brandedLoading } = useQuery({
-    queryKey: ["my-deals-branded-activity", user?.id],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from("branded_pawbucks_activity")
-        .select(
-          `id, type, amount, description, created_at, campaign_id, merchant_id,
-           brand_campaigns:campaign_id (
-             id, name, campaign_color, campaign_logo_url, brand_id,
-             brand_accounts:brand_id ( id, brand_name, logo_url )
-           )`,
-        )
-        .eq("user_id", user!.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (error) throw error;
-      return (data || []) as BrandedActivityRow[];
-    },
-  });
+  // Split redemptions into active/redeemed
+  const activeRedemptions = useMemo(
+    () => redemptions.filter((r) => !r.redeemed_at),
+    [redemptions],
+  );
+  const redeemedRedemptions = useMemo(
+    () => redemptions.filter((r) => !!r.redeemed_at),
+    [redemptions],
+  );
 
-  // 4) Full Ecosystem merchant offers (active partner_offers at full-ecosystem stores)
-  const { data: fullEcoOffersRaw = [], isLoading: fullEcoLoading } = useQuery({
-    queryKey: ["my-deals-full-ecosystem-offers"],
-    queryFn: async () => {
-      const nowIso = new Date().toISOString();
-      // Fetch offers (public RLS allows read)
-      const { data: offers, error } = await (supabase as any)
-        .from("partner_offers")
-        .select(
-          `id, title, description, coins_required, end_date, start_date, partner_id, is_active, status`,
-        )
-        .eq("is_active", true);
-      if (error) throw error;
-      const activeOffers = (offers || []).filter(
-        (r: any) =>
-          (!r.status || r.status === "active") &&
-          (!r.start_date || r.start_date <= nowIso) &&
-          (!r.end_date || r.end_date >= nowIso),
-      );
-      const partnerIds = [
-        ...new Set(activeOffers.map((o: any) => o.partner_id).filter(Boolean)),
-      ] as string[];
-      if (partnerIds.length === 0) return [];
-      // Join merchant details via the public view (bypasses merchants RLS)
-      const { data: merchants } = await (supabase as any)
-        .from("merchants_public")
-        .select(
-          "id, business_name, business_type, address, latitude, longitude, fee_model, stripe_account_status",
-        )
-        .in("id", partnerIds);
-      const merchantMap = new Map<string, any>();
-      for (const m of merchants || []) merchantMap.set(m.id, m);
-      return activeOffers
-        .map((r: any) => ({ ...r, merchants: merchantMap.get(r.partner_id) || null }))
-        .filter(
-          (r: any) =>
-            r.merchants &&
-            r.merchants.fee_model !== "acquisition_only" &&
-            r.merchants.stripe_account_status === "active",
-        );
-    },
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const fullEcosystemOffers: FullEcosystemOffer[] = useMemo(() => {
-    const list = fullEcoOffersRaw.map((r: any) => {
-      const m = r.merchants;
-      const distance =
-        userLocation && m?.latitude != null && m?.longitude != null
-          ? calculateDistance(
-              userLocation.latitude,
-              userLocation.longitude,
-              m.latitude,
-              m.longitude,
-            )
-          : null;
-      return {
-        id: r.id,
-        title: r.title,
-        description: r.description,
-        coins_required: r.coins_required,
-        end_date: r.end_date,
-        partner_id: r.partner_id,
-        merchants: m,
-        distance,
-      } as FullEcosystemOffer;
-    });
-    return list.sort((a, b) => {
-      if (a.distance == null && b.distance == null) return 0;
-      if (a.distance == null) return 1;
-      if (b.distance == null) return -1;
-      return a.distance - b.distance;
-    });
-  }, [fullEcoOffersRaw, userLocation]);
-
-  const brandedTotals = useMemo(() => {
-    let earned = 0;
-    let redeemed = 0;
-    for (const a of brandedActivity) {
-      const amt = Number(a.amount || 0);
-      if (a.type === "earn") earned += amt;
-      else if (a.type === "redeem") redeemed += amt;
-    }
-    return { earned, redeemed };
-  }, [brandedActivity]);
+  const activeCount = activeRedemptions.length + brandedCards.length;
+  const redeemedCount = redeemedRedemptions.length;
 
   const copyCode = async (code: string) => {
     try {
@@ -368,471 +340,143 @@ const MyDeals = () => {
 
   if (authLoading || !user) return <PageLoader />;
 
-  const unlockedCount = acquisitionRedemptions.length;
-  const redeemedCount = acquisitionRedemptions.filter((r) => !!r.redeemed_at).length;
-  const readyCount = unlockedCount - redeemedCount;
+  const loading = redLoading || brandedLoading;
 
   return (
     <div className="min-h-screen bg-background pb-24">
       <SEO
-        title="My New Customer Deals — PawBucks"
-        description="Track the New Customer deals you've unlocked and find new ones to scan in-store."
+        title="My Deals — PawBucks"
+        description="Every unlocked offer and brand-sponsored reward in one place."
       />
       <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
-      <main className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
-        {/* Hero / summary */}
-        <section className="space-y-2">
+      <main className="container mx-auto px-4 py-6 max-w-4xl space-y-5">
+        <section className="space-y-1">
           <h1 className="text-3xl font-bold">My Deals</h1>
-          <p className="text-muted-foreground">
-            Two ways to save: in-store deal codes you've unlocked, plus PawBucks earned from brand-sponsored campaigns.
+          <p className="text-muted-foreground text-sm">
+            Scan a merchant's in-store QR to unlock their offers. Everything you unlock lives here.
           </p>
-
-          <div className="grid grid-cols-3 gap-2 pt-3">
-            <Card className="p-4 text-center py-3">
-              <div className="text-2xl font-bold">{unlockedCount}</div>
-              <div className="text-xs text-muted-foreground">Unlocked</div>
-            </Card>
-            <Card className="p-4 text-center py-3">
-              <div className="text-2xl font-bold text-success">{readyCount}</div>
-              <div className="text-xs text-muted-foreground">Ready to use</div>
-            </Card>
-            <Card className="p-4 text-center py-3">
-              <div className="text-2xl font-bold text-muted-foreground">
-                {redeemedCount}
-              </div>
-              <div className="text-xs text-muted-foreground">Redeemed</div>
-            </Card>
-          </div>
         </section>
 
-        {/* ============================================================ */}
-        {/* FEATURE 1 — New Customer Deals (in-store QR unlocks)          */}
-        {/* ============================================================ */}
-        <section className="space-y-5 rounded-2xl border border-accent/20 bg-accent/5 p-4 sm:p-5">
-          <div className="space-y-1">
-            <Badge className="bg-accent/15 text-accent border-accent/30">
-              <Sparkles className="w-3 h-3 mr-1" aria-hidden="true" />
-              New Customer Deals
-            </Badge>
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-success" aria-hidden="true" />
-              Unlocked Codes
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Scan a merchant's in-store QR to unlock their welcome offer.
-            </p>
-          </div>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as "active" | "redeemed")}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="active">Active ({activeCount})</TabsTrigger>
+            <TabsTrigger value="redeemed">Redeemed ({redeemedCount})</TabsTrigger>
+          </TabsList>
 
-          {redLoading ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">
-              Loading your unlocked deals…
-            </div>
-          ) : acquisitionRedemptions.length === 0 ? (
-            <Card className="p-4 text-sm text-muted-foreground text-center py-6">
-              You haven't unlocked any New Customer deals yet. Visit a
-              participating store and scan their QR code to unlock.
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {acquisitionRedemptions.map((r) => {
-                const offer = r.partner_offers;
-                const m = offer?.merchants;
-                const redeemed = !!r.redeemed_at;
-                return (
-                  <Card key={r.id} className="p-4 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate">
-                          {offer?.title || "New Customer Deal"}
-                        </h3>
-                        {m && (
-                          <button
-                            onClick={() => navigate(`/merchant/${m.id}`)}
-                            className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mt-0.5"
-                          >
-                            <Store className="w-3 h-3" aria-hidden="true" />
-                            <span className="truncate">{m.business_name}</span>
-                          </button>
-                        )}
-                        {offer?.description && (
-                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                            {offer.description}
-                          </p>
-                        )}
-                      </div>
-                      {redeemed ? (
-                        <Badge className="bg-muted text-muted-foreground border-border shrink-0">
-                          <Check className="w-3 h-3 mr-1" /> Redeemed
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-success/10 text-success border-success/30 shrink-0">
-                          Ready
-                        </Badge>
-                      )}
-                    </div>
-
-                    <div
-                      className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 ${
-                        redeemed
-                          ? "bg-muted/40 border-border"
-                          : "bg-accent/5 border-accent/30"
-                      }`}
-                    >
-                      <div className="min-w-0">
-                        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                          Redemption code
-                        </div>
-                        <div className="font-mono text-lg font-semibold truncate">
-                          {r.redemption_code}
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant={redeemed ? "outline" : "default"}
-                        onClick={() => copyCode(r.redemption_code)}
-                      >
-                        {copiedCode === r.redemption_code ? (
-                          <>
-                            <Check className="w-4 h-4 mr-1" /> Copied
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-4 h-4 mr-1" /> Copy
-                          </>
-                        )}
-                      </Button>
-                    </div>
-
-                    {offer?.end_date && !redeemed && (
-                      <p className="text-xs text-muted-foreground">
-                        Expires {new Date(offer.end_date).toLocaleDateString()}
-                      </p>
-                    )}
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Locked nearby — same feature */}
-          <div className="space-y-3 pt-3 border-t border-accent/15">
-            <div className="flex items-end justify-between gap-2">
-              <h3 className="text-base font-semibold flex items-center gap-2">
-                <Lock className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
-                Still Locked Near You
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/discover")}
-              >
-                See all <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-            </div>
-
-            {lockedLoading ? (
-              <div className="text-sm text-muted-foreground py-6 text-center">
-                Loading nearby deals…
-              </div>
-            ) : lockedMerchants.length === 0 ? (
-              <Card className="p-4 text-sm text-muted-foreground text-center py-6 bg-background">
-                {unlockedMerchantIds.size > 0
-                  ? "You've unlocked every nearby New Customer deal — nice work!"
-                  : "No locked New Customer deals nearby right now."}
+          {/* -------- Active tab -------- */}
+          <TabsContent value="active" className="mt-4 space-y-3">
+            {loading ? (
+              <Card className="p-6 text-center text-sm text-muted-foreground">
+                Loading your deals…
+              </Card>
+            ) : activeCount === 0 ? (
+              <Card className="p-6 text-center text-sm text-muted-foreground space-y-2">
+                <Sparkles className="w-6 h-6 mx-auto text-accent" aria-hidden="true" />
+                <p className="font-medium text-foreground">No active deals yet</p>
+                <p>Visit a participating merchant and scan their QR code to unlock offers.</p>
               </Card>
             ) : (
-              <div className="grid sm:grid-cols-2 gap-3">
-                {lockedMerchants.map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => navigate(`/merchant/${m.id}`)}
-                    className="text-left"
-                  >
-                    <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-md bg-muted flex items-center justify-center shrink-0">
-                          <Lock
-                            className="w-5 h-5 text-muted-foreground"
-                            aria-hidden="true"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold truncate">
-                            {m.business_name}
-                          </h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {m.offer_count} New Customer{" "}
-                            {m.offer_count === 1 ? "deal" : "deals"} to unlock
-                          </p>
-                          {m.address && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-                              <MapPin className="w-3 h-3" aria-hidden="true" />
-                              <span className="truncate">{m.address}</span>
-                              {m.distance != null && (
-                                <span className="ml-1 shrink-0">
-                                  · {m.distance.toFixed(1)} mi
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-1 text-xs text-accent mt-2 font-medium">
-                            Scan in-store QR to unlock
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  </button>
+              <>
+                {activeRedemptions.map((r) => (
+                  <RedemptionCard
+                    key={r.id}
+                    r={r}
+                    copyCode={copyCode}
+                    copiedCode={copiedCode}
+                    onMerchantClick={(id) => navigate(`/merchant/${id}`)}
+                    redeemed={false}
+                  />
                 ))}
-              </div>
+                {brandedCards.map((c) => (
+                  <BrandedCard key={c.id} c={c} />
+                ))}
+              </>
             )}
-          </div>
-        </section>
 
-        {/* Visual separator between the two distinct features */}
-        <div className="flex items-center gap-3" aria-hidden="true">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-            And
-          </span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-
-        {/* ============================================================ */}
-        {/* FEATURE 1.5 — Offers from Full Ecosystem Merchants            */}
-        {/* ============================================================ */}
-        <section className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
-          <div className="flex items-end justify-between gap-2">
-            <div className="space-y-1">
-              <Badge className="bg-primary/15 text-primary border-primary/30">
-                <PawBucksLogo className="w-3 h-3 mr-1" />
-                Full Ecosystem
-              </Badge>
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Store className="w-5 h-5 text-primary" aria-hidden="true" />
-                Offers from Full Ecosystem Merchants
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Redeem PawBucks for exclusive offers at partners where you also
-                earn PawBucks every visit.
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/discover")}
-            >
-              See all <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
-
-          {fullEcoLoading ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">
-              Loading offers…
-            </div>
-          ) : fullEcosystemOffers.length === 0 ? (
-            <Card className="p-4 text-sm text-muted-foreground text-center py-6 bg-background">
-              No Full Ecosystem offers available right now — check back soon.
-            </Card>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-3">
-              {fullEcosystemOffers.slice(0, 8).map((o) => {
-                const m = o.merchants;
-                return (
-                  <button
-                    key={o.id}
-                    onClick={() => navigate(`/pawbucks/redeem?offer=${o.id}`)}
-                    className="text-left"
+            {/* Locked nearby (discover more) */}
+            {lockedMerchants.length > 0 && (
+              <div className="pt-4 space-y-3">
+                <div className="flex items-end justify-between gap-2">
+                  <h3 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
+                    <Lock className="w-4 h-4" aria-hidden="true" />
+                    Discover More Nearby
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate("/discover")}
                   >
-                    <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                          <Store
-                            className="w-6 h-6 text-primary"
-                            aria-hidden="true"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <h4 className="font-semibold truncate">
-                              {o.title}
+                    See all <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {lockedMerchants.slice(0, 4).map((m) => (
+                    <button
+                      key={m.id}
+                      onClick={() => navigate(`/merchant/${m.id}`)}
+                      className="text-left"
+                    >
+                      <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0">
+                            <Lock
+                              className="w-4 h-4 text-muted-foreground"
+                              aria-hidden="true"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold truncate text-sm">
+                              {m.business_name}
                             </h4>
-                            {o.coins_required != null && (
-                              <Badge className="bg-primary/10 text-primary border-primary/20 shrink-0 flex items-center gap-1">
-                                <PawBucksLogo className="w-3 h-3" />
-                                {Number(o.coins_required).toLocaleString()}
-                              </Badge>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {m.offer_count} deal{m.offer_count === 1 ? "" : "s"} to unlock
+                            </p>
+                            {m.address && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
+                                <MapPin className="w-3 h-3" aria-hidden="true" />
+                                <span className="truncate">{m.address}</span>
+                                {m.distance != null && (
+                                  <span className="ml-1 shrink-0">
+                                    · {m.distance.toFixed(1)} mi
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </div>
-                          {m && (
-                            <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                              at {m.business_name}
-                            </p>
-                          )}
-                          {o.description && (
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                              {o.description}
-                            </p>
-                          )}
-                          {m?.address && (
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-                              <MapPin className="w-3 h-3" aria-hidden="true" />
-                              <span className="truncate">{m.address}</span>
-                              {o.distance != null && (
-                                <span className="ml-1 shrink-0">
-                                  · {o.distance.toFixed(1)} mi
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {o.end_date && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Expires{" "}
-                              {new Date(o.end_date).toLocaleDateString()}
-                            </p>
-                          )}
                         </div>
-                      </div>
-                    </Card>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* Visual separator */}
-        <div className="flex items-center gap-3" aria-hidden="true">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-            And
-          </span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-
-        {/* ============================================================ */}
-        {/* FEATURE 2 — Branded Campaign Rewards (sponsor PawBucks)       */}
-        {/* ============================================================ */}
-        <section className="space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
-          <div className="flex items-end justify-between gap-2">
-            <div className="space-y-1">
-              <Badge className="bg-primary/15 text-primary border-primary/30">
-                <PawBucksLogo className="w-3 h-3 mr-1" />
-                Sponsor Rewards
-              </Badge>
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <PawBucksLogo className="w-5 h-5" />
-                Branded Campaign Rewards
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                PawBucks you've earned or redeemed from brand-sponsored campaigns.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                toast({
-                  title: "About Branded Campaigns",
-                  description:
-                    "Brands sponsor extra PawBucks on top of merchant cashback. Earn at participating stores; redeem like normal PawBucks.",
-                })
-              }
-              className="text-muted-foreground hover:text-foreground"
-              aria-label="About branded campaigns"
-            >
-              <HelpCircle className="w-4 h-4" />
-            </button>
-          </div>
-
-          {brandedLoading ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">
-              Loading campaign rewards…
-            </div>
-          ) : brandedActivity.length === 0 ? (
-            <Card className="p-4 text-sm text-muted-foreground text-center py-6">
-              No branded campaign activity yet. Check in or shop at participating
-              merchants to start earning brand-sponsored PawBucks.
-            </Card>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 gap-2">
-                <Card className="p-4 text-center py-3">
-                  <div className="text-2xl font-bold text-success">
-                    +{brandedTotals.earned.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-muted-foreground">PB earned from campaigns</div>
-                </Card>
-                <Card className="p-4 text-center py-3">
-                  <div className="text-2xl font-bold">
-                    {brandedTotals.redeemed.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-muted-foreground">PB redeemed</div>
-                </Card>
+                      </Card>
+                    </button>
+                  ))}
+                </div>
               </div>
+            )}
+          </TabsContent>
 
-              <div className="space-y-2">
-                {brandedActivity.map((a) => {
-                  const isEarn = a.type === "earn";
-                  const campaignName = a.brand_campaigns?.name || "Brand campaign";
-                  const brandName = a.brand_campaigns?.brand_accounts?.brand_name;
-                  const logo =
-                    a.brand_campaigns?.campaign_logo_url ||
-                    a.brand_campaigns?.brand_accounts?.logo_url ||
-                    null;
-                  return (
-                    <Card key={a.id} className="p-3">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0 overflow-hidden"
-                          style={
-                            a.brand_campaigns?.campaign_color
-                              ? { backgroundColor: a.brand_campaigns.campaign_color + "22" }
-                              : undefined
-                          }
-                        >
-                          {logo ? (
-                            <img
-                              src={logo}
-                              alt={brandName || campaignName}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <PawBucksLogo className="w-5 h-5" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <h3 className="font-medium truncate text-sm">
-                              {campaignName}
-                            </h3>
-                            <span
-                              className={`font-mono font-semibold text-sm shrink-0 ${
-                                isEarn ? "text-success" : "text-foreground"
-                              }`}
-                            >
-                              {isEarn ? "+" : "−"}
-                              {Number(a.amount || 0).toLocaleString()} PB
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground mt-0.5">
-                            <span className="truncate">
-                              {brandName ? `by ${brandName}` : "Brand campaign"}
-                              {a.description ? ` · ${a.description}` : ""}
-                            </span>
-                            <span className="shrink-0">
-                              {format(new Date(a.created_at), "MMM d")}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </section>
-
+          {/* -------- Redeemed tab -------- */}
+          <TabsContent value="redeemed" className="mt-4 space-y-3">
+            {loading ? (
+              <Card className="p-6 text-center text-sm text-muted-foreground">
+                Loading…
+              </Card>
+            ) : redeemedCount === 0 ? (
+              <Card className="p-6 text-center text-sm text-muted-foreground">
+                No deals redeemed yet.
+              </Card>
+            ) : (
+              redeemedRedemptions.map((r) => (
+                <RedemptionCard
+                  key={r.id}
+                  r={r}
+                  copyCode={copyCode}
+                  copiedCode={copiedCode}
+                  onMerchantClick={(id) => navigate(`/merchant/${id}`)}
+                  redeemed
+                />
+              ))
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
 
       <BottomNav />
@@ -841,3 +485,165 @@ const MyDeals = () => {
 };
 
 export default MyDeals;
+
+// --- Card components ------------------------------------------------------
+function RedemptionCard({
+  r,
+  redeemed,
+  copyCode,
+  copiedCode,
+  onMerchantClick,
+}: {
+  r: RedemptionRow;
+  redeemed: boolean;
+  copyCode: (code: string) => void;
+  copiedCode: string | null;
+  onMerchantClick: (id: string) => void;
+}) {
+  const offer = r.partner_offers;
+  const m = offer?.merchants;
+  const type = normalizeOfferType(offer?.offer_type ?? null);
+  const meta = TYPE_META[type];
+  const Icon = meta.Icon;
+
+  return (
+    <Card className={`p-4 space-y-3 border ${meta.ringClass}`}>
+      <div className="flex items-start gap-3">
+        <div
+          className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${meta.iconBgClass}`}
+        >
+          <Icon className="w-5 h-5" aria-hidden="true" />
+        </div>
+        <div className="flex-1 min-w-0">
+          {m ? (
+            <button
+              onClick={() => onMerchantClick(m.id)}
+              className="text-sm font-semibold hover:underline flex items-center gap-1"
+            >
+              <Store className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
+              <span className="truncate">{m.business_name}</span>
+            </button>
+          ) : (
+            <span className="text-sm font-semibold">Merchant</span>
+          )}
+          <Badge className={`${meta.badgeClass} mt-1 text-[10px] tracking-wider`}>
+            {meta.label}
+          </Badge>
+          <h3 className="font-bold text-lg mt-1 truncate">
+            {offer?.title || "Deal"}
+          </h3>
+          {offer?.description && (
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+              {offer.description}
+            </p>
+          )}
+          {offer?.end_date && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Expires {new Date(offer.end_date).toLocaleDateString()}
+            </p>
+          )}
+        </div>
+        {redeemed ? (
+          <Badge className="bg-muted text-muted-foreground border-border shrink-0">
+            <Check className="w-3 h-3 mr-1" /> Redeemed
+          </Badge>
+        ) : (
+          <Badge className="bg-success/10 text-success border-success/30 shrink-0">
+            Ready
+          </Badge>
+        )}
+      </div>
+
+      <div
+        className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 ${
+          redeemed ? "bg-muted/40 border-border" : "bg-background border-border"
+        }`}
+      >
+        <div className="min-w-0">
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Redemption code
+          </div>
+          <div className="font-mono text-lg font-semibold truncate">
+            {r.redemption_code}
+          </div>
+        </div>
+        <Button
+          size="sm"
+          variant={redeemed ? "outline" : "default"}
+          onClick={() => copyCode(r.redemption_code)}
+        >
+          {copiedCode === r.redemption_code ? (
+            <>
+              <Check className="w-4 h-4 mr-1" /> Copied
+            </>
+          ) : (
+            <>
+              <Copy className="w-4 h-4 mr-1" /> Copy
+            </>
+          )}
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+function BrandedCard({
+  c,
+}: {
+  c: {
+    id: string;
+    name: string;
+    brandName: string | null;
+    logo: string | null;
+    color: string | null;
+    end_date: string | null;
+    totalEarned: number;
+  };
+}) {
+  const meta = TYPE_META.branded;
+  return (
+    <Card className={`p-4 border ${meta.ringClass}`}>
+      <div className="flex items-start gap-3">
+        <div
+          className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${
+            c.logo ? "bg-muted" : meta.iconBgClass
+          }`}
+          style={
+            c.color && !c.logo
+              ? { backgroundColor: c.color + "22" }
+              : undefined
+          }
+        >
+          {c.logo ? (
+            <img src={c.logo} alt={c.brandName ?? c.name} className="w-full h-full object-cover" />
+          ) : (
+            <PawBucksLogo className="w-5 h-5" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold truncate">
+            {c.brandName ?? c.name}
+          </div>
+          <Badge className={`${meta.badgeClass} mt-1 text-[10px] tracking-wider`}>
+            {meta.label}
+          </Badge>
+          <h3 className="font-bold text-lg mt-1">
+            Earned {c.totalEarned.toLocaleString()} PB
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+            {c.name}
+          </p>
+          {c.end_date && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Campaign ends {new Date(c.end_date).toLocaleDateString()}
+            </p>
+          )}
+        </div>
+        <Badge className="bg-primary/10 text-primary border-primary/30 shrink-0 flex items-center gap-1">
+          <PawBucksLogo className="w-3 h-3" />
+          +{c.totalEarned.toLocaleString()}
+        </Badge>
+      </div>
+    </Card>
+  );
+}

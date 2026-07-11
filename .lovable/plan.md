@@ -1,58 +1,94 @@
-# QR Scan Unlock Flow — Acquisition-Only New Customer Deals
+# Deals & Promotions Flow — Align to Diagram
 
-Right now, on the pet-owner side, the acquisition-only merchant profile only shows a static notice telling people to scan the in-store QR code. There is no actual deal surfaced, and no gating against scanning. This plan wires the existing offer + check-in infrastructure together so the deal only activates after a verified in-store scan.
+## Current state (audit)
 
-## User experience
+**Scan → Unlock** (`CheckInPage` → `process_checkin` → `unlock-acquisition-offers` + `distribute-branded-pawbucks`)
 
-1. Pet owner opens an acquisition-only merchant profile.
-2. They see the merchant's active New Customer deal as a **locked** card with a "Scan in-store to unlock" CTA.
-3. They walk in, scan the merchant's QR code (existing `/checkin?token=...` flow).
-4. On successful check-in at that merchant, the deal flips to **unlocked** and a one-time redemption code is generated.
-5. Code stays available in the deal card and in a new "My Unlocked Deals" surface. It's redeemed in person by the merchant via the existing `merchant-confirm-redemption` flow.
-6. One unlock per user per offer. Re-scanning does nothing extra. Locks are scoped per-merchant — scanning Merchant A's QR cannot unlock Merchant B's deal.
+| Merchant type | New Customer Offer | Partner Deal | Branded PawBucks |
+|---|---|---|---|
+| Acquisition-Only (`fee_model='acquisition_only'`) | Unlocked (first-time only) | N/A | Distributed |
+| Full Ecosystem (`fee_model='full_ecosystem'`) | **Not unlocked** (function early-returns) | **Not unlocked** as a redemption | Distributed |
 
-## Surfaces to change (pet-owner side only)
+**My Deals page** — 3 stacked sections (Unlocked new-customer, browse full-ecosystem, branded activity history). No Active/Redeemed tab split; branded rewards shown as activity log, not as offer cards; layout diverges from mockup.
 
-- `src/pages/MerchantProfile.tsx`
-  - For acquisition-only merchants: fetch active `partner_offers` for the merchant, plus the current user's existing `offer_redemptions` rows for those offers.
-  - Render a new `AcquisitionOfferCard`:
-    - Locked state → muted card, lock icon, "Scan the in-store QR to unlock" + the existing instructions.
-    - Unlocked state → highlighted card, redemption code, "Show this to the cashier" copy, expiry if any.
-  - Keep the existing notice banner but tie its instructions to these cards.
-- `src/components/checkin/` — new `AcquisitionUnlockedToast` shown by `CheckInPage` when the check-in is for an acquisition-only merchant with at least one eligible offer ("New Customer deal unlocked at {merchant}").
-- `src/pages/CheckInPage.tsx` — after a successful `process_checkin`, if the entity is an acquisition-only merchant, call the new unlock edge function and surface the result inline (link: "View your deal").
+## Gaps vs. diagram
 
-## Backend
+1. Full Ecosystem scan doesn't unlock New Customer Offer (for first-time customers) or Partner Deals into "My Deals".
+2. My Deals lacks the Active/Redeemed tabbed layout from the mockup.
+3. Offer cards don't show the diagram's three-way visual distinction (New Customer / Partner Deal / Branded PawBucks) with colored type badges.
 
-New edge function `unlock-acquisition-offers` (JWT-verified):
-- Input: `{ merchant_id, checkin_id }`.
-- Validates:
-  - Caller's JWT user owns `checkins.id = checkin_id` and `checkins.merchant_id = merchant_id`, and the row was created within the last 15 minutes (matches the existing check-in verification window).
-  - `merchants.fee_model = 'acquisition_only'`.
-- For each active `partner_offers` row at that merchant where the user does not already have an `offer_redemptions` row:
-  - Insert `offer_redemptions { offer_id, user_id, redemption_code: <ULID-style 8-char code>, partner_confirmed: false }`.
-  - Respect `per_user_limit` and `redemption_cap` (skip if cap reached) and `status='active'` + date window.
-- Returns `{ unlocked: [{ offer_id, redemption_code, title }] }`.
-- Idempotent: re-invocations return existing codes instead of creating new ones.
+## Changes
 
-New read-side helper for the profile: existing `offer_redemptions` policies already let users read their own rows, so the profile query stays client-side (no new function needed for reads).
+### 1. Backend — unlock logic (rename & extend)
 
-Migration:
-- Add partial unique index on `offer_redemptions (offer_id, user_id)` to enforce one redemption per offer per user (only where the platform's "single unlock" rule applies; safe because today's flows generate one code per redeem).
-- Confirm `offer_redemptions` has GRANTs and RLS that allow `authenticated` users to `SELECT` their own rows and the edge function (service role) to insert.
+Rename `unlock-acquisition-offers` → `unlock-merchant-offers` (keep old path as alias for one release).
 
-## Gating rules
+New behavior after a valid check-in:
 
-- Locked-card UI is the only place the deal appears on acquisition-only merchant profiles. We do not list these offers in `PartnerOffers` or other discovery surfaces, so users can't bypass the scan.
-- Full-ecosystem merchants are unaffected — no QR-gating on their offers.
+```text
+if merchant.fee_model == 'acquisition_only':
+    unlock offer_type='new_customer'  (first-time customer only, one code)
+elif merchant.fee_model == 'full_ecosystem':
+    if first-time customer at this merchant:
+        unlock offer_type='new_customer'  (one code)
+    unlock every active offer_type='partner_deal'  (one code each, respects per_user_limit / redemption_cap)
+```
 
-## Out of scope
+Branded PawBucks continues to run via `distribute-branded-pawbucks` (unchanged).
 
-- Changing the in-store redemption confirmation flow (`merchant-confirm-redemption` already handles marking codes as redeemed).
-- Notifications/email for unlocked deals.
-- Expiration of unlocked codes beyond the offer's existing `end_date`.
+Migration: no schema change required — `partner_offers.offer_type` is already free-text. Add a lightweight CHECK narrowing values to `('new_customer','partner_deal','pawbucks_redemption')` and default `'partner_deal'`.
 
-## Confirm before I build
+### 2. Frontend — CheckInPage
 
-1. Should the unlock be tied to the **most recent** check-in (must scan again to re-view) or persistent once unlocked until the user redeems it? Plan above assumes **persistent once unlocked**.
-2. One offer per acquisition-only merchant, or support multiple? Plan above supports **multiple** (all active offers for that merchant unlock at once on scan).
+Replace the invoke of `unlock-acquisition-offers` with `unlock-merchant-offers`. Toast copy adapts to the offer_type(s) returned. No other changes.
+
+### 3. Frontend — My Deals page (rebuild to match mockup)
+
+Single unified layout:
+
+```text
+[← back]            My Deals
+       [ Active (n) ]  [ Redeemed (n) ]
+
+┌ card ─────────────────────────────┐
+│ (logo)  Merchant Name             │
+│         NEW CUSTOMER OFFER (blue) │
+│         20% Off                   │
+│         One-time use              │
+│         Expires 07/31/2025        │
+└───────────────────────────────────┘
+
+┌ card ─────────────────────────────┐
+│ (logo)  Merchant Name             │
+│         PARTNER DEAL (amber)      │
+│         15% Off                   │
+│         Any Purchase              │
+└───────────────────────────────────┘
+
+┌ card ─────────────────────────────┐
+│ (logo)  Brand/Merchant            │
+│         BRANDED PAWBUCKS (purple) │
+│         Earn 50 PB                │
+│         When you spend $50+       │
+└───────────────────────────────────┘
+```
+
+- **Active** tab = unredeemed `offer_redemptions` rows + active branded campaigns the user is enrolled in / has earned from.
+- **Redeemed** tab = `offer_redemptions` with `redeemed_at` set.
+- Card variant driven by `offer_type` (or `branded` synthetic). Tap card → detail modal with code + Copy button.
+- "Still Locked Near You" (locked acquisition merchants) and the full-ecosystem browse grid move to a collapsed "Discover more deals" strip at the bottom, so the primary view matches the mockup.
+
+### 4. Non-goals for this pass
+
+- No redesign of merchant-side offer editor.
+- Branded PawBucks distribution logic itself is untouched.
+- No changes to check-in / QR scanning code paths (they already produce the merchant_id + checkin_id used to unlock).
+
+## Files touched
+
+- `supabase/functions/unlock-merchant-offers/index.ts` (new; supersedes `unlock-acquisition-offers`)
+- `supabase/functions/unlock-acquisition-offers/index.ts` (thin alias forwarder for one release, then removed)
+- `supabase/migrations/…_partner_offers_offer_type.sql` (CHECK constraint + default)
+- `src/pages/CheckInPage.tsx` (swap function name, adjust toast)
+- `src/pages/MyDeals.tsx` (rebuild UI to match mockup)
+- Small helper: `src/components/deals/DealCard.tsx` (variant per offer_type)
