@@ -21,6 +21,7 @@ interface UnlockedOffer {
   redemption_code: string;
   already_unlocked: boolean;
   redeemed: boolean;
+  offer_type?: string | null;
 }
 
 const PROCESS_CHECKIN_TIMEOUT_MS = 10000;
