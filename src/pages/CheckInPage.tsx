@@ -166,17 +166,17 @@ export default function CheckInPage() {
  // Distribute branded PawBucks if applicable
  const merchantId = (row as any).merchant_id as string | null;
  const checkinId = (row as any).checkin_id as string | null;
- if (merchantId) {
- // Unlock acquisition-only New Customer deals (no-op for full-ecosystem merchants).
+                if (merchantId) {
+                  // Unlock New Customer and/or Partner Deal offers based on merchant fee_model.
  if (checkinId) {
  setUnlockMerchantId(merchantId);
  supabase.functions
- .invoke("unlock-acquisition-offers", {
+                      .invoke("unlock-merchant-offers", {
  body: { merchant_id: merchantId, checkin_id: checkinId },
  })
  .then(({ data: unlockData, error: unlockError }) => {
  if (unlockError) {
- console.warn("[checkin] unlock-acquisition-offers failed", unlockError);
+                          console.warn("[checkin] unlock-merchant-offers failed", unlockError);
  return;
  }
  const offers = (unlockData?.unlocked ?? []) as UnlockedOffer[];
@@ -184,15 +184,19 @@ export default function CheckInPage() {
  setUnlockedOffers(offers);
  const newly = offers.filter((o) => !o.already_unlocked);
  if (newly.length > 0) {
- toast.success(
- `🎉 New Customer deal unlocked at ${row.entity_name}!`,
- { duration: 6000 },
- );
+                            const hasNew = newly.some((o) => o.offer_type === "new_customer");
+                            const hasPartner = newly.some((o) => o.offer_type === "partner_deal");
+                            const label = hasNew && hasPartner
+                              ? `🎉 ${newly.length} deals unlocked at ${row.entity_name}!`
+                              : hasNew
+                                ? `🎉 New Customer deal unlocked at ${row.entity_name}!`
+                                : `🎉 Partner deal${newly.length > 1 ? "s" : ""} unlocked at ${row.entity_name}!`;
+                            toast.success(label, { duration: 6000 });
  }
  }
  })
  .catch((err) => {
- console.warn("[checkin] unlock-acquisition-offers threw", err);
+                        console.warn("[checkin] unlock-merchant-offers threw", err);
  });
  }
  console.log("[checkin] invoking distribute-branded-pawbucks", {
