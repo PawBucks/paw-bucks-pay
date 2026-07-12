@@ -16006,6 +16006,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      recompute_pawbucks_wallet: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       redeem_branded_pawbucks: {
         Args: {
           p_amount: number
