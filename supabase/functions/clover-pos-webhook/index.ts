@@ -347,7 +347,7 @@ serve(async (req) => {
       // Record the debit activity
       await supabaseAdmin.from("pawbucks_activity").insert({
         user_id: matchedUser.id,
-        amount: -requestedPawbucks,
+        amount: requestedPawbucks,
         type: "redeem",
         source: "clover_pos",
         description: `PawBucks redeemed at ${merchant?.business_name || "Partner Store"} (Clover POS)`,

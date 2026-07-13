@@ -227,7 +227,7 @@ serve(async (req) => {
         .from('pawbucks_activity')
         .insert({
           user_id: transaction.user_id,
-          amount: -pawbucksEarned,
+          amount: pawbucksEarned,
           type: 'redeem',
           source: 'refund',
           description: `PawBucks deducted due to refund of transaction`,

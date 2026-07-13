@@ -1045,13 +1045,13 @@ async function debitPawBucksForRedemption(
     }
     await supabase.from('pawbucks_activity').insert({
       user_id: userId,
-      amount: -pawbucksUsed,
+      amount: pawbucksUsed,
       type: 'redeem',
       source: 'subscription_renewal',
       description: `Auto-redeemed ${pawbucksUsed} PawBucks on ${productName} renewal`,
       pawbucks_status: 'available',
       partner_id: merchantId,
-      metadata: { payment_intent_id: paymentIntentId, auto_redeem: true },
+      stripe_payment_intent_id: paymentIntentId,
     });
   } catch (err) {
     logStep('Error debiting PawBucks for redemption', { userId, error: String(err) });

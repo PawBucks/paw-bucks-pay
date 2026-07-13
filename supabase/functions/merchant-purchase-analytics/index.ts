@@ -102,7 +102,7 @@ serve(async (req) => {
           user_id: user.id,
           type: 'redeem',
           source: 'analytics_purchase',
-          amount: -product.price_pawbucks,
+          amount: product.price_pawbucks,
           description: `Purchased ${product.name}`
         });
 
