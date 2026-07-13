@@ -3,6 +3,7 @@ import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
 import { isPetOwnerPawBucksEarningEnabled } from "../_shared/pet-owner-earning-kill-switch.ts";
+import { checkInternalSecret } from "../_shared/internal-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,6 +35,12 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Only cron / admin callers with the internal secret can trigger this
+  // reconciliation. Without this guard anyone could force reward payouts
+  // and Stripe API traffic.
+  const authFail = await checkInternalSecret(req, corsHeaders);
+  if (authFail) return authFail;
 
   const runId = crypto.randomUUID();
   const startedAt = Date.now();

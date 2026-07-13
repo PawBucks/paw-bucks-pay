@@ -80,6 +80,42 @@ serve(async (req) => {
 
     logStep("Slice retrieved", { sliceId, gapAmount: slice.gap_amount });
 
+    // Authorization: only the pet owner, the treating vet's merchant, or an
+    // admin/superadmin may act on a claim slice. Without this any signed-in
+    // user could settle other people's claims and mint themselves PawBucks.
+    const ownerId: string | undefined = slice.claim?.policy?.pet?.user_id;
+    const merchantId: string | undefined = slice.invoice?.merchant_id;
+
+    let authorized = false;
+    if (ownerId && ownerId === user.id) {
+      authorized = true;
+    }
+    if (!authorized && merchantId) {
+      const { data: merchantRow } = await supabaseClient
+        .from("merchants")
+        .select("id")
+        .eq("id", merchantId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (merchantRow) authorized = true;
+    }
+    if (!authorized) {
+      const { data: roleRows } = await supabaseClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      if ((roleRows ?? []).some((r: { role: string }) => r.role === "admin" || r.role === "superadmin")) {
+        authorized = true;
+      }
+    }
+    if (!authorized) {
+      logStep("Forbidden: caller does not own this claim slice", { sliceId, userId: user.id });
+      return new Response(
+        JSON.stringify({ error: "Forbidden" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+      );
+    }
+
     let result: Record<string, unknown> = {};
 
     switch (action) {

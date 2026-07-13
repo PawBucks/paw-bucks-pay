@@ -140,6 +140,24 @@ serve(async (req) => {
       );
     }
 
+    // Ensure the caller's merchant actually owns this redemption. Without this
+    // any merchant could void or view another merchant's customer redemptions.
+    let ownerPartnerId: string | null = (activity as { partner_id?: string | null }).partner_id ?? null;
+    if (!ownerPartnerId && activity.offer_id) {
+      const { data: offerRow } = await serviceClient
+        .from("partner_offers")
+        .select("partner_id")
+        .eq("id", activity.offer_id)
+        .maybeSingle();
+      ownerPartnerId = offerRow?.partner_id ?? null;
+    }
+    if (ownerPartnerId && ownerPartnerId !== partnerCheck.id) {
+      return new Response(
+        JSON.stringify({ valid: false, message: "This redemption code is not for your business" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
+      );
+    }
+
     // Mark as used
     const { error: updateError } = await serviceClient
       .from("pawbucks_activity")
