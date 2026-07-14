@@ -11,6 +11,7 @@ const InvoicePaymentSuccess = () => {
  const { invoiceId } = useParams<{ invoiceId: string }>();
  const [searchParams] = useSearchParams();
  const sessionId = searchParams.get("session_id");
+ const token = searchParams.get("token");
  
  const [loading, setLoading] = useState(true);
  const [invoice, setInvoice] = useState<any>(null);
@@ -31,6 +32,7 @@ const InvoicePaymentSuccess = () => {
  body: {
  invoiceId,
  sessionId,
+ token,
  },
  });
 
