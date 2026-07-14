@@ -13,11 +13,11 @@ serve(async (req) => {
   }
 
   try {
-    const { invoiceId, sessionId } = await req.json();
+    const { invoiceId, token } = await req.json();
 
-    if (!invoiceId) {
+    if (!invoiceId || !token) {
       return new Response(
-        JSON.stringify({ error: 'Invoice ID is required' }),
+        JSON.stringify({ error: 'Invoice ID and access token are required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
@@ -30,7 +30,7 @@ serve(async (req) => {
 
     console.log('[VERIFY_INVOICE_PAYMENT] Verifying payment for invoice:', invoiceId);
 
-    // Fetch invoice
+    // Fetch invoice — require the invoice's access_token to prove authorization
     const { data: invoice, error: invoiceError } = await supabaseAdmin
       .from('invoices')
       .select(`
@@ -42,18 +42,23 @@ serve(async (req) => {
         amount_due,
         merchant_id,
         client_name,
-        client_email
+        client_email,
+        access_token
       `)
       .eq('id', invoiceId)
-      .single();
+      .eq('access_token', token)
+      .maybeSingle();
 
     if (invoiceError || !invoice) {
-      console.log('[VERIFY_INVOICE_PAYMENT] Invoice not found:', invoiceError);
+      console.log('[VERIFY_INVOICE_PAYMENT] Invoice not found or access denied');
       return new Response(
-        JSON.stringify({ error: 'Invoice not found' }),
+        JSON.stringify({ error: 'Invoice not found or access denied' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
       );
     }
+
+    // Strip sensitive fields before returning
+    const { access_token: _t, ...safeInvoice } = invoice as Record<string, unknown>;
 
     // Fetch merchant (public info only)
     const { data: merchant } = await supabaseAdmin
@@ -71,7 +76,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        invoice,
+        invoice: safeInvoice,
         merchant: merchant || null,
         verified: true
       }),

@@ -38,11 +38,26 @@ serve(async (req) => {
 
     const { integration_id } = await req.json();
 
+    // Ensure the caller is a vet who owns this lab integration
+    const { data: vet, error: vetError } = await supabase
+      .from("partner_vets")
+      .select("id")
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+
+    if (vetError || !vet) {
+      return new Response(
+        JSON.stringify({ error: "You must be a registered vet" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Get integration details
     const { data: integration, error: integrationError } = await supabase
       .from("vet_lab_integrations")
       .select("*")
       .eq("id", integration_id)
+      .eq("vet_id", vet.id)
       .single();
 
     if (integrationError || !integration) {
