@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { addDays, addWeeks, addMonths, addYears, format } from "https://esm.sh/date-fns@3.6.0";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,7 +31,7 @@ function isDatePastDue(dateString: string): boolean {
 function buildInvoiceEmailHtml(invoice: any, merchant: any, items: any[], paymentUrl: string): string {
   const itemsHtml = items.map((item: any) => `
     <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.description}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(item.description)}</td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">$${Number(item.unit_price).toFixed(2)}</td>
       <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">$${(Number(item.quantity) * Number(item.unit_price)).toFixed(2)}</td>
@@ -43,20 +44,20 @@ function buildInvoiceEmailHtml(invoice: any, merchant: any, items: any[], paymen
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice from ${merchant.business_name}</title>
+  <title>Invoice from ${escapeHtml(merchant.business_name)}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
       <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; text-align: center;">
-        ${merchant.logo_url ? `<img src="${merchant.logo_url}" alt="${merchant.business_name}" style="height: 60px; margin-bottom: 15px;">` : ""}
-        <h1 style="color: white; margin: 0; font-size: 24px;">${merchant.business_name}</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">${merchant.address || ""}</p>
+        ${merchant.logo_url ? `<img src="${escapeHtml(merchant.logo_url)}" alt="${escapeHtml(merchant.business_name)}" style="height: 60px; margin-bottom: 15px;">` : ""}
+        <h1 style="color: white; margin: 0; font-size: 24px;">${escapeHtml(merchant.business_name)}</h1>
+        <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">${escapeHtml(merchant.address || "")}</p>
       </div>
       <div style="padding: 30px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h2 style="margin: 0 0 5px 0; color: #333;">Invoice #${invoice.invoice_number}</h2>
-          ${invoice.title ? `<p style="margin: 0; color: #666;">${invoice.title}</p>` : ""}
+          <h2 style="margin: 0 0 5px 0; color: #333;">Invoice #${escapeHtml(invoice.invoice_number)}</h2>
+          ${invoice.title ? `<p style="margin: 0; color: #666;">${escapeHtml(invoice.title)}</p>` : ""}
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
           <div>
@@ -72,10 +73,10 @@ function buildInvoiceEmailHtml(invoice: any, merchant: any, items: any[], paymen
         </div>
         <div style="margin-bottom: 25px;">
           <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase;">Bill To</p>
-          <p style="margin: 5px 0 0 0; font-weight: 600;">${invoice.client_name}</p>
-          ${invoice.client_company ? `<p style="margin: 2px 0 0 0; color: #666;">${invoice.client_company}</p>` : ""}
-          <p style="margin: 2px 0 0 0; color: #666;">${invoice.client_email}</p>
-          ${invoice.client_phone ? `<p style="margin: 2px 0 0 0; color: #666;">${invoice.client_phone}</p>` : ""}
+          <p style="margin: 5px 0 0 0; font-weight: 600;">${escapeHtml(invoice.client_name)}</p>
+          ${invoice.client_company ? `<p style="margin: 2px 0 0 0; color: #666;">${escapeHtml(invoice.client_company)}</p>` : ""}
+          <p style="margin: 2px 0 0 0; color: #666;">${escapeHtml(invoice.client_email)}</p>
+          ${invoice.client_phone ? `<p style="margin: 2px 0 0 0; color: #666;">${escapeHtml(invoice.client_phone)}</p>` : ""}
         </div>
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px;">
           <thead>
@@ -116,11 +117,11 @@ function buildInvoiceEmailHtml(invoice: any, merchant: any, items: any[], paymen
         ${invoice.notes ? `
         <div style="margin-top: 30px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
           <p style="margin: 0 0 5px 0; font-weight: 600; font-size: 14px;">Notes</p>
-          <p style="margin: 0; color: #666; font-size: 14px; white-space: pre-wrap;">${invoice.notes}</p>
+          <p style="margin: 0; color: #666; font-size: 14px; white-space: pre-wrap;">${escapeHtml(invoice.notes)}</p>
         </div>` : ""}
       </div>
       <div style="background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eee;">
-        <p style="margin: 0; color: #999; font-size: 12px;">${invoice.footer || "Thank you for your business!"}</p>
+        <p style="margin: 0; color: #999; font-size: 12px;">${escapeHtml(invoice.footer || "Thank you for your business!")}</p>
         <p style="margin: 10px 0 0 0; color: #999; font-size: 11px;">Powered by PawBucks</p>
       </div>
     </div>
