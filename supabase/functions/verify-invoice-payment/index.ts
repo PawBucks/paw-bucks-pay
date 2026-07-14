@@ -13,11 +13,11 @@ serve(async (req) => {
   }
 
   try {
-    const { invoiceId, sessionId } = await req.json();
+    const { invoiceId, sessionId, token } = await req.json();
 
-    if (!invoiceId) {
+    if (!invoiceId || (!token && !sessionId)) {
       return new Response(
-        JSON.stringify({ error: 'Invoice ID is required' }),
+        JSON.stringify({ error: 'Invoice ID and access token or session ID are required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
@@ -30,8 +30,8 @@ serve(async (req) => {
 
     console.log('[VERIFY_INVOICE_PAYMENT] Verifying payment for invoice:', invoiceId);
 
-    // Fetch invoice
-    const { data: invoice, error: invoiceError } = await supabaseAdmin
+    // Fetch invoice — require either matching access_token or matching Stripe session
+    let invoiceQuery = supabaseAdmin
       .from('invoices')
       .select(`
         id,
@@ -42,18 +42,31 @@ serve(async (req) => {
         amount_due,
         merchant_id,
         client_name,
-        client_email
+        client_email,
+        access_token,
+        stripe_payment_intent_id,
+        stripe_checkout_session_id
       `)
-      .eq('id', invoiceId)
-      .single();
+      .eq('id', invoiceId);
+
+    if (token) {
+      invoiceQuery = invoiceQuery.eq('access_token', token);
+    } else {
+      invoiceQuery = invoiceQuery.eq('stripe_checkout_session_id', sessionId);
+    }
+
+    const { data: invoice, error: invoiceError } = await invoiceQuery.maybeSingle();
 
     if (invoiceError || !invoice) {
-      console.log('[VERIFY_INVOICE_PAYMENT] Invoice not found:', invoiceError);
+      console.log('[VERIFY_INVOICE_PAYMENT] Invoice not found or access denied');
       return new Response(
-        JSON.stringify({ error: 'Invoice not found' }),
+        JSON.stringify({ error: 'Invoice not found or access denied' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
       );
     }
+
+    // Strip sensitive fields before returning
+    const { access_token: _t, stripe_payment_intent_id: _pi, stripe_checkout_session_id: _cs, ...safeInvoice } = invoice as Record<string, unknown>;
 
     // Fetch merchant (public info only)
     const { data: merchant } = await supabaseAdmin
@@ -71,7 +84,7 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        invoice,
+        invoice: safeInvoice,
         merchant: merchant || null,
         verified: true
       }),
