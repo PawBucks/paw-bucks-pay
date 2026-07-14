@@ -147,6 +147,36 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Per the platform QR check-in flow: Branded PawBucks are a Full-Ecosystem
+    // merchant benefit only. Acquisition-Only merchants unlock the New Customer
+    // Offer via `unlock-merchant-offers` and nothing else — no branded PB.
+    const { data: merchantRow, error: merchantErr } = await supabase
+      .from("merchants")
+      .select("id, fee_model")
+      .eq("id", merchant_id)
+      .maybeSingle();
+    if (merchantErr) {
+      console.error("[distribute-branded-pawbucks] merchant lookup failed", merchantErr);
+      return new Response(
+        JSON.stringify({ distributed: false, message: "Merchant lookup failed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+    if (!merchantRow || merchantRow.fee_model !== "full_ecosystem") {
+      console.log("[distribute-branded-pawbucks] skipping — not full_ecosystem", {
+        merchant_id,
+        fee_model: merchantRow?.fee_model ?? null,
+      });
+      return new Response(
+        JSON.stringify({
+          distributed: false,
+          message: "Branded PawBucks are only distributed at Full Ecosystem merchants",
+          fee_model: merchantRow?.fee_model ?? null,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+      );
+    }
+
     const { data: activeCampaignMerchants, error: campaignError } = await supabase
       .from("brand_campaign_merchants")
       .select(`
