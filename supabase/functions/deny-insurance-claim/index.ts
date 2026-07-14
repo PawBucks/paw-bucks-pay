@@ -40,6 +40,17 @@ serve(async (req) => {
 
     logStep("Vet user authenticated", { userId: user.id });
 
+    // Verify caller is a registered vet, and later confirm they own the claim
+    const { data: vet, error: vetError } = await supabaseClient
+      .from("partner_vets")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (vetError || !vet) {
+      throw new Error("You must be a registered vet to deny claims");
+    }
+
     const { claimId, denialReason } = await req.json();
 
     if (!claimId) {
@@ -61,6 +72,10 @@ serve(async (req) => {
 
     if (claimError || !claim) {
       throw new Error("Claim not found");
+    }
+
+    if (claim.vet_id !== vet.id) {
+      throw new Error("You are not authorized to deny this claim");
     }
 
     logStep("Claim retrieved", { claimId, currentStatus: claim.status });
