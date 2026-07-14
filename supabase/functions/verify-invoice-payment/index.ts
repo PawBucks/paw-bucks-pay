@@ -13,11 +13,11 @@ serve(async (req) => {
   }
 
   try {
-    const { invoiceId, sessionId, token } = await req.json();
+    const { invoiceId, token } = await req.json();
 
-    if (!invoiceId || (!token && !sessionId)) {
+    if (!invoiceId || !token) {
       return new Response(
-        JSON.stringify({ error: 'Invoice ID and access token or session ID are required' }),
+        JSON.stringify({ error: 'Invoice ID and access token are required' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
@@ -30,8 +30,8 @@ serve(async (req) => {
 
     console.log('[VERIFY_INVOICE_PAYMENT] Verifying payment for invoice:', invoiceId);
 
-    // Fetch invoice — require either matching access_token or matching Stripe session
-    let invoiceQuery = supabaseAdmin
+    // Fetch invoice — require the invoice's access_token to prove authorization
+    const { data: invoice, error: invoiceError } = await supabaseAdmin
       .from('invoices')
       .select(`
         id,
@@ -43,19 +43,11 @@ serve(async (req) => {
         merchant_id,
         client_name,
         client_email,
-        access_token,
-        stripe_payment_intent_id,
-        stripe_checkout_session_id
+        access_token
       `)
-      .eq('id', invoiceId);
-
-    if (token) {
-      invoiceQuery = invoiceQuery.eq('access_token', token);
-    } else {
-      invoiceQuery = invoiceQuery.eq('stripe_checkout_session_id', sessionId);
-    }
-
-    const { data: invoice, error: invoiceError } = await invoiceQuery.maybeSingle();
+      .eq('id', invoiceId)
+      .eq('access_token', token)
+      .maybeSingle();
 
     if (invoiceError || !invoice) {
       console.log('[VERIFY_INVOICE_PAYMENT] Invoice not found or access denied');
@@ -66,7 +58,7 @@ serve(async (req) => {
     }
 
     // Strip sensitive fields before returning
-    const { access_token: _t, stripe_payment_intent_id: _pi, stripe_checkout_session_id: _cs, ...safeInvoice } = invoice as Record<string, unknown>;
+    const { access_token: _t, ...safeInvoice } = invoice as Record<string, unknown>;
 
     // Fetch merchant (public info only)
     const { data: merchant } = await supabaseAdmin
