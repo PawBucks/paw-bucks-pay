@@ -6,15 +6,18 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 export function AnalyticsTab() {
  const [analytics, setAnalytics] = useState<any>(null);
  const [loading, setLoading] = useState(true);
+ const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
  const loadAnalytics = useCallback(async () => {
  try {
+  setErrorMessage(null);
  const { data, error } = await supabase.rpc('get_admin_analytics');
  
  if (error) throw error;
  setAnalytics(data?.[0]);
  } catch (error) {
  console.error('Error loading analytics:', error);
+  setErrorMessage(error instanceof Error ? error.message : 'Unable to load analytics metrics.');
  } finally {
  setLoading(false);
  }
@@ -70,6 +73,20 @@ export function AnalyticsTab() {
 
  if (loading) {
  return <div className="text-center py-8">Loading analytics...</div>;
+ }
+
+ if (errorMessage) {
+  return (
+  <Card>
+  <CardHeader>
+  <CardTitle>Analytics unavailable</CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-3">
+  <p className="text-sm text-muted-foreground">The analytics view could not load live platform totals.</p>
+  <p className="text-sm text-destructive">{errorMessage}</p>
+  </CardContent>
+  </Card>
+  );
  }
 
  const CHART_COLORS = [
