@@ -134,7 +134,7 @@ export function OverviewTab() {
  color:'text-warning',
  },
  {
- title:'Platform Revenue (3%)',
+  title:'Success Fee Revenue',
  value: `$${stats.platformRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
  icon: DollarSign,
  color:'text-success',
