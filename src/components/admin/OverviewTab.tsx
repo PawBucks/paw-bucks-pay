@@ -23,9 +23,11 @@ export function OverviewTab() {
  totalRedeemers: 0,
  });
  const [loading, setLoading] = useState(true);
+ const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
  const loadStats = useCallback(async () => {
  try {
+  setErrorMessage(null);
  const { data, error } = await supabase.rpc('get_admin_analytics');
  
  if (error) throw error;
@@ -51,6 +53,7 @@ export function OverviewTab() {
  }
  } catch (error) {
  console.error('Error loading stats:', error);
+  setErrorMessage(error instanceof Error ? error.message : 'Unable to load dashboard metrics.');
  } finally {
  setLoading(false);
  }
@@ -153,6 +156,20 @@ export function OverviewTab() {
 
  if (loading) {
  return <div className="text-center py-8">Loading overview...</div>;
+ }
+
+ if (errorMessage) {
+  return (
+   <Card>
+    <CardHeader>
+     <CardTitle>Dashboard metrics unavailable</CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-3">
+     <p className="text-sm text-muted-foreground">The Admin Dashboard could not load live platform totals.</p>
+     <p className="text-sm text-destructive">{errorMessage}</p>
+    </CardContent>
+   </Card>
+  );
  }
 
  return (
