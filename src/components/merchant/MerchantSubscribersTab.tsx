@@ -88,7 +88,8 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  .from("merchant_subscriptions")
   .select("*")
  .eq("merchant_id", merchantId)
- .in("status", ["active","past_due"])
+  .in("status", ["active","past_due"])
+  .eq("cancel_at_period_end", false)
  .order("created_at", { ascending: false });
 
  if (fetchError) throw fetchError;
