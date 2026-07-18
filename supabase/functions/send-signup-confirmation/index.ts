@@ -85,9 +85,10 @@ serve(async (req: Request) => {
 
     if (createErr || !created.user) {
       const msg = createErr?.message || "Failed to create account";
-      const status = /already|registered|exists/i.test(msg) ? 409 : 400;
-      return new Response(JSON.stringify({ error: msg }), {
-        status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      // Return 200 so supabase.functions.invoke surfaces our `error` field
+      // instead of a generic "non-2xx status code" message on the client.
+      return new Response(JSON.stringify({ success: false, error: msg }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -103,8 +104,8 @@ serve(async (req: Request) => {
 
     if (linkErr || !linkData?.properties?.action_link) {
       console.error("generateLink error", linkErr);
-      return new Response(JSON.stringify({ error: "Failed to generate confirmation link" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ success: false, error: "Failed to generate confirmation link" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
