@@ -14,6 +14,18 @@ import { POINTS_MULTIPLIER } from "@/lib/constants";
 export function useUserEarnRate(): { rate: number; tierLabel: "Free" | "PawPass" | "PawPass+"; loading: boolean } {
   const { subscription, loading } = useSubscription();
 
+  // A paid tier only applies while the subscription is actually active.
+  // If the user has let their subscription lapse (subscribed=false, or
+  // status is canceled/incomplete/unpaid/past_due), fall back to Free even
+  // if the stored subscription_tier / product_id still references PawPass.
+  const status = (subscription?.status || "").toLowerCase();
+  const isActive =
+    !!subscription?.subscribed && (status === "" || status === "active" || status === "trialing");
+
+  if (!isActive) {
+    return { rate: POINTS_MULTIPLIER.FREE, tierLabel: "Free", loading };
+  }
+
   const tier = (subscription?.subscription_tier || "").toLowerCase();
   const productId = subscription?.product_id || "";
 
