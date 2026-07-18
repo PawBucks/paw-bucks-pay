@@ -255,6 +255,22 @@ const MerchantDirectory = () => {
     return sorted;
   }, [merchants, selectedCategory, debouncedSearch, sortBy, pawbucksOnly, searchBoostedIds, userLocation]);
 
+  // Rank category pills by number of matching merchants (desc). "All" stays first.
+  const sortedBusinessTypes = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const t of businessTypes) {
+      if (t.value === "all") continue;
+      const n = merchants.filter((m) =>
+        merchantMatchesCategory(t.value, m.business_type, (m as any).business_categories)
+      ).length;
+      counts.set(t.value, n);
+    }
+    const rest = businessTypes.filter((t) => t.value !== "all");
+    rest.sort((a, b) => (counts.get(b.value) ?? 0) - (counts.get(a.value) ?? 0));
+    const all = businessTypes.find((t) => t.value === "all");
+    return all ? [all, ...rest] : rest;
+  }, [merchants]);
+
   useEffect(() => {
     if (filteredMerchants.length > 0 && searchBoostedIds.size > 0) {
       const boostedMerchants = filteredMerchants
@@ -528,7 +544,7 @@ const MerchantDirectory = () => {
 
                 {/* Category pills */}
                 <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-3 -mx-1 px-1">
-                  {businessTypes.map((type) => {
+                  {sortedBusinessTypes.map((type) => {
                     const isSelected = selectedCategory === type.value;
                     return (
                       <button
