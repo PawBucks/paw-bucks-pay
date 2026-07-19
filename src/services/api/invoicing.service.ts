@@ -305,12 +305,12 @@ export const invoicingService = {
  },
 
  async createInvoice(invoice: Partial<Invoice>) {
- const { data, error } = await supabase.from("invoices").insert(invoice as any).select().single();
+ const { data, error } = await supabase.from("invoices").insert(invoice as any).select(INVOICE_SELECT_COLUMNS).single();
  return { data: data as Invoice | null, error };
  },
 
  async updateInvoice(invoiceId: string, updates: Partial<Invoice>) {
- const { data, error } = await supabase.from("invoices").update(updates as any).eq("id", invoiceId).select().single();
+ const { data, error } = await supabase.from("invoices").update(updates as any).eq("id", invoiceId).select(INVOICE_SELECT_COLUMNS).single();
  return { data: data as Invoice | null, error };
  },
 
