@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from'react';
 import { supabase } from'@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from'@/components/ui/card';
-import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat } from "lucide-react";
+import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle } from "lucide-react";
 import { Progress } from'@/components/ui/progress';
 import { cn } from'@/lib/utils';
 
@@ -21,6 +21,9 @@ export function OverviewTab() {
  repeatRedemptionRate: 0,
  repeatRedeemers: 0,
  totalRedeemers: 0,
+ crossMerchantRate: 0,
+ crossMerchantPb: 0,
+ attributedPb: 0,
  });
  const [loading, setLoading] = useState(true);
  const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,6 +52,9 @@ export function OverviewTab() {
  repeatRedemptionRate: data[0].repeat_redemption_rate || 0,
  repeatRedeemers: data[0].repeat_redeemers || 0,
  totalRedeemers: data[0].total_redeemers || 0,
+ crossMerchantRate: Number(data[0].cross_merchant_redemption_rate || 0),
+ crossMerchantPb: Number(data[0].cross_merchant_redeemed_pb || 0),
+ attributedPb: Number(data[0].attributed_redeemed_pb || 0),
  });
  }
  } catch (error) {
