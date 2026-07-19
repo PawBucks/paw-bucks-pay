@@ -15682,6 +15682,9 @@ export type Database = {
       get_admin_analytics: {
         Args: never
         Returns: {
+          attributed_redeemed_pb: number
+          cross_merchant_redeemed_pb: number
+          cross_merchant_redemption_rate: number
           pawbucks_spend_rate: number
           platform_revenue: number
           repeat_redeemers: number
