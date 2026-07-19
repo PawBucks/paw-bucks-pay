@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from'react';
 import { supabase } from'@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from'@/components/ui/card';
-import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat } from "lucide-react";
+import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle } from "lucide-react";
 import { Progress } from'@/components/ui/progress';
 import { cn } from'@/lib/utils';
 
@@ -21,6 +21,9 @@ export function OverviewTab() {
  repeatRedemptionRate: 0,
  repeatRedeemers: 0,
  totalRedeemers: 0,
+ crossMerchantRate: 0,
+ crossMerchantPb: 0,
+ attributedPb: 0,
  });
  const [loading, setLoading] = useState(true);
  const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,6 +52,9 @@ export function OverviewTab() {
  repeatRedemptionRate: data[0].repeat_redemption_rate || 0,
  repeatRedeemers: data[0].repeat_redeemers || 0,
  totalRedeemers: data[0].total_redeemers || 0,
+ crossMerchantRate: Number(data[0].cross_merchant_redemption_rate || 0),
+ crossMerchantPb: Number(data[0].cross_merchant_redeemed_pb || 0),
+ attributedPb: Number(data[0].attributed_redeemed_pb || 0),
  });
  }
  } catch (error) {
@@ -392,6 +398,104 @@ export function OverviewTab() {
  )}
  </CardContent>
  </Card>
+    {/* Cross-Merchant Redemption Rate Card */}
+    <Card className="border-2">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div>
+          <CardTitle className="text-lg font-bold flex items-center gap-2">
+            <Shuffle className="w-5 h-5 text-primary" />
+            Cross-Merchant Redemption Rate
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            % of PawBucks redeemed at a different merchant than where they were earned
+          </p>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex items-end gap-3">
+          <span className={cn(
+            "text-5xl font-extrabold tracking-tight",
+            stats.crossMerchantRate >= 40 ? "text-success" :
+            stats.crossMerchantRate >= 20 ? "text-warning" : "text-destructive"
+          )}>
+            {stats.crossMerchantRate}%
+          </span>
+          <span className={cn(
+            "text-sm font-semibold mb-2 px-2 py-0.5 rounded-full",
+            stats.crossMerchantRate >= 40
+              ? "bg-success/10 text-success"
+              : stats.crossMerchantRate >= 20
+              ? "bg-warning/10 text-warning"
+              : "bg-destructive/10 text-destructive"
+          )}>
+            {stats.crossMerchantRate >= 40 ? "Strong Circulation" :
+             stats.crossMerchantRate >= 20 ? "Moderate" : "Siloed"}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          <Progress
+            value={Math.min(stats.crossMerchantRate, 100)}
+            className={cn(
+              "h-4 rounded-full",
+              stats.crossMerchantRate >= 40
+                ? "[&>div]:bg-success"
+                : stats.crossMerchantRate >= 20
+                ? "[&>div]:bg-warning"
+                : "[&>div]:bg-destructive"
+            )}
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>0%</span>
+            <span className="text-destructive font-medium">20%</span>
+            <span className="text-success font-medium">40%+</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Redeemed Cross-Merchant</p>
+            <p className="text-xl font-bold">
+              {stats.crossMerchantPb.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">PB</span>
+            </p>
+            <p className="text-xs text-muted-foreground">
+              ≈ ${(stats.crossMerchantPb * 0.001).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Redeemed Same-Merchant</p>
+            <p className="text-xl font-bold">
+              {(stats.attributedPb - stats.crossMerchantPb).toLocaleString()} <span className="text-sm font-normal text-muted-foreground">PB</span>
+            </p>
+            <p className="text-xs text-muted-foreground">Earned & spent at same merchant</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Attributable Total</p>
+            <p className="text-xl font-bold">
+              {stats.attributedPb.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">PB</span>
+            </p>
+            <p className="text-xs text-muted-foreground">Traceable to earning merchant</p>
+          </div>
+        </div>
+
+        {stats.crossMerchantRate < 20 && stats.attributedPb > 0 && (
+          <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive">
+            <strong>Below 20%:</strong> PawBucks are staying siloed at their earning merchant. Encourage cross-merchant discovery to grow ecosystem stickiness.
+          </div>
+        )}
+        {stats.crossMerchantRate >= 20 && stats.crossMerchantRate < 40 && stats.attributedPb > 0 && (
+          <div className="bg-warning/5 border border-warning/20 rounded-lg p-3 text-sm text-warning">
+            <strong>Moderate:</strong> Some PawBucks are circulating across merchants. Target 40%+ for a healthy network effect.
+          </div>
+        )}
+        {stats.crossMerchantRate >= 40 && stats.attributedPb > 0 && (
+          <div className="bg-success/5 border border-success/20 rounded-lg p-3 text-sm text-success">
+            <strong>Strong:</strong> PawBucks are flowing across the merchant network, driving cross-shop traffic.
+          </div>
+        )}
+      </CardContent>
+    </Card>
  </div>
  );
 }
