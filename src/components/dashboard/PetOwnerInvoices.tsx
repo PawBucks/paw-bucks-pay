@@ -1,5 +1,4 @@
 import { useState, useEffect } from"react";
-import { useNavigate } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
@@ -44,7 +43,6 @@ const statusConfig: Record<string, { label: string; variant:"default" |"secondar
 };
 
 export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
- const navigate = useNavigate();
  const [invoices, setInvoices] = useState<PetOwnerInvoice[]>([]);
  const [loading, setLoading] = useState(true);
 
