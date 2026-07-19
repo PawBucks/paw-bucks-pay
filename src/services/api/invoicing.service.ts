@@ -287,6 +287,13 @@ export const invoicingService = {
  return { data: data as unknown as Invoice | null, error };
  },
 
+ async getInvoicePaymentLink(invoiceId: string) {
+  const { data, error } = await supabase.functions.invoke("get-invoice-payment-link", {
+   body: { invoiceId },
+  });
+  return { data: data as { paymentUrl?: string } | null, error };
+ },
+
  async getInvoiceWithItems(invoiceId: string) {
  const [invoiceResult, itemsResult, recipientsResult] = await Promise.all([
   supabase.from("invoices").select(INVOICE_SELECT_COLUMNS).eq("id", invoiceId).single(),

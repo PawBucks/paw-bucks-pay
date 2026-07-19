@@ -29,9 +29,8 @@ import {
  TableRow,
 } from"@/components/ui/table";
 import { Skeleton } from"@/components/ui/skeleton";
-import { Invoice } from"@/services/api/invoicing.service";
+import { Invoice, invoicingService } from"@/services/api/invoicing.service";
 import { cn } from"@/lib/utils";
-import { buildAppUrl } from"@/lib/url";
 
 import { Formatters } from "@/utils/formatters";
 interface InvoiceListProps {
@@ -433,10 +432,14 @@ export function InvoiceList({
  Duplicate
  </DropdownMenuItem>
  {invoice.status !=='draft' && (
- <DropdownMenuItem onClick={() => {
- const shareUrl = buildAppUrl(`/invoice/${invoice.id}/pay?token=${invoice.access_token}`);
- navigator.clipboard.writeText(shareUrl);
- toast.success("Share link copied to clipboard");
+  <DropdownMenuItem onClick={async () => {
+  const { data, error } = await invoicingService.getInvoicePaymentLink(invoice.id);
+  if (error || !data?.paymentUrl) {
+  toast.error("Unable to create share link");
+  return;
+  }
+  navigator.clipboard.writeText(data.paymentUrl);
+  toast.success("Share link copied to clipboard");
  }}>
  <Link className="h-4 w-4 mr-2" />
  Copy Share Link

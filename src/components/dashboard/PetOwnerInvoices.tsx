@@ -9,6 +9,7 @@ import { FileText, ChevronRight, AlertCircle, CheckCircle2, Clock } from "lucide
 import { format, parseISO } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
+import { invoicingService } from "@/services/api/invoicing.service";
 interface PetOwnerInvoice {
  id: string;
  invoice_number: string;
@@ -19,7 +20,7 @@ interface PetOwnerInvoice {
  total: number;
  amount_paid: number;
  amount_due: number;
- access_token: string;
+ access_token?: string | null;
  client_name: string;
  title?: string;
  merchant?: {
@@ -67,7 +68,6 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  total,
  amount_paid,
  amount_due,
- access_token,
  client_name,
  title
  `)
@@ -120,9 +120,13 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  fetchInvoices();
  }, [userEmail]);
 
- const handlePayInvoice = (invoice: PetOwnerInvoice) => {
- // Navigate to invoice payment page with access token
- navigate(`/invoice/${invoice.id}/pay?token=${invoice.access_token}`);
+ const handlePayInvoice = async (invoice: PetOwnerInvoice) => {
+  const { data, error } = await invoicingService.getInvoicePaymentLink(invoice.id);
+  if (error || !data?.paymentUrl) {
+  toast.error("Unable to open invoice link");
+  return;
+  }
+  window.location.href = data.paymentUrl;
  };
 
  const getDisplayStatus = (invoice: PetOwnerInvoice) => {

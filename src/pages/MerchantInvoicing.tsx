@@ -14,7 +14,6 @@ import { InvoiceList, InvoiceEditor, InvoicePreview, ClientManager, InvoiceSetti
 import { RecordPaymentDialog } from"@/components/invoicing/RecordPaymentDialog";
 import { DeleteRecurringInvoiceDialog, type RecurringDeleteChoice } from"@/components/invoicing/DeleteRecurringInvoiceDialog";
 import { invoicingService, type Invoice, type InvoiceItem, type InvoiceClient, type InvoiceSettings, type InvoiceTemplate, type CatalogItem, type InvoicePayment, type InvoiceRecipient } from"@/services/api/invoicing.service";
-import { buildAppUrl } from"@/lib/url";
 
 // Helper function to calculate next invoice date based on interval
 function calculateNextInvoiceDate(fromDate: Date, interval: string): Date {
@@ -660,9 +659,12 @@ const MerchantInvoicing = () => {
 
  const handleDownloadPdf = async (invoice: Invoice) => {
  toast.info("Opening print dialog...");
- // For now, open the invoice in a new window for printing
- const payUrl = buildAppUrl(`/invoice/${invoice.id}/pay?token=${invoice.access_token}`);
- window.open(payUrl,"_blank");
+  const { data, error } = await invoicingService.getInvoicePaymentLink(invoice.id);
+  if (error || !data?.paymentUrl) {
+  toast.error("Unable to open invoice link");
+  return;
+  }
+  window.open(data.paymentUrl,"_blank");
  };
 
  // Record payment handlers
@@ -710,10 +712,13 @@ const MerchantInvoicing = () => {
  }
  };
 
- const handlePrintReceipt = (invoice: Invoice) => {
- // Open the invoice view in a new window for printing
- const payUrl = buildAppUrl(`/invoice/${invoice.id}/pay?token=${invoice.access_token}`);
- const printWindow = window.open(payUrl,"_blank");
+ const handlePrintReceipt = async (invoice: Invoice) => {
+  const { data, error } = await invoicingService.getInvoicePaymentLink(invoice.id);
+  if (error || !data?.paymentUrl) {
+  toast.error("Unable to open receipt link");
+  return;
+  }
+  const printWindow = window.open(data.paymentUrl,"_blank");
  if (printWindow) {
  // Give it a moment to load then trigger print
  printWindow.onload = () => {
