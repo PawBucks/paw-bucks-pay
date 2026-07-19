@@ -4,11 +4,10 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent } from"@/components/ui/card";
 import { Badge } from"@/components/ui/badge";
 import { Separator } from"@/components/ui/separator";
-import { Invoice, InvoiceItem, InvoicePayment, InvoiceRecipient } from"@/services/api/invoicing.service";
+import { Invoice, InvoiceItem, InvoicePayment, InvoiceRecipient, invoicingService } from"@/services/api/invoicing.service";
 import { cn } from"@/lib/utils";
 import { toast } from"sonner";
 import { supabase } from"@/integrations/supabase/client";
-import { buildAppUrl } from"@/lib/url";
 
 import { Formatters } from "@/utils/formatters";
 interface InvoicePreviewProps {
@@ -59,11 +58,14 @@ export function InvoicePreview({
 }: InvoicePreviewProps) {
  const status = statusConfig[invoice.status] || statusConfig.draft;
 
- const copyPaymentLink = () => {
- // Use correct route: /invoice/:invoiceId/pay?token=accessToken
- const link = buildAppUrl(`/invoice/${invoice.id}/pay?token=${invoice.access_token}`);
- navigator.clipboard.writeText(link);
- toast.success("Payment link copied to clipboard!");
+ const copyPaymentLink = async () => {
+  const { data, error } = await invoicingService.getInvoicePaymentLink(invoice.id);
+  if (error || !data?.paymentUrl) {
+  toast.error("Unable to create payment link");
+  return;
+  }
+  navigator.clipboard.writeText(data.paymentUrl);
+  toast.success("Payment link copied to clipboard!");
  };
 
  return (

@@ -1,5 +1,7 @@
 import { supabase } from"./base.service";
 
+const INVOICE_SELECT_COLUMNS = "id, merchant_id, client_id, invoice_number, status, issue_date, due_date, sent_at, viewed_at, paid_at, client_name, client_email, client_phone, client_company, client_address, subtotal, discount_type, discount_value, discount_amount, tax_rate, tax_amount, shipping_amount, total, amount_paid, amount_due, currency, title, notes, footer, terms_conditions, payment_terms, allow_partial_payments, allow_tips, accept_credit_card, accept_bank_transfer, accept_pawbucks, view_count, stripe_payment_intent_id, stripe_invoice_id, is_recurring, recurring_interval, recurring_end_date, parent_invoice_id, next_invoice_date, attachment_urls, created_at, updated_at" as const;
+
 // Types - using'any' for flexibility with Supabase responses
 export interface InvoiceClient {
  id: string;
@@ -87,7 +89,7 @@ export interface Invoice {
  accept_credit_card: boolean;
  accept_bank_transfer: boolean;
  accept_pawbucks: boolean;
- access_token: string;
+ access_token?: string | null;
  view_count: number;
  stripe_payment_intent_id?: string | null;
  stripe_invoice_id?: string | null;
@@ -269,7 +271,7 @@ export const invoicingService = {
  async getInvoices(merchantId: string, filters?: { status?: string; limit?: number }) {
  let query = supabase
  .from("invoices")
- .select("*")
+  .select(INVOICE_SELECT_COLUMNS)
  .eq("merchant_id", merchantId)
  .order("created_at", { ascending: false });
 
@@ -277,24 +279,31 @@ export const invoicingService = {
  if (filters?.limit) query = query.limit(filters.limit);
 
  const { data, error } = await query;
- return { data: (data || []) as Invoice[], error };
+ return { data: (data || []) as unknown as Invoice[], error };
  },
 
  async getInvoiceById(invoiceId: string) {
- const { data, error } = await supabase.from("invoices").select("*").eq("id", invoiceId).single();
- return { data: data as Invoice | null, error };
+ const { data, error } = await supabase.from("invoices").select(INVOICE_SELECT_COLUMNS).eq("id", invoiceId).single();
+ return { data: data as unknown as Invoice | null, error };
+ },
+
+ async getInvoicePaymentLink(invoiceId: string) {
+  const { data, error } = await supabase.functions.invoke("get-invoice-payment-link", {
+   body: { invoiceId },
+  });
+  return { data: data as { paymentUrl?: string } | null, error };
  },
 
  async getInvoiceWithItems(invoiceId: string) {
  const [invoiceResult, itemsResult, recipientsResult] = await Promise.all([
- supabase.from("invoices").select("*").eq("id", invoiceId).single(),
+  supabase.from("invoices").select(INVOICE_SELECT_COLUMNS).eq("id", invoiceId).single(),
  supabase.from("invoice_items").select("*").eq("invoice_id", invoiceId).order("sort_order"),
  supabase.from("invoice_recipients").select("*").eq("invoice_id", invoiceId)
  ]);
  if (invoiceResult.error) return { data: null, error: invoiceResult.error };
  return { 
  data: { 
- ...(invoiceResult.data as Invoice), 
+  ...(invoiceResult.data as unknown as Invoice), 
  items: (itemsResult.data || []) as InvoiceItem[],
  recipients: (recipientsResult.data || []) as InvoiceRecipient[]
  }, 
@@ -303,13 +312,13 @@ export const invoicingService = {
  },
 
  async createInvoice(invoice: Partial<Invoice>) {
- const { data, error } = await supabase.from("invoices").insert(invoice as any).select().single();
- return { data: data as Invoice | null, error };
+ const { data, error } = await supabase.from("invoices").insert(invoice as any).select(INVOICE_SELECT_COLUMNS).single();
+ return { data: data as unknown as Invoice | null, error };
  },
 
  async updateInvoice(invoiceId: string, updates: Partial<Invoice>) {
- const { data, error } = await supabase.from("invoices").update(updates as any).eq("id", invoiceId).select().single();
- return { data: data as Invoice | null, error };
+ const { data, error } = await supabase.from("invoices").update(updates as any).eq("id", invoiceId).select(INVOICE_SELECT_COLUMNS).single();
+ return { data: data as unknown as Invoice | null, error };
  },
 
  async deleteInvoice(invoiceId: string) {

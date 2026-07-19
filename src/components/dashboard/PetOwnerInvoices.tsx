@@ -1,5 +1,4 @@
 import { useState, useEffect } from"react";
-import { useNavigate } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
@@ -7,8 +6,10 @@ import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
 import { FileText, ChevronRight, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { format, parseISO } from"date-fns";
+import { toast } from"sonner";
 
 import { Formatters } from "@/utils/formatters";
+import { invoicingService } from "@/services/api/invoicing.service";
 interface PetOwnerInvoice {
  id: string;
  invoice_number: string;
@@ -19,7 +20,7 @@ interface PetOwnerInvoice {
  total: number;
  amount_paid: number;
  amount_due: number;
- access_token: string;
+ access_token?: string | null;
  client_name: string;
  title?: string;
  merchant?: {
@@ -42,7 +43,6 @@ const statusConfig: Record<string, { label: string; variant:"default" |"secondar
 };
 
 export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
- const navigate = useNavigate();
  const [invoices, setInvoices] = useState<PetOwnerInvoice[]>([]);
  const [loading, setLoading] = useState(true);
 
@@ -67,7 +67,6 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  total,
  amount_paid,
  amount_due,
- access_token,
  client_name,
  title
  `)
@@ -120,9 +119,13 @@ export function PetOwnerInvoices({ userEmail }: PetOwnerInvoicesProps) {
  fetchInvoices();
  }, [userEmail]);
 
- const handlePayInvoice = (invoice: PetOwnerInvoice) => {
- // Navigate to invoice payment page with access token
- navigate(`/invoice/${invoice.id}/pay?token=${invoice.access_token}`);
+ const handlePayInvoice = async (invoice: PetOwnerInvoice) => {
+  const { data, error } = await invoicingService.getInvoicePaymentLink(invoice.id);
+  if (error || !data?.paymentUrl) {
+  toast.error("Unable to open invoice link");
+  return;
+  }
+  window.location.href = data.paymentUrl;
  };
 
  const getDisplayStatus = (invoice: PetOwnerInvoice) => {
