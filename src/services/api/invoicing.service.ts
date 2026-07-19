@@ -1,5 +1,7 @@
 import { supabase } from"./base.service";
 
+const INVOICE_SELECT_COLUMNS = "id, merchant_id, client_id, invoice_number, status, issue_date, due_date, sent_at, viewed_at, paid_at, client_name, client_email, client_phone, client_company, client_address, subtotal, discount_type, discount_value, discount_amount, tax_rate, tax_amount, shipping_amount, total, amount_paid, amount_due, currency, title, notes, footer, terms_conditions, payment_terms, allow_partial_payments, allow_tips, accept_credit_card, accept_bank_transfer, accept_pawbucks, view_count, stripe_payment_intent_id, stripe_invoice_id, is_recurring, recurring_interval, recurring_end_date, parent_invoice_id, next_invoice_date, attachment_urls, created_at, updated_at" as const;
+
 // Types - using'any' for flexibility with Supabase responses
 export interface InvoiceClient {
  id: string;
@@ -266,13 +268,10 @@ export const invoicingService = {
  },
 
  // INVOICES
- invoiceSelectColumns:
- "id, merchant_id, client_id, invoice_number, status, issue_date, due_date, sent_at, viewed_at, paid_at, client_name, client_email, client_phone, client_company, client_address, subtotal, discount_type, discount_value, discount_amount, tax_rate, tax_amount, shipping_amount, total, amount_paid, amount_due, currency, title, notes, footer, terms_conditions, payment_terms, allow_partial_payments, allow_tips, accept_credit_card, accept_bank_transfer, accept_pawbucks, view_count, stripe_payment_intent_id, stripe_invoice_id, is_recurring, recurring_interval, recurring_end_date, parent_invoice_id, next_invoice_date, attachment_urls, created_at, updated_at",
-
  async getInvoices(merchantId: string, filters?: { status?: string; limit?: number }) {
  let query = supabase
  .from("invoices")
-  .select(this.invoiceSelectColumns)
+  .select(INVOICE_SELECT_COLUMNS)
  .eq("merchant_id", merchantId)
  .order("created_at", { ascending: false });
 
@@ -284,13 +283,13 @@ export const invoicingService = {
  },
 
  async getInvoiceById(invoiceId: string) {
- const { data, error } = await supabase.from("invoices").select(this.invoiceSelectColumns).eq("id", invoiceId).single();
+ const { data, error } = await supabase.from("invoices").select(INVOICE_SELECT_COLUMNS).eq("id", invoiceId).single();
  return { data: data as Invoice | null, error };
  },
 
  async getInvoiceWithItems(invoiceId: string) {
  const [invoiceResult, itemsResult, recipientsResult] = await Promise.all([
-  supabase.from("invoices").select(this.invoiceSelectColumns).eq("id", invoiceId).single(),
+  supabase.from("invoices").select(INVOICE_SELECT_COLUMNS).eq("id", invoiceId).single(),
  supabase.from("invoice_items").select("*").eq("invoice_id", invoiceId).order("sort_order"),
  supabase.from("invoice_recipients").select("*").eq("invoice_id", invoiceId)
  ]);
