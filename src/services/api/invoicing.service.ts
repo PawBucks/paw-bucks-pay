@@ -279,12 +279,12 @@ export const invoicingService = {
  if (filters?.limit) query = query.limit(filters.limit);
 
  const { data, error } = await query;
- return { data: (data || []) as Invoice[], error };
+ return { data: (data || []) as unknown as Invoice[], error };
  },
 
  async getInvoiceById(invoiceId: string) {
  const { data, error } = await supabase.from("invoices").select(INVOICE_SELECT_COLUMNS).eq("id", invoiceId).single();
- return { data: data as Invoice | null, error };
+ return { data: data as unknown as Invoice | null, error };
  },
 
  async getInvoiceWithItems(invoiceId: string) {
@@ -296,7 +296,7 @@ export const invoicingService = {
  if (invoiceResult.error) return { data: null, error: invoiceResult.error };
  return { 
  data: { 
- ...(invoiceResult.data as Invoice), 
+  ...(invoiceResult.data as unknown as Invoice), 
  items: (itemsResult.data || []) as InvoiceItem[],
  recipients: (recipientsResult.data || []) as InvoiceRecipient[]
  }, 
@@ -306,12 +306,12 @@ export const invoicingService = {
 
  async createInvoice(invoice: Partial<Invoice>) {
  const { data, error } = await supabase.from("invoices").insert(invoice as any).select(INVOICE_SELECT_COLUMNS).single();
- return { data: data as Invoice | null, error };
+ return { data: data as unknown as Invoice | null, error };
  },
 
  async updateInvoice(invoiceId: string, updates: Partial<Invoice>) {
  const { data, error } = await supabase.from("invoices").update(updates as any).eq("id", invoiceId).select(INVOICE_SELECT_COLUMNS).single();
- return { data: data as Invoice | null, error };
+ return { data: data as unknown as Invoice | null, error };
  },
 
  async deleteInvoice(invoiceId: string) {
