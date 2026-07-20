@@ -139,7 +139,8 @@ serve(async (req) => {
       );
     }
 
-    const { totalAmount, pawbucksAmount: manualPawbucksAmount, storeLockedPawbucks, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem, items } = validation.data;
+    const { totalAmount, pawbucksAmount: manualPawbucksAmount, storeLockedPawbucks: initialStoreLockedPawbucks, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem, items } = validation.data;
+    let storeLockedPawbucks = initialStoreLockedPawbucks;
     const lineItems: IncomingTransactionItem[] = items ?? [];
 
     const supabaseAdmin = createClient(
@@ -287,9 +288,38 @@ serve(async (req) => {
 
     // Calculate USD value of PawBucks - both regular and store-locked apply to base amount ONLY, not tip
     const storeLockedUsdValue = storeLockedPawbucks * PAWBUCKS_TO_USD;
-    const pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
-    const totalPbUsdValue = pawbucksUsdValue + storeLockedUsdValue;
-    const stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount; // Tip always goes to card
+    let pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
+    let totalPbUsdValue = pawbucksUsdValue + storeLockedUsdValue;
+    let stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount; // Tip always goes to card
+
+    // Stripe minimum charge is $0.50. If PawBucks would reduce the card portion
+    // below $0.50 (but not to $0.00), scale back the PawBucks applied so the
+    // remaining card charge equals exactly $0.50. Prefer trimming wallet
+    // PawBucks first, then store-locked PawBucks. If PB alone can cover the
+    // whole total (stripeAmount === 0), leave it — the PB-only branch handles it.
+    const STRIPE_MIN_USD = 0.5;
+    if (stripeAmount > 0 && stripeAmount < STRIPE_MIN_USD) {
+      const shortfallUsd = STRIPE_MIN_USD - stripeAmount;
+      // Trim wallet PawBucks first
+      const trimFromWallet = Math.min(pawbucksAmount, Math.ceil(shortfallUsd / PAWBUCKS_TO_USD));
+      pawbucksAmount -= trimFromWallet;
+      let remainingShortfall = shortfallUsd - trimFromWallet * PAWBUCKS_TO_USD;
+      if (remainingShortfall > 0 && storeLockedPawbucks > 0) {
+        const trimFromStore = Math.min(storeLockedPawbucks, Math.ceil(remainingShortfall / PAWBUCKS_TO_USD));
+        storeLockedPawbucks -= trimFromStore;
+      }
+      pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
+      const newStoreLockedUsdValue = storeLockedPawbucks * PAWBUCKS_TO_USD;
+      totalPbUsdValue = pawbucksUsdValue + newStoreLockedUsdValue;
+      stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount;
+      // Guard against tiny float drift
+      if (stripeAmount > 0 && stripeAmount < STRIPE_MIN_USD) {
+        stripeAmount = STRIPE_MIN_USD;
+      }
+      logStep('Stripe minimum guard applied', {
+        shortfallUsd, pawbucksAmount, storeLockedPawbucks, stripeAmount,
+      });
+    }
 
     // Determine how much comes from wallet vs welcome credit
     let walletPawbucks = 0;
