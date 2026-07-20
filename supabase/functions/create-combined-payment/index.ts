@@ -139,7 +139,8 @@ serve(async (req) => {
       );
     }
 
-    const { totalAmount, pawbucksAmount: manualPawbucksAmount, storeLockedPawbucks, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem, items } = validation.data;
+    const { totalAmount, pawbucksAmount: manualPawbucksAmount, storeLockedPawbucks: initialStoreLockedPawbucks, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem, items } = validation.data;
+    let storeLockedPawbucks = initialStoreLockedPawbucks;
     const lineItems: IncomingTransactionItem[] = items ?? [];
 
     const supabaseAdmin = createClient(
