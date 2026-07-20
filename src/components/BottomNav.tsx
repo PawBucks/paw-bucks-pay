@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { title: "Home", to: "/home", emoji: "🏠", ariaLabel: "Home" },
-  { title: "Pay", to: "/pay", emoji: "💳", ariaLabel: "Pay & save" },
+  { title: "Deals", to: "/my-deals", emoji: "🏷️", ariaLabel: "My deals" },
   { title: "Discover", to: "/discover", emoji: "🧭", ariaLabel: "Discover places" },
   { title: "Community", to: "/community", emoji: "💬", ariaLabel: "Community forum" },
   { title: "Activity", to: "/activity", emoji: "🧾", ariaLabel: "Your activity" },
