@@ -5,7 +5,7 @@ import { z } from "https://esm.sh/zod@3.22.4";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-api-key",
+    "authorization, x-client-info, apikey, content-type, x-api-key, x-clover-auth, clover-auth-signature",
 };
 
 const PLATFORM_FEE_RATE = 0.03; // 3% success fee on USD portion
@@ -48,53 +48,169 @@ async function hashApiKey(key: string): Promise<string> {
     .join("");
 }
 
+async function hmacSha256Hex(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // ── 0. Clover Marketplace verification challenge (must run before auth) ──
+  const url = new URL(req.url);
+  if (req.method === "GET") {
+    const code = url.searchParams.get("verification_code") ||
+      url.searchParams.get("verificationCode");
+    if (code) {
+      return new Response(code, {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "text/plain" },
+      });
+    }
+    return new Response("ok", {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "text/plain" },
+    });
+  }
+
+  // Read the raw body once so signature verification and JSON parsing stay in sync.
+  const rawBody = req.method === "POST" ? await req.text() : "";
+  let parsedBody: any = null;
+  if (rawBody) {
+    try {
+      parsedBody = JSON.parse(rawBody);
+    } catch {
+      parsedBody = null;
+    }
+  }
+
+  // POST-body verification challenge (Clover sometimes posts { verificationCode })
+  if (
+    parsedBody &&
+    typeof parsedBody === "object" &&
+    typeof parsedBody.verificationCode === "string" &&
+    parsedBody.amount === undefined &&
+    parsedBody.tender === undefined
+  ) {
+    return new Response(
+      JSON.stringify({ verificationCode: parsedBody.verificationCode }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
   try {
-    // ── 1. Authenticate via POS API Key ──
-    const apiKey = req.headers.get("x-api-key");
-    if (!apiKey) {
-      return new Response(
-        JSON.stringify({ error: "Missing x-api-key header" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (!apiKey.startsWith("pk_live_")) {
-      return new Response(
-        JSON.stringify({ error: "Invalid API key format" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    const apiKeyHash = await hashApiKey(apiKey);
+    // ── 1. Authenticate: either Clover Marketplace signature OR merchant POS API key ──
+    const cloverSig =
+      req.headers.get("x-clover-auth") ||
+      req.headers.get("clover-auth-signature");
+    const apiKey = req.headers.get("x-api-key");
 
-    const { data: integration, error: integrationError } = await supabaseAdmin
-      .from("merchant_pos_integrations")
-      .select("id, merchant_id, is_active")
-      .eq("api_key_hash", apiKeyHash)
-      .single();
+    let integration: { id: string; merchant_id: string; is_active: boolean } | null = null;
 
-    if (integrationError || !integration) {
-      console.error("Clover webhook: API key lookup failed", integrationError);
-      return new Response(
-        JSON.stringify({ error: "Invalid API key" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (cloverSig) {
+      const signingSecret = Deno.env.get("CLOVER_APP_SIGNING_SECRET") ?? "";
+      if (!signingSecret) {
+        console.error("Clover webhook: CLOVER_APP_SIGNING_SECRET not configured");
+        return new Response(
+          JSON.stringify({ error: "Signing secret not configured" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      const expected = await hmacSha256Hex(signingSecret, rawBody);
+      const provided = cloverSig.replace(/^sha256=/i, "").trim().toLowerCase();
+      if (!constantTimeEqual(expected, provided)) {
+        console.error("Clover webhook: signature mismatch");
+        return new Response(
+          JSON.stringify({ error: "Invalid Clover signature" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const cloverMerchantId =
+        parsedBody?.merchant ??
+        parsedBody?.merchantId ??
+        parsedBody?.merchant_id ??
+        null;
+      if (!cloverMerchantId) {
+        console.error("Clover webhook: signed event missing merchant id");
+        return new Response(
+          JSON.stringify({ error: "Missing merchant identifier in signed event" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const { data: matched, error: matchErr } = await supabaseAdmin
+        .from("merchant_pos_integrations")
+        .select("id, merchant_id, is_active")
+        .eq("clover_merchant_id", cloverMerchantId)
+        .maybeSingle();
+      if (matchErr || !matched) {
+        console.error("Clover webhook: no integration for clover merchant", cloverMerchantId, matchErr);
+        return new Response(
+          JSON.stringify({ error: "Unknown Clover merchant" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      integration = matched;
+    } else {
+      if (!apiKey) {
+        console.error("Clover webhook: missing auth (no x-clover-auth and no x-api-key)");
+        return new Response(
+          JSON.stringify({ error: "Missing authentication header" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      if (!apiKey.startsWith("pk_live_")) {
+        console.error("Clover webhook: api key wrong format");
+        return new Response(
+          JSON.stringify({ error: "Invalid API key format" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      const apiKeyHash = await hashApiKey(apiKey);
+      const { data: found, error: integrationError } = await supabaseAdmin
+        .from("merchant_pos_integrations")
+        .select("id, merchant_id, is_active")
+        .eq("api_key_hash", apiKeyHash)
+        .single();
+      if (integrationError || !found) {
+        console.error("Clover webhook: API key lookup failed", integrationError);
+        return new Response(
+          JSON.stringify({ error: "Invalid API key" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      integration = found;
     }
 
-    if (!integration.is_active) {
+    if (!integration!.is_active) {
       return new Response(
-        JSON.stringify({ error: "API key is deactivated" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Integration is deactivated" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -102,11 +218,10 @@ serve(async (req) => {
     await supabaseAdmin
       .from("merchant_pos_integrations")
       .update({ last_used_at: new Date().toISOString() })
-      .eq("id", integration.id);
+      .eq("id", integration!.id);
 
     // ── 2. Validate payload ──
-    const body = await req.json();
-    const parsed = cloverWebhookSchema.safeParse(body);
+    const parsed = cloverWebhookSchema.safeParse(parsedBody ?? {});
 
     if (!parsed.success) {
       const errors = parsed.error.errors.map((e) => e.message).join(", ");
