@@ -186,13 +186,14 @@ const MerchantInvoicing = () => {
  
  setLoading(true);
  try {
- const [invoicesRes, clientsRes, settingsRes, templatesRes, catalogRes] = await Promise.all([
- invoicingService.getInvoices(merchantId),
- invoicingService.getClients(merchantId),
- invoicingService.getSettings(merchantId),
- invoicingService.getTemplates(merchantId),
- invoicingService.getCatalogItems(merchantId),
- ]);
+  const [invoicesRes, clientsRes, settingsRes, templatesRes, catalogRes, storefrontRes] = await Promise.all([
+  invoicingService.getInvoices(merchantId),
+  invoicingService.getClients(merchantId),
+  invoicingService.getSettings(merchantId),
+  invoicingService.getTemplates(merchantId),
+  invoicingService.getCatalogItems(merchantId),
+  supabase.functions.invoke("list-connect-products", { body: { merchantId } }),
+  ]);
 
  if (invoicesRes.data) setInvoices(invoicesRes.data);
  if (clientsRes.data) setClients(clientsRes.data);
@@ -202,8 +203,42 @@ const MerchantInvoicing = () => {
  `${settingsRes.data.invoice_prefix ||"INV-"}${String(settingsRes.data.next_invoice_number || 1).padStart(5,"0")}`
  );
  }
- if (templatesRes.data) setTemplates(templatesRes.data);
- if (catalogRes.data) setCatalogItems(catalogRes.data);
+  if (templatesRes.data) setTemplates(templatesRes.data);
+
+  // Merge invoice catalog items with storefront (Stripe Connect) products so
+  // merchants can add products they've listed on their storefront to invoices.
+  const dbCatalog = catalogRes.data || [];
+  const storefrontProducts = (storefrontRes.data?.products || []) as Array<{
+  id: string;
+  name: string;
+  description: string | null;
+  price: { unit_amount: number | null } | null;
+  }>;
+  const nowIso = new Date().toISOString();
+  const storefrontCatalog: CatalogItem[] = storefrontProducts
+  .filter((p) => p.price?.unit_amount != null)
+  .map((p) => ({
+  id: `storefront:${p.id}`,
+  merchant_id: merchantId,
+  name: p.name,
+  description: p.description,
+  unit_price: (p.price!.unit_amount || 0) / 100,
+  unit_type: "unit",
+  tax_rate: 0,
+  category: "Storefront Products",
+  sku: null,
+  is_active: true,
+  created_at: nowIso,
+  updated_at: nowIso,
+  }));
+  // Avoid duplicates: skip storefront entries whose name matches an existing
+  // catalog item (case-insensitive).
+  const existingNames = new Set(dbCatalog.map((c) => c.name.trim().toLowerCase()));
+  const merged = [
+  ...dbCatalog,
+  ...storefrontCatalog.filter((s) => !existingNames.has(s.name.trim().toLowerCase())),
+  ];
+  setCatalogItems(merged);
  } catch (error) {
  console.error("Error loading invoicing data:", error);
  toast.error("Failed to load invoicing data");
