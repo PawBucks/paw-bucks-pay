@@ -389,3 +389,6 @@ verify_jwt = false
 
 [functions.verify-phone-otp]
 verify_jwt = false
+
+[functions.clover-oauth-callback]
+verify_jwt = false
