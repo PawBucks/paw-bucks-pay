@@ -96,23 +96,52 @@ serve(async (req) => {
   const rawBody = req.method === "POST" ? await req.text() : "";
   let parsedBody: any = null;
   if (rawBody) {
+    // Try JSON first
     try {
       parsedBody = JSON.parse(rawBody);
     } catch {
-      parsedBody = null;
+      // Fall back to form-encoded (Clover sometimes sends application/x-www-form-urlencoded)
+      try {
+        const params = new URLSearchParams(rawBody);
+        const obj: Record<string, string> = {};
+        for (const [k, v] of params.entries()) obj[k] = v;
+        if (Object.keys(obj).length > 0) parsedBody = obj;
+      } catch {
+        parsedBody = null;
+      }
     }
   }
 
-  // POST-body verification challenge (Clover sometimes posts { verificationCode })
-  if (
-    parsedBody &&
-    typeof parsedBody === "object" &&
-    typeof parsedBody.verificationCode === "string" &&
-    parsedBody.amount === undefined &&
-    parsedBody.tender === undefined
-  ) {
+  // ── Clover Marketplace verification challenge on POST ──
+  // Clover verifies webhook ownership by POSTing a body containing a
+  // `verificationCode` (JSON or form-encoded), sometimes also via query string
+  // or a header. Echo it back with 200 BEFORE any auth check.
+  const verificationCode =
+    (parsedBody && typeof parsedBody === "object" &&
+      (parsedBody.verificationCode || parsedBody.verification_code)) ||
+    url.searchParams.get("verificationCode") ||
+    url.searchParams.get("verification_code") ||
+    req.headers.get("x-clover-verification-code") ||
+    null;
+
+  if (verificationCode) {
     return new Response(
-      JSON.stringify({ verificationCode: parsedBody.verificationCode }),
+      JSON.stringify({ verificationCode }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+  // Some Clover marketplace apps ping the URL with no body or with a payload
+  // that has neither `amount` nor `tender` (e.g. app-install/uninstall events).
+  // Those are not real transactions to process — acknowledge with 200 so the
+  // marketplace can save the URL, but do not run auth or state changes.
+  const looksLikeTransaction =
+    parsedBody && typeof parsedBody === "object" &&
+    (parsedBody.amount !== undefined || parsedBody.tender !== undefined);
+
+  if (!looksLikeTransaction) {
+    return new Response(
+      JSON.stringify({ success: true, acknowledged: true }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
