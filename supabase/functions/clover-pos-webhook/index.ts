@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://esm.sh/zod@3.22.4";
+import { attachPawBucksNote } from "../_shared/clover.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -220,7 +221,9 @@ serve(async (req) => {
       req.headers.get("clover-auth-signature");
     const apiKey = req.headers.get("x-api-key");
 
-    let integration: { id: string; merchant_id: string; is_active: boolean } | null = null;
+    let integration:
+      | { id: string; merchant_id: string; is_active: boolean; clover_merchant_id: string | null }
+      | null = null;
 
     if (cloverSig) {
       const hasConfiguredCloverAuth = Boolean(
@@ -255,7 +258,7 @@ serve(async (req) => {
 
       const { data: matched, error: matchErr } = await supabaseAdmin
         .from("merchant_pos_integrations")
-        .select("id, merchant_id, is_active")
+        .select("id, merchant_id, is_active, clover_merchant_id")
         .eq("clover_merchant_id", cloverMerchantId)
         .maybeSingle();
       if (matchErr || !matched) {
@@ -284,7 +287,7 @@ serve(async (req) => {
       const apiKeyHash = await hashApiKey(apiKey);
       const { data: found, error: integrationError } = await supabaseAdmin
         .from("merchant_pos_integrations")
-        .select("id, merchant_id, is_active")
+        .select("id, merchant_id, is_active, clover_merchant_id")
         .eq("api_key_hash", apiKeyHash)
         .single();
       if (integrationError || !found) {
@@ -610,6 +613,29 @@ serve(async (req) => {
         `Merchant payout: $${netPayoutToMerchant} | ` +
         `PB earned: ${pawbucksEarned}`
     );
+
+    // ── 11a. Write receipt note back to Clover (order + payment) ──
+    // Fires whenever we processed this Clover transaction — covers both earn
+    // and redeem. Non-fatal: never rolls back the ledger update.
+    if (integration!.clover_merchant_id && (orderId || paymentId)) {
+      try {
+        const noteRes = await attachPawBucksNote({
+          cloverMerchantId: integration!.clover_merchant_id,
+          orderId: orderId ?? null,
+          paymentId: paymentId ?? null,
+        });
+        console.log(
+          `[CLOVER][receipt-note] tx=${posTx!.id} order=${noteRes.order?.ok ?? "skip"} payment=${noteRes.payment?.ok ?? "skip"}`,
+        );
+      } catch (e) {
+        console.error("[CLOVER][receipt-note] failed (non-fatal)", (e as Error).message);
+      }
+    } else if (!integration!.clover_merchant_id) {
+      console.warn(
+        "[CLOVER][receipt-note] skipped — integration has no clover_merchant_id",
+        { pos_transaction_id: posTx!.id },
+      );
+    }
 
     // ── 11b. Track Branded PawBucks redemption (FIFO across this merchant's active campaigns) ──
     if (requestedPawbucks > 0) {

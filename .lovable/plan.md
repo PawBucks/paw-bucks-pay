@@ -1,35 +1,54 @@
-## Problem
+# Clover Receipt Note Write-Back
 
-Clover Marketplace is calling the webhook URL and getting **`Bad response status: Unauthorized`**. Two independent reasons in `supabase/functions/clover-pos-webhook/index.ts`:
+Every time our `clover-pos-webhook` processes a transaction that earns or redeems PawBucks, call Clover's REST API to attach the note **"Paid via PawBucks - Balance Updated."** to both the order and the payment so it prints on the customer receipt.
 
-1. **No verification-challenge handler.** When Clover saves a webhook URL in the Marketplace, it first hits it (a GET with `?verification_code=…`, and separately POSTs a payload with `{ verificationCode }`) and expects the code echoed back as plain text / JSON. The current function has no `GET` branch and no `verificationCode` short-circuit, so it falls straight into the `x-api-key` check and returns **401**.
-2. **Wrong auth model for Marketplace-originated events.** Real Clover Marketplace webhooks are signed by Clover with an `X-Clover-Auth` (a.k.a. `Clover-Auth-Signature`) header derived from the app's **Signing Secret** — they do **not** carry the per-merchant `pk_live_...` POS key. Requiring `x-api-key` on every request rejects every legitimate Marketplace delivery as Unauthorized.
+## Current state (verified)
 
-The per-merchant `pk_live_` API key path is still valid for direct POS pushes (Clover semi-integrated / our own POS bridge), so we keep it as a second accepted auth mode rather than replacing it.
+- `supabase/functions/clover-pos-webhook/index.ts` is inbound only — Clover pushes events to us, we never call Clover back.
+- `merchant_pos_integrations` stores `clover_merchant_id` and a hashed inbound API key, but **no OAuth access token column** exists yet. You said Clover OAuth is set up on the Marketplace side; we still need a place to persist the per‑merchant token our webhook can read.
 
-## Plan
+## What we'll build
 
-Edit **only** `supabase/functions/clover-pos-webhook/index.ts`. No schema changes, no other files.
+### 1. Storage for Clover OAuth tokens
+Add three columns to `merchant_pos_integrations`:
+- `clover_access_token` (text, encrypted-at-rest via existing pattern)
+- `clover_refresh_token` (text, nullable — Clover v2 OAuth)
+- `clover_token_expires_at` (timestamptz, nullable)
 
-1. **Handle the Marketplace verification challenge first**, before any auth check:
-   - If `req.method === "GET"` and `url.searchParams.get("verification_code")` is present → return that code as `text/plain`, 200.
-   - If `req.method === "POST"` and the JSON body contains a top-level `verificationCode` (and no `amount`/`tender`) → return `{ verificationCode }` as JSON, 200.
-2. **Accept two auth modes** for real events:
-   - **Marketplace mode:** if header `x-clover-auth` (or `clover-auth-signature`) is present, verify it against a new secret `CLOVER_APP_SIGNING_SECRET` (HMAC-SHA256 of the raw request body, compared in constant time). On mismatch → 401. On match → resolve the merchant from the Clover `merchant` id in the payload via `merchant_pos_integrations.clover_merchant_id` (already the column we hash the pk against).
-   - **Direct POS mode (unchanged):** if no Clover signature header, fall back to the existing `x-api-key` (`pk_live_...`) lookup against `merchant_pos_integrations.api_key_hash`.
-3. **Add the signing secret via `add_secret`** for `CLOVER_APP_SIGNING_SECRET` (user pastes the value Clover shows in the Marketplace app's "App Settings → Secret" panel). Do not hardcode.
-4. **Improve error visibility** — when either auth path fails, log the reason (never the header value) so future Clover re-verifications are debuggable from edge-function logs.
-5. **Keep the existing payload schema and downstream Zod validation intact** for real events. Verification requests short-circuit before Zod runs.
+RLS stays merchant-scoped; only `service_role` reads the token columns.
 
-## Verification
+### 2. OAuth callback edge function
+New function `clover-oauth-callback` that:
+- Accepts Clover's OAuth redirect (`code`, `merchant_id`).
+- Exchanges the code at `https://api.clover.com/oauth/v2/token` using `CLOVER_APP_ID` + `CLOVER_APP_SECRET` (secrets to add).
+- Upserts the tokens into `merchant_pos_integrations` keyed on `clover_merchant_id`.
 
-- Re-save the webhook URL in the Clover Marketplace app → expect green "Verified".
-- Trigger a test `PAYMENTS` event from Clover sandbox → expect 200 and a row in `pos_transactions`.
-- Direct POS push with `x-api-key: pk_live_...` still returns 200 (regression check).
-- Missing/incorrect `x-clover-auth` on a signed request returns 401 with a log line, not a silent accept.
+### 3. Shared Clover REST helper
+New `supabase/functions/_shared/clover.ts` with:
+- `getMerchantToken(clover_merchant_id)` — pulls & refreshes if expired.
+- `addOrderNote(mId, orderId, note)` — `POST /v3/merchants/{mId}/orders/{orderId}` with `{ note }` (Clover merges into existing note; we prepend to preserve anything already there).
+- `addPaymentNote(mId, orderId, paymentId, note)` — `POST /v3/merchants/{mId}/orders/{orderId}/payments/{paymentId}` with `{ note }`.
+- Clover receipt templates print order notes and payment notes by default; no extra "print flag" API exists — the note field itself is what prints. We'll document that in the code comment.
 
-## Technical notes
+### 4. Wire it into `clover-pos-webhook`
+After the existing PawBucks earn/redeem write completes successfully and `orderId` (and `paymentId` when present) are on the payload:
+- Call `addOrderNote` and `addPaymentNote` with `"Paid via PawBucks - Balance Updated."`.
+- Wrap in try/catch — a Clover write failure must NOT roll back the ledger update; log to `webhook_delivery_logs` with `status='clover_note_failed'` so ops can retry.
+- Trigger fires on **both earn and redeem** (i.e., any successful PawBucks-tagged tender we process), per your answer.
 
-- `verify_jwt = false` is already set in `supabase/config.toml` for this function, so Supabase's gateway will not add its own Unauthorized layer; the 401 the user is seeing is definitively coming from inside the function.
-- HMAC uses `crypto.subtle.importKey` + `sign("HMAC", …)` with SHA-256 over the raw request text (must read `await req.text()` once and `JSON.parse` from that string so signature and parsed body stay in sync).
-- Constant-time compare via a length-checked XOR loop on the hex strings — avoid `===` on secrets.
+### 5. Secrets required
+- `CLOVER_APP_ID`
+- `CLOVER_APP_SECRET`
+
+I'll request these via the secrets flow once the plan is approved.
+
+## Out of scope
+- Backfilling notes on historical Clover transactions.
+- Editing Clover receipt template layout (Clover controls that; the note field is what surfaces on the printed/emailed receipt).
+
+## Files touched
+- `supabase/migrations/<new>.sql` — add token columns
+- `supabase/functions/_shared/clover.ts` — new
+- `supabase/functions/clover-oauth-callback/index.ts` — new
+- `supabase/functions/clover-pos-webhook/index.ts` — call note helpers after ledger write
+- `supabase/config.toml` — register new function with `verify_jwt = false`
