@@ -167,6 +167,9 @@ serve(async (req) => {
     null;
 
   if (verificationCode) {
+    console.log(
+      `[CLOVER][verification] Received verificationCode from Clover: ${verificationCode}`,
+    );
     return new Response(JSON.stringify({ verificationCode }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
