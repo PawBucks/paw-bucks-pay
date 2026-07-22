@@ -5,7 +5,7 @@ import { z } from "https://esm.sh/zod@3.22.4";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-api-key, x-clover-auth, clover-auth-signature",
+    "authorization, x-client-info, apikey, content-type, x-api-key, x-clover-auth, x-clover-verification-code, clover-auth-signature, clover-signature",
 };
 
 const PLATFORM_FEE_RATE = 0.03; // 3% success fee on USD portion
@@ -70,6 +70,47 @@ function constantTimeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
+async function verifyCloverAuthHeader(
+  providedHeader: string,
+  rawBody: string,
+): Promise<boolean> {
+  const configuredSecret =
+    (Deno.env.get("CLOVER_AUTH_CODE") ||
+      Deno.env.get("CLOVER_APP_SIGNING_SECRET") ||
+      "").trim();
+
+  if (!configuredSecret) return false;
+
+  const provided = providedHeader.trim();
+
+  // Clover Developer Dashboard webhooks send the Clover Auth Code as a static
+  // X-Clover-Auth header after the callback URL is verified. This is not HMAC.
+  if (constantTimeEqual(provided, configuredSecret)) return true;
+
+  // Keep backward compatibility with the earlier HMAC implementation and with
+  // any Hosted Checkout-style signatures using the same stored secret.
+  const normalizedProvided = provided.replace(/^sha256=/i, "").trim().toLowerCase();
+  const expectedBodyHmac = await hmacSha256Hex(configuredSecret, rawBody);
+  if (constantTimeEqual(expectedBodyHmac, normalizedProvided)) return true;
+
+  return false;
+}
+
+function extractCloverMerchantId(payload: any): string | null {
+  if (!payload || typeof payload !== "object") return null;
+  const direct = payload.merchant || payload.merchantId || payload.merchant_id;
+  if (typeof direct === "string" && direct.trim()) return direct.trim();
+  if (
+    payload.merchants &&
+    typeof payload.merchants === "object" &&
+    !Array.isArray(payload.merchants)
+  ) {
+    const [firstMerchantId] = Object.keys(payload.merchants);
+    return firstMerchantId || null;
+  }
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -78,7 +119,8 @@ serve(async (req) => {
   // ── 0. Clover Marketplace verification challenge (must run before auth) ──
   const url = new URL(req.url);
   if (req.method === "GET") {
-    const code = url.searchParams.get("verification_code") ||
+    const code =
+      url.searchParams.get("verification_code") ||
       url.searchParams.get("verificationCode");
     if (code) {
       return new Response(code, {
@@ -125,23 +167,40 @@ serve(async (req) => {
     null;
 
   if (verificationCode) {
-    return new Response(
-      JSON.stringify({ verificationCode }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ verificationCode }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
-  // Some Clover marketplace apps ping the URL with no body or with a payload
-  // that has neither `amount` nor `tender` (e.g. app-install/uninstall events).
-  // Those are not real transactions to process — acknowledge with 200 so the
-  // marketplace can save the URL, but do not run auth or state changes.
+  // Clover's app-level webhook notifications are event envelopes, not full
+  // payment rows. They look like: { appId, merchants: { MERCHANT_ID: [...] } }.
+  // Acknowledge those with 200 so Clover keeps the webhook healthy. Direct POS
+  // transaction pushes still require x-api-key or a valid Clover auth header.
   const looksLikeTransaction =
     parsedBody && typeof parsedBody === "object" &&
     (parsedBody.amount !== undefined || parsedBody.tender !== undefined);
 
+  const looksLikeCloverMarketplaceEvent =
+    parsedBody && typeof parsedBody === "object" &&
+    (parsedBody.appId !== undefined ||
+      parsedBody.merchants !== undefined ||
+      parsedBody.objectId !== undefined);
+
+  if (!looksLikeTransaction && looksLikeCloverMarketplaceEvent) {
+    return new Response(
+      JSON.stringify({
+        success: true,
+        acknowledged: true,
+        source: "clover_marketplace_event",
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
   if (!looksLikeTransaction) {
     return new Response(
-      JSON.stringify({ success: true, acknowledged: true }),
+      JSON.stringify({ success: true, acknowledged: true, source: "non_transaction_ping" }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
@@ -161,29 +220,28 @@ serve(async (req) => {
     let integration: { id: string; merchant_id: string; is_active: boolean } | null = null;
 
     if (cloverSig) {
-      const signingSecret = Deno.env.get("CLOVER_APP_SIGNING_SECRET") ?? "";
-      if (!signingSecret) {
-        console.error("Clover webhook: CLOVER_APP_SIGNING_SECRET not configured");
+      const hasConfiguredCloverAuth = Boolean(
+        (Deno.env.get("CLOVER_AUTH_CODE") ||
+          Deno.env.get("CLOVER_APP_SIGNING_SECRET") ||
+          "").trim(),
+      );
+      if (!hasConfiguredCloverAuth) {
+        console.error("Clover webhook: Clover auth code/signing secret not configured");
         return new Response(
-          JSON.stringify({ error: "Signing secret not configured" }),
+          JSON.stringify({ error: "Clover auth is not configured" }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      const expected = await hmacSha256Hex(signingSecret, rawBody);
-      const provided = cloverSig.replace(/^sha256=/i, "").trim().toLowerCase();
-      if (!constantTimeEqual(expected, provided)) {
-        console.error("Clover webhook: signature mismatch");
+      const validCloverHeader = await verifyCloverAuthHeader(cloverSig, rawBody);
+      if (!validCloverHeader) {
+        console.error("Clover webhook: invalid Clover auth header");
         return new Response(
-          JSON.stringify({ error: "Invalid Clover signature" }),
+          JSON.stringify({ error: "Invalid Clover auth header" }),
           { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
-      const cloverMerchantId =
-        parsedBody?.merchant ??
-        parsedBody?.merchantId ??
-        parsedBody?.merchant_id ??
-        null;
+      const cloverMerchantId = extractCloverMerchantId(parsedBody);
       if (!cloverMerchantId) {
         console.error("Clover webhook: signed event missing merchant id");
         return new Response(
