@@ -70,9 +70,14 @@ function constantTimeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-async function verifyCloverAuthHeader(providedHeader: string, rawBody: string): Promise<boolean> {
+async function verifyCloverAuthHeader(
+  providedHeader: string,
+  rawBody: string,
+): Promise<boolean> {
   const configuredSecret =
-    (Deno.env.get("CLOVER_AUTH_CODE") || Deno.env.get("CLOVER_APP_SIGNING_SECRET") || "").trim();
+    (Deno.env.get("CLOVER_AUTH_CODE") ||
+      Deno.env.get("CLOVER_APP_SIGNING_SECRET") ||
+      "").trim();
 
   if (!configuredSecret) return false;
 
@@ -95,7 +100,11 @@ function extractCloverMerchantId(payload: any): string | null {
   if (!payload || typeof payload !== "object") return null;
   const direct = payload.merchant || payload.merchantId || payload.merchant_id;
   if (typeof direct === "string" && direct.trim()) return direct.trim();
-  if (payload.merchants && typeof payload.merchants === "object" && !Array.isArray(payload.merchants)) {
+  if (
+    payload.merchants &&
+    typeof payload.merchants === "object" &&
+    !Array.isArray(payload.merchants)
+  ) {
     const [firstMerchantId] = Object.keys(payload.merchants);
     return firstMerchantId || null;
   }
@@ -110,7 +119,8 @@ serve(async (req) => {
   // ── 0. Clover Marketplace verification challenge (must run before auth) ──
   const url = new URL(req.url);
   if (req.method === "GET") {
-    const code = url.searchParams.get("verification_code") ||
+    const code =
+      url.searchParams.get("verification_code") ||
       url.searchParams.get("verificationCode");
     if (code) {
       return new Response(code, {
@@ -157,10 +167,10 @@ serve(async (req) => {
     null;
 
   if (verificationCode) {
-    return new Response(
-      JSON.stringify({ verificationCode }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ verificationCode }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   // Clover's app-level webhook notifications are event envelopes, not full
@@ -173,11 +183,17 @@ serve(async (req) => {
 
   const looksLikeCloverMarketplaceEvent =
     parsedBody && typeof parsedBody === "object" &&
-    (parsedBody.appId !== undefined || parsedBody.merchants !== undefined || parsedBody.objectId !== undefined);
+    (parsedBody.appId !== undefined ||
+      parsedBody.merchants !== undefined ||
+      parsedBody.objectId !== undefined);
 
   if (!looksLikeTransaction && looksLikeCloverMarketplaceEvent) {
     return new Response(
-      JSON.stringify({ success: true, acknowledged: true, source: "clover_marketplace_event" }),
+      JSON.stringify({
+        success: true,
+        acknowledged: true,
+        source: "clover_marketplace_event",
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
@@ -205,7 +221,9 @@ serve(async (req) => {
 
     if (cloverSig) {
       const hasConfiguredCloverAuth = Boolean(
-        (Deno.env.get("CLOVER_AUTH_CODE") || Deno.env.get("CLOVER_APP_SIGNING_SECRET") || "").trim(),
+        (Deno.env.get("CLOVER_AUTH_CODE") ||
+          Deno.env.get("CLOVER_APP_SIGNING_SECRET") ||
+          "").trim(),
       );
       if (!hasConfiguredCloverAuth) {
         console.error("Clover webhook: Clover auth code/signing secret not configured");
