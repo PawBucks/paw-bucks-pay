@@ -6401,7 +6401,10 @@ export type Database = {
         Row: {
           api_key_hash: string
           api_key_prefix: string
+          clover_access_token: string | null
           clover_merchant_id: string | null
+          clover_refresh_token: string | null
+          clover_token_expires_at: string | null
           created_at: string
           id: string
           is_active: boolean
@@ -6413,7 +6416,10 @@ export type Database = {
         Insert: {
           api_key_hash: string
           api_key_prefix: string
+          clover_access_token?: string | null
           clover_merchant_id?: string | null
+          clover_refresh_token?: string | null
+          clover_token_expires_at?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
@@ -6425,7 +6431,10 @@ export type Database = {
         Update: {
           api_key_hash?: string
           api_key_prefix?: string
+          clover_access_token?: string | null
           clover_merchant_id?: string | null
+          clover_refresh_token?: string | null
+          clover_token_expires_at?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
