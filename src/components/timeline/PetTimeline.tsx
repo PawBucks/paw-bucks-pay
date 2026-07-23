@@ -103,24 +103,24 @@ const MomentCard = ({
  <div className="absolute left-6 top-14 bottom-0 w-0.5 bg-gradient-to-b from-primary/30 to-transparent" />
  )}
  
- <div className={`flex w-full max-w-full min-w-0 gap-2 overflow-hidden sm:gap-3 ${compact ?'' :'pl-0 sm:pl-2'}`}>
+  <div className={`flex w-full max-w-full min-w-0 gap-2 overflow-hidden sm:gap-3 ${compact ?'' :'pl-0 sm:pl-2'}`}>
  {/* Timeline dot */}
  {!compact && (
- <div className="relative z-10 mt-4">
- <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-lg shadow-lg">
+  <div className="relative z-10 mt-3 sm:mt-4">
+  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent text-base shadow-lg sm:text-lg">
  {moment.emoji}
  </div>
  </div>
  )}
  
-  <Card className={`w-full max-w-full flex-1 min-w-0 overflow-hidden border-2 ${borderColor} bg-gradient-to-br ${bgGradient} backdrop-blur-sm transition-all duration-300 hover:shadow-lg`}>
-  <CardContent className={compact ?"p-3" :"p-3 sm:p-4"}>
-  <div className="flex w-full max-w-full min-w-0 gap-2 overflow-hidden sm:gap-3">
+   <Card className={`w-full max-w-full flex-1 min-w-0 overflow-hidden border-2 ${borderColor} bg-gradient-to-br ${bgGradient} backdrop-blur-sm transition-all duration-300 hover:shadow-lg`}>
+   <CardContent className={compact ?"p-3" :"p-3 sm:p-4"}>
+   <div className={`flex w-full max-w-full min-w-0 gap-2 overflow-hidden sm:gap-3 ${compact ?'' :'flex-col sm:flex-row'}`}>
  {/* Photo */}
   {photoUrl && (
  <motion.div 
  whileHover={{ scale: 1.05 }}
-  className={`${compact ?'w-16 h-16' :'w-16 h-16 sm:w-20 sm:h-20'} rounded-lg overflow-hidden flex-shrink-0 cursor-pointer shadow-md`}
+   className={`${compact ?'w-16 h-16' :'h-32 w-full sm:h-20 sm:w-20'} max-w-full rounded-lg overflow-hidden flex-shrink-0 cursor-pointer shadow-md`}
   onClick={() => onPhotoClick?.(photoUrl)}
  >
  <img 
@@ -135,7 +135,7 @@ const MomentCard = ({
   <div className="flex min-w-0 items-start justify-between gap-2 mb-1">
   <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
  {compact && <span className="text-lg">{moment.emoji}</span>}
-  <h4 className={`min-w-0 flex-1 truncate font-semibold ${compact ?'text-sm' :'text-sm sm:text-base'}`}>
+   <h4 className={`min-w-0 flex-1 font-semibold ${compact ?'truncate text-sm' :'line-clamp-2 text-sm sm:truncate sm:text-base'}`}>
  {moment.title}
  </h4>
  </div>
@@ -144,7 +144,7 @@ const MomentCard = ({
  </Badge>
  </div>
  
-  <p className={`max-w-full break-words text-muted-foreground ${compact ?'text-xs line-clamp-2' :'text-sm'} mb-2`}>
+   <p className={`max-w-full break-words text-muted-foreground ${compact ?'text-xs line-clamp-2' :'text-sm'} mb-2`}>
  {moment.narrative}
  </p>
  
@@ -339,7 +339,7 @@ export const PetTimeline = ({
 
  return (
  <>
- <Card className="overflow-hidden border-2 border-primary/10 bg-gradient-to-br from-background via-background to-primary/5">
+  <Card className="w-full max-w-full min-w-0 overflow-hidden border-2 border-primary/10 bg-gradient-to-br from-background via-background to-primary/5">
  {showHeader && (
  <CardHeader className="pb-2">
  <div className="flex items-center justify-between">
@@ -364,11 +364,11 @@ export const PetTimeline = ({
  </CardHeader>
  )}
  
- <CardContent className={showHeader ?"pt-2" :""}>
+  <CardContent className={showHeader ?"p-3 pt-2 sm:p-6 sm:pt-2" :"p-2 sm:p-4 md:p-6"}>
  {moments.length === 0 ? (
  <EmptyTimeline petName={pets[0]?.name} />
  ) : (
-  <ScrollArea className={compact ?"max-h-[300px] w-full max-w-full min-w-0 overflow-hidden" :"max-h-[500px] w-full max-w-full min-w-0 overflow-hidden"}>
+   <ScrollArea className={compact ?"max-h-[300px] w-full max-w-full min-w-0 overflow-hidden" :"max-h-[calc(100dvh-280px)] w-full max-w-full min-w-0 overflow-hidden sm:max-h-[500px]"}>
   <div className="box-border w-full max-w-full min-w-0 space-y-4 overflow-hidden pr-0 sm:pr-2">
  <AnimatePresence>
  {moments.map((moment, index) => (
