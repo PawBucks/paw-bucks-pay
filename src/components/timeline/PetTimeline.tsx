@@ -190,15 +190,15 @@ const EmptyTimeline = ({ petName }: { petName?: string }) => (
  <motion.div 
  initial={{ opacity: 0, y: 10 }}
  animate={{ opacity: 1, y: 0 }}
- className="text-center py-8 px-4"
+ className="px-4 py-10 text-center"
  >
- <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
- <Sparkles className="w-8 h-8 text-primary" />
+ <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+ <Sparkles className="h-8 w-8 text-primary" />
  </div>
  <h3 className="font-semibold text-lg mb-2">
  {petName ? `${petName}'s Story Awaits` :"Your Pet's Story Awaits"}
  </h3>
- <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+ <p className="mx-auto max-w-xs text-sm text-muted-foreground">
  Every paw print, vet visit, and snack run adds to their timeline. Make your first purchase to start the adventure!
  </p>
  </motion.div>
@@ -337,16 +337,16 @@ export const PetTimeline = ({
 
  return (
  <>
-  <Card className="w-full max-w-full min-w-0 overflow-hidden border-2 border-primary/10 bg-gradient-to-br from-background via-background to-primary/5">
+  <Card className="w-full max-w-full min-w-0 overflow-visible border-0 bg-transparent shadow-none">
  {showHeader && (
  <CardHeader className="pb-2">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
- <Sparkles className="w-5 h-5 text-white" />
+ <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+ <Sparkles className="h-5 w-5 text-primary" />
  </div>
  <div>
- <CardTitle className="text-lg">✨ Your Pet's Story, Unlocked</CardTitle>
+ <CardTitle className="text-lg">Your Pet's Story</CardTitle>
  <p className="text-xs text-muted-foreground">
  Every dollar spent becomes a memory
  </p>
@@ -362,11 +362,11 @@ export const PetTimeline = ({
  </CardHeader>
  )}
  
-  <CardContent className={showHeader ?"p-3 pt-2 sm:p-6 sm:pt-2" :"p-2 sm:p-4 md:p-6"}>
+  <CardContent className={showHeader ?"p-0 pt-2" :"p-0"}>
  {moments.length === 0 ? (
  <EmptyTimeline petName={pets[0]?.name} />
- ) : (
-   <ScrollArea className={compact ?"max-h-[300px] w-full max-w-full min-w-0 overflow-hidden" :"max-h-[calc(100dvh-280px)] w-full max-w-full min-w-0 overflow-hidden sm:max-h-[500px]"}>
+ ) : compact ? (
+  <ScrollArea className="max-h-[300px] w-full max-w-full min-w-0 overflow-hidden">
   <div className="box-border w-full max-w-full min-w-0 space-y-4 overflow-hidden pr-0 sm:pr-2">
  <AnimatePresence>
  {moments.map((moment, index) => (
@@ -382,6 +382,21 @@ export const PetTimeline = ({
  </AnimatePresence>
  </div>
  </ScrollArea>
+ ) : (
+  <div className="box-border w-full max-w-full min-w-0 space-y-5 overflow-visible pb-6">
+ <AnimatePresence>
+ {moments.map((moment, index) => (
+ <MomentCard
+ key={moment.id}
+ moment={moment}
+ petName={getPetName(moment.pet_id)}
+ index={index}
+ compact={compact}
+ onPhotoClick={handlePhotoClick}
+ />
+ ))}
+ </AnimatePresence>
+ </div>
  )}
  </CardContent>
  </Card>
