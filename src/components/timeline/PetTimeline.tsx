@@ -110,7 +110,7 @@ const MomentCard = ({
  </div>
  )}
  
-    <Card className={`w-full flex-1 min-w-0 overflow-hidden border bg-card shadow-sm ${compact ?'max-w-full' :'max-w-[calc(100%-3.25rem)] rounded-2xl'}`}>
+    <Card className={`flex-1 min-w-0 overflow-hidden border bg-card shadow-sm ${compact ?'w-full max-w-full' :'max-w-full rounded-lg'}`}>
     <CardContent className={compact ?"p-3" :"p-4 sm:p-5"}>
     <div className={`flex w-full max-w-full min-w-0 gap-3 overflow-hidden ${compact ?'' :'flex-col'}`}>
  {/* Photo */}
