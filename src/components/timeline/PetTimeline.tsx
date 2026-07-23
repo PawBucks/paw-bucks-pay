@@ -2,13 +2,12 @@ import { useState, useEffect } from"react";
 import { motion, AnimatePresence } from"framer-motion";
 import { supabase } from"@/integrations/supabase/client";
 import { format, isToday, isYesterday, isThisWeek } from"date-fns";
-import { ChevronRight } from "lucide-react";
+import { Bone, ChevronRight, HeartPulse, MapPin, PawPrint, Smile } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { Card, CardContent, CardHeader, CardTitle } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
 import { ScrollArea } from"@/components/ui/scroll-area";
 import { Badge } from"@/components/ui/badge";
-import { AspectRatio } from"@/components/ui/aspect-ratio";
 import { Skeleton } from"@/components/ui/skeleton";
 import { PhotoLightbox } from"@/components/PhotoLightbox";
 
@@ -48,22 +47,20 @@ interface PetTimelineProps {
  onViewAll?: () => void;
 }
 
-const moodColors: Record<string, string> = {
- happy:"from-warning/20 to-warning/20",
- proud:"from-accent/20 to-accent/20",
- cozy:"from-info/20 to-info/20",
- adventurous:"from-success/20 to-success/20",
- brave:"from-destructive/20 to-destructive/20",
- playful:"from-accent/20 to-accent/20",
+const moodAccentClasses: Record<string, string> = {
+ happy:"border-warning/40 bg-warning/10 text-warning",
+ proud:"border-accent/40 bg-accent/10 text-accent",
+ cozy:"border-info/40 bg-info/10 text-info",
+ adventurous:"border-success/40 bg-success/10 text-success",
+ brave:"border-destructive/40 bg-destructive/10 text-destructive",
+ playful:"border-accent/40 bg-accent/10 text-accent",
 };
 
-const moodBorderColors: Record<string, string> = {
- happy:"border-warning/30",
- proud:"border-accent/30",
- cozy:"border-info/30",
- adventurous:"border-success/30",
- brave:"border-destructive/30",
- playful:"border-accent/30",
+const getMomentIcon = (moment: TimelineMoment) => {
+ if (moment.source === "medical_visit" || moment.source === "medical_record" || moment.moment_type === "medical_visit") return HeartPulse;
+ if (moment.moment_type === "food" || moment.merchant_category?.toLowerCase().includes("food")) return Bone;
+ if (moment.source === "transaction") return PawPrint;
+ return Smile;
 };
 
 function formatMomentDate(dateString: string): string {
