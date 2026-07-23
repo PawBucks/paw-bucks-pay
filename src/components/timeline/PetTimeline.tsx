@@ -148,20 +148,20 @@ const MomentCard = ({
  {moment.narrative}
  </p>
  
- <div className="flex items-center gap-3 flex-wrap">
+  <div className="flex max-w-full min-w-0 flex-wrap items-center gap-2 overflow-hidden sm:gap-3">
  {moment.amount && (
- <span className="text-xs text-muted-foreground">
+  <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground">
  {Formatters.currency(moment.amount)}
  </span>
  )}
  {moment.pawbucks_earned > 0 && (
- <Badge className="bg-gradient-to-r from-primary to-accent text-white text-xs gap-1">
+  <Badge className="max-w-full min-w-0 overflow-hidden bg-gradient-to-r from-primary to-accent text-white text-xs gap-1">
  <PawBucksLogo className="w-3 h-3" />
- +{moment.pawbucks_earned.toLocaleString()} PawBucks
+  <span className="truncate">+{moment.pawbucks_earned.toLocaleString()} PawBucks</span>
  </Badge>
  )}
  {moment.merchant_name && !compact && (
- <span className="text-xs text-muted-foreground">
+  <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground">
  @ {moment.merchant_name}
  </span>
  )}
@@ -368,8 +368,8 @@ export const PetTimeline = ({
  {moments.length === 0 ? (
  <EmptyTimeline petName={pets[0]?.name} />
  ) : (
- <ScrollArea className={compact ?"max-h-[300px] w-full" :"max-h-[500px] w-full"}>
- <div className="space-y-4 pr-2 w-full min-w-0">
+  <ScrollArea className={compact ?"max-h-[300px] w-full max-w-full min-w-0 overflow-hidden" :"max-h-[500px] w-full max-w-full min-w-0 overflow-hidden"}>
+  <div className="box-border w-full max-w-full min-w-0 space-y-4 overflow-hidden pr-0 sm:pr-2">
  <AnimatePresence>
  {moments.map((moment, index) => (
  <MomentCard
