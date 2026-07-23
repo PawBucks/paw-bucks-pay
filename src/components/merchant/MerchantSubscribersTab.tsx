@@ -26,7 +26,7 @@ import {
  DropdownMenuItem,
  DropdownMenuTrigger,
 } from"@/components/ui/dropdown-menu";
-import { AlertCircle, Loader2, MoreVertical, RefreshCw, Users, XCircle } from "lucide-react";
+import { AlertCircle, Loader2, MoreVertical, PauseCircle, PlayCircle, RefreshCw, Users, XCircle } from "lucide-react";
 import { Button } from"@/components/ui/button";
 import { Textarea } from"@/components/ui/textarea";
 import { Label } from"@/components/ui/label";
@@ -61,6 +61,8 @@ const statusVariant = (status: string) => {
  return"default";
  case"past_due":
  return"destructive";
+ case"paused":
+ return"outline";
  case"canceled":
  return"secondary";
  default:
@@ -80,6 +82,14 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  const [cancelReason, setCancelReason] = useState("");
  const [canceling, setCanceling] = useState(false);
 
+ const [pauseDialog, setPauseDialog] = useState<{
+ open: boolean;
+ subscriber: Subscriber | null;
+ action: "pause" | "resume";
+ }>({ open: false, subscriber: null, action: "pause" });
+ const [pauseReason, setPauseReason] = useState("");
+ const [pausing, setPausing] = useState(false);
+
  const fetchSubscribers = async () => {
  setLoading(true);
  setError(null);
@@ -88,7 +98,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  .from("merchant_subscriptions")
   .select("*")
  .eq("merchant_id", merchantId)
-  .in("status", ["active","past_due"])
+   .in("status", ["active","past_due","paused"])
   .eq("cancel_at_period_end", false)
  .order("created_at", { ascending: false });
 
@@ -115,6 +125,35 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  setError(err.message ||"Failed to load subscribers");
  } finally {
  setLoading(false);
+ }
+ };
+
+ const handlePauseResume = async () => {
+ if (!pauseDialog.subscriber) return;
+ if (pauseReason.trim().length < 3) {
+ toast.error("Please provide a reason (at least 3 characters).");
+ return;
+ }
+ setPausing(true);
+ try {
+ const { data, error } = await supabase.functions.invoke("merchant-pause-subscription", {
+ body: {
+ subscriptionId: pauseDialog.subscriber.id,
+ action: pauseDialog.action,
+ reason: pauseReason.trim(),
+ },
+ });
+ if (error) throw error;
+ if (data?.error) throw new Error(data.error);
+ toast.success(pauseDialog.action === "pause" ? "Subscription paused" : "Subscription resumed");
+ setPauseDialog({ open: false, subscriber: null, action: "pause" });
+ setPauseReason("");
+ await fetchSubscribers();
+ } catch (err: any) {
+ console.error("Error updating subscription:", err);
+ toast.error(err.message || "Failed to update subscription");
+ } finally {
+ setPausing(false);
  }
  };
 
@@ -294,6 +333,25 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  </Button>
  </DropdownMenuTrigger>
  <DropdownMenuContent align="end">
+                 {sub.status === "paused" ? (
+                 <DropdownMenuItem
+                 onClick={() =>
+                 setPauseDialog({ open: true, subscriber: sub, action: "resume" })
+                 }
+                 >
+                 <PlayCircle className="h-4 w-4 mr-2" />
+                 Resume Subscription
+                 </DropdownMenuItem>
+                 ) : (
+                 <DropdownMenuItem
+                 onClick={() =>
+                 setPauseDialog({ open: true, subscriber: sub, action: "pause" })
+                 }
+                 >
+                 <PauseCircle className="h-4 w-4 mr-2" />
+                 Pause Subscription
+                 </DropdownMenuItem>
+                 )}
  <DropdownMenuItem
  onClick={() =>
  setCancelDialog({ open: true, subscriber: sub, immediately: false })
@@ -345,7 +403,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  </AlertDialogHeader>
 
  <div className="space-y-2">
- <Label htmlFor="cancel-reason">Reason (optional)</Label>
+  <Label htmlFor="cancel-reason">Reason <span className="text-destructive">*</span></Label>
  <Textarea
  id="cancel-reason"
  placeholder="Provide a reason for cancellation..."
@@ -359,7 +417,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  <AlertDialogCancel disabled={canceling}>Cancel</AlertDialogCancel>
  <AlertDialogAction
  onClick={handleCancelSubscription}
- disabled={canceling}
+  disabled={canceling || cancelReason.trim().length < 3}
  className={cancelDialog.immediately ?"bg-destructive text-destructive-foreground hover:bg-destructive/90" :""}
  >
  {canceling ? (
@@ -371,6 +429,60 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
 "Cancel Immediately"
  ) : (
 "Cancel at Period End"
+ )}
+ </AlertDialogAction>
+ </AlertDialogFooter>
+ </AlertDialogContent>
+ </AlertDialog>
+
+ {/* Pause / Resume confirmation dialog */}
+ <AlertDialog
+ open={pauseDialog.open}
+ onOpenChange={(open) => {
+ if (!open) {
+ setPauseDialog({ open: false, subscriber: null, action: "pause" });
+ setPauseReason("");
+ }
+ }}
+ >
+ <AlertDialogContent>
+ <AlertDialogHeader>
+ <AlertDialogTitle>
+ {pauseDialog.action === "pause" ? "Pause Subscription" : "Resume Subscription"}
+ </AlertDialogTitle>
+ <AlertDialogDescription>
+ {pauseDialog.action === "pause"
+ ? `${pauseDialog.subscriber?.profiles?.full_name || "This subscriber"}'s subscription to ${pauseDialog.subscriber?.product_name} will be paused. They will not be billed until you resume it. Please provide a reason — the subscriber will be notified.`
+ : `${pauseDialog.subscriber?.profiles?.full_name || "This subscriber"}'s subscription to ${pauseDialog.subscriber?.product_name} will resume and billing will continue on the next scheduled date. Please provide a reason — the subscriber will be notified.`}
+ </AlertDialogDescription>
+ </AlertDialogHeader>
+
+ <div className="space-y-2">
+ <Label htmlFor="pause-reason">Reason <span className="text-destructive">*</span></Label>
+ <Textarea
+ id="pause-reason"
+ placeholder={pauseDialog.action === "pause" ? "Why are you pausing this subscription?" : "Why are you resuming this subscription?"}
+ value={pauseReason}
+ onChange={(e) => setPauseReason(e.target.value)}
+ rows={3}
+ />
+ </div>
+
+ <AlertDialogFooter>
+ <AlertDialogCancel disabled={pausing}>Cancel</AlertDialogCancel>
+ <AlertDialogAction
+ onClick={handlePauseResume}
+ disabled={pausing || pauseReason.trim().length < 3}
+ >
+ {pausing ? (
+ <>
+ <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+ Processing...
+ </>
+ ) : pauseDialog.action === "pause" ? (
+ "Pause Subscription"
+ ) : (
+ "Resume Subscription"
  )}
  </AlertDialogAction>
  </AlertDialogFooter>
