@@ -95,14 +95,14 @@ const MomentCard = ({
  initial={{ opacity: 0, x: -20 }}
  animate={{ opacity: 1, x: 0 }}
  transition={{ delay: index * 0.1, duration: 0.4 }}
- className="relative"
+ className="relative w-full min-w-0"
  >
  {/* Timeline connector */}
  {!compact && (
  <div className="absolute left-6 top-14 bottom-0 w-0.5 bg-gradient-to-b from-primary/30 to-transparent" />
  )}
  
- <div className={`flex gap-3 ${compact ?'' :'pl-2'}`}>
+ <div className={`flex gap-3 w-full min-w-0 ${compact ?'' :'pl-2'}`}>
  {/* Timeline dot */}
  {!compact && (
  <div className="relative z-10 mt-4">
@@ -112,9 +112,9 @@ const MomentCard = ({
  </div>
  )}
  
- <Card className={`flex-1 overflow-hidden border-2 ${borderColor} bg-gradient-to-br ${bgGradient} backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.01]`}>
+ <Card className={`flex-1 min-w-0 overflow-hidden border-2 ${borderColor} bg-gradient-to-br ${bgGradient} backdrop-blur-sm transition-all duration-300 hover:shadow-lg`}>
  <CardContent className={compact ?"p-3" :"p-4"}>
- <div className="flex gap-3">
+ <div className="flex gap-3 min-w-0">
  {/* Photo */}
  {moment.photo_url && (
  <motion.div 
@@ -130,11 +130,11 @@ const MomentCard = ({
  </motion.div>
  )}
  
- <div className="flex-1 min-w-0">
+ <div className="flex-1 min-w-0 break-words">
  <div className="flex items-start justify-between gap-2 mb-1">
- <div className="flex items-center gap-2 flex-wrap">
+ <div className="flex items-center gap-2 flex-wrap min-w-0">
  {compact && <span className="text-lg">{moment.emoji}</span>}
- <h4 className={`font-semibold ${compact ?'text-sm' :'text-base'}`}>
+ <h4 className={`font-semibold break-words ${compact ?'text-sm' :'text-base'}`}>
  {moment.title}
  </h4>
  </div>
@@ -367,8 +367,8 @@ export const PetTimeline = ({
  {moments.length === 0 ? (
  <EmptyTimeline petName={pets[0]?.name} />
  ) : (
- <ScrollArea className={compact ?"max-h-[300px]" :"max-h-[500px]"}>
- <div className="space-y-4 pr-2">
+ <ScrollArea className={compact ?"max-h-[300px] w-full" :"max-h-[500px] w-full"}>
+ <div className="space-y-4 pr-2 w-full min-w-0">
  <AnimatePresence>
  {moments.map((moment, index) => (
  <MomentCard
