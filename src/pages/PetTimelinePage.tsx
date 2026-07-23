@@ -88,10 +88,10 @@ const PetTimelinePage = () => {
  keywords={["pet timeline","pet memories","PawBucks history"]}
  noIndex={true}
  />
- <div className="min-h-[100dvh] overflow-x-hidden bg-background flex flex-col">
+ <div className="flex min-h-[100dvh] flex-col overflow-x-hidden bg-background">
  <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
  
-  <main className="mx-auto w-full max-w-5xl min-w-0 flex-1 overflow-x-hidden px-3 pt-4 pb-24 sm:px-4 md:pb-8 lg:max-w-5xl">
+  <main className="mx-auto w-full max-w-4xl min-w-0 flex-1 overflow-x-hidden px-4 pb-[calc(env(safe-area-inset-bottom)+7rem)] pt-[calc(env(safe-area-inset-top)+1rem)] sm:px-6 md:pb-10">
  {/* Header */}
  <motion.div
  initial={{ opacity: 0, y: -20 }}
@@ -108,15 +108,15 @@ const PetTimelinePage = () => {
  Back to Dashboard
  </Button>
  
-   <div className="flex min-w-0 items-center gap-2.5 mb-2 sm:gap-3">
-  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent sm:h-12 sm:w-12">
-  <Sparkles className="h-5 w-5 text-white sm:h-6 sm:w-6" />
+   <div className="mb-2 flex min-w-0 items-center gap-3 sm:gap-4">
+  <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 sm:h-12 sm:w-12">
+  <Sparkles className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
  </div>
   <div className="min-w-0">
-   <h1 className="text-xl sm:text-3xl font-bold break-words leading-tight">
- ✨ Your Pet's Story, Unlocked
+   <h1 className="break-words text-2xl font-semibold leading-tight tracking-normal sm:text-3xl">
+ Your Pet's Story
  </h1>
-   <p className="text-sm text-muted-foreground break-words sm:text-base">
+   <p className="break-words text-sm leading-relaxed text-muted-foreground sm:text-base">
  Every paw print, vet visit, and snack run adds to their timeline
  </p>
  </div>
@@ -132,10 +132,10 @@ const PetTimelinePage = () => {
    className="mb-5 min-w-0 overflow-hidden sm:mb-6"
  >
   <Tabs value={selectedPetId} onValueChange={setSelectedPetId} className="min-w-0 overflow-hidden">
-  <TabsList className="flex h-auto w-full min-w-0 flex-wrap justify-start gap-2 bg-transparent p-0">
+  <TabsList className="flex h-auto w-full min-w-0 justify-start gap-2 overflow-x-auto bg-transparent p-0 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
  <TabsTrigger 
  value="all" 
-  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4"
+  className="flex-shrink-0 rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
  >
  All Pets
  </TabsTrigger>
@@ -143,7 +143,7 @@ const PetTimelinePage = () => {
  <TabsTrigger
  key={pet.id}
  value={pet.id}
-   className="max-w-[calc(50%-0.25rem)] min-w-0 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-3 gap-2 sm:max-w-full sm:px-4"
+   className="max-w-[11rem] flex-shrink-0 gap-2 rounded-full px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:max-w-full sm:px-4"
  >
  {pet.photo_url ? (
  <img 
@@ -167,7 +167,7 @@ const PetTimelinePage = () => {
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 0.2 }}
-   className="w-full max-w-full min-w-0 overflow-hidden"
+   className="w-full max-w-full min-w-0 overflow-visible"
   >
  {effectiveWalletUserId && (
  <PetTimeline 
