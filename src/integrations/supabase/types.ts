@@ -15531,9 +15531,6 @@ export type Database = {
       }
     }
     Functions: {
-      _test_admin_analytics_body: { Args: never; Returns: Json }
-      _test_gaa_admin: { Args: never; Returns: Json }
-      _test_gaa_full: { Args: never; Returns: Json }
       admin_bulk_grant_branded_pawbucks: {
         Args: {
           p_actor_user_id: string
