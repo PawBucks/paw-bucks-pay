@@ -1,0 +1,1 @@
+CREATE POLICY "Anyone can view active catalog items" ON public.invoice_catalog_items FOR SELECT USING (is_active = true);
