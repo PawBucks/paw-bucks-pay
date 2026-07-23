@@ -184,18 +184,18 @@ export const HomeTimelinePreview = ({ userId, pets }: Props) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         aria-label="Pet timeline"
-        className="rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] via-background to-accent/[0.04] p-4 sm:p-5"
+        className="w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.04] via-background to-accent/[0.04] p-4 sm:p-5"
       >
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2.5">
+        <div className="flex min-w-0 items-center justify-between gap-2 mb-3">
+          <div className="flex min-w-0 items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
               <Sparkles className="h-4.5 w-4.5 text-white" />
             </div>
-            <div>
-              <h3 className="font-semibold text-sm sm:text-base leading-tight">
+            <div className="min-w-0">
+              <h3 className="truncate font-semibold text-sm sm:text-base leading-tight">
                 Your Pet's Timeline
               </h3>
-              <p className="text-xs text-muted-foreground">
+              <p className="truncate text-xs text-muted-foreground">
                 {totalCount > 0
                   ? `${totalCount} ${totalCount === 1 ? "moment" : "moments"} captured`
                   : "Every visit becomes a memory"}
@@ -205,7 +205,7 @@ export const HomeTimelinePreview = ({ userId, pets }: Props) => {
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1 h-8 text-primary hover:bg-primary/10"
+            className="h-8 flex-shrink-0 gap-1 text-primary hover:bg-primary/10"
             onClick={() => navigate("/pet-timeline")}
           >
             View all
@@ -227,14 +227,14 @@ export const HomeTimelinePreview = ({ userId, pets }: Props) => {
             </p>
           </button>
         ) : (
-          <ul className="space-y-2">
+          <ul className="w-full max-w-full min-w-0 space-y-2 overflow-hidden">
             {moments.map((m) => (
-              <li key={m.id}>
+              <li key={m.id} className="w-full max-w-full min-w-0 overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setSelected(m)}
                   aria-label={`Read full story: ${m.title}`}
-                  className="w-full text-left rounded-xl border border-border/60 bg-card hover:bg-accent/5 hover:border-primary/30 transition-all p-3 flex items-start gap-3 group"
+                  className="flex w-full max-w-full min-w-0 items-start gap-2.5 overflow-hidden rounded-xl border border-border/60 bg-card p-3 text-left transition-all hover:border-primary/30 hover:bg-accent/5 sm:gap-3 group"
                 >
                   {m.photo_url ? (
                     <img
@@ -247,8 +247,8 @@ export const HomeTimelinePreview = ({ userId, pets }: Props) => {
                       {m.emoji || "🐾"}
                     </div>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
+                   <div className="min-w-0 flex-1 overflow-hidden">
+                    <div className="flex min-w-0 items-start justify-between gap-2">
                       <p className="text-sm font-medium truncate">{m.title}</p>
                       <span className="text-[11px] text-muted-foreground whitespace-nowrap">
                         {format(new Date(m.moment_date), "MMM d")}
