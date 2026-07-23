@@ -89,20 +89,21 @@ const MomentCard = ({
 }) => {
  const bgGradient = moodColors[moment.mood] || moodColors.happy;
  const borderColor = moodBorderColors[moment.mood] || moodBorderColors.happy;
+ const photoUrl = moment.photo_url;
 
  return (
  <motion.div
  initial={{ opacity: 0, x: -20 }}
  animate={{ opacity: 1, x: 0 }}
  transition={{ delay: index * 0.1, duration: 0.4 }}
- className="relative w-full min-w-0"
+ className="relative w-full max-w-full min-w-0 overflow-hidden"
  >
  {/* Timeline connector */}
  {!compact && (
  <div className="absolute left-6 top-14 bottom-0 w-0.5 bg-gradient-to-b from-primary/30 to-transparent" />
  )}
  
- <div className={`flex gap-3 w-full min-w-0 ${compact ?'' :'pl-2'}`}>
+ <div className={`flex w-full max-w-full min-w-0 gap-2 overflow-hidden sm:gap-3 ${compact ?'' :'pl-0 sm:pl-2'}`}>
  {/* Timeline dot */}
  {!compact && (
  <div className="relative z-10 mt-4">
@@ -112,55 +113,55 @@ const MomentCard = ({
  </div>
  )}
  
- <Card className={`flex-1 min-w-0 overflow-hidden border-2 ${borderColor} bg-gradient-to-br ${bgGradient} backdrop-blur-sm transition-all duration-300 hover:shadow-lg`}>
- <CardContent className={compact ?"p-3" :"p-4"}>
- <div className="flex gap-3 min-w-0">
+  <Card className={`w-full max-w-full flex-1 min-w-0 overflow-hidden border-2 ${borderColor} bg-gradient-to-br ${bgGradient} backdrop-blur-sm transition-all duration-300 hover:shadow-lg`}>
+  <CardContent className={compact ?"p-3" :"p-3 sm:p-4"}>
+  <div className="flex w-full max-w-full min-w-0 gap-2 overflow-hidden sm:gap-3">
  {/* Photo */}
- {moment.photo_url && (
+  {photoUrl && (
  <motion.div 
  whileHover={{ scale: 1.05 }}
- className={`${compact ?'w-16 h-16' :'w-20 h-20'} rounded-lg overflow-hidden flex-shrink-0 cursor-pointer shadow-md`}
- onClick={() => onPhotoClick?.(moment.photo_url!)}
+  className={`${compact ?'w-16 h-16' :'w-16 h-16 sm:w-20 sm:h-20'} rounded-lg overflow-hidden flex-shrink-0 cursor-pointer shadow-md`}
+  onClick={() => onPhotoClick?.(photoUrl)}
  >
  <img 
- src={moment.photo_url} 
+  src={photoUrl} 
  alt={moment.title}
  className="w-full h-full object-cover"
  />
  </motion.div>
  )}
  
- <div className="flex-1 min-w-0 break-words">
- <div className="flex items-start justify-between gap-2 mb-1">
- <div className="flex items-center gap-2 flex-wrap min-w-0">
+  <div className="flex-1 min-w-0 max-w-full overflow-hidden break-words">
+  <div className="flex min-w-0 items-start justify-between gap-2 mb-1">
+  <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
  {compact && <span className="text-lg">{moment.emoji}</span>}
- <h4 className={`font-semibold break-words ${compact ?'text-sm' :'text-base'}`}>
+  <h4 className={`min-w-0 flex-1 truncate font-semibold ${compact ?'text-sm' :'text-sm sm:text-base'}`}>
  {moment.title}
  </h4>
  </div>
- <Badge variant="outline" className="text-xs whitespace-nowrap flex-shrink-0">
+  <Badge variant="outline" className="flex-shrink-0 whitespace-nowrap text-[10px] sm:text-xs">
  {formatMomentDate(moment.moment_date)}
  </Badge>
  </div>
  
- <p className={`text-muted-foreground ${compact ?'text-xs line-clamp-2' :'text-sm'} mb-2`}>
+  <p className={`max-w-full break-words text-muted-foreground ${compact ?'text-xs line-clamp-2' :'text-sm'} mb-2`}>
  {moment.narrative}
  </p>
  
- <div className="flex items-center gap-3 flex-wrap">
+  <div className="flex max-w-full min-w-0 flex-wrap items-center gap-2 overflow-hidden sm:gap-3">
  {moment.amount && (
- <span className="text-xs text-muted-foreground">
+  <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground">
  {Formatters.currency(moment.amount)}
  </span>
  )}
  {moment.pawbucks_earned > 0 && (
- <Badge className="bg-gradient-to-r from-primary to-accent text-white text-xs gap-1">
+  <Badge className="max-w-full min-w-0 overflow-hidden bg-gradient-to-r from-primary to-accent text-white text-xs gap-1">
  <PawBucksLogo className="w-3 h-3" />
- +{moment.pawbucks_earned.toLocaleString()} PawBucks
+  <span className="truncate">+{moment.pawbucks_earned.toLocaleString()} PawBucks</span>
  </Badge>
  )}
  {moment.merchant_name && !compact && (
- <span className="text-xs text-muted-foreground">
+  <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground">
  @ {moment.merchant_name}
  </span>
  )}
@@ -367,8 +368,8 @@ export const PetTimeline = ({
  {moments.length === 0 ? (
  <EmptyTimeline petName={pets[0]?.name} />
  ) : (
- <ScrollArea className={compact ?"max-h-[300px] w-full" :"max-h-[500px] w-full"}>
- <div className="space-y-4 pr-2 w-full min-w-0">
+  <ScrollArea className={compact ?"max-h-[300px] w-full max-w-full min-w-0 overflow-hidden" :"max-h-[500px] w-full max-w-full min-w-0 overflow-hidden"}>
+  <div className="box-border w-full max-w-full min-w-0 space-y-4 overflow-hidden pr-0 sm:pr-2">
  <AnimatePresence>
  {moments.map((moment, index) => (
  <MomentCard

@@ -88,15 +88,15 @@ const PetTimelinePage = () => {
  keywords={["pet timeline","pet memories","PawBucks history"]}
  noIndex={true}
  />
- <div className="min-h-[100dvh] bg-background flex flex-col">
+ <div className="min-h-[100dvh] overflow-x-hidden bg-background flex flex-col">
  <Header isAuthenticated={true} onLogout={handleSignOut} userId={user?.id} />
  
- <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-8 max-w-5xl lg:max-w-5xl">
+ <main className="w-full max-w-5xl min-w-0 flex-1 container mx-auto overflow-x-hidden px-4 pt-4 pb-24 md:pb-8 lg:max-w-5xl">
  {/* Header */}
  <motion.div
  initial={{ opacity: 0, y: -20 }}
  animate={{ opacity: 1, y: 0 }}
- className="mb-6"
+  className="mb-6 min-w-0 overflow-hidden"
  >
  <Button 
  variant="ghost" 
@@ -108,15 +108,15 @@ const PetTimelinePage = () => {
  Back to Dashboard
  </Button>
  
- <div className="flex items-center gap-3 mb-2">
+  <div className="flex min-w-0 items-center gap-3 mb-2">
  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
  <Sparkles className="w-6 h-6 text-white" />
  </div>
- <div>
- <h1 className="text-2xl sm:text-3xl font-bold">
+  <div className="min-w-0">
+  <h1 className="text-2xl sm:text-3xl font-bold break-words">
  ✨ Your Pet's Story, Unlocked
  </h1>
- <p className="text-muted-foreground">
+  <p className="text-muted-foreground break-words">
  Every paw print, vet visit, and snack run adds to their timeline
  </p>
  </div>
@@ -129,10 +129,10 @@ const PetTimelinePage = () => {
  initial={{ opacity: 0, y: 10 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 0.1 }}
- className="mb-6"
+  className="mb-6 min-w-0 overflow-hidden"
  >
- <Tabs value={selectedPetId} onValueChange={setSelectedPetId}>
- <TabsList className="w-full flex-wrap h-auto gap-2 bg-transparent p-0">
+  <Tabs value={selectedPetId} onValueChange={setSelectedPetId} className="min-w-0 overflow-hidden">
+  <TabsList className="w-full min-w-0 flex-wrap h-auto gap-2 bg-transparent p-0">
  <TabsTrigger 
  value="all" 
  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4"
@@ -143,7 +143,7 @@ const PetTimelinePage = () => {
  <TabsTrigger
  key={pet.id}
  value={pet.id}
- className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 gap-2"
+  className="max-w-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 gap-2"
  >
  {pet.photo_url ? (
  <img 
@@ -154,7 +154,7 @@ const PetTimelinePage = () => {
  ) : (
  <span>{pet.type ==="cat" ?"🐱" :"🐕"}</span>
  )}
- {pet.name}
+  <span className="truncate">{pet.name}</span>
  </TabsTrigger>
  ))}
  </TabsList>
@@ -167,7 +167,8 @@ const PetTimelinePage = () => {
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: 0.2 }}
- >
+  className="min-w-0 overflow-hidden"
+  >
  {effectiveWalletUserId && (
  <PetTimeline 
  userId={effectiveWalletUserId}

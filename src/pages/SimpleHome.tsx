@@ -118,14 +118,14 @@ const SimpleHome = () => {
   return (
     <>
       <SEO title="Home — PawBucks" description="Pay for pet care and save automatically." noIndex />
-      <div className="min-h-[100dvh] bg-background flex flex-col">
+      <div className="min-h-[100dvh] overflow-x-hidden bg-background flex flex-col">
         <ConfettiCanvas active={showConfetti} onDone={() => setShowConfetti(false)} />
         {showOverlay && (
           <BirthdayOverlay pets={birthdayPets as any} onDismiss={() => setShowOverlay(false)} />
         )}
         <Header isAuthenticated onLogout={signOut} userId={user?.id} />
 
-        <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-12 pb-28 md:pb-10 max-w-6xl">
+        <main className="w-full max-w-6xl min-w-0 flex-1 container mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 pt-6 lg:pt-12 pb-28 md:pb-10">
           {/* Greeting */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -158,9 +158,9 @@ const SimpleHome = () => {
             </div>
           )}
 
-      <div className="grid gap-6 lg:gap-10 lg:grid-cols-5">
+      <div className="grid w-full min-w-0 gap-6 lg:gap-10 lg:grid-cols-5">
         {/* Left column — hero + actions */}
-        <div className="lg:col-span-3 space-y-5 lg:space-y-6">
+        <div className="min-w-0 space-y-5 lg:col-span-3 lg:space-y-6">
           <SavingsHero
             availableUsd={availableUsd}
             helperText={
@@ -206,7 +206,7 @@ const SimpleHome = () => {
         </div>
 
         {/* Right column — recent visits + pets */}
-        <div className="lg:col-span-2 mt-2 lg:mt-0 space-y-6">
+        <div className="min-w-0 space-y-6 mt-2 lg:col-span-2 lg:mt-0">
           {/* Recent visits */}
           <section>
             <div className="flex items-center justify-between mb-3">
