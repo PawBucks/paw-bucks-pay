@@ -15531,7 +15531,6 @@ export type Database = {
       }
     }
     Functions: {
-      _verify_gaa: { Args: never; Returns: Json }
       admin_bulk_grant_branded_pawbucks: {
         Args: {
           p_actor_user_id: string
