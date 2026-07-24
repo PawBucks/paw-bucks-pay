@@ -385,6 +385,35 @@ serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
+    // Sweep: any subscription flagged cancel_at_period_end whose period has
+    // ended should be marked canceled so merchant dashboards reflect reality.
+    {
+      const nowIso = new Date().toISOString();
+      const { data: expired, error: expiredErr } = await supabaseAdmin
+        .from("merchant_subscriptions")
+        .select("id, user_id, product_name, merchant_id")
+        .in("status", ["active", "past_due", "paused"])
+        .eq("cancel_at_period_end", true)
+        .lte("current_period_end", nowIso);
+      if (expiredErr) {
+        logStep("Sweep query error", { error: expiredErr.message });
+      } else if (expired && expired.length > 0) {
+        const ids = expired.map((r: any) => r.id);
+        await supabaseAdmin
+          .from("merchant_subscriptions")
+          .update({ status: "canceled", canceled_at: nowIso })
+          .in("id", ids);
+        await supabaseAdmin.from("merchant_subscription_events").insert(
+          expired.map((r: any) => ({
+            subscription_id: r.id,
+            event_type: "canceled",
+            metadata: { reason: "period_end_reached", auto: true },
+          }))
+        );
+        logStep("Swept expired cancel_at_period_end subscriptions", { count: ids.length });
+      }
+    }
+
     // Get active subscription candidates, then decide due status by the merchant/user local calendar date.
     const now = new Date();
     const localDueLookahead = new Date(now.getTime() + 36 * 60 * 60 * 1000);
