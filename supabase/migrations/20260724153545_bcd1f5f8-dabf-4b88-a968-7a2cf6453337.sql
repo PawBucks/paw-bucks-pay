@@ -1,0 +1,1 @@
+ALTER TABLE public.merchant_subscriptions REPLICA IDENTITY FULL;
