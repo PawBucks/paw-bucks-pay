@@ -99,11 +99,17 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
   .select("*")
  .eq("merchant_id", merchantId)
    .in("status", ["active","past_due","paused"])
-  .eq("cancel_at_period_end", false)
  .order("created_at", { ascending: false });
 
  if (fetchError) throw fetchError;
-  const rows = (data || []) as any[];
+      const nowMs = Date.now();
+      // Hide any row whose cancellation has already taken effect (period ended)
+      // even if a cron sweep hasn't yet flipped status to 'canceled'.
+      const rows = ((data || []) as any[]).filter((r) => {
+        if (!r.cancel_at_period_end) return true;
+        const end = r.current_period_end ? new Date(r.current_period_end).getTime() : 0;
+        return end > nowMs;
+      });
   const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter(Boolean)));
   const profileById = new Map<string, { full_name: string; email: string }>();
   if (userIds.length > 0) {
