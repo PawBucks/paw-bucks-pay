@@ -924,7 +924,10 @@ export const PaymentDialogWithPawBucks = ({
 
  <Slider
  value={[pawbucksToUse]}
- onValueChange={([value]) => setPawbucksToUse(value)}
+  onValueChange={([value]) => {
+  userAdjustedPawbucksRef.current = true;
+  setPawbucksToUse(value);
+  }}
  max={maxPawbucks}
  min={0}
  step={maxPawbucks <= 500 ? 1 : 100}
