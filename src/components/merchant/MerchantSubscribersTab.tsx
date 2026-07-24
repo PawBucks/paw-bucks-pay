@@ -165,7 +165,17 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
 
  useEffect(() => {
  fetchSubscribers();
- }, [merchantId]);
+    if (!merchantId) return;
+    const channel = supabase
+      .channel(`merchant-subs-${merchantId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "merchant_subscriptions", filter: `merchant_id=eq.${merchantId}` },
+        () => { fetchSubscribers(); }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [merchantId]);
 
  const handleCancelSubscription = async () => {
  if (!cancelDialog.subscriber) return;
