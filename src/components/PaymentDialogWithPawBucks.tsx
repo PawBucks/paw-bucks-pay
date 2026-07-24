@@ -1,4 +1,4 @@
-import { useState, useEffect } from"react";
+import { useState, useEffect, useRef } from"react";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
@@ -325,6 +325,18 @@ export const PaymentDialogWithPawBucks = ({
  const [paymentData, setPaymentData] = useState<any>(null);
  const [redemptionError, setRedemptionError] = useState<{ title: string; message: string } | null>(null);
 
+  // Track whether the customer has manually touched the PawBucks slider
+  // during this open session. Auto-apply is the DEFAULT, but a manual
+  // adjustment (including sliding down to 0) always wins and must not be
+  // overwritten by the auto-fill effect.
+  const userAdjustedPawbucksRef = useRef(false);
+
+  // Reset the "user adjusted" flag whenever the dialog opens fresh so the
+  // default auto-apply kicks in on the next session.
+  useEffect(() => {
+    if (open) userAdjustedPawbucksRef.current = false;
+  }, [open]);
+
   // Keep prefilled values in sync if the dialog is reopened with new params.
   useEffect(() => {
     if (!open) return;
@@ -484,7 +496,8 @@ export const PaymentDialogWithPawBucks = ({
  if (!open || loadingBalance) return;
  if (totalAmount <= 0) return;
  if (pawbucksSource ==="none") return;
- if (pawbucksToUse === 0 && maxPawbucks > 0) {
+  if (userAdjustedPawbucksRef.current) return;
+  if (pawbucksToUse === 0 && maxPawbucks > 0) {
  setPawbucksToUse(maxPawbucks);
  }
  // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -911,7 +924,10 @@ export const PaymentDialogWithPawBucks = ({
 
  <Slider
  value={[pawbucksToUse]}
- onValueChange={([value]) => setPawbucksToUse(value)}
+  onValueChange={([value]) => {
+  userAdjustedPawbucksRef.current = true;
+  setPawbucksToUse(value);
+  }}
  max={maxPawbucks}
  min={0}
  step={maxPawbucks <= 500 ? 1 : 100}
