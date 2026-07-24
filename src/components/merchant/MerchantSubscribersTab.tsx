@@ -212,6 +212,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
 
  const activeCount = subscribers.filter((s) => s.status ==="active").length;
  const pastDueCount = subscribers.filter((s) => s.status ==="past_due").length;
+ const pausedCount = subscribers.filter((s) => s.status ==="paused").length;
  const totalMRR = subscribers
  .filter((s) => s.status ==="active")
  .reduce((sum, s) => sum + s.amount, 0);
@@ -238,7 +239,7 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  </div>
 
  {/* Summary cards */}
- <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -261,6 +262,17 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  </div>
  </div>
  </GradientCard>
+   <GradientCard>
+   <div className="flex items-center gap-3">
+   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+   <PauseCircle className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
+   </div>
+   <div>
+   <p className="text-sm text-muted-foreground">Paused</p>
+   <p className="text-2xl font-bold">{pausedCount}</p>
+   </div>
+   </div>
+   </GradientCard>
  <GradientCard>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
