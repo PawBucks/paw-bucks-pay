@@ -669,6 +669,35 @@ const Community = () => {
 
       {/* Feed */}
       <div style={{ padding: "16px 16px 80px", maxWidth: 896, margin: "0 auto" }}>
+        {/* Guides */}
+        <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 14, padding: 14, marginBottom: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <div>
+              <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: C.teal, marginBottom: 2 }}>GUIDES</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, letterSpacing: "-0.01em" }}>📚 Pet Care Guides</div>
+              <div style={{ fontSize: 12, color: C.mutedLight, marginTop: 2 }}>Handpicked local & wellness guides from the PawBucks team.</div>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}>
+            {[
+              { to: "/guides/pet-friendly-los-angeles", emoji: "🌴", title: "Pet-Friendly Los Angeles", desc: "Best dog parks, cafes, trails & events in LA." },
+              { to: "/guides/wellness-plans-comparison", emoji: "🩺", title: "Wellness Plans Compared", desc: "Compare pet wellness plan options side by side." },
+            ].map((g) => (
+              <button
+                key={g.to}
+                type="button"
+                onClick={() => navigate(g.to)}
+                style={{ textAlign: "left", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: 12, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                <div style={{ fontSize: 18, marginBottom: 4 }}>{g.emoji}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginBottom: 2 }}>{g.title}</div>
+                <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.4 }}>{g.desc}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: C.teal, marginTop: 8 }}>Read guide →</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {user && (
           <Composer
             authorName={author.name}
