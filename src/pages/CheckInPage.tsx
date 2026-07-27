@@ -323,7 +323,15 @@ export default function CheckInPage() {
  {unlockedOffers.length > 0 && (
  <div className="rounded-lg border border-accent/40 bg-accent/5 p-4 text-left space-y-3">
  <div className="flex items-center justify-between">
- <p className="text-sm font-semibold text-foreground">🎟️ New Customer Deal Unlocked</p>
+							<p className="text-sm font-semibold text-foreground">
+								🎟️ {(() => {
+									const hasNew = unlockedOffers.some((o) => o.offer_type === "new_customer");
+									const hasPartner = unlockedOffers.some((o) => o.offer_type === "partner_deal");
+									if (hasNew && hasPartner) return `${unlockedOffers.length} Offers Unlocked`;
+									if (hasPartner) return unlockedOffers.length > 1 ? "Partner Deals Unlocked" : "Partner Deal Unlocked";
+									return "New Customer Deal Unlocked";
+								})()}
+							</p>
  <span className="text-[10px] uppercase tracking-wide font-semibold text-accent">In-store</span>
  </div>
  <ul className="space-y-3">
