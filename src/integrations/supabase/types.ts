@@ -15943,6 +15943,7 @@ export type Database = {
         }
         Returns: string
       }
+      is_admin_or_service: { Args: never; Returns: boolean }
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
       is_returning_customer: {
         Args: { p_merchant_id: string; p_user_id: string }
