@@ -130,7 +130,7 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  setPawbucksUsed("");
  setSubmitting(false);
 
- toast.success(`+${estimatedPB.toLocaleString()} PawBucks credited provisionally!`);
+  toast.success(`+${estimatedPB.toLocaleString()} PawBucks pending admin approval`);
  };
 
  const handleStillShopping = async (followupId: string) => {
@@ -202,12 +202,12 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  <GradientCard className="p-6 space-y-4 text-center">
  <PartyPopper className="h-10 w-10 text-success" aria-hidden />
  <div>
- <p className="text-lg font-bold text-primary">
- You've earned +{creditedFollowup.pawbucks.toLocaleString()} PawBucks!
- </p>
- <p className="text-sm text-muted-foreground mt-2">
- Upload your receipt to unlock it
- </p>
+  <p className="text-lg font-bold text-primary">
+  +{creditedFollowup.pawbucks.toLocaleString()} PawBucks pending admin approval
+  </p>
+  <p className="text-sm text-muted-foreground mt-2">
+  Upload your receipt to help admins verify and approve your reward
+  </p>
  </div>
  <Button
  onClick={() => setShowReceiptUpload(true)}
@@ -216,9 +216,9 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  <Upload className="w-4 h-4 mr-2" />
  Upload Receipt (Takes 5 seconds)
  </Button>
- <p className="text-xs text-muted-foreground">
- Pending: +{creditedFollowup.pawbucks.toLocaleString()} PB
- </p>
+  <p className="text-xs text-muted-foreground">
+  Pending admin approval: +{creditedFollowup.pawbucks.toLocaleString()} PB
+  </p>
  </GradientCard>
  )}
 
@@ -227,16 +227,16 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
  <GradientCard className="p-6 space-y-3 text-center">
  <CheckCircle2 className="h-10 w-10 text-success" aria-hidden />
  <div>
- <p className="text-lg font-bold">You're all set!</p>
- <p className="text-sm text-muted-foreground mt-2">
- Your PawBucks will be approved within 24–48 hours
- </p>
+  <p className="text-lg font-bold">You're all set!</p>
+  <p className="text-sm text-muted-foreground mt-2">
+  Your PawBucks are pending admin approval and will post to your wallet once reviewed
+  </p>
  </div>
  {creditedFollowup && (
  <div className="bg-primary/10 rounded-lg px-4 py-2">
- <span className="text-sm font-semibold text-primary">
- Pending: +{creditedFollowup.pawbucks.toLocaleString()} PawBucks
- </span>
+  <span className="text-sm font-semibold text-primary">
+  Pending admin approval: +{creditedFollowup.pawbucks.toLocaleString()} PawBucks
+  </span>
  </div>
  )}
  <Button
