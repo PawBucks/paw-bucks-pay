@@ -71,7 +71,7 @@ serve(async (req) => {
     // Insert codes (pre-generated, not yet redeemed)
     const redemptions = codes.map(code => ({
       offer_id: offer_id,
-      user_id: user.id, // Temporary, will be updated when actually redeemed
+      user_id: null, // Unassigned until a customer redeems the code
       redemption_code: code,
       redeemed_at: null,
       partner_confirmed: false
