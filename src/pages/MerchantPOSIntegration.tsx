@@ -124,7 +124,7 @@ export default function MerchantPOSIntegration() {
  // Load integrations
  const { data: integrationsData } = await supabase
  .from("merchant_pos_integrations")
- .select("*")
+        .select("id, merchant_id, name, api_key_prefix, is_active, last_used_at, created_at, updated_at, clover_merchant_id, clover_token_expires_at")
  .eq("merchant_id", merchantData.id)
  .order("created_at", { ascending: false });
 
