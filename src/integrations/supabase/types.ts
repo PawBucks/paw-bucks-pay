@@ -7924,7 +7924,7 @@ export type Database = {
           partner_confirmed: boolean | null
           redeemed_at: string | null
           redemption_code: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -7933,7 +7933,7 @@ export type Database = {
           partner_confirmed?: boolean | null
           redeemed_at?: string | null
           redemption_code: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -7942,7 +7942,7 @@ export type Database = {
           partner_confirmed?: boolean | null
           redeemed_at?: string | null
           redemption_code?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
