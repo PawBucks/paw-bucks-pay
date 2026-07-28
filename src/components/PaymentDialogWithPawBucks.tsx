@@ -573,7 +573,10 @@ export const PaymentDialogWithPawBucks = ({
  tipAmount,
  merchantId,
  description: description || `Payment to ${merchantName}`,
- autoRedeem: autoRedeemPref?.enabled ?? false,
+				// Only allow server-side auto-redeem when the user hasn't touched the slider.
+				// If the user explicitly moved the slider (including to 0), respect that
+				// choice absolutely — never let the backend override it with auto-apply.
+				autoRedeem: !userAdjustedPawbucksRef.current && (autoRedeemPref?.enabled ?? false),
  items: itemsToPayload(lineItems),
  },
  });
