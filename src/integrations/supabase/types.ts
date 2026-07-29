@@ -3834,6 +3834,138 @@ export type Database = {
           },
         ]
       }
+      guide_events: {
+        Row: {
+          area: string
+          created_at: string
+          description: string
+          guide_slug: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          tag: string | null
+          tag_label: string | null
+          tip: string | null
+          tip_icon: string | null
+          updated_at: string
+        }
+        Insert: {
+          area: string
+          created_at?: string
+          description: string
+          guide_slug: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          tag?: string | null
+          tag_label?: string | null
+          tip?: string | null
+          tip_icon?: string | null
+          updated_at?: string
+        }
+        Update: {
+          area?: string
+          created_at?: string
+          description?: string
+          guide_slug?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          tag?: string | null
+          tag_label?: string | null
+          tip?: string | null
+          tip_icon?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      guide_faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          guide_slug: string
+          id: string
+          is_active: boolean
+          question: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          guide_slug: string
+          id?: string
+          is_active?: boolean
+          question: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          guide_slug?: string
+          id?: string
+          is_active?: boolean
+          question?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      guide_places: {
+        Row: {
+          area: string
+          created_at: string
+          description: string
+          guide_slug: string
+          id: string
+          is_active: boolean
+          name: string
+          section: string
+          sort_order: number
+          tag: string | null
+          tag_label: string | null
+          tip: string | null
+          tip_icon: string | null
+          updated_at: string
+        }
+        Insert: {
+          area: string
+          created_at?: string
+          description: string
+          guide_slug: string
+          id?: string
+          is_active?: boolean
+          name: string
+          section: string
+          sort_order?: number
+          tag?: string | null
+          tag_label?: string | null
+          tip?: string | null
+          tip_icon?: string | null
+          updated_at?: string
+        }
+        Update: {
+          area?: string
+          created_at?: string
+          description?: string
+          guide_slug?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          section?: string
+          sort_order?: number
+          tag?: string | null
+          tag_label?: string | null
+          tip?: string | null
+          tip_icon?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       guilt_badge_definitions: {
         Row: {
           badge_key: string
