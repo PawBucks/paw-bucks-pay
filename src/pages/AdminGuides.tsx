@@ -81,9 +81,9 @@ function RowEditor({
     let error;
     if (payload.id) {
       const { id, created_at, updated_at, ...rest } = payload;
-      ({ error } = await supabase.from(table).update(rest).eq("id", id));
+      ({ error } = await (supabase.from(table) as any).update(rest).eq("id", id));
     } else {
-      ({ error } = await supabase.from(table).insert(payload));
+      ({ error } = await (supabase.from(table) as any).insert(payload));
     }
     setSaving(false);
     if (error) {
