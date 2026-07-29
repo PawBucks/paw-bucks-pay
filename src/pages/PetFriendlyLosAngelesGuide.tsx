@@ -3,34 +3,9 @@ import { SEO, createFAQSchema } from "@/components/SEO";
 import { MapPin } from "lucide-react";
 import "./PetFriendlyLosAngelesGuide.css";
 import pawbucksLogo from "@/assets/logo.png";
+import { useGuideContent, type GuidePlace } from "@/hooks/useGuideContent";
 
-const faqs = [
-  {
-    question: "What are the best off-leash dog parks in Los Angeles?",
-    answer:
-      "Runyon Canyon (Hollywood), Silver Lake Dog Park, Griffith Park's off-leash area near John Ferraro Soccer Field, Hermon Dog Park (Highland Park), and Sepulveda Basin Off-Leash Dog Park (Encino) are consistently the most-loved off-leash dog parks in LA.",
-  },
-  {
-    question: "Are there pet-friendly beaches near Los Angeles?",
-    answer:
-      "Yes. Rosie's Dog Beach in Long Beach is the closest fully off-leash beach. Leo Carrillo State Beach (Malibu) allows leashed dogs on the north end, and Huntington Dog Beach (about an hour south) is a favorite weekend trip.",
-  },
-  {
-    question: "Which LA cafes and restaurants allow dogs on the patio?",
-    answer:
-      "Lady & Larder (Santa Monica), Alfred Coffee (multiple), Dog Haus, Lazy Dog Restaurant, Blue Bottle Coffee patios, and most Café Gratitude locations welcome leashed dogs on outdoor patios. Always call ahead to confirm current policy.",
-  },
-  {
-    question: "Where can I find pet-friendly events in Los Angeles?",
-    answer:
-      "Pup-ups at Rose Bowl Flea Market, Yappy Hour at The Fairmont Miramar, Wags & Whiskers at Silver Lake Reservoir, and seasonal Bark in the Park nights at Dodger Stadium. PawBucks Discover surfaces upcoming pet events from local merchants and partners.",
-  },
-  {
-    question: "How do I earn PawBucks on pet outings in LA?",
-    answer:
-      "Book grooming, boarding, day care, training, or vet visits through PawBucks partner merchants in Los Angeles to earn 10–30 PawBucks per $1 spent. Redeem those rewards on future pet care, treats, or the PawBucks Marketplace.",
-  },
-];
+const GUIDE_SLUG = "pet-friendly-los-angeles";
 
 const articleSchema = {
   "@context": "https://schema.org",
@@ -49,55 +24,20 @@ const articleSchema = {
   mainEntityOfPage: "https://pawbucks.app/guides/pet-friendly-los-angeles",
 };
 
-type Tag = "off-leash" | "leashed" | "partner" | "free" | "monthly";
-type Place = { name: string; area: string; desc: string; tag?: Tag; tagLabel?: string; tip?: string; tipIcon?: string };
-
-const dogParks: Place[] = [
-  { name: "Runyon Canyon Park", area: "Hollywood Hills", tag: "off-leash", tagLabel: "Off-Leash", desc: "Iconic off-leash hike with sweeping city views — one of LA's most beloved spots for dogs and their people.", tip: "Go early — parking fills fast on weekends, and the trail gets crowded after 9am.", tipIcon: "💡" },
-  { name: "Silver Lake Dog Park", area: "Silver Lake", tag: "off-leash", tagLabel: "Off-Leash", desc: "Fenced and shaded with a separate small-dog area. A reliable neighborhood favorite with a social atmosphere.", tip: "Best mid-morning on weekdays before it gets crowded.", tipIcon: "💡" },
-  { name: "Griffith Park Off-Leash Area", area: "Los Feliz", tag: "off-leash", tagLabel: "Off-Leash", desc: "Large open field near John Ferraro Soccer Field — great for high-energy dogs who need room to run." },
-  { name: "Barrington Dog Park", area: "Brentwood", tag: "off-leash", tagLabel: "Off-Leash", desc: "Popular Westside pick with separate small and large dog enclosures. Well maintained and close to Santa Monica." },
-  { name: "Sepulveda Basin Off-Leash Park", area: "Encino", tag: "off-leash", tagLabel: "Off-Leash", desc: "One of the largest off-leash areas in LA — perfect for weekend zoomies and dogs who need serious space." },
-];
-
-const beachesAndTrails: Place[] = [
-  { name: "Rosie's Dog Beach", area: "Long Beach", tag: "off-leash", tagLabel: "Off-Leash", desc: "The nearest fully off-leash beach to LA — a must-visit day trip. Dogs can run, swim, and socialize freely.", tip: "Bring fresh water — the salt and sun tire dogs out fast.", tipIcon: "💡" },
-  { name: "Leo Carrillo State Beach", area: "Malibu", tag: "leashed", tagLabel: "Leashed", desc: "Leashed dogs welcome on the north end of the beach. Scenic coastal setting with sea caves and tide pools nearby." },
-  { name: "Fryman Canyon Trail", area: "Studio City", tag: "leashed", tagLabel: "Leashed", desc: "Shaded 3-mile loop trail popular with leashed dogs. Cooler than most LA hikes thanks to the tree canopy.", tip: "Packed on weekend mornings — arrive before 8am for a peaceful experience.", tipIcon: "💡" },
-  { name: "Kenneth Hahn Park Trails", area: "Baldwin Hills", tag: "leashed", tagLabel: "Leashed", desc: "Great views, dog-friendly leashed trails, and a dedicated dog park within the larger park. A hidden gem on the Westside." },
-  { name: "Elysian Park", area: "Echo Park", tag: "leashed", tagLabel: "Leashed", desc: "Miles of paths perfect for morning walks with your dog. Quieter than Runyon, with genuine neighborhood character." },
-];
-
-const cafes: Place[] = [
-  { name: "Alfred Coffee", area: "Melrose Place · Silver Lake · Brentwood", tag: "partner", tagLabel: "Dog Welcome", desc: "Iconic dog-welcoming patios across the city. Known for their specialty coffee and genuinely relaxed outdoor seating." },
-  { name: "Lady & Larder", area: "Santa Monica", tag: "partner", tagLabel: "Dog Welcome", desc: "Cheese boards and pastries with a shaded dog-friendly patio. One of the best spots on the Westside for a leisurely afternoon." },
-  { name: "Dog Haus", area: "Multiple locations", tag: "partner", tagLabel: "Dog Welcome", desc: "Hot dogs for you, water bowls for your pup. Multiple LA locations with consistent dog-friendly outdoor seating." },
-  { name: "Lazy Dog Restaurant", area: "Torrance · Woodland Hills", tag: "partner", tagLabel: "Dog Menu", desc: "Full dog menu on the patio — grilled chicken, brown rice, and more. One of the most genuinely dog-forward restaurants in LA.", tip: "Dogs eat here too — not just tolerated on the patio.", tipIcon: "🐾" },
-  { name: "Blue Bottle Coffee", area: "Abbot Kinney · DTLA · Larchmont", tag: "partner", tagLabel: "Dog Welcome", desc: "Leashed dogs welcome on outdoor seating at all LA locations. The Abbot Kinney spot is especially spacious and relaxed." },
-  { name: "Café Gratitude", area: "Larchmont · Venice", tag: "partner", tagLabel: "Dog Welcome", desc: "Plant-based menu with generous patio space for dogs. The Venice location is particularly popular with West LA dog owners.", tip: "Always call ahead to confirm current patio policy at any venue.", tipIcon: "💡" },
-];
-
-const events: Place[] = [
-  { name: "Yappy Hour at Fairmont Miramar", area: "Santa Monica", tag: "monthly", tagLabel: "Monthly", desc: "Monthly dog-friendly cocktail hour on the terrace of one of Santa Monica's best hotels. A genuinely upscale outing with your pup." },
-  { name: "Bark in the Park Night", area: "Dodger Stadium", tag: "monthly", tagLabel: "Seasonal", desc: "Bring your dog to select summer home games. A bucket-list experience for sports fans and dog owners alike.", tip: "Tickets sell out quickly — watch Dodgers social channels for announcements.", tipIcon: "💡" },
-  { name: "Rose Bowl Flea Market Pup-Ups", area: "Pasadena", tag: "monthly", tagLabel: "2nd Sunday", desc: "Pet vendor pop-ups on the second Sunday of each month at the Rose Bowl Flea Market. Treats, gear, and a very social crowd." },
-  { name: "Wags & Whiskers", area: "Silver Lake Reservoir", tag: "monthly", tagLabel: "Seasonal", desc: "Seasonal outdoor pet event at the reservoir featuring local pet vendors, adoptable animals, and community meetups.", tip: "PawBucks Discover surfaces upcoming pet events from local merchants and partners — check the app.", tipIcon: "🐾" },
-];
-
-const PlaceCard = ({ p }: { p: Place }) => (
+const PlaceCard = ({ p }: { p: GuidePlace }) => (
   <div className="place-card">
     <div className="place-card-top">
       <h3>{p.name}</h3>
-      {p.tagLabel && <span className={`place-tag ${p.tag ?? ""}`}>{p.tagLabel}</span>}
+      {p.tag_label && <span className={`place-tag ${p.tag ?? ""}`}>{p.tag_label}</span>}
     </div>
     <div className="place-location">
       <MapPin size={12} strokeWidth={2.5} />
       {p.area}
     </div>
-    <p className="place-desc">{p.desc}</p>
+    <p className="place-desc">{p.description}</p>
     {p.tip && (
       <div className="place-tip">
-        <span className="tip-icon">{p.tipIcon ?? "💡"}</span>
+        <span className="tip-icon">{p.tip_icon ?? "💡"}</span>
         <span>{p.tip}</span>
       </div>
     )}
@@ -105,6 +45,7 @@ const PlaceCard = ({ p }: { p: Place }) => (
 );
 
 const PetFriendlyLosAngelesGuide = () => {
+  const { parks, beaches, cafes, events, faqs, merchants, loading } = useGuideContent(GUIDE_SLUG);
   return (
     <div className="pfla-page">
       <SEO
@@ -126,7 +67,7 @@ const PetFriendlyLosAngelesGuide = () => {
           { name: "Guides", url: "/guides" },
           { name: "Pet-Friendly Los Angeles", url: "/guides/pet-friendly-los-angeles" },
         ]}
-        jsonLd={{ ...articleSchema, faq: createFAQSchema(faqs) }}
+        jsonLd={{ ...articleSchema, faq: createFAQSchema(faqs.map((f) => ({ question: f.question, answer: f.answer }))) }}
       />
 
       <nav className="nav">
@@ -183,7 +124,7 @@ const PetFriendlyLosAngelesGuide = () => {
             <h2>Best Off-Leash Dog Parks in LA</h2>
           </div>
           <div className="place-list">
-            {dogParks.map((p) => <PlaceCard key={p.name} p={p} />)}
+            {loading && parks.length === 0 ? <div className="place-desc">Loading…</div> : parks.map((p) => <PlaceCard key={p.id} p={p} />)}
           </div>
         </section>
 
@@ -193,7 +134,7 @@ const PetFriendlyLosAngelesGuide = () => {
             <h2>Beaches &amp; Hiking Trails</h2>
           </div>
           <div className="place-list">
-            {beachesAndTrails.map((p) => <PlaceCard key={p.name} p={p} />)}
+            {beaches.map((p) => <PlaceCard key={p.id} p={p} />)}
           </div>
         </section>
 
@@ -207,13 +148,46 @@ const PetFriendlyLosAngelesGuide = () => {
           <Link to="/discover" className="ec-btn">🐾 Discover LA Pet Merchants</Link>
         </div>
 
+        {merchants.length > 0 && (
+          <section id="partners" className="guide-section">
+            <div className="section-header">
+              <div className="section-icon">🐾</div>
+              <h2>Featured PawBucks Partner Merchants in LA</h2>
+            </div>
+            <div className="place-list">
+              {merchants.map((m) => (
+                <Link
+                  key={m.id}
+                  to={m.storefront_slug ? `/m/${m.storefront_slug}` : `/discover`}
+                  className="place-card"
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <div className="place-card-top">
+                    <h3>{m.business_name}</h3>
+                    {m.cashback_rate ? (
+                      <span className="place-tag partner">{Math.round(Number(m.cashback_rate) * 100)}% back</span>
+                    ) : (
+                      <span className="place-tag partner">Partner</span>
+                    )}
+                  </div>
+                  <div className="place-location">
+                    <MapPin size={12} strokeWidth={2.5} />
+                    {m.address || m.business_type.replace(/_/g, " ")}
+                  </div>
+                  {m.description && <p className="place-desc">{m.description}</p>}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section id="cafes" className="guide-section">
           <div className="section-header">
             <div className="section-icon">☕</div>
             <h2>Dog-Friendly Cafes &amp; Patios</h2>
           </div>
           <div className="place-list">
-            {cafes.map((p) => <PlaceCard key={p.name} p={p} />)}
+            {cafes.map((p) => <PlaceCard key={p.id} p={p} />)}
           </div>
         </section>
 
@@ -223,7 +197,7 @@ const PetFriendlyLosAngelesGuide = () => {
             <h2>Recurring Pet Events in LA</h2>
           </div>
           <div className="place-list">
-            {events.map((p) => <PlaceCard key={p.name} p={p} />)}
+            {events.map((p) => <PlaceCard key={p.id} p={p} />)}
           </div>
         </section>
 
@@ -231,7 +205,7 @@ const PetFriendlyLosAngelesGuide = () => {
           <h2>Frequently Asked Questions</h2>
           <div className="faq-list">
             {faqs.map((f) => (
-              <div key={f.question} className="faq-card">
+              <div key={f.id} className="faq-card">
                 <h3>{f.question}</h3>
                 <p>{f.answer}</p>
               </div>
