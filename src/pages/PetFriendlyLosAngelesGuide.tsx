@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { SEO, createFAQSchema } from "@/components/SEO";
 import { MapPin } from "lucide-react";
+import "./PetFriendlyLosAngelesGuide.css";
 
 const faqs = [
   {
