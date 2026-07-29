@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { SEO, createFAQSchema } from "@/components/SEO";
 import { MapPin } from "lucide-react";
 import "./PetFriendlyLosAngelesGuide.css";
+import pawbucksLogo from "@/assets/logo.png";
 
 const faqs = [
   {
@@ -129,7 +130,9 @@ const PetFriendlyLosAngelesGuide = () => {
       />
 
       <nav className="nav">
-        <Link to="/" className="nav-logo">🐾 Paw<span>Bucks</span></Link>
+        <Link to="/" className="nav-logo" aria-label="PawBucks home">
+          <img src={pawbucksLogo} alt="PawBucks" className="nav-logo-img" />
+        </Link>
         <div className="nav-right">
           <Link to="/merchants" className="nav-link">Merchants</Link>
           <Link to="/auth" className="nav-cta">Join Free</Link>
@@ -244,7 +247,9 @@ const PetFriendlyLosAngelesGuide = () => {
       </section>
 
       <footer className="footer-nav">
-        <div className="fn-logo">🐾 Paw<span>Bucks</span></div>
+        <div className="fn-logo">
+          <img src={pawbucksLogo} alt="PawBucks" className="fn-logo-img" />
+        </div>
         <p>Stronger Pets. Happier People. Stronger Community.</p>
         <p>Santa Monica · Venice · Mar Vista · Marina Del Rey · Culver City · Westchester</p>
       </footer>
