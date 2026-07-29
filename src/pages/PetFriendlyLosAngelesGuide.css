@@ -46,6 +46,8 @@
   text-decoration: none;
 }
 .pfla-page .nav-logo span { color: var(--teal); }
+.pfla-page .nav-logo-img { height: 40px; width: auto; display: block; }
+.pfla-page .footer-nav .fn-logo-img { height: 56px; width: auto; margin: 0 auto; display: block; }
 .pfla-page .nav-right { display: flex; align-items: center; gap: 10px; }
 .pfla-page .nav-link {
   font-size: 13px; color: rgba(255,255,255,0.6);
