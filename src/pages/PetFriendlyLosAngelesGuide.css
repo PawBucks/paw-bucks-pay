@@ -20,17 +20,28 @@
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pfla-page * { box-sizing: border-box; }
 
+.pfla-page img,
+.pfla-page svg { max-width: 100%; }
+
 .pfla-page .nav {
   background: var(--navy);
-  padding: 0 20px;
-  height: 58px;
+  padding: 0 16px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  min-height: 58px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -46,29 +57,31 @@
   text-decoration: none;
 }
 .pfla-page .nav-logo span { color: var(--teal); }
-.pfla-page .nav-logo-img { height: 40px; width: auto; display: block; }
+.pfla-page .nav-logo-img { height: 34px; width: auto; display: block; }
 .pfla-page .footer-nav .fn-logo-img { height: 56px; width: auto; margin: 0 auto; display: block; }
-.pfla-page .nav-right { display: flex; align-items: center; gap: 10px; }
+.pfla-page .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .pfla-page .nav-link {
   font-size: 13px; color: rgba(255,255,255,0.6);
-  text-decoration: none; font-weight: 500;
+  text-decoration: none; font-weight: 500; white-space: nowrap;
+  display: inline-flex; align-items: center; min-height: 44px;
 }
 .pfla-page .nav-cta {
   background: var(--teal); color: white; font-size: 12px; font-weight: 600;
-  padding: 7px 14px; border-radius: 8px; text-decoration: none;
+  padding: 9px 14px; border-radius: 8px; text-decoration: none; white-space: nowrap;
+  display: inline-flex; align-items: center; min-height: 40px;
   font-family: 'Space Grotesk', sans-serif;
 }
 
 .pfla-page .breadcrumb {
-  padding: 14px 20px; font-size: 12px; color: var(--gray-500);
+  padding: 12px 16px; font-size: 12px; color: var(--gray-500);
   border-bottom: 1px solid var(--gray-100); background: var(--gray-50);
-  display: flex; align-items: center; gap: 6px;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
 }
 .pfla-page .breadcrumb a { color: var(--teal-dark); text-decoration: none; font-weight: 500; }
 .pfla-page .breadcrumb span { color: var(--gray-300); }
 
 .pfla-page .hero {
-  background: var(--navy); padding: 40px 20px 0; position: relative; overflow: hidden;
+  background: var(--navy); padding: 32px 16px 0; position: relative; overflow: hidden;
 }
 .pfla-page .hero::before {
   content: ''; position: absolute; top: -60px; right: -60px;
@@ -88,36 +101,39 @@
 }
 .pfla-page .hero h1 {
   font-family: 'Playfair Display', serif;
-  font-size: 34px; font-weight: 800; color: white;
-  line-height: 1.15; margin-bottom: 16px; max-width: 560px; position: relative;
+  font-size: clamp(26px, 7.5vw, 34px); font-weight: 800; color: white;
+  line-height: 1.18; margin-bottom: 14px; max-width: 560px; position: relative;
 }
 .pfla-page .hero-sub {
-  font-size: 15px; color: rgba(255,255,255,0.65);
-  line-height: 1.65; max-width: 520px; margin-bottom: 28px; position: relative;
+  font-size: 14.5px; color: rgba(255,255,255,0.65);
+  line-height: 1.6; max-width: 520px; margin-bottom: 22px; position: relative;
 }
 .pfla-page .hero-actions {
-  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; position: relative;
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; position: relative;
 }
 .pfla-page .btn-hero-primary {
   background: var(--teal); color: white;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 13px; font-weight: 700;
-  padding: 11px 20px; border-radius: 10px; text-decoration: none;
-  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 18px; border-radius: 10px; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  flex: 1 1 auto; text-align: center; min-height: 46px;
 }
 .pfla-page .btn-hero-outline {
   background: transparent; color: rgba(255,255,255,0.8);
   font-family: 'Space Grotesk', sans-serif;
   font-size: 13px; font-weight: 600;
-  padding: 11px 20px; border-radius: 10px; text-decoration: none;
+  padding: 12px 18px; border-radius: 10px; text-decoration: none;
   border: 1.5px solid rgba(255,255,255,0.2);
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  flex: 1 1 auto; text-align: center; min-height: 46px;
 }
 
 .pfla-page .section-nav {
-  padding: 0 0 16px; display: flex; gap: 8px;
+  padding: 0 16px 16px; margin: 0 -16px; display: flex; gap: 8px;
   overflow-x: auto; scrollbar-width: none;
-  position: relative;
+  position: relative; -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
 }
 .pfla-page .section-nav::-webkit-scrollbar { display: none; }
 .pfla-page .section-pill {
@@ -126,7 +142,9 @@
   color: rgba(255,255,255,0.7);
   font-size: 12px; font-weight: 600;
   font-family: 'Space Grotesk', sans-serif;
-  padding: 6px 14px; border-radius: 20px; text-decoration: none;
+  padding: 9px 14px; border-radius: 20px; text-decoration: none;
+  display: inline-flex; align-items: center; white-space: nowrap;
+  scroll-snap-align: start;
   transition: all 0.15s;
 }
 .pfla-page .section-pill:hover {
@@ -136,14 +154,14 @@
 .pfla-page .earn-banner {
   background: var(--teal-light);
   border-left: 4px solid var(--teal);
-  padding: 16px 20px;
+  padding: 16px;
   display: flex; align-items: flex-start; gap: 12px;
 }
 .pfla-page .earn-banner .eb-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
 .pfla-page .earn-banner .eb-text { font-size: 13px; color: var(--teal-dark); line-height: 1.5; }
 .pfla-page .earn-banner .eb-text strong { font-weight: 700; color: var(--navy); }
 
-.pfla-page .content { padding: 0 20px; }
+.pfla-page .content { padding: 0 16px; width: 100%; }
 
 .pfla-page .guide-section {
   padding: 32px 0 8px; border-bottom: 1px solid var(--gray-100);
@@ -171,10 +189,11 @@
   background: var(--white);
   border: 1.5px solid var(--gray-100);
   border-radius: 14px;
-  padding: 18px 16px;
+  padding: 16px 14px;
   position: relative;
   transition: all 0.18s;
   overflow: hidden;
+  min-width: 0;
 }
 .pfla-page .place-card::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
@@ -189,12 +208,12 @@
 .pfla-page .place-card:hover::before { opacity: 1; }
 .pfla-page .place-card-top {
   display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 10px; margin-bottom: 6px;
+  gap: 8px; margin-bottom: 6px; flex-wrap: wrap;
 }
 .pfla-page .place-card h3 {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 15px; font-weight: 700; color: var(--navy); line-height: 1.3;
-  margin: 0;
+  margin: 0; min-width: 0; flex: 1 1 60%;
 }
 .pfla-page .place-tag {
   flex-shrink: 0;
@@ -210,6 +229,7 @@
 .pfla-page .place-location {
   display: flex; align-items: center; gap: 4px;
   font-size: 11px; color: var(--teal-dark); font-weight: 600; margin-bottom: 7px;
+  min-height: 0;
 }
 .pfla-page .place-desc { font-size: 13px; color: var(--gray-500); line-height: 1.55; margin: 0; }
 .pfla-page .place-tip {
@@ -222,7 +242,7 @@
 
 .pfla-page .earn-card {
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
-  border-radius: 16px; padding: 24px 20px; margin: 28px 0;
+  border-radius: 16px; padding: 22px 18px; margin: 24px 0;
   position: relative; overflow: hidden;
 }
 .pfla-page .earn-card::after {
@@ -243,7 +263,7 @@
   background: var(--teal); color: white;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 13px; font-weight: 700;
-  padding: 10px 18px; border-radius: 9px; text-decoration: none;
+  padding: 12px 18px; border-radius: 9px; text-decoration: none; min-height: 46px;
 }
 
 .pfla-page .faq-section { padding: 32px 0; }
@@ -266,10 +286,10 @@
 }
 .pfla-page .faq-card p { font-size: 13px; color: var(--gray-500); line-height: 1.6; margin: 0; }
 
-.pfla-page .footer-cta { background: var(--teal); padding: 32px 20px; text-align: center; }
+.pfla-page .footer-cta { background: var(--teal); padding: 32px 16px; text-align: center; }
 .pfla-page .footer-cta h2 {
   font-family: 'Playfair Display', serif;
-  font-size: 24px; font-weight: 800; color: white; margin: 0 0 8px; line-height: 1.2;
+  font-size: clamp(20px, 6vw, 24px); font-weight: 800; color: white; margin: 0 0 8px; line-height: 1.25;
 }
 .pfla-page .footer-cta p {
   font-size: 14px; color: rgba(255,255,255,0.8); margin: 0 0 20px; line-height: 1.5;
@@ -279,10 +299,14 @@
   background: white; color: var(--teal-dark);
   font-family: 'Space Grotesk', sans-serif;
   font-size: 14px; font-weight: 700;
-  padding: 12px 24px; border-radius: 10px; text-decoration: none;
+  padding: 13px 24px; border-radius: 10px; text-decoration: none;
+  justify-content: center; min-height: 48px; max-width: 100%;
 }
 
-.pfla-page .footer-nav { background: var(--navy); padding: 20px; text-align: center; }
+.pfla-page .footer-nav {
+  background: var(--navy); padding: 20px 16px; text-align: center;
+  padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 20px));
+}
 .pfla-page .footer-nav .fn-logo {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 15px; font-weight: 800; color: white; margin-bottom: 8px;
@@ -298,7 +322,15 @@
   .pfla-page .place-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .pfla-page .breadcrumb { padding: 14px 40px; }
   .pfla-page .earn-banner { padding: 20px 40px; }
-  .pfla-page .section-nav { padding-left: 40px; padding-right: 40px; }
+  .pfla-page .section-nav { padding-left: 0; padding-right: 0; margin: 0; }
   .pfla-page .nav { padding: 0 40px; }
   .pfla-page .section-header h2 { font-size: 26px; }
+  .pfla-page .btn-hero-primary, .pfla-page .btn-hero-outline { flex: 0 0 auto; }
+  .pfla-page .nav-logo-img { height: 40px; }
+}
+
+@media (max-width: 380px) {
+  .pfla-page .hero-actions { flex-direction: column; }
+  .pfla-page .btn-hero-primary, .pfla-page .btn-hero-outline { width: 100%; }
+  .pfla-page .section-header h2 { font-size: 19px; }
 }
