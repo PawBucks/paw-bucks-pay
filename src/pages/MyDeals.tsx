@@ -557,6 +557,92 @@ function RedemptionCard({
   );
 }
 
+function LockedOfferCard({
+  o,
+  onMerchantClick,
+}: {
+  o: LockedOffer;
+  onMerchantClick: (id: string) => void;
+}) {
+  const meta = TYPE_META[o.offer_type];
+  const Icon = meta.Icon;
+  const isPartner = o.merchant?.fee_model === "full_ecosystem";
+
+  return (
+    <Card className="p-4 space-y-3 border border-border relative overflow-hidden">
+      <div className="flex items-start gap-3">
+        <div
+          className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${meta.iconBgClass}`}
+        >
+          <Icon className="w-5 h-5" aria-hidden="true" />
+        </div>
+        <div className="flex-1 min-w-0">
+          {o.merchant ? (
+            <button
+              onClick={() => onMerchantClick(o.merchant!.id)}
+              className="text-sm font-semibold hover:underline flex items-center gap-1"
+            >
+              <Store className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
+              <span className="truncate">{o.merchant.business_name}</span>
+            </button>
+          ) : (
+            <span className="text-sm font-semibold">Merchant</span>
+          )}
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+            <Badge className={`${meta.badgeClass} text-[10px] tracking-wider`}>
+              {meta.label}
+            </Badge>
+            <Badge variant="outline" className="text-[10px] tracking-wider">
+              {isPartner ? "PARTNER" : "NON-PARTNER"}
+            </Badge>
+          </div>
+
+          {/* Blurred details — revealed only after an in-store QR check-in */}
+          <div
+            className="mt-1 select-none pointer-events-none"
+            aria-hidden="true"
+          >
+            <h3 className="font-bold text-lg truncate blur-[6px]">{o.title}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 blur-[5px]">
+              {o.description || "Offer details hidden until you scan in store."}
+            </p>
+          </div>
+          <span className="sr-only">
+            Offer details are locked. Scan this merchant's in-store QR code to reveal.
+          </span>
+
+          {o.merchant?.address && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
+              <MapPin className="w-3 h-3" aria-hidden="true" />
+              <span className="truncate">{o.merchant.address}</span>
+              {o.distance != null && (
+                <span className="ml-1 shrink-0">· {o.distance.toFixed(1)} mi</span>
+              )}
+            </div>
+          )}
+        </div>
+        <Badge className="bg-muted text-muted-foreground border-border shrink-0 flex items-center gap-1">
+          <Lock className="w-3 h-3" aria-hidden="true" /> Locked
+        </Badge>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 rounded-md border border-dashed border-border bg-muted/40 px-3 py-2">
+        <div className="min-w-0">
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Redemption code
+          </div>
+          <div className="font-mono text-lg font-semibold truncate blur-[6px] select-none">
+            XXXX-XXXX
+          </div>
+        </div>
+        <span className="text-xs text-muted-foreground text-right shrink-0">
+          Scan in-store QR to unlock
+        </span>
+      </div>
+    </Card>
+  );
+}
+
 function BrandedCard({
   c,
 }: {
