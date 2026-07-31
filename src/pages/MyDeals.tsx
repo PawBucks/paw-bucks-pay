@@ -328,7 +328,8 @@ const MyDeals = () => {
     [redemptions],
   );
 
-  const activeCount = activeRedemptions.length + brandedCards.length;
+  const activeCount =
+    activeRedemptions.length + brandedCards.length + lockedOffers.length;
   const redeemedCount = redeemedRedemptions.length;
 
   const copyCode = async (code: string) => {
@@ -344,7 +345,7 @@ const MyDeals = () => {
 
   if (authLoading || !user) return <PageLoader />;
 
-  const loading = redLoading || brandedLoading;
+  const loading = redLoading || brandedLoading || lockedLoading;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -395,65 +396,30 @@ const MyDeals = () => {
                 {brandedCards.map((c) => (
                   <BrandedCard key={c.id} c={c} />
                 ))}
-              </>
-            )}
 
-            {/* Locked nearby (discover more) */}
-            {lockedMerchants.length > 0 && (
-              <div className="pt-4 space-y-3">
-                <div className="flex items-end justify-between gap-2">
-                  <h3 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
-                    <Lock className="w-4 h-4" aria-hidden="true" />
-                    Discover More Nearby
-                  </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate("/discover")}
-                  >
-                    See all <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {lockedMerchants.slice(0, 4).map((m) => (
-                    <button
-                      key={m.id}
-                      onClick={() => navigate(`/merchant/${m.id}`)}
-                      className="text-left"
-                    >
-                      <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0">
-                            <Lock
-                              className="w-4 h-4 text-muted-foreground"
-                              aria-hidden="true"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold truncate text-sm">
-                              {m.business_name}
-                            </h4>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              {m.offer_count} deal{m.offer_count === 1 ? "" : "s"} to unlock
-                            </p>
-                            {m.address && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
-                                <MapPin className="w-3 h-3" aria-hidden="true" />
-                                <span className="truncate">{m.address}</span>
-                                {m.distance != null && (
-                                  <span className="ml-1 shrink-0">
-                                    · {m.distance.toFixed(1)} mi
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    </button>
-                  ))}
-                </div>
-              </div>
+                {lockedOffers.length > 0 && (
+                  <div className="pt-4 space-y-3">
+                    <div className="flex items-end justify-between gap-2">
+                      <h3 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
+                        <Lock className="w-4 h-4" aria-hidden="true" />
+                        Locked — scan in-store to reveal ({lockedOffers.length})
+                      </h3>
+                      <Button variant="ghost" size="sm" onClick={() => navigate("/discover")}>
+                        Find nearby <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      {lockedOffers.map((o) => (
+                        <LockedOfferCard
+                          key={o.id}
+                          o={o}
+                          onMerchantClick={(id) => navigate(`/merchant/${id}`)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 
