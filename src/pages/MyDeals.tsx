@@ -253,15 +253,15 @@ const MyDeals = () => {
     return [...byCampaign.values()].sort((a, b) => (a.lastAt < b.lastAt ? 1 : -1));
   }, [brandedRows]);
 
-  // 3) Locked nearby: acquisition-only merchants with active offers user hasn't unlocked
+  // 3) Every active offer on the platform (partner + non-partner merchants)
   const { data: lockedRaw = [], isLoading: lockedLoading } = useQuery({
-    queryKey: ["my-deals-locked"],
+    queryKey: ["my-deals-all-active-offers"],
     queryFn: async () => {
       const nowIso = new Date().toISOString();
       const { data, error } = await (supabase as any)
         .from("partner_offers")
         .select(
-          `id, partner_id, end_date, start_date, is_active, status, offer_type,
+          `id, title, description, partner_id, end_date, start_date, is_active, status, offer_type,
            merchants:partner_id ( id, business_name, address, latitude, longitude, fee_model, is_active )`,
         )
         .eq("is_active", true);
@@ -272,21 +272,20 @@ const MyDeals = () => {
           (!r.status || r.status === "active") &&
           (!r.start_date || r.start_date <= nowIso) &&
           (!r.end_date || r.end_date >= nowIso) &&
-          r.merchants?.is_active &&
-          r.merchants?.fee_model === "acquisition_only",
+          r.merchants?.is_active,
       );
     },
     staleTime: 1000 * 60 * 5,
   });
 
-  const lockedMerchants: LockedMerchant[] = useMemo(() => {
-    const byMerchant = new Map<string, LockedMerchant>();
+  // Locked = active offer the pet owner hasn't unlocked with an in-store QR scan yet
+  const lockedOffers: LockedOffer[] = useMemo(() => {
+    const list: LockedOffer[] = [];
     for (const r of lockedRaw as any[]) {
       if (unlockedOfferIds.has(r.id)) continue;
       const m = r.merchants;
-      if (!m) continue;
       const distance =
-        userLocation && m.latitude != null && m.longitude != null
+        userLocation && m?.latitude != null && m?.longitude != null
           ? calculateDistance(
               userLocation.latitude,
               userLocation.longitude,
@@ -294,23 +293,24 @@ const MyDeals = () => {
               m.longitude,
             )
           : null;
-      const existing = byMerchant.get(m.id);
-      if (existing) {
-        existing.offer_count += 1;
-      } else {
-        byMerchant.set(m.id, {
-          id: m.id,
-          business_name: m.business_name,
-          address: m.address,
-          latitude: m.latitude,
-          longitude: m.longitude,
-          fee_model: m.fee_model,
-          offer_count: 1,
-          distance,
-        });
-      }
+      list.push({
+        id: r.id,
+        title: r.title ?? "Deal",
+        description: r.description ?? null,
+        end_date: r.end_date ?? null,
+        offer_type: normalizeOfferType(r.offer_type),
+        merchant: m
+          ? {
+              id: m.id,
+              business_name: m.business_name,
+              address: m.address,
+              fee_model: m.fee_model,
+            }
+          : null,
+        distance,
+      });
     }
-    return [...byMerchant.values()].sort((a, b) => {
+    return list.sort((a, b) => {
       if (a.distance == null && b.distance == null) return 0;
       if (a.distance == null) return 1;
       if (b.distance == null) return -1;
