@@ -62,14 +62,18 @@ type RedemptionRow = {
   } | null;
 };
 
-type LockedMerchant = {
+type LockedOffer = {
   id: string;
-  business_name: string;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  fee_model: string | null;
-  offer_count: number;
+  title: string;
+  description: string | null;
+  end_date: string | null;
+  offer_type: OfferType;
+  merchant: {
+    id: string;
+    business_name: string;
+    address: string | null;
+    fee_model: string | null;
+  } | null;
   distance: number | null;
 };
 
