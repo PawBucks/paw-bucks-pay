@@ -62,14 +62,18 @@ type RedemptionRow = {
   } | null;
 };
 
-type LockedMerchant = {
+type LockedOffer = {
   id: string;
-  business_name: string;
-  address: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  fee_model: string | null;
-  offer_count: number;
+  title: string;
+  description: string | null;
+  end_date: string | null;
+  offer_type: OfferType;
+  merchant: {
+    id: string;
+    business_name: string;
+    address: string | null;
+    fee_model: string | null;
+  } | null;
   distance: number | null;
 };
 
@@ -249,15 +253,15 @@ const MyDeals = () => {
     return [...byCampaign.values()].sort((a, b) => (a.lastAt < b.lastAt ? 1 : -1));
   }, [brandedRows]);
 
-  // 3) Locked nearby: acquisition-only merchants with active offers user hasn't unlocked
+  // 3) Every active offer on the platform (partner + non-partner merchants)
   const { data: lockedRaw = [], isLoading: lockedLoading } = useQuery({
-    queryKey: ["my-deals-locked"],
+    queryKey: ["my-deals-all-active-offers"],
     queryFn: async () => {
       const nowIso = new Date().toISOString();
       const { data, error } = await (supabase as any)
         .from("partner_offers")
         .select(
-          `id, partner_id, end_date, start_date, is_active, status, offer_type,
+          `id, title, description, partner_id, end_date, start_date, is_active, status, offer_type,
            merchants:partner_id ( id, business_name, address, latitude, longitude, fee_model, is_active )`,
         )
         .eq("is_active", true);
@@ -268,21 +272,20 @@ const MyDeals = () => {
           (!r.status || r.status === "active") &&
           (!r.start_date || r.start_date <= nowIso) &&
           (!r.end_date || r.end_date >= nowIso) &&
-          r.merchants?.is_active &&
-          r.merchants?.fee_model === "acquisition_only",
+          r.merchants?.is_active,
       );
     },
     staleTime: 1000 * 60 * 5,
   });
 
-  const lockedMerchants: LockedMerchant[] = useMemo(() => {
-    const byMerchant = new Map<string, LockedMerchant>();
+  // Locked = active offer the pet owner hasn't unlocked with an in-store QR scan yet
+  const lockedOffers: LockedOffer[] = useMemo(() => {
+    const list: LockedOffer[] = [];
     for (const r of lockedRaw as any[]) {
       if (unlockedOfferIds.has(r.id)) continue;
       const m = r.merchants;
-      if (!m) continue;
       const distance =
-        userLocation && m.latitude != null && m.longitude != null
+        userLocation && m?.latitude != null && m?.longitude != null
           ? calculateDistance(
               userLocation.latitude,
               userLocation.longitude,
@@ -290,23 +293,24 @@ const MyDeals = () => {
               m.longitude,
             )
           : null;
-      const existing = byMerchant.get(m.id);
-      if (existing) {
-        existing.offer_count += 1;
-      } else {
-        byMerchant.set(m.id, {
-          id: m.id,
-          business_name: m.business_name,
-          address: m.address,
-          latitude: m.latitude,
-          longitude: m.longitude,
-          fee_model: m.fee_model,
-          offer_count: 1,
-          distance,
-        });
-      }
+      list.push({
+        id: r.id,
+        title: r.title ?? "Deal",
+        description: r.description ?? null,
+        end_date: r.end_date ?? null,
+        offer_type: normalizeOfferType(r.offer_type),
+        merchant: m
+          ? {
+              id: m.id,
+              business_name: m.business_name,
+              address: m.address,
+              fee_model: m.fee_model,
+            }
+          : null,
+        distance,
+      });
     }
-    return [...byMerchant.values()].sort((a, b) => {
+    return list.sort((a, b) => {
       if (a.distance == null && b.distance == null) return 0;
       if (a.distance == null) return 1;
       if (b.distance == null) return -1;
@@ -324,7 +328,8 @@ const MyDeals = () => {
     [redemptions],
   );
 
-  const activeCount = activeRedemptions.length + brandedCards.length;
+  const activeCount =
+    activeRedemptions.length + brandedCards.length + lockedOffers.length;
   const redeemedCount = redeemedRedemptions.length;
 
   const copyCode = async (code: string) => {
@@ -340,7 +345,7 @@ const MyDeals = () => {
 
   if (authLoading || !user) return <PageLoader />;
 
-  const loading = redLoading || brandedLoading;
+  const loading = redLoading || brandedLoading || lockedLoading;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -391,65 +396,30 @@ const MyDeals = () => {
                 {brandedCards.map((c) => (
                   <BrandedCard key={c.id} c={c} />
                 ))}
-              </>
-            )}
 
-            {/* Locked nearby (discover more) */}
-            {lockedMerchants.length > 0 && (
-              <div className="pt-4 space-y-3">
-                <div className="flex items-end justify-between gap-2">
-                  <h3 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
-                    <Lock className="w-4 h-4" aria-hidden="true" />
-                    Discover More Nearby
-                  </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate("/discover")}
-                  >
-                    See all <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {lockedMerchants.slice(0, 4).map((m) => (
-                    <button
-                      key={m.id}
-                      onClick={() => navigate(`/merchant/${m.id}`)}
-                      className="text-left"
-                    >
-                      <Card className="p-4 h-full bg-background hover:shadow-[var(--shadow-medium)] transition-all">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center shrink-0">
-                            <Lock
-                              className="w-4 h-4 text-muted-foreground"
-                              aria-hidden="true"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold truncate text-sm">
-                              {m.business_name}
-                            </h4>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              {m.offer_count} deal{m.offer_count === 1 ? "" : "s"} to unlock
-                            </p>
-                            {m.address && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
-                                <MapPin className="w-3 h-3" aria-hidden="true" />
-                                <span className="truncate">{m.address}</span>
-                                {m.distance != null && (
-                                  <span className="ml-1 shrink-0">
-                                    · {m.distance.toFixed(1)} mi
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    </button>
-                  ))}
-                </div>
-              </div>
+                {lockedOffers.length > 0 && (
+                  <div className="pt-4 space-y-3">
+                    <div className="flex items-end justify-between gap-2">
+                      <h3 className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
+                        <Lock className="w-4 h-4" aria-hidden="true" />
+                        Locked — scan in-store to reveal ({lockedOffers.length})
+                      </h3>
+                      <Button variant="ghost" size="sm" onClick={() => navigate("/discover")}>
+                        Find nearby <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      {lockedOffers.map((o) => (
+                        <LockedOfferCard
+                          key={o.id}
+                          o={o}
+                          onMerchantClick={(id) => navigate(`/merchant/${id}`)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 
@@ -582,6 +552,92 @@ function RedemptionCard({
             </>
           )}
         </Button>
+      </div>
+    </Card>
+  );
+}
+
+function LockedOfferCard({
+  o,
+  onMerchantClick,
+}: {
+  o: LockedOffer;
+  onMerchantClick: (id: string) => void;
+}) {
+  const meta = TYPE_META[o.offer_type];
+  const Icon = meta.Icon;
+  const isPartner = o.merchant?.fee_model === "full_ecosystem";
+
+  return (
+    <Card className="p-4 space-y-3 border border-border relative overflow-hidden">
+      <div className="flex items-start gap-3">
+        <div
+          className={`w-11 h-11 rounded-lg flex items-center justify-center shrink-0 ${meta.iconBgClass}`}
+        >
+          <Icon className="w-5 h-5" aria-hidden="true" />
+        </div>
+        <div className="flex-1 min-w-0">
+          {o.merchant ? (
+            <button
+              onClick={() => onMerchantClick(o.merchant!.id)}
+              className="text-sm font-semibold hover:underline flex items-center gap-1"
+            >
+              <Store className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
+              <span className="truncate">{o.merchant.business_name}</span>
+            </button>
+          ) : (
+            <span className="text-sm font-semibold">Merchant</span>
+          )}
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+            <Badge className={`${meta.badgeClass} text-[10px] tracking-wider`}>
+              {meta.label}
+            </Badge>
+            <Badge variant="outline" className="text-[10px] tracking-wider">
+              {isPartner ? "PARTNER" : "NON-PARTNER"}
+            </Badge>
+          </div>
+
+          {/* Blurred details — revealed only after an in-store QR check-in */}
+          <div
+            className="mt-1 select-none pointer-events-none"
+            aria-hidden="true"
+          >
+            <h3 className="font-bold text-lg truncate blur-[6px]">{o.title}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 blur-[5px]">
+              {o.description || "Offer details hidden until you scan in store."}
+            </p>
+          </div>
+          <span className="sr-only">
+            Offer details are locked. Scan this merchant's in-store QR code to reveal.
+          </span>
+
+          {o.merchant?.address && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
+              <MapPin className="w-3 h-3" aria-hidden="true" />
+              <span className="truncate">{o.merchant.address}</span>
+              {o.distance != null && (
+                <span className="ml-1 shrink-0">· {o.distance.toFixed(1)} mi</span>
+              )}
+            </div>
+          )}
+        </div>
+        <Badge className="bg-muted text-muted-foreground border-border shrink-0 flex items-center gap-1">
+          <Lock className="w-3 h-3" aria-hidden="true" /> Locked
+        </Badge>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 rounded-md border border-dashed border-border bg-muted/40 px-3 py-2">
+        <div className="min-w-0">
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Redemption code
+          </div>
+          <div className="font-mono text-lg font-semibold truncate blur-[6px] select-none">
+            XXXX-XXXX
+          </div>
+        </div>
+        <span className="text-xs text-muted-foreground text-right shrink-0">
+          Scan in-store QR to unlock
+        </span>
       </div>
     </Card>
   );
