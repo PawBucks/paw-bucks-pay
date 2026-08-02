@@ -187,7 +187,13 @@ export default function MerchantOfferCodes() {
  </div>
 
  {/* Generated Codes */}
- {codes.length > 0 ? (
+ {fetching ? (
+ <Card>
+ <CardContent className="py-12 flex items-center justify-center">
+ <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+ </CardContent>
+ </Card>
+ ) : codes.length > 0 ? (
  <Card>
  <CardHeader>
  <div className="flex items-center justify-between">
