@@ -257,23 +257,11 @@ const MyDeals = () => {
   const { data: lockedRaw = [], isLoading: lockedLoading } = useQuery({
     queryKey: ["my-deals-all-active-offers"],
     queryFn: async () => {
-      const nowIso = new Date().toISOString();
-      const { data, error } = await (supabase as any)
-        .from("partner_offers")
-        .select(
-          `id, title, description, partner_id, end_date, start_date, is_active, status, offer_type,
-           merchants:partner_id ( id, business_name, address, latitude, longitude, fee_model, is_active )`,
-        )
-        .eq("is_active", true);
+      // Uses the same server-side source as the Redeem page so both stay in sync.
+      const { data, error } = await supabase.functions.invoke("get-partner-offers");
       if (error) throw error;
-      const rows = (data || []) as Array<any>;
-      return rows.filter(
-        (r) =>
-          (!r.status || r.status === "active") &&
-          (!r.start_date || r.start_date <= nowIso) &&
-          (!r.end_date || r.end_date >= nowIso) &&
-          r.merchants?.is_active,
-      );
+      const rows = ((data as any)?.offers || []) as Array<any>;
+      return rows.filter((r) => !r.merchants?.is_paused);
     },
     staleTime: 1000 * 60 * 5,
   });
