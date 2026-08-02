@@ -58,6 +58,19 @@ serve(async (req) => {
     let updates: any = {};
     let actionLog = "";
 
+    // Offers may only go live once redemption codes exist for them.
+    const requireCodes = async () => {
+      const { count } = await supabaseClient
+        .from("offer_redemptions")
+        .select("id", { count: "exact", head: true })
+        .eq("offer_id", offer_id);
+      if (!count || count === 0) {
+        throw new Error(
+          "Generate redemption codes for this offer before making it live.",
+        );
+      }
+    };
+
     switch (action) {
       case "pause":
         if (offer.status === "archived") {
@@ -74,6 +87,7 @@ serve(async (req) => {
         if (offer.end_date && new Date(offer.end_date) < new Date()) {
           throw new Error("Cannot resume expired offer");
         }
+        await requireCodes();
         updates = { status: "active", is_active: true };
         actionLog = "resumed";
         break;
@@ -97,6 +111,7 @@ serve(async (req) => {
         if (offer.end_date && new Date(offer.end_date) < new Date()) {
           throw new Error("Cannot activate expired offer. Update the end date first.");
         }
+        await requireCodes();
         updates = { status: "active", is_active: true };
         actionLog = "activated";
         break;
