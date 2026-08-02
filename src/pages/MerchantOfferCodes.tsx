@@ -9,15 +9,19 @@ import { Input } from"@/components/ui/input";
 import { Label } from"@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from"@/components/ui/dialog";
-import { ArrowLeft, Plus, Copy, Download } from"lucide-react";
+import { ArrowLeft, Plus, Copy, Download, Loader2 } from"lucide-react";
+import { Badge } from"@/components/ui/badge";
 import { toast } from"sonner";
 import { ErrorHandler } from"@/utils/errorHandler";
+
+type CodeDetail = { code: string; status: "available" |"claimed" |"redeemed" };
 
 export default function MerchantOfferCodes() {
  const navigate = useNavigate();
  const { id } = useParams();
  const [user, setUser] = useState<any>(null);
- const [codes, setCodes] = useState<string[]>([]);
+ const [codes, setCodes] = useState<CodeDetail[]>([]);
+ const [fetching, setFetching] = useState(true);
  const [loading, setLoading] = useState(false);
  const [codeCount, setCodeCount] = useState(10);
  const [dialogOpen, setDialogOpen] = useState(false);
@@ -33,6 +37,30 @@ export default function MerchantOfferCodes() {
 
  return () => subscription.unsubscribe();
  }, []);
+
+ const loadCodes = async () => {
+ if (!id) return;
+ try {
+ setFetching(true);
+ const { data: { session } } = await supabase.auth.getSession();
+ if (!session) return;
+ const { data, error } = await supabase.functions.invoke("merchant-generate-codes", {
+ body: { offer_id: id, action:"list" },
+ headers: { Authorization: `Bearer ${session.access_token}` },
+ });
+ if (error) throw error;
+ setCodes((data?.details as CodeDetail[]) ?? []);
+ } catch (error) {
+ ErrorHandler.handle(error);
+ } finally {
+ setFetching(false);
+ }
+ };
+
+ useEffect(() => {
+ if (user) loadCodes();
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [user, id]);
 
  const handleGenerateCodes = async () => {
  if (codeCount < 1 || codeCount > 1000) {
@@ -57,9 +85,9 @@ export default function MerchantOfferCodes() {
 
  if (error) throw error;
 
- setCodes(data.codes || []);
  toast.success(`Generated ${data.count} codes successfully`);
  setDialogOpen(false);
+ await loadCodes();
  } catch (error) {
  ErrorHandler.handle(error);
  } finally {
@@ -73,12 +101,14 @@ export default function MerchantOfferCodes() {
  };
 
  const handleCopyAll = () => {
- navigator.clipboard.writeText(codes.join("\n"));
+ navigator.clipboard.writeText(codes.map((c) => c.code).join("\n"));
  toast.success("All codes copied to clipboard");
  };
 
  const handleDownloadCodes = () => {
- const csv = ["Redemption Code"].concat(codes).join("\n");
+ const csv = ["Redemption Code,Status"]
+ .concat(codes.map((c) => `${c.code},${c.status}`))
+ .join("\n");
  const blob = new Blob([csv], { type:"text/csv" });
  const url = window.URL.createObjectURL(blob);
  const a = document.createElement("a");
