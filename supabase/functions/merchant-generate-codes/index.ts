@@ -37,13 +37,13 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { offer_id, count = 1 } = body;
+    const { offer_id, count = 1, action } = body;
 
     if (!offer_id) {
       throw new Error("Offer ID required");
     }
 
-    if (count < 1 || count > 1000) {
+    if (action !== "list" && (count < 1 || count > 1000)) {
       throw new Error("Count must be between 1 and 1000");
     }
 
@@ -57,6 +57,34 @@ serve(async (req) => {
 
     if (checkError || !offer) {
       throw new Error("Offer not found");
+    }
+
+    // Listing mode: return all previously generated codes for this offer.
+    if (action === "list") {
+      const { data: rows, error: listError } = await supabaseClient
+        .from("offer_redemptions")
+        .select("redemption_code, user_id, redeemed_at, partner_confirmed, created_at")
+        .eq("offer_id", offer_id)
+        .order("created_at", { ascending: false });
+
+      if (listError) throw listError;
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          codes: (rows ?? []).map((r) => r.redemption_code),
+          details: (rows ?? []).map((r) => ({
+            code: r.redemption_code,
+            status: r.redeemed_at
+              ? "redeemed"
+              : r.user_id
+                ? "claimed"
+                : "available",
+          })),
+          count: rows?.length ?? 0,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+      );
     }
 
     // Generate codes
