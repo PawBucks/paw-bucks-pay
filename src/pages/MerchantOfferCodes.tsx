@@ -209,16 +209,21 @@ export default function MerchantOfferCodes() {
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[500px] overflow-y-auto">
- {codes.map((code, index) => (
+ {codes.map((item, index) => (
  <div
  key={index}
  className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors"
  >
- <code className="font-mono text-sm">{code}</code>
+ <div className="flex items-center gap-2 min-w-0">
+ <code className="font-mono text-sm truncate">{item.code}</code>
+ <Badge variant={item.status ==="available" ?"secondary" : item.status ==="claimed" ?"outline" :"default"}>
+ {item.status ==="available" ?"Available" : item.status ==="claimed" ?"Claimed" :"Redeemed"}
+ </Badge>
+ </div>
  <Button
  variant="ghost"
  size="sm"
- onClick={() => handleCopyCode(code)}
+ onClick={() => handleCopyCode(item.code)}
  >
  <Copy className="h-4 w-4" />
  </Button>
