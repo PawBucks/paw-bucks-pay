@@ -249,9 +249,41 @@ serve(async (req) => {
       .map((id) => offersById.get(id))
       .filter(Boolean) as OfferRow[];
 
-    // 8. Generate codes for new unlocks.
+    // 8. Claim a merchant pre-generated code when available, else generate one.
     const created: Array<{ offer_id: string; redemption_code: string }> = [];
     for (const offer of toCreate) {
+      // 8a. Try to claim an unassigned code from the merchant's pre-generated pool.
+      let claimed: { offer_id: string; redemption_code: string } | null = null;
+      for (let attempt = 0; attempt < 3 && !claimed; attempt++) {
+        const { data: poolRow } = await serviceClient
+          .from("offer_redemptions")
+          .select("id, redemption_code")
+          .eq("offer_id", offer.id)
+          .is("user_id", null)
+          .is("redeemed_at", null)
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (!poolRow) break;
+        const { data: claimedRow } = await serviceClient
+          .from("offer_redemptions")
+          .update({ user_id: userId })
+          .eq("id", poolRow.id)
+          .is("user_id", null)
+          .select("offer_id, redemption_code")
+          .maybeSingle();
+        if (claimedRow) {
+          claimed = {
+            offer_id: claimedRow.offer_id as string,
+            redemption_code: claimedRow.redemption_code as string,
+          };
+        }
+      }
+      if (claimed) {
+        created.push(claimed);
+        continue;
+      }
+
       const { data: codeData, error: codeError } = await serviceClient.rpc(
         "generate_redemption_code",
       );
