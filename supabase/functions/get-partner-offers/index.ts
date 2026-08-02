@@ -56,6 +56,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
+    const nowIso = new Date().toISOString();
+
     // Fetch all active partner offers with merchant details from the public view
     const { data: offers, error } = await supabaseClient
       .from("partner_offers")
@@ -72,6 +74,8 @@ serve(async (req) => {
         redemption_count,
         per_user_limit,
         is_active,
+        status,
+        offer_type,
         partner_id,
         brand_id
       `)
@@ -83,24 +87,38 @@ serve(async (req) => {
       throw new Error("Failed to fetch offers");
     }
 
+    // Only surface offers that are truly live right now (status + date window).
+    const liveOffers = (offers ?? []).filter((o: any) =>
+      (!o.status || o.status === "active") &&
+      (!o.start_date || new Date(o.start_date).toISOString() <= nowIso) &&
+      (!o.end_date || new Date(o.end_date).toISOString() >= nowIso)
+    );
+
     // Fetch merchant details from public view for each offer
-    const partnerIds = [...new Set(offers?.map(o => o.partner_id) || [])];
-    
-    let merchantsMap: Record<string, { business_name: string; business_type: string; description: string | null }> = {};
+    const partnerIds = [...new Set(liveOffers.map((o: any) => o.partner_id) || [])];
+
+    let merchantsMap: Record<string, any> = {};
     
     if (partnerIds.length > 0) {
       const { data: merchants, error: merchantsError } = await supabaseClient
         .from("merchants_public")
-        .select("id, business_name, business_type, description")
+        .select("id, business_name, business_type, description, address, latitude, longitude, fee_model, approval_status, is_paused")
         .in("id", partnerIds);
       
       if (!merchantsError && merchants) {
-        merchantsMap = merchants.reduce((acc, m) => {
+        merchantsMap = merchants.reduce((acc: any, m: any) => {
           if (m.id) {
             acc[m.id] = {
+              id: m.id,
               business_name: m.business_name || 'Partner',
               business_type: m.business_type || 'Merchant',
-              description: m.description
+              description: m.description,
+              address: m.address ?? null,
+              latitude: m.latitude ?? null,
+              longitude: m.longitude ?? null,
+              fee_model: m.fee_model ?? null,
+              approval_status: m.approval_status ?? null,
+              is_paused: m.is_paused ?? false,
             };
           }
           return acc;
@@ -110,7 +128,7 @@ serve(async (req) => {
 
     // Fetch brand display info for any brand-tagged offers.
     const brandIds = [
-      ...new Set((offers ?? []).map((o: any) => o.brand_id).filter(Boolean)),
+      ...new Set(liveOffers.map((o: any) => o.brand_id).filter(Boolean)),
     ] as string[];
     let brandsMap: Record<string, { id: string; brand_name: string }> = {};
     if (brandIds.length > 0) {
@@ -129,11 +147,11 @@ serve(async (req) => {
     }
 
     // Combine offers with merchant data
-    const offersWithMerchants = offers?.map(offer => ({
+    const offersWithMerchants = liveOffers.map((offer: any) => ({
       ...offer,
       merchants: merchantsMap[offer.partner_id] || { business_name: 'Partner', business_type: 'Merchant', description: null },
       brand: offer.brand_id ? (brandsMap[offer.brand_id] || null) : null,
-    })) || [];
+    }));
 
     console.log(`Fetched ${offersWithMerchants.length} active partner offers`);
 
