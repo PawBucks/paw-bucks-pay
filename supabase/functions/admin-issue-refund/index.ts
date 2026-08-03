@@ -86,7 +86,7 @@ serve(async (req) => {
     // Get full transaction details including user_id, rewards_earned, and merchant_id
     const { data: transaction, error: txError } = await supabaseAdmin
       .from('transactions')
-      .select('stripe_payment_intent_id, amount, status, user_id, rewards_earned, merchant_id')
+      .select('stripe_payment_intent_id, amount, status, user_id, rewards_earned, merchant_id, amount_refunded, pawbucks_used, pawbucks_refunded')
       .eq('id', transactionId)
       .single();
 
@@ -175,10 +175,20 @@ serve(async (req) => {
       console.log('[REFUND] No valid Stripe payment intent, processing as internal refund only');
     }
 
-    // Update transaction status to refunded
+    // Record the refunded amount so platform-wide reporting stays accurate
+    const alreadyRefunded = Number(transaction.amount_refunded || 0);
+    const newAmountRefunded = Math.min(
+      Number(transaction.amount),
+      alreadyRefunded + Number(refundAmount)
+    );
+    const isFinalRefund = newAmountRefunded >= Number(transaction.amount) - 0.005;
+
     const { error: updateError } = await supabaseAdmin
       .from('transactions')
-      .update({ status: 'refunded' })
+      .update({
+        status: isFinalRefund ? 'refunded' : 'partially_refunded',
+        amount_refunded: newAmountRefunded,
+      })
       .eq('id', transactionId);
 
     if (updateError) {
