@@ -145,7 +145,7 @@ serve(async (req) => {
       supabaseAdmin.from("direct_payments").select("amount, application_fee").eq("merchant_id", merchant.id).eq("status", "refunded"),
       supabaseAdmin.from("transactions").select("id, amount, cashback_earned, rewards_earned, status, created_at, description").eq("merchant_id", merchant.id).order("created_at", { ascending: false }).limit(50),
       supabaseAdmin.from("transactions").select("amount, cashback_earned, rewards_earned, stripe_amount, application_fee").eq("merchant_id", merchant.id).eq("status", "completed"),
-      supabaseAdmin.from("transactions").select("amount, cashback_earned, rewards_earned").eq("merchant_id", merchant.id).eq("status", "refunded"),
+      supabaseAdmin.from("transactions").select("amount, amount_refunded, cashback_earned, rewards_earned").eq("merchant_id", merchant.id).in("status", ["refunded", "partially_refunded"]),
     ]);
 
     if (directPaymentsError) logStep("Error fetching direct payments", { error: directPaymentsError.message });
@@ -163,7 +163,12 @@ serve(async (req) => {
     const transactionCount = transactionTotals?.length || 0;
 
     // Calculate refund totals
-    const refundedTransactionAmount = refundedTransactions?.reduce((sum, t) => sum + Number(t.amount || 0), 0) || 0;
+    // Use the recorded refunded amount when present (supports partial refunds),
+    // falling back to the full transaction amount for full refunds.
+    const refundedTransactionAmount = refundedTransactions?.reduce(
+      (sum, t) => sum + (Number(t.amount_refunded || 0) > 0 ? Number(t.amount_refunded) : Number(t.amount || 0)),
+      0,
+    ) || 0;
     const refundedTransactionCount = refundedTransactions?.length || 0;
     const totalRefundedAmount = (refundedDirectAmount / 100) + refundedTransactionAmount;
     const totalRefundedCount = (refundedDirectPayments?.length || 0) + refundedTransactionCount;
