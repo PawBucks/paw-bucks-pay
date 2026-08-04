@@ -2,6 +2,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import {
+  getSpendableSources,
+  planPawBucksDebit,
+  applyPawBucksDebit,
+} from "../_shared/pet-fund-debit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -582,14 +587,28 @@ serve(async (req) => {
           .single();
 
         if (merchantCheck?.accepts_pawbucks) {
-          const { data: wallet } = await supabaseAdmin
-            .from('pawbucks_wallet')
-            .select('balance')
-            .eq('user_id', user.id)
-            .single();
-
-          const availablePB = wallet?.balance || 0;
           const priceUsd = amount / 100;
+          // Spendable = wallet + Pet Fund welcome credit (if txn meets its minimum) + legacy credit
+          const sources = await getSpendableSources(supabaseAdmin, user.id);
+          const petFundEligible =
+            sources.petFundAvailable > 0 &&
+            (!sources.petFundMinUsd || priceUsd >= sources.petFundMinUsd);
+          const legacyEligible =
+            sources.legacyCreditBalance > 0 &&
+            (!sources.legacyCreditMinUsd || priceUsd >= sources.legacyCreditMinUsd);
+          const availablePB =
+            sources.walletBalance +
+            (petFundEligible ? sources.petFundAvailable : 0) +
+            (legacyEligible ? sources.legacyCreditBalance : 0);
+
+          logStep("Spendable sources (merchant subscription)", {
+            wallet: sources.walletBalance,
+            petFundAvailable: sources.petFundAvailable,
+            petFundMinUsd: sources.petFundMinUsd,
+            petFundEligible,
+            legacyEligible,
+            availablePB,
+          });
 
           if (availablePB > 0 && priceUsd > 0) {
             const maxPbBySubFloor = Math.max(
@@ -633,17 +652,22 @@ serve(async (req) => {
     }
 
     if (pawbucksToUse && pawbucksToUse > 0) {
-      // Validate user has sufficient balance
-      const { data: wallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single();
+      // Validate against all spendable sources: wallet + Pet Fund credit + legacy credit
+      const priceUsdForCheck = amount / 100;
+      const checkSources = await getSpendableSources(supabaseAdmin, user.id);
+      const petFundEligibleForCheck =
+        checkSources.petFundAvailable > 0 &&
+        (!checkSources.petFundMinUsd || priceUsdForCheck >= checkSources.petFundMinUsd);
+      const legacyEligibleForCheck =
+        checkSources.legacyCreditBalance > 0 &&
+        (!checkSources.legacyCreditMinUsd || priceUsdForCheck >= checkSources.legacyCreditMinUsd);
+      const availableBalance =
+        checkSources.walletBalance +
+        (petFundEligibleForCheck ? checkSources.petFundAvailable : 0) +
+        (legacyEligibleForCheck ? checkSources.legacyCreditBalance : 0);
 
-      const availableBalance = wallet?.balance || 0;
-      
       if (pawbucksToUse > availableBalance) {
-        throw new Error(`Insufficient PawBucks balance. You have ${availableBalance} but tried to use ${pawbucksToUse}.`);
+        throw new Error(`Insufficient PawBucks balance. You have ${availableBalance} eligible but tried to use ${pawbucksToUse}.`);
       }
 
       // Check merchant accepts PawBucks
@@ -815,20 +839,13 @@ serve(async (req) => {
 
     // === PAWBUCKS REDEMPTION - DEDUCT FROM USER & CREDIT TO MERCHANT ===
     if (actualPawbucksUsed > 0) {
-      // Deduct PawBucks from user's wallet
-      const { data: userWallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single();
-
-      const currentBalance = userWallet?.balance || 0;
-      const newBalance = currentBalance - actualPawbucksUsed;
-
-      await supabaseAdmin
-        .from('pawbucks_wallet')
-        .update({ balance: newBalance })
-        .eq('user_id', user.id);
+      // Debit across wallet → Pet Fund welcome credit → legacy welcome credit
+      const debitSources = await getSpendableSources(supabaseAdmin, user.id);
+      const debitPlan = planPawBucksDebit(debitSources, actualPawbucksUsed, amount / 100);
+      await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan, {
+        merchantId,
+        transactionTotalCents: amount,
+      });
 
       // Log debit activity
       await supabaseAdmin.from('pawbucks_activity').insert({
@@ -841,10 +858,11 @@ serve(async (req) => {
         partner_id: merchantId,
       });
 
-      logStep("PawBucks deducted from user", { 
-        previousBalance: currentBalance, 
-        deducted: actualPawbucksUsed, 
-        newBalance 
+      logStep("PawBucks deducted from user", {
+        deducted: actualPawbucksUsed,
+        wallet: debitPlan.walletDeduction,
+        petFund: debitPlan.petFundDeduction,
+        legacyCredit: debitPlan.legacyCreditDeduction,
       });
 
       // Credit PawBucks to merchant's wallet
