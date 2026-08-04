@@ -587,14 +587,28 @@ serve(async (req) => {
           .single();
 
         if (merchantCheck?.accepts_pawbucks) {
-          const { data: wallet } = await supabaseAdmin
-            .from('pawbucks_wallet')
-            .select('balance')
-            .eq('user_id', user.id)
-            .single();
-
-          const availablePB = wallet?.balance || 0;
           const priceUsd = amount / 100;
+          // Spendable = wallet + Pet Fund welcome credit (if txn meets its minimum) + legacy credit
+          const sources = await getSpendableSources(supabaseAdmin, user.id);
+          const petFundEligible =
+            sources.petFundAvailable > 0 &&
+            (!sources.petFundMinUsd || priceUsd >= sources.petFundMinUsd);
+          const legacyEligible =
+            sources.legacyCreditBalance > 0 &&
+            (!sources.legacyCreditMinUsd || priceUsd >= sources.legacyCreditMinUsd);
+          const availablePB =
+            sources.walletBalance +
+            (petFundEligible ? sources.petFundAvailable : 0) +
+            (legacyEligible ? sources.legacyCreditBalance : 0);
+
+          logStep("Spendable sources (merchant subscription)", {
+            wallet: sources.walletBalance,
+            petFundAvailable: sources.petFundAvailable,
+            petFundMinUsd: sources.petFundMinUsd,
+            petFundEligible,
+            legacyEligible,
+            availablePB,
+          });
 
           if (availablePB > 0 && priceUsd > 0) {
             const maxPbBySubFloor = Math.max(
