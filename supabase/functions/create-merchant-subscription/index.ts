@@ -652,17 +652,22 @@ serve(async (req) => {
     }
 
     if (pawbucksToUse && pawbucksToUse > 0) {
-      // Validate user has sufficient balance
-      const { data: wallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single();
+      // Validate against all spendable sources: wallet + Pet Fund credit + legacy credit
+      const priceUsdForCheck = amount / 100;
+      const checkSources = await getSpendableSources(supabaseAdmin, user.id);
+      const petFundEligibleForCheck =
+        checkSources.petFundAvailable > 0 &&
+        (!checkSources.petFundMinUsd || priceUsdForCheck >= checkSources.petFundMinUsd);
+      const legacyEligibleForCheck =
+        checkSources.legacyCreditBalance > 0 &&
+        (!checkSources.legacyCreditMinUsd || priceUsdForCheck >= checkSources.legacyCreditMinUsd);
+      const availableBalance =
+        checkSources.walletBalance +
+        (petFundEligibleForCheck ? checkSources.petFundAvailable : 0) +
+        (legacyEligibleForCheck ? checkSources.legacyCreditBalance : 0);
 
-      const availableBalance = wallet?.balance || 0;
-      
       if (pawbucksToUse > availableBalance) {
-        throw new Error(`Insufficient PawBucks balance. You have ${availableBalance} but tried to use ${pawbucksToUse}.`);
+        throw new Error(`Insufficient PawBucks balance. You have ${availableBalance} eligible but tried to use ${pawbucksToUse}.`);
       }
 
       // Check merchant accepts PawBucks
