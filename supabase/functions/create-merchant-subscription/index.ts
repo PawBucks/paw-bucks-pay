@@ -839,20 +839,13 @@ serve(async (req) => {
 
     // === PAWBUCKS REDEMPTION - DEDUCT FROM USER & CREDIT TO MERCHANT ===
     if (actualPawbucksUsed > 0) {
-      // Deduct PawBucks from user's wallet
-      const { data: userWallet } = await supabaseAdmin
-        .from('pawbucks_wallet')
-        .select('balance')
-        .eq('user_id', user.id)
-        .single();
-
-      const currentBalance = userWallet?.balance || 0;
-      const newBalance = currentBalance - actualPawbucksUsed;
-
-      await supabaseAdmin
-        .from('pawbucks_wallet')
-        .update({ balance: newBalance })
-        .eq('user_id', user.id);
+      // Debit across wallet → Pet Fund welcome credit → legacy welcome credit
+      const debitSources = await getSpendableSources(supabaseAdmin, user.id);
+      const debitPlan = planPawBucksDebit(debitSources, actualPawbucksUsed, amount / 100);
+      await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan, {
+        merchantId,
+        transactionTotalCents: amount,
+      });
 
       // Log debit activity
       await supabaseAdmin.from('pawbucks_activity').insert({
@@ -865,10 +858,11 @@ serve(async (req) => {
         partner_id: merchantId,
       });
 
-      logStep("PawBucks deducted from user", { 
-        previousBalance: currentBalance, 
-        deducted: actualPawbucksUsed, 
-        newBalance 
+      logStep("PawBucks deducted from user", {
+        deducted: actualPawbucksUsed,
+        wallet: debitPlan.walletDeduction,
+        petFund: debitPlan.petFundDeduction,
+        legacyCredit: debitPlan.legacyCreditDeduction,
       });
 
       // Credit PawBucks to merchant's wallet
