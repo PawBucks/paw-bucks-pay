@@ -23,6 +23,7 @@ import { Calendar, Loader2, Plus, Syringe } from "lucide-react";
 import { toast } from"sonner";
 import { format } from"date-fns";
 import type { Vaccination } from"./types";
+import { parseDateOnly } from "@/lib/timezone";
 
 interface VaccinationsTabProps {
  petId: string;
@@ -311,7 +312,7 @@ export const VaccinationsTab = ({ petId, vetId }: VaccinationsTabProps) => {
  <div className="flex items-center gap-1">
  <Calendar className="w-4 h-4" aria-hidden="true" />
  <span className="text-sm">
- Due: {format(new Date(vax.next_due_date),"MMM d, yyyy")}
+ Due: {format(parseDateOnly(vax.next_due_date)!,"MMM d, yyyy")}
  </span>
  {isOverdue(vax.next_due_date) && (
  <Badge variant="destructive">Overdue</Badge>

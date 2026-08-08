@@ -7,6 +7,7 @@ import { startOfMonth, endOfMonth, subMonths, differenceInDays, format } from"da
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 type Transaction = {
  id: string;
  amount: number;
@@ -72,7 +73,7 @@ export const SpendingInsights = memo(({
  
  const medTotal = medicalRecords
  .filter(r => {
- const d = new Date(r.record_date);
+ const d = (parseDateOnly(r.record_date) as Date);
  return d >= start && d <= end;
  })
  .reduce((sum, r) => sum + (r.price || 0), 0);
@@ -96,7 +97,7 @@ export const SpendingInsights = memo(({
 
  const medTotal = medicalRecords
  .filter(r => {
- const d = new Date(r.record_date);
+ const d = (parseDateOnly(r.record_date) as Date);
  return d >= start && d <= end;
  })
  .reduce((sum, r) => sum + (r.price || 0), 0);

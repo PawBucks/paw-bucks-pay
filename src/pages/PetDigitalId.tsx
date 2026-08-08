@@ -12,6 +12,7 @@ import pawbucksLogo from "@/assets/pawbucks-logo.png";
 import { toast } from"@/hooks/use-toast";
 import { SEO } from"@/components/SEO";
 import {
+import { parseDateOnly, formatDateOnly } from "@/lib/timezone";
  AlertDialog,
  AlertDialogAction,
  AlertDialogCancel,
@@ -244,7 +245,7 @@ export default function PetDigitalId() {
  </p>
  {pet.birthday && (
  <p className="text-sm opacity-80">
- Born {new Date(pet.birthday).toLocaleDateString()}
+ Born {formatDateOnly(pet.birthday, { month:"numeric", day:"numeric", year:"numeric" })}
  </p>
  )}
  </div>
@@ -300,7 +301,7 @@ export default function PetDigitalId() {
  </p>
  {v.next_due_date && (
  <p className={`text-xs mt-0.5 ${overdue ?"text-destructive font-medium" :"text-muted-foreground"}`}>
- Next due {new Date(v.next_due_date).toLocaleDateString()}
+ Next due {formatDateOnly(v.next_due_date, { month:"numeric", day:"numeric", year:"numeric" })}
  </p>
  )}
  </div>

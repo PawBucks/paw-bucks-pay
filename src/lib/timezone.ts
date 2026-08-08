@@ -65,3 +65,31 @@ export function tzAbbr(date: Date, tz: string): string {
 }
 
 export { formatInTimeZone, toZonedTime, fromZonedTime };
+/**
+ * Parse a date-only value ("yyyy-MM-dd") as LOCAL midnight.
+ * `new Date("2011-05-26")` is parsed as UTC midnight, which renders as the
+ * previous day for viewers west of UTC (EST/PST) — this avoids that.
+ */
+export function parseDateOnly(value?: string | null): Date | null {
+  if (!value) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/** Format a date-only value without timezone drift. */
+export function formatDateOnly(
+  value?: string | null,
+  options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" },
+): string {
+  const d = parseDateOnly(value);
+  return d ? d.toLocaleDateString("en-US", options) : "";
+}
+
+/** Today's date as a local "yyyy-MM-dd" string (never UTC). */
+export function todayDateOnly(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}

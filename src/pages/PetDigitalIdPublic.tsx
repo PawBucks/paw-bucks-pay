@@ -7,6 +7,7 @@ import { Skeleton } from"@/components/ui/skeleton";
 import { Syringe, AlertTriangle, ShieldX } from "lucide-react";
 import pawbucksLogo from "@/assets/pawbucks-logo.png";
 import { SEO } from"@/components/SEO";
+import { formatDateOnly } from "@/lib/timezone";
 
 type DigitalId = {
  pet: {
@@ -118,7 +119,7 @@ export default function PetDigitalIdPublic() {
  {pet.breed ? ` · ${pet.breed}` :""}
  </p>
  {pet.birthday && (
- <p className="text-sm opacity-80">Born {new Date(pet.birthday).toLocaleDateString()}</p>
+ <p className="text-sm opacity-80">Born {formatDateOnly(pet.birthday, { month:"numeric", day:"numeric", year:"numeric" })}</p>
  )}
  </div>
  </div>
@@ -162,7 +163,7 @@ export default function PetDigitalIdPublic() {
  </p>
  {v.next_due_date && (
  <p className={`text-xs mt-0.5 ${overdue ?"text-destructive font-medium" :"text-muted-foreground"}`}>
- Next due {new Date(v.next_due_date).toLocaleDateString()}
+ Next due {formatDateOnly(v.next_due_date, { month:"numeric", day:"numeric", year:"numeric" })}
  </p>
  )}
  </div>

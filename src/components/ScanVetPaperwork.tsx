@@ -25,6 +25,7 @@ import { Badge } from"@/components/ui/badge";
 import { Loader2, Check, X, Trash2, Plus, AlertCircle } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { toast } from"sonner";
+import { todayDateOnly } from "@/lib/timezone";
 
 type ScanVetPaperworkProps = {
  petId: string;
@@ -133,7 +134,7 @@ export const ScanVetPaperwork = ({
 
  const result = data.data;
  setExtractedData({
- visit_date: result.visit_date || new Date().toISOString().split("T")[0],
+ visit_date: result.visit_date || todayDateOnly(),
  vet_name: result.vet_name ||"",
  doctor_name: result.doctor_name ||"",
  visit_notes: result.visit_notes ||"",
@@ -225,7 +226,7 @@ export const ScanVetPaperwork = ({
  .insert({
  pet_id: petId,
  user_id: user.id,
- visit_date: extractedData.visit_date || new Date().toISOString().split("T")[0],
+ visit_date: extractedData.visit_date || todayDateOnly(),
  notes: extractedData.visit_notes || null,
  vet_name: extractedData.vet_name || null,
  doctor_name: extractedData.doctor_name || null,
@@ -262,7 +263,7 @@ export const ScanVetPaperwork = ({
  user_id: user.id,
  record_type: item.record_type,
  title: item.title,
- record_date: extractedData.visit_date || new Date().toISOString().split("T")[0],
+ record_date: extractedData.visit_date || todayDateOnly(),
  quantity: item.quantity || null,
  price: item.price,
  description: item.description || null,

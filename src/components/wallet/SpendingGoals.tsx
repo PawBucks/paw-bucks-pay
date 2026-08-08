@@ -16,6 +16,7 @@ import { useQueryClient } from"@tanstack/react-query";
 import { startOfMonth, endOfMonth, differenceInDays, addMonths, format } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 type Transaction = {
  id: string;
  amount: number;
@@ -64,7 +65,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
 
  const medTotal = medicalRecords
  .filter(r => {
- const d = new Date(r.record_date);
+ const d = (parseDateOnly(r.record_date) as Date);
  return d >= monthStart && d <= monthEnd;
  })
  .reduce((sum, r) => sum + (r.price || 0), 0);
@@ -90,7 +91,7 @@ export const SpendingGoals = memo(({ transactions, medicalRecords = [] }: Spendi
 
  const medTotal = medicalRecords
  .filter(r => {
- const d = new Date(r.record_date);
+ const d = (parseDateOnly(r.record_date) as Date);
  return d >= monthStart && d <= monthEnd;
  })
  .reduce((sum, r) => sum + (r.price || 0), 0);

@@ -7,6 +7,7 @@ import { startOfMonth, endOfMonth, subMonths } from"date-fns";
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 type Transaction = {
  id: string;
  amount: number;
@@ -62,7 +63,7 @@ export const CategoryComparison = memo(({ transactions, medicalRecords = [] }: C
 
  // Process medical records as veterinary
  medicalRecords.forEach(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  const amount = record.price || 0;
 
  if (recordDate >= thisMonthStart && recordDate <= thisMonthEnd) {

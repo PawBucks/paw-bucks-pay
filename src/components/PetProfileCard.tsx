@@ -13,6 +13,7 @@ import { EditPetProfileDialog } from"./EditPetProfileDialog";
 import { usePetPersonality } from"@/hooks/usePersonalityBadges";
 import { transformPersonalityName } from"@/components/personality-quiz/personalityNameUtils";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { parseDateOnly } from "@/lib/timezone";
 
 type PetProfile = {
  id: string;
@@ -62,7 +63,7 @@ const PetProfileCardComponent = ({ pet, onUpdate, index = 0 }: PetProfileCardPro
  const age = useMemo(() => {
  if (!pet.birthday) return null;
  return Math.floor(
- (new Date().getTime() - new Date(pet.birthday).getTime()) /
+ (new Date().getTime() - (parseDateOnly(pet.birthday)?.getTime() ?? 0)) /
  (365.25 * 24 * 60 * 60 * 1000)
  );
  }, [pet.birthday]);

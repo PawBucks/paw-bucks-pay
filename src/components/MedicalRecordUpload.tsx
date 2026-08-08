@@ -23,6 +23,7 @@ import {
 import { Loader2, Upload, Paperclip, X, Plus, Trash2 } from"lucide-react";
 import { toast } from"sonner";
 import { Card } from"@/components/ui/card";
+import { todayDateOnly } from "@/lib/timezone";
 
 type MedicalRecordUploadProps = {
  petId: string;
@@ -53,7 +54,7 @@ const recordTypes = [
 export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadProps) => {
  const [open, setOpen] = useState(false);
  const [isLoading, setIsLoading] = useState(false);
- const [visitDate, setVisitDate] = useState<string>(new Date().toISOString().split('T')[0]);
+ const [visitDate, setVisitDate] = useState<string>(todayDateOnly());
  const [visitNotes, setVisitNotes] = useState("");
  const [vetName, setVetName] = useState("");
  const [doctorName, setDoctorName] = useState("");
@@ -173,7 +174,7 @@ export const MedicalRecordUpload = ({ petId, onSuccess }: MedicalRecordUploadPro
 
  toast.success("Medical records uploaded successfully");
  setOpen(false);
- setVisitDate(new Date().toISOString().split('T')[0]);
+ setVisitDate(todayDateOnly());
  setVisitNotes("");
  setVetName("");
  setDoctorName("");

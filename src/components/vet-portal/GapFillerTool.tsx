@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/
 import { toast } from"sonner";
 import { AlertTriangle, Calendar, Cat, Dog, Gift, Search, Send } from "lucide-react";
 import { format, differenceInDays } from"date-fns";
+import { parseDateOnly } from "@/lib/timezone";
 
 interface GapFillerToolProps {
  vetId: string;
@@ -90,7 +91,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
  const patients: OverduePatient[] = (reminders || []).map(r => {
  const pet = r.pet_profiles as any;
  const owner = pet.profiles;
- const dueDate = new Date(r.due_date);
+ const dueDate = (parseDateOnly(r.due_date) as Date);
  const daysOverdue = differenceInDays(new Date(), dueDate);
 
  return {

@@ -46,6 +46,7 @@ import { toast } from "sonner";
 import { formatInTimeZone } from "date-fns-tz";
 import { DEFAULT_MERCHANT_TZ } from "@/lib/timezone";
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 
 type ProfileRow = {
   full_name: string;
@@ -433,7 +434,7 @@ const Profile = () => {
                       const age = pet.birthday
                         ? Math.max(
                             0,
-                            new Date().getFullYear() - new Date(pet.birthday).getFullYear()
+                            new Date().getFullYear() - (parseDateOnly(pet.birthday)?.getFullYear() ?? new Date().getFullYear())
                           )
                         : null;
                       return (

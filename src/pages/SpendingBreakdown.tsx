@@ -19,6 +19,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import { CATEGORY_CONFIG, getNormalizedCategory } from"@/lib/categoryMapping";
 
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 type TransactionWithMerchant = {
  id: string;
  amount: number;
@@ -156,7 +157,7 @@ const SpendingBreakdown = () => {
  // Medical records spending for the month
  const medicalTotal = medicalRecords
  .filter(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  return recordDate >= monthStart && recordDate <= monthEnd;
  })
  .reduce((sum, record) => sum + (record.price || 0), 0);

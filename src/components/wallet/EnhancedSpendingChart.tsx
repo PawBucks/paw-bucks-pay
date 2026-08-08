@@ -19,6 +19,7 @@ import {
 import { format, subDays, subWeeks, subMonths, startOfWeek, endOfWeek, startOfDay, endOfDay, startOfMonth, endOfMonth } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 type Transaction = {
  id: string;
  amount: number;
@@ -59,7 +60,7 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
 
  const dayMedical = medicalRecords
  .filter(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  return recordDate >= dayStart && recordDate <= dayEnd;
  })
  .reduce((sum, record) => sum + (record.price || 0), 0);
@@ -98,7 +99,7 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
 
  const weekMedical = medicalRecords
  .filter(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  return recordDate >= weekStart && recordDate <= weekEnd;
  })
  .reduce((sum, record) => sum + (record.price || 0), 0);
@@ -138,7 +139,7 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
 
  const monthMedical = medicalRecords
  .filter(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  return recordDate >= monthStart && recordDate <= monthEnd;
  })
  .reduce((sum, record) => sum + (record.price || 0), 0);
@@ -156,7 +157,7 @@ export const EnhancedSpendingChart = memo(({ transactions, medicalRecords = [] }
 
  const prevYearMed = medicalRecords
  .filter(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  return recordDate >= prevYearStart && recordDate <= prevYearEnd;
  })
  .reduce((sum, record) => sum + (record.price || 0), 0);

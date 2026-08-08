@@ -4,6 +4,7 @@ import { Minus } from "lucide-react";
 import { startOfMonth, endOfMonth, subMonths } from"date-fns";
 
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 type Transaction = {
  id: string;
  amount: number;
@@ -47,14 +48,14 @@ export const MonthlyComparison = memo(({ transactions, medicalRecords = [] }: Mo
  // Calculate medical record totals
  const thisMonthMedical = medicalRecords
  .filter(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  return recordDate >= thisMonthStart && recordDate <= thisMonthEnd;
  })
  .reduce((sum, record) => sum + (record.price || 0), 0);
 
  const lastMonthMedical = medicalRecords
  .filter(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  return recordDate >= lastMonthStart && recordDate <= lastMonthEnd;
  })
  .reduce((sum, record) => sum + (record.price || 0), 0);
