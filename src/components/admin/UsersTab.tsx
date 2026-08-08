@@ -397,7 +397,7 @@ export function UsersTab() {
  <TableHead>Email</TableHead>
  <TableHead>Type</TableHead>
  <TableHead>PawBucks</TableHead>
- <TableHead>Welcome Credit</TableHead>
+ <TableHead>Pet Fund / Welcome Credit</TableHead>
  <TableHead>Phone</TableHead>
  <TableHead>Joined</TableHead>
  <TableHead className="text-right">Actions</TableHead>
@@ -435,8 +435,37 @@ export function UsersTab() {
  </span>
  </TableCell>
  <TableCell>
- {user.welcome_credit_status ? (
+ {user.pet_fund_status || user.welcome_credit_status ? (
  <div className="flex flex-col gap-0.5">
+ {user.pet_fund_status && (
+ <>
+ <Badge
+ variant="outline"
+ className={
+ (user.pet_fund_available ?? 0) > 0
+ ? 'bg-success/10 text-success border-success/30'
+ : user.pet_fund_status === 'active'
+ ? 'bg-info/10 text-info border-info/30'
+ : 'bg-muted text-muted-foreground border-border'
+ }
+ >
+ <PawBucksLogo className="w-3 h-3 mr-1" />
+ PF {Formatters.currency((user.pet_fund_available ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE)} avail
+ </Badge>
+ <span className="text-xs text-muted-foreground">
+ {Formatters.currency((user.pet_fund_used ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE)} used of{' '}
+ {Formatters.currency((user.pet_fund_total ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE)}
+ {user.pet_fund_min_usd ? ` · min $${user.pet_fund_min_usd}` : ''}
+ </span>
+ {user.pet_fund_next_expires && (user.pet_fund_available ?? 0) > 0 && (
+ <span className="text-xs text-muted-foreground">
+ Exp {new Date(user.pet_fund_next_expires).toLocaleDateString()}
+ </span>
+ )}
+ </>
+ )}
+ {user.welcome_credit_status && (
+ <>
  <Badge
  variant="outline"
  className={
@@ -450,12 +479,14 @@ export function UsersTab() {
  }
  >
  <Gift className="w-3 h-3 mr-1" aria-hidden="true" />
- {user.welcome_credit_status ==='active' ? `$${Formatters.number(Math.round(((user.welcome_credit_amount ?? 0) / 1000)))} Active` : user.welcome_credit_status.charAt(0).toUpperCase() + user.welcome_credit_status.slice(1)}
+ WC {user.welcome_credit_status ==='active' ? `$${Formatters.number(Math.round(((user.welcome_credit_amount ?? 0) / 1000)))} Active` : user.welcome_credit_status.charAt(0).toUpperCase() + user.welcome_credit_status.slice(1)}
  </Badge>
  {user.welcome_credit_status ==='active' && user.welcome_credit_expires && (
  <span className="text-xs text-muted-foreground">
  Exp {new Date(user.welcome_credit_expires).toLocaleDateString()}
  </span>
+ )}
+ </>
  )}
  </div>
  ) : (
