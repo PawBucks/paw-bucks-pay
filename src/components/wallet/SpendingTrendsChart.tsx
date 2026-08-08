@@ -5,6 +5,7 @@ import { format, subDays, subWeeks, startOfWeek, endOfWeek, startOfDay, endOfDay
 import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
 
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 type Transaction = {
  id: string;
  amount: number;
@@ -44,7 +45,7 @@ export const SpendingTrendsChart = memo(({ transactions, medicalRecords = [] }: 
  // Medical record totals
  const dayMedical = medicalRecords
  .filter(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  return recordDate >= dayStart && recordDate <= dayEnd;
  })
  .reduce((sum, record) => sum + (record.price || 0), 0);
@@ -79,7 +80,7 @@ export const SpendingTrendsChart = memo(({ transactions, medicalRecords = [] }: 
  // Medical record totals
  const weekMedical = medicalRecords
  .filter(record => {
- const recordDate = new Date(record.record_date);
+ const recordDate = (parseDateOnly(record.record_date) as Date);
  return recordDate >= weekStart && recordDate <= weekEnd;
  })
  .reduce((sum, record) => sum + (record.price || 0), 0);

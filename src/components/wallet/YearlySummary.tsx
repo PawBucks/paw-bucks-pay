@@ -12,6 +12,7 @@ import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAcco
 import { useAuth } from"@/hooks/useAuth";
 
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 // Fixed colors for pie chart (actual HSL values, not CSS variables)
 const CATEGORY_COLORS: Record<string, string> = {
  veterinary:"hsl(340, 75%, 55%)",
@@ -113,7 +114,7 @@ export function YearlySummary() {
 
  // Process medical records
  medicalRecords?.forEach((record: any) => {
- const month = new Date(record.record_date).getMonth();
+ const month = (parseDateOnly(record.record_date) as Date).getMonth();
  const amount = parseFloat(record.price) || 0;
  monthlyTotals[month] += amount;
 

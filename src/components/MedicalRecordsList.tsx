@@ -33,6 +33,7 @@ import { Card } from"@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from"@/components/ui/collapsible";
 
 import { Formatters } from "@/utils/formatters";
+import { parseDateOnly } from "@/lib/timezone";
 type RecordType ="vaccination" |"checkup" |"surgery" |"lab_results" |"prescription" |"dental" |"emergency" |"other";
 
 type MedicalRecord = {
@@ -354,7 +355,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
  const calculateMonthlyTotals = () => {
  const monthlyMap = new Map<string, { total: number; date: Date }>();
  visits.forEach(visit => {
- const visitDate = new Date(visit.visit_date);
+ const visitDate = parseDateOnly(visit.visit_date) || new Date(visit.visit_date);
  const monthKey = format(visitDate,"yyyy-MM");
  const visitTotal = calculateVisitTotal(visit.records);
  const existing = monthlyMap.get(monthKey);
@@ -417,7 +418,7 @@ export const MedicalRecordsList = ({ petId, refreshTrigger }: MedicalRecordsList
  )}
  <div className="text-left">
  <div className="font-semibold">
- {format(new Date(visit.visit_date),"MMMM d, yyyy")}
+ {format(parseDateOnly(visit.visit_date) || new Date(visit.visit_date),"MMMM d, yyyy")}
  </div>
  <div className="text-sm text-muted-foreground">
  {visit.records.length} item{visit.records.length !== 1 ?'s' :''}

@@ -5,6 +5,7 @@ import { Badge } from"@/components/ui/badge";
 import { Skeleton } from"@/components/ui/skeleton";
 import { Calendar, Heart, Weight } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
+import { formatDateOnly } from "@/lib/timezone";
 
 type Pet = {
  id: string;
@@ -145,7 +146,7 @@ export function UserDetailPets({ userId }: { userId: string }) {
  <p className="text-sm text-muted-foreground">#{policy.policy_number ||"N/A"} {policy.coverage_type && `· ${policy.coverage_type}`}</p>
  {policy.effective_date && (
  <p className="text-xs text-muted-foreground">
- {new Date(policy.effective_date).toLocaleDateString()} — {policy.expiration_date ? new Date(policy.expiration_date).toLocaleDateString() :"Ongoing"}
+ {formatDateOnly(policy.effective_date, { month:"numeric", day:"numeric", year:"numeric" })} — {policy.expiration_date ? formatDateOnly(policy.expiration_date, { month:"numeric", day:"numeric", year:"numeric" }) :"Ongoing"}
  </p>
  )}
  </div>
