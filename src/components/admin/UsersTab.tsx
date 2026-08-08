@@ -29,6 +29,12 @@ type User = {
  welcome_credit_status?: string | null;
  welcome_credit_amount?: number | null;
  welcome_credit_expires?: string | null;
+ pet_fund_status?: string | null;
+ pet_fund_available?: number | null;
+ pet_fund_total?: number | null;
+ pet_fund_used?: number | null;
+ pet_fund_next_expires?: string | null;
+ pet_fund_min_usd?: number | null;
 };
 
 type UserRole = {
@@ -71,6 +77,15 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
  .from('user_welcome_credits')
  .select('user_id, status, credit_amount, expires_at');
 
+ // Fetch Pet Fund ledgers + releases (live availability computed from releases)
+ const { data: petFundLedgers } = await supabase
+ .from('pet_fund_ledgers')
+ .select('user_id, status, total_amount, total_used');
+
+ const { data: petFundReleases } = await supabase
+ .from('pet_fund_releases')
+ .select('user_id, amount, status, used_at, expires_at, min_transaction_usd');
+
  // Create a map of member_id to owner_id
  const memberToOwnerMap = new Map<string, string>();
  sharedMembers?.forEach(m => {
@@ -109,6 +124,34 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
  welcomeCreditMap.set(wc.user_id, { status: wc.status, amount: wc.credit_amount, expires_at: wc.expires_at });
  });
 
+ // Compute live Pet Fund availability: released, unused, non-expired releases
+ const nowTs = Date.now();
+ const petFundAvailableMap = new Map<string, { available: number; nextExpires: string | null; minUsd: number | null }>();
+ petFundReleases?.forEach(r => {
+ const isAvailable =
+ r.status === 'released' &&
+ !r.used_at &&
+ (!r.expires_at || new Date(r.expires_at).getTime() > nowTs);
+ if (!isAvailable) return;
+ const prev = petFundAvailableMap.get(r.user_id) ?? { available: 0, nextExpires: null, minUsd: null };
+ const nextExpires =
+ r.expires_at && (!prev.nextExpires || new Date(r.expires_at) < new Date(prev.nextExpires))
+ ? r.expires_at
+ : prev.nextExpires;
+ const minUsd =
+ prev.minUsd === null ? Number(r.min_transaction_usd ?? 0) : Math.min(prev.minUsd, Number(r.min_transaction_usd ?? 0));
+ petFundAvailableMap.set(r.user_id, {
+ available: prev.available + (r.amount ?? 0),
+ nextExpires,
+ minUsd,
+ });
+ });
+
+ const petFundMap = new Map<string, { status: string; total: number; used: number }>();
+ petFundLedgers?.forEach(l => {
+ petFundMap.set(l.user_id, { status: l.status, total: l.total_amount ?? 0, used: l.total_used ?? 0 });
+ });
+
  return (profiles || []).map(p => {
  const ownerId = memberToOwnerMap.get(p.id);
  
@@ -130,6 +173,8 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
  }
  
  const wc = welcomeCreditMap.get(p.id);
+ const pf = petFundMap.get(p.id);
+ const pfAvail = petFundAvailableMap.get(p.id);
  return {
  ...p,
  pawbucks_balance: effectiveBalance,
@@ -137,6 +182,12 @@ const fetchUsersWithBalances = async (): Promise<User[]> => {
  welcome_credit_status: wc?.status ?? null,
  welcome_credit_amount: wc?.amount ?? null,
  welcome_credit_expires: wc?.expires_at ?? null,
+ pet_fund_status: pf?.status ?? null,
+ pet_fund_available: pfAvail?.available ?? 0,
+ pet_fund_total: pf?.total ?? null,
+ pet_fund_used: pf?.used ?? null,
+ pet_fund_next_expires: pfAvail?.nextExpires ?? null,
+ pet_fund_min_usd: pfAvail?.minUsd ?? null,
  };
  });
 };
@@ -346,7 +397,7 @@ export function UsersTab() {
  <TableHead>Email</TableHead>
  <TableHead>Type</TableHead>
  <TableHead>PawBucks</TableHead>
- <TableHead>Welcome Credit</TableHead>
+ <TableHead>Pet Fund / Welcome Credit</TableHead>
  <TableHead>Phone</TableHead>
  <TableHead>Joined</TableHead>
  <TableHead className="text-right">Actions</TableHead>
@@ -384,8 +435,37 @@ export function UsersTab() {
  </span>
  </TableCell>
  <TableCell>
- {user.welcome_credit_status ? (
+ {user.pet_fund_status || user.welcome_credit_status ? (
  <div className="flex flex-col gap-0.5">
+ {user.pet_fund_status && (
+ <>
+ <Badge
+ variant="outline"
+ className={
+ (user.pet_fund_available ?? 0) > 0
+ ? 'bg-success/10 text-success border-success/30'
+ : user.pet_fund_status === 'active'
+ ? 'bg-info/10 text-info border-info/30'
+ : 'bg-muted text-muted-foreground border-border'
+ }
+ >
+ <PawBucksLogo className="w-3 h-3 mr-1" />
+ PF {Formatters.currency((user.pet_fund_available ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE)} avail
+ </Badge>
+ <span className="text-xs text-muted-foreground">
+ {Formatters.currency((user.pet_fund_used ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE)} used of{' '}
+ {Formatters.currency((user.pet_fund_total ?? 0) * PAWBUCKS_CONVERSION.PAWBUCKS_USD_VALUE)}
+ {user.pet_fund_min_usd ? ` · min $${user.pet_fund_min_usd}` : ''}
+ </span>
+ {user.pet_fund_next_expires && (user.pet_fund_available ?? 0) > 0 && (
+ <span className="text-xs text-muted-foreground">
+ Exp {new Date(user.pet_fund_next_expires).toLocaleDateString()}
+ </span>
+ )}
+ </>
+ )}
+ {user.welcome_credit_status && (
+ <>
  <Badge
  variant="outline"
  className={
@@ -399,12 +479,14 @@ export function UsersTab() {
  }
  >
  <Gift className="w-3 h-3 mr-1" aria-hidden="true" />
- {user.welcome_credit_status ==='active' ? `$${Formatters.number(Math.round(((user.welcome_credit_amount ?? 0) / 1000)))} Active` : user.welcome_credit_status.charAt(0).toUpperCase() + user.welcome_credit_status.slice(1)}
+ WC {user.welcome_credit_status ==='active' ? `$${Formatters.number(Math.round(((user.welcome_credit_amount ?? 0) / 1000)))} Active` : user.welcome_credit_status.charAt(0).toUpperCase() + user.welcome_credit_status.slice(1)}
  </Badge>
  {user.welcome_credit_status ==='active' && user.welcome_credit_expires && (
  <span className="text-xs text-muted-foreground">
  Exp {new Date(user.welcome_credit_expires).toLocaleDateString()}
  </span>
+ )}
+ </>
  )}
  </div>
  ) : (
