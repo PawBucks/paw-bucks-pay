@@ -154,7 +154,7 @@ serve(async (req) => {
     // 6. For new_customer: at most ONE code per merchant per user, ever.
     //    For partner_deal: one code per offer per user (enforced by unique offer+user).
     const newCustomerOffers = eligibleOffers.filter((o) => o.offer_type === "new_customer");
-    const partnerDealOffers = eligibleOffers.filter((o) => o.offer_type === "partner_deal");
+    const otherOffers = eligibleOffers.filter((o) => o.offer_type !== "new_customer");
 
     // Existing new-customer unlocks at this merchant (any offer_id)
     const { data: priorNewCustomerUnlocks } = await serviceClient
@@ -179,7 +179,7 @@ serve(async (req) => {
       }
     }
 
-    for (const p of partnerDealOffers) targetOfferIds.push(p.id);
+    for (const p of otherOffers) targetOfferIds.push(p.id);
 
     if (targetOfferIds.length === 0) {
       return jsonResponse({ unlocked: [], merchant_name: merchant.business_name });
