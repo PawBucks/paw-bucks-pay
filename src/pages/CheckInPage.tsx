@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from"react";
 import { useNavigate, useSearchParams } from"react-router-dom";
+import { useQueryClient } from"@tanstack/react-query";
 import { useAuth } from"@/hooks/useAuth";
 import { supabase } from"@/integrations/supabase/client";
 import { SEO } from"@/components/SEO";
@@ -58,6 +59,7 @@ function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
 export default function CheckInPage() {
  const { user, loading: authLoading } = useAuth();
  const navigate = useNavigate();
+ const queryClient = useQueryClient();
  const [searchParams] = useSearchParams();
  const token = searchParams.get("token");
  const [processing, setProcessing] = useState(false);
@@ -66,6 +68,14 @@ export default function CheckInPage() {
  const [unlockedOffers, setUnlockedOffers] = useState<UnlockedOffer[]>([]);
  const [unlockMerchantId, setUnlockMerchantId] = useState<string | null>(null);
  const checkinAttempted = useRef(false);
+
+ // Refresh the My Deals surfaces after a check-in unlocks offers/promotions.
+ const refreshDeals = () => {
+  queryClient.invalidateQueries({ queryKey: ["my-deals-redemptions"] });
+  queryClient.invalidateQueries({ queryKey: ["my-deals-branded"] });
+  queryClient.invalidateQueries({ queryKey: ["my-deals-all-active-offers"] });
+  queryClient.invalidateQueries({ queryKey: ["partner-offers"] });
+ };
 
  useEffect(() => {
  if (authLoading) return;
@@ -182,6 +192,7 @@ export default function CheckInPage() {
  const offers = (unlockData?.unlocked ?? []) as UnlockedOffer[];
  if (offers.length > 0) {
  setUnlockedOffers(offers);
+ refreshDeals();
  const newly = offers.filter((o) => !o.already_unlocked);
  if (newly.length > 0) {
                             const hasNew = newly.some((o) => o.offer_type === "new_customer");
@@ -225,6 +236,7 @@ export default function CheckInPage() {
  const brandNames = brandedData.campaigns.map((c: any) => c.brand_name).join(",");
  setBrandedAwards(brandedData.campaigns as BrandedAward[]);
  toast.success(`🎁 You received ${total.toLocaleString()} branded PawBucks from ${brandNames}!`, { duration: 5000 });
+ refreshDeals();
  }
  try {
  sessionStorage.setItem(storageKey, JSON.stringify({

@@ -95,11 +95,6 @@ serve(async (req) => {
 
     const feeModel = merchant.fee_model as string | null;
     const isAcquisitionOnly = feeModel === "acquisition_only";
-    const isFullEcosystem = feeModel === "full_ecosystem";
-
-    if (!isAcquisitionOnly && !isFullEcosystem) {
-      return jsonResponse({ unlocked: [], skipped: "unsupported_fee_model" });
-    }
 
     // 3. First-time customer check (for new_customer offers).
     const { count: priorCheckinCount } = await serviceClient
@@ -118,22 +113,9 @@ serve(async (req) => {
     const isFirstTimeCustomer =
       (priorCheckinCount ?? 0) === 0 && (priorTxnCount ?? 0) === 0;
 
-    // 4. Determine which offer_types are eligible for this merchant model.
-    const eligibleTypes: string[] = isAcquisitionOnly
-      ? (isFirstTimeCustomer ? ["new_customer"] : [])
-      : (isFirstTimeCustomer
-          ? ["new_customer", "partner_deal"]
-          : ["partner_deal"]);
-
-    if (eligibleTypes.length === 0) {
-      return jsonResponse({
-        unlocked: [],
-        skipped: "not_first_time_customer",
-        message: "New Customer Deals are only available on your first visit.",
-      });
-    }
-
-    // 5. Load active offers for this merchant of eligible types.
+    // 4/5. Load ALL active offers for this merchant. Every offer type unlocks on
+    // check-in; only `new_customer` offers are gated to a first visit, and
+    // acquisition-only merchants never expose PawBucks-redemption offers.
     const nowIso = new Date().toISOString();
     const { data: offers, error: offersError } = await serviceClient
       .from("partner_offers")
@@ -141,8 +123,7 @@ serve(async (req) => {
         "id, title, description, offer_type, coins_required, end_date, start_date, status, is_active, per_user_limit, redemption_cap, redemption_count",
       )
       .eq("partner_id", merchantId)
-      .eq("is_active", true)
-      .in("offer_type", eligibleTypes);
+      .eq("is_active", true);
 
     if (offersError) {
       console.error("[unlock-merchant-offers] offers query failed", offersError);
@@ -150,6 +131,8 @@ serve(async (req) => {
     }
 
     const eligibleOffers = ((offers ?? []) as OfferRow[]).filter((o) => {
+      if (o.offer_type === "new_customer" && !isFirstTimeCustomer) return false;
+      if (isAcquisitionOnly && o.offer_type === "pawbucks_redemption") return false;
       if (o.status && o.status !== "active") return false;
       if (o.start_date && new Date(o.start_date).toISOString() > nowIso) return false;
       if (o.end_date && new Date(o.end_date).toISOString() < nowIso) return false;
@@ -171,7 +154,7 @@ serve(async (req) => {
     // 6. For new_customer: at most ONE code per merchant per user, ever.
     //    For partner_deal: one code per offer per user (enforced by unique offer+user).
     const newCustomerOffers = eligibleOffers.filter((o) => o.offer_type === "new_customer");
-    const partnerDealOffers = eligibleOffers.filter((o) => o.offer_type === "partner_deal");
+    const otherOffers = eligibleOffers.filter((o) => o.offer_type !== "new_customer");
 
     // Existing new-customer unlocks at this merchant (any offer_id)
     const { data: priorNewCustomerUnlocks } = await serviceClient
@@ -196,7 +179,7 @@ serve(async (req) => {
       }
     }
 
-    for (const p of partnerDealOffers) targetOfferIds.push(p.id);
+    for (const p of otherOffers) targetOfferIds.push(p.id);
 
     if (targetOfferIds.length === 0) {
       return jsonResponse({ unlocked: [], merchant_name: merchant.business_name });

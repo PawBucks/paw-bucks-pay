@@ -88,15 +88,83 @@ serve(async (req) => {
       .maybeSingle();
 
     if (activityError || !activity) {
+      // Codes unlocked by an in-store check-in live in `offer_redemptions`.
+      const { data: merchantRow } = await supabaseClient
+        .from("merchants")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!merchantRow) {
+        return new Response(
+          JSON.stringify({ error: "Only merchants can verify redemptions" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 },
+        );
+      }
+
+      const { data: unlocked } = await serviceClient
+        .from("offer_redemptions")
+        .select("id, offer_id, user_id, redeemed_at, partner_offers!inner(id, title, partner_id, redemption_count)")
+        .eq("redemption_code", redemption_code)
+        .eq("partner_offers.partner_id", merchantRow.id)
+        .maybeSingle();
+
+      if (!unlocked) {
+        return new Response(
+          JSON.stringify({ valid: false, message: "Invalid redemption code" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+        );
+      }
+      if (unlocked.redeemed_at) {
+        return new Response(
+          JSON.stringify({
+            valid: false,
+            message: "This code has already been used",
+            used_at: unlocked.redeemed_at,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+        );
+      }
+
+      const redeemedAt = new Date().toISOString();
+      const { data: marked } = await serviceClient
+        .from("offer_redemptions")
+        .update({ redeemed_at: redeemedAt, partner_confirmed: true })
+        .eq("id", unlocked.id)
+        .is("redeemed_at", null)
+        .select("id")
+        .maybeSingle();
+
+      if (!marked) {
+        return new Response(
+          JSON.stringify({ valid: false, message: "This code has already been used" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+        );
+      }
+
+      const offerMeta = (unlocked as any).partner_offers;
+      await serviceClient
+        .from("partner_offers")
+        .update({ redemption_count: (offerMeta?.redemption_count ?? 0) + 1 })
+        .eq("id", unlocked.offer_id);
+
+      const { data: unlockedProfile } = await serviceClient
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", unlocked.user_id)
+        .maybeSingle();
+
       return new Response(
-        JSON.stringify({ 
-          valid: false,
-          message: "Invalid redemption code"
+        JSON.stringify({
+          valid: true,
+          user_name: unlockedProfile?.full_name || "Customer",
+          user_email: unlockedProfile?.email,
+          offer_title: offerMeta?.title ?? "Deal",
+          coins_spent: 0,
+          redeemed_at: redeemedAt,
+          message: "Redemption verified successfully",
         }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        }
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
       );
     }
 
