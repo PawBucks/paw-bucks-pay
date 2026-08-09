@@ -51,7 +51,62 @@ serve(async (req) => {
       .eq("type", "redeem")
       .maybeSingle();
 
-    if (activityError || !activity) {
+    if (activityError) {
+      throw activityError;
+    }
+
+    // Codes unlocked via in-store check-in live in `offer_redemptions` and have
+    // no pawbucks_activity row. Confirm those here so the deal moves to the
+    // pet owner's "Redeemed" pile.
+    if (!activity) {
+      const { data: unlocked } = await supabaseClient
+        .from("offer_redemptions")
+        .select("id, offer_id, user_id, redeemed_at, partner_offers!inner(id, partner_id, redemption_count)")
+        .eq("redemption_code", redemption_code)
+        .eq("partner_offers.partner_id", merchant.id)
+        .maybeSingle();
+
+      if (!unlocked) {
+        throw new Error("Redemption code not found");
+      }
+      if (unlocked.redeemed_at) {
+        throw new Error("Redemption already confirmed");
+      }
+
+      const { data: confirmedUnlock, error: unlockError } = await supabaseClient
+        .from("offer_redemptions")
+        .update({ redeemed_at: new Date().toISOString(), partner_confirmed: true })
+        .eq("id", unlocked.id)
+        .is("redeemed_at", null)
+        .select()
+        .maybeSingle();
+
+      if (unlockError) throw unlockError;
+      if (!confirmedUnlock) throw new Error("Redemption already confirmed");
+
+      const currentCount = (unlocked as any).partner_offers?.redemption_count ?? 0;
+      await supabaseClient
+        .from("partner_offers")
+        .update({ redemption_count: currentCount + 1 })
+        .eq("id", unlocked.offer_id);
+
+      try {
+        await supabaseClient.from("offer_activity").insert({
+          offer_id: unlocked.offer_id,
+          merchant_id: merchant.id,
+          action: "confirmed_redemption",
+          actor_id: user.id,
+          details: { redemption_code, source: "checkin_unlock" },
+        });
+      } catch (_) { /* non-fatal */ }
+
+      return new Response(
+        JSON.stringify({ success: true, redemption: confirmedUnlock }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+      );
+    }
+
+    if (!activity) {
       throw new Error("Redemption code not found");
     }
 
@@ -77,6 +132,14 @@ serve(async (req) => {
     // Best-effort: increment redemption_count on the offer.
     const targetOfferId = activity.offer_id ?? offer_id ?? null;
     if (targetOfferId) {
+      // Keep the pet owner's unlocked card in sync so it moves to "Redeemed".
+      await supabaseClient
+        .from("offer_redemptions")
+        .update({ redeemed_at: new Date().toISOString(), partner_confirmed: true })
+        .eq("offer_id", targetOfferId)
+        .eq("user_id", activity.user_id)
+        .is("redeemed_at", null);
+
       const { data: offerRow } = await supabaseClient
         .from("partner_offers")
         .select("redemption_count")
