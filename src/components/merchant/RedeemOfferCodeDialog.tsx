@@ -159,13 +159,13 @@ export function RedeemOfferCodeDialog({
                 <XCircle className="h-4 w-4 mt-0.5 shrink-0" />
               )}
               <span>
-                {result.ok ? (
+                {result.ok === true ? (
                   <>
                     <strong>Redeemed</strong> — {result.offerTitle || "Offer"} for {result.userName}
                     {result.coinsSpent > 0 && <> ({result.coinsSpent.toLocaleString()} PB)</>}
                   </>
                 ) : (
-                  result.message
+                  (result as { ok: false; message: string }).message
                 )}
               </span>
             </AlertDescription>
