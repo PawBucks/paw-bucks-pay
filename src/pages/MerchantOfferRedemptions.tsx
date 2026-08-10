@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/
 import { ArrowLeft, Search, CheckCircle2 } from"lucide-react";
 import { toast } from"sonner";
 import { ErrorHandler } from"@/utils/errorHandler";
+import { RedeemOfferCodeDialog } from"@/components/merchant/RedeemOfferCodeDialog";
 
 interface Redemption {
  id: string;
@@ -139,7 +140,12 @@ export default function MerchantOfferRedemptions() {
  keywords={["merchant","redemptions","codes"]}
  />
  <MerchantWorkspaceLayout>
- <WorkspacePageHeader section="Catalog & Services" title="Redemptions" subtitle="View and confirm customer redemptions" />
+ <WorkspacePageHeader
+   section="Catalog & Services"
+   title="Redemptions"
+   subtitle="View and confirm customer redemptions"
+   actions={<RedeemOfferCodeDialog offerId={id} onRedeemed={fetchRedemptions} triggerVariant="default" />}
+ />
  <main className="container mx-auto px-4 py-6 pb-24 max-w-7xl">
  <Button variant="ghost" onClick={() => navigate(`/merchant/offers/${id}`)} className="mb-4">
  <ArrowLeft className="mr-2 h-4 w-4" />
