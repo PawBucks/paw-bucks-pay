@@ -14,6 +14,7 @@ import { Archive, ArchiveRestore, BarChart3, Edit, Pause, Play, Plus, QrCode, Se
 import { toast } from"sonner";
 import { ErrorHandler } from"@/utils/errorHandler";
 import { MerchantOfferImport } from"@/components/MerchantOfferImport";
+import { RedeemOfferCodeDialog } from"@/components/merchant/RedeemOfferCodeDialog";
 
 interface Offer {
  id: string;
@@ -163,6 +164,7 @@ const handleSignOut = async () => {
    actions={
      <>
        <MerchantOfferImport onImportComplete={fetchOffers} />
+       <RedeemOfferCodeDialog onRedeemed={fetchOffers} />
        <Button onClick={() => navigate("/merchant/offers/new")}>
          <Plus className="mr-2 h-4 w-4" />
          Create Offer
