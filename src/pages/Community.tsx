@@ -643,7 +643,7 @@ const Community = () => {
       <div style={{ background: C.white, borderBottom: `1px solid ${C.border}`, padding: "16px 16px 0" }}>
         <div style={{ maxWidth: 896, margin: "0 auto" }}>
           <div style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase", color: C.teal, marginBottom: 4 }}>COMMUNITY RESOURCES</div>
-          <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, letterSpacing: "-0.02em", marginBottom: 4 }}>Connect with pet owners and merchants near you</div>
+          <h1 style={{ fontSize: 19, fontWeight: 800, color: C.ink, letterSpacing: "-0.02em", margin: "0 0 4px" }}>Connect with pet owners and merchants near you</h1>
           <div style={{ fontSize: 12, color: C.mutedLight, marginBottom: 14 }}>Ask questions, share moments, and discover local pet care tips.</div>
 
           <div style={{ display: "flex", gap: 6, overflowX: "auto", scrollbarWidth: "none", paddingBottom: 12 }}>
