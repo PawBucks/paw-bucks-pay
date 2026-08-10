@@ -100,8 +100,20 @@ serve(async (req) => {
         });
       } catch (_) { /* non-fatal */ }
 
+      const [{ data: unlockedProfile }, { data: unlockedOffer }] = await Promise.all([
+        supabaseClient.from("profiles").select("full_name, email").eq("id", unlocked.user_id).maybeSingle(),
+        supabaseClient.from("partner_offers").select("title").eq("id", unlocked.offer_id).maybeSingle(),
+      ]);
+
       return new Response(
-        JSON.stringify({ success: true, redemption: confirmedUnlock }),
+        JSON.stringify({
+          success: true,
+          redemption: confirmedUnlock,
+          offer_title: unlockedOffer?.title ?? null,
+          user_name: unlockedProfile?.full_name || "Customer",
+          user_email: unlockedProfile?.email ?? null,
+          coins_spent: 0,
+        }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
       );
     }
@@ -166,10 +178,21 @@ serve(async (req) => {
 
     console.log(`Confirmed redemption ${redemption_code} for merchant ${merchant.id}`);
 
+    const [{ data: activityProfile }, { data: activityOffer }] = await Promise.all([
+      supabaseClient.from("profiles").select("full_name, email").eq("id", activity.user_id).maybeSingle(),
+      targetOfferId
+        ? supabaseClient.from("partner_offers").select("title").eq("id", targetOfferId).maybeSingle()
+        : Promise.resolve({ data: null as { title: string } | null }),
+    ]);
+
     return new Response(
       JSON.stringify({
         success: true,
-        redemption: confirmed
+        redemption: confirmed,
+        offer_title: activityOffer?.title ?? null,
+        user_name: activityProfile?.full_name || "Customer",
+        user_email: activityProfile?.email ?? null,
+        coins_spent: Math.abs(activity.amount ?? 0),
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
