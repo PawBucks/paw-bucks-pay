@@ -621,6 +621,7 @@ const Index = () => {
 
   {/* PREMIUM MERCHANTS */}
   <section className="pl-section" style={{ background:"var(--section-alt)" }}>
+  <h2 className="pl-section-title">Featured premium partners near you.</h2>
   <PremiumMerchantsBanner />
   </section>
 
