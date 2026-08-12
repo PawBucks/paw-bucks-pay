@@ -16,6 +16,7 @@ pg_cron schedules run in the database's UTC timezone with no per-user awareness,
 - `send-invoice-reminders` (9 AM, per merchant owner — invoice clients aren't always registered users)
 - `send-lost-pet-deletion-warning` (9 AM, per pet owner)
 - `process-grooming-rebooks` (10 AM, per customer)
+- `pet-fund-monthly-release` (runs hourly at :05; releases each installment once the pet owner's local calendar date reaches `scheduled_at`, which is stored as local midnight in their timezone)
 
 **Functions exempt:** TZ-agnostic ops/maintenance jobs (every-N-minute pollers, hourly subscription/expiration checks, daily 3 AM cleanups). These can keep fixed UTC schedules.
 
