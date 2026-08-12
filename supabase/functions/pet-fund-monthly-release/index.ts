@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { checkInternalSecret } from "../_shared/internal-auth.ts";
+import { currentDateInTz } from "../_shared/tz.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,7 +38,7 @@ serve(async (req) => {
     // so comparing against now() is correct
     const { data: dueReleases, error: releaseError } = await supabaseAdmin
       .from('pet_fund_releases')
-      .select('id, ledger_id, user_id, amount, month_number')
+      .select('id, ledger_id, user_id, amount, month_number, scheduled_at')
       .eq('status', 'pending')
       .lte('scheduled_at', new Date().toISOString());
 
@@ -55,16 +56,24 @@ serve(async (req) => {
     }
 
     let releasedCount = 0;
-    const now = new Date();
+    let skippedCount = 0;
 
     for (const release of (dueReleases || [])) {
-      // Double-check: has midnight passed in the user's local timezone?
+      // Safety gate: only release once the calendar date has actually arrived
+      // in the pet owner's own timezone (scheduled_at is local midnight in UTC).
       const tz = releaseTzMap.get(release.user_id) || 'America/New_York';
-      const localDate = new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(now);
-      const scheduledDate = release.scheduled_at?.split?.('T')?.[0];
-      
-      // Only release if user's local date is past the scheduled date
-      // (scheduled_at is already midnight-local converted to UTC, so this is a safety check)
+      const localToday = currentDateInTz(tz);
+      const scheduledLocalDate = new Intl.DateTimeFormat('en-CA', {
+        timeZone: tz,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date(release.scheduled_at));
+
+      if (localToday < scheduledLocalDate) {
+        skippedCount++;
+        continue;
+      }
 
       const { error: rpcError } = await supabaseAdmin.rpc('release_pet_fund_installment', {
         p_release_id: release.id,
@@ -110,11 +119,12 @@ serve(async (req) => {
       bonusesReleased++;
     }
 
-    console.log(`[PET-FUND-RELEASE] Complete: ${releasedCount} installments, ${bonusesReleased} bonuses released, ${expiredCount || 0} expired`);
+    console.log(`[PET-FUND-RELEASE] Complete: ${releasedCount} installments, ${skippedCount} skipped (local midnight not reached), ${bonusesReleased} bonuses released, ${expiredCount || 0} expired`);
 
     return new Response(JSON.stringify({
       success: true,
       releasedCount,
+      skippedCount,
       bonusesReleased,
       expiredCount: expiredCount || 0,
       timestamp: new Date().toISOString(),
