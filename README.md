@@ -1,6 +1,6 @@
 # PawBucks-pay
 
-You are a full-stack engineer. Create a full-stack web app called "PetalPay" that connects pet stores, groomers, and trainers with pet owners. The app should have two portals:
+You are a full-stack engineer. Create a full-stack web app called "PawBucks" that connects pet stores, groomers, and trainers with pet owners. The app should have two portals:
 1. A Pet Owner app (frontend)
 2. A Merchant dashboard (for pet businesses)
 Both should connect to a single backend using a secure API. Include user authentication, payments, and a rewards wallet system.
