@@ -170,6 +170,10 @@ const MyDeals = () => {
   const { data: redemptions = [], isLoading: redLoading } = useQuery({
     queryKey: ["my-deals-redemptions", user?.id],
     enabled: !!user?.id,
+    // Merchant confirmation happens on their device — keep this fresh so the
+    // deal flips from Active to Redeemed shortly after the code is entered.
+    refetchInterval: 20000,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("offer_redemptions")
