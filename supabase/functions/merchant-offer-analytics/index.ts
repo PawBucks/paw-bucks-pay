@@ -47,18 +47,21 @@ serve(async (req) => {
       throw offersError;
     }
 
-    // Get total redemptions
+    const offerIds = offers?.map(o => o.id) || [];
+
+    // Codes issued to a customer (unassigned pre-generated codes don't count).
     const { count: totalRedemptions } = await supabaseClient
       .from("offer_redemptions")
       .select("*", { count: "exact", head: true })
-      .in("offer_id", offers?.map(o => o.id) || []);
+      .in("offer_id", offerIds)
+      .not("user_id", "is", null);
 
-    // Get confirmed redemptions
+    // Actual redemptions: only once the merchant confirmed / entered the code.
     const { count: confirmedRedemptions } = await supabaseClient
       .from("offer_redemptions")
       .select("*", { count: "exact", head: true })
-      .in("offer_id", offers?.map(o => o.id) || [])
-      .eq("partner_confirmed", true);
+      .in("offer_id", offerIds)
+      .not("redeemed_at", "is", null);
 
     // Get monthly redemptions (last 30 days)
     const thirtyDaysAgo = new Date();
@@ -66,9 +69,10 @@ serve(async (req) => {
 
     const { data: monthlyRedemptions, error: monthlyError } = await supabaseClient
       .from("offer_redemptions")
-      .select("created_at, offer_id")
-      .in("offer_id", offers?.map(o => o.id) || [])
-      .gte("created_at", thirtyDaysAgo.toISOString());
+      .select("redeemed_at, offer_id")
+      .in("offer_id", offerIds)
+      .not("redeemed_at", "is", null)
+      .gte("redeemed_at", thirtyDaysAgo.toISOString());
 
     if (monthlyError) {
       throw monthlyError;
@@ -77,7 +81,7 @@ serve(async (req) => {
     // Group by day
     const redemptionsByDay: Record<string, number> = {};
     monthlyRedemptions?.forEach(r => {
-      const day = new Date(r.created_at).toISOString().split("T")[0];
+      const day = new Date(r.redeemed_at as string).toISOString().split("T")[0];
       redemptionsByDay[day] = (redemptionsByDay[day] || 0) + 1;
     });
 
