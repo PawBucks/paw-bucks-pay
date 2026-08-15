@@ -95,6 +95,30 @@ serve(async (req) => {
     // Stripe will charge the invoice line item PLUS a separate tip line item,
     // so the invoice line item must NOT include the tip (otherwise tip is double-charged).
     const tipCents = Number(tipAmountCents || 0);
+
+    // Server-side amount validation: never trust the client-supplied total.
+    if (!Number.isFinite(tipCents) || tipCents < 0) {
+      throw new Error("Invalid tip amount");
+    }
+    if (invoice.status === "paid" || invoice.status === "void" || invoice.status === "cancelled") {
+      throw new Error("This invoice is no longer payable");
+    }
+    const amountDueCents = Math.round(Number(invoice.amount_due ?? invoice.total ?? 0) * 100);
+    const baseCents = Math.round(Number(totalAmountCents)) - Math.round(tipCents);
+    if (!Number.isFinite(baseCents) || baseCents <= 0) {
+      throw new Error("Invalid payment amount");
+    }
+    if (amountDueCents <= 0) {
+      throw new Error("No balance due on this invoice");
+    }
+    if (baseCents > amountDueCents) {
+      throw new Error("Payment amount exceeds the amount due on this invoice");
+    }
+    if (!invoice.allow_partial_payments && baseCents !== amountDueCents) {
+      throw new Error("This invoice must be paid in full");
+    }
+    logStep("Amount validated against invoice", { baseCents, amountDueCents, tipCents });
+
     // 1 PawBuck = $0.001 = 0.1¢. Prefer the explicit PawBucks count from the
     // client so we never re-derive (and inflate) it from rounded cents.
     let pawbucksUsed = Number.isFinite(pawbucksUsedFromClient) && pawbucksUsedFromClient >= 0
