@@ -76,7 +76,7 @@ export function RescheduleBookingDialog({ open, onOpenChange, booking, initiator
   const { data: overrides = [] } = useQuery({
     queryKey: ["reschedule-overrides", merchantId],
     queryFn: () =>
-      schedulingService.getOverrides(
+      schedulingService.getPublicOverrides(
         merchantId!,
         format(new Date(), "yyyy-MM-dd"),
         format(addDays(new Date(), 60), "yyyy-MM-dd"),

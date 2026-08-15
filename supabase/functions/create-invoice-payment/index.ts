@@ -23,22 +23,51 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { invoiceId, amount, tipAmount, userId } = await req.json();
+    const { invoiceId, amount, tipAmount, userId, accessToken, token } = await req.json();
+    const suppliedToken = accessToken || token;
 
     if (!invoiceId || !amount) {
       throw new Error("Invoice ID and amount are required");
     }
+    if (!suppliedToken) {
+      throw new Error("A valid invoice access token is required");
+    }
 
-    // Fetch the invoice
+    // Fetch the invoice — access token proves authorization to pay it
     const { data: invoice, error: invoiceError } = await supabase
       .from("invoices")
       .select("*")
       .eq("id", invoiceId)
+      .eq("access_token", suppliedToken)
       .single();
 
     if (invoiceError || !invoice) {
-      throw new Error("Invoice not found");
+      throw new Error("Invoice not found or invalid access token");
     }
+
+    if (invoice.status === "paid" || invoice.status === "void" || invoice.status === "cancelled") {
+      throw new Error("This invoice is no longer payable");
+    }
+
+    // Server-side amount validation: never trust the client-supplied amount.
+    const amountDueCents = Math.round(Number(invoice.amount_due ?? invoice.total ?? 0) * 100);
+    const requestedCents = Math.round(Number(amount));
+    const validatedTip = Math.max(0, Math.round(Number(tipAmount || 0)));
+
+    if (!Number.isFinite(requestedCents) || requestedCents <= 0) {
+      throw new Error("Invalid payment amount");
+    }
+    if (amountDueCents <= 0) {
+      throw new Error("No balance due on this invoice");
+    }
+    if (requestedCents > amountDueCents) {
+      throw new Error("Payment amount exceeds the amount due on this invoice");
+    }
+    if (!invoice.allow_partial_payments && requestedCents !== amountDueCents) {
+      throw new Error("This invoice must be paid in full");
+    }
+
+    const validatedAmount = requestedCents;
 
     // Fetch the merchant
     const { data: merchant, error: merchantError } = await supabase
@@ -62,14 +91,14 @@ serve(async (req) => {
             name: `Invoice #${invoice.invoice_number}`,
             description: invoice.title || `Payment for invoice from ${merchant.business_name}`,
           },
-          unit_amount: amount,
+          unit_amount: validatedAmount,
         },
         quantity: 1,
       },
     ];
 
     // Add tip as separate line item if provided
-    if (tipAmount && tipAmount > 0) {
+    if (validatedTip > 0) {
       lineItems.push({
         price_data: {
           currency: invoice.currency || "usd",
@@ -77,7 +106,7 @@ serve(async (req) => {
             name: "Tip",
             description: "Optional gratuity",
           },
-          unit_amount: tipAmount,
+          unit_amount: validatedTip,
         },
         quantity: 1,
       });
@@ -115,7 +144,7 @@ serve(async (req) => {
       invoice_id: invoiceId,
       merchant_id: merchant.id,
       type: "invoice_payment",
-      tip_amount: String(tipAmount || 0),
+      tip_amount: String(validatedTip),
       pawbucks_used: "0", // This function doesn't handle PawBucks, but included for consistency
       user_id: userId || "", // CRITICAL: Required for PawBucks rewards and transaction records
     };
@@ -124,7 +153,7 @@ serve(async (req) => {
       // Use Stripe Connect destination charges (Express accounts)
       // Success Fee: 3% applies ONLY to the invoice amount (Stripe-funded portion),
       // never to tips. Tips are passed through 100% to the merchant.
-      const applicationFee = Math.round(amount * 0.03);
+      const applicationFee = Math.round(validatedAmount * 0.03);
 
       console.log(`Creating Connect checkout for merchant ${merchant.id} with destination ${connectedAccountId}`);
 
@@ -146,7 +175,7 @@ serve(async (req) => {
             invoice_id: invoiceId,
             merchant_id: merchant.id,
             user_id: userId || "",
-            tip_amount: String(tipAmount || 0),
+            tip_amount: String(validatedTip),
             pawbucks_used: "0",
           },
         },
@@ -188,11 +217,11 @@ serve(async (req) => {
       .insert({
         invoice_id: invoiceId,
         action: "payment_initiated",
-        description: `Payment of $${(amount / 100).toFixed(2)} initiated`,
+        description: `Payment of $${(validatedAmount / 100).toFixed(2)} initiated`,
         metadata: {
           checkout_session_id: session.id,
-          amount: amount,
-          tip_amount: tipAmount || 0,
+          amount: validatedAmount,
+          tip_amount: validatedTip,
           user_id: userId || null,
         },
       });

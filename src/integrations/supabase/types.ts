@@ -4527,6 +4527,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "invoice_items_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_catalog_items_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "invoice_items_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
@@ -15225,6 +15232,54 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_catalog_items_public: {
+        Row: {
+          category: string | null
+          description: string | null
+          id: string | null
+          merchant_id: string | null
+          name: string | null
+          sku: string | null
+          unit_price: number | null
+          unit_type: string | null
+        }
+        Insert: {
+          category?: string | null
+          description?: string | null
+          id?: string | null
+          merchant_id?: string | null
+          name?: string | null
+          sku?: string | null
+          unit_price?: number | null
+          unit_type?: string | null
+        }
+        Update: {
+          category?: string | null
+          description?: string | null
+          id?: string | null
+          merchant_id?: string | null
+          name?: string | null
+          sku?: string | null
+          unit_price?: number | null
+          unit_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_catalog_items_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_catalog_items_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lost_pet_posts_public: {
         Row: {
           additional_notes: string | null
@@ -15334,6 +15389,48 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "merchant_market_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_availability_overrides_public: {
+        Row: {
+          end_time: string | null
+          id: string | null
+          is_available: boolean | null
+          merchant_id: string | null
+          override_date: string | null
+          start_time: string | null
+        }
+        Insert: {
+          end_time?: string | null
+          id?: string | null
+          is_available?: boolean | null
+          merchant_id?: string | null
+          override_date?: string | null
+          start_time?: string | null
+        }
+        Update: {
+          end_time?: string | null
+          id?: string | null
+          is_available?: boolean | null
+          merchant_id?: string | null
+          override_date?: string | null
+          start_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_availability_overrides_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_availability_overrides_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
         ]
