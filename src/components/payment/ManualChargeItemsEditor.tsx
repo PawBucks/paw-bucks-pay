@@ -67,7 +67,6 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
           .from("invoice_catalog_items_public" as any)
           .select("id, name, unit_price, sku, category")
           .eq("merchant_id", merchantId)
-          .eq("is_active", true)
           .order("name"),
         supabase
           .from("merchant_services")
