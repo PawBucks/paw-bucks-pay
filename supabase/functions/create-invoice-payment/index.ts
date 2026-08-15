@@ -23,22 +23,51 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    const { invoiceId, amount, tipAmount, userId } = await req.json();
+    const { invoiceId, amount, tipAmount, userId, accessToken, token } = await req.json();
+    const suppliedToken = accessToken || token;
 
     if (!invoiceId || !amount) {
       throw new Error("Invoice ID and amount are required");
     }
+    if (!suppliedToken) {
+      throw new Error("A valid invoice access token is required");
+    }
 
-    // Fetch the invoice
+    // Fetch the invoice — access token proves authorization to pay it
     const { data: invoice, error: invoiceError } = await supabase
       .from("invoices")
       .select("*")
       .eq("id", invoiceId)
+      .eq("access_token", suppliedToken)
       .single();
 
     if (invoiceError || !invoice) {
-      throw new Error("Invoice not found");
+      throw new Error("Invoice not found or invalid access token");
     }
+
+    if (invoice.status === "paid" || invoice.status === "void" || invoice.status === "cancelled") {
+      throw new Error("This invoice is no longer payable");
+    }
+
+    // Server-side amount validation: never trust the client-supplied amount.
+    const amountDueCents = Math.round(Number(invoice.amount_due ?? invoice.total ?? 0) * 100);
+    const requestedCents = Math.round(Number(amount));
+    const validatedTip = Math.max(0, Math.round(Number(tipAmount || 0)));
+
+    if (!Number.isFinite(requestedCents) || requestedCents <= 0) {
+      throw new Error("Invalid payment amount");
+    }
+    if (amountDueCents <= 0) {
+      throw new Error("No balance due on this invoice");
+    }
+    if (requestedCents > amountDueCents) {
+      throw new Error("Payment amount exceeds the amount due on this invoice");
+    }
+    if (!invoice.allow_partial_payments && requestedCents !== amountDueCents) {
+      throw new Error("This invoice must be paid in full");
+    }
+
+    const validatedAmount = requestedCents;
 
     // Fetch the merchant
     const { data: merchant, error: merchantError } = await supabase
