@@ -17,10 +17,11 @@ import { RedeemOfferCodeDialog } from"@/components/merchant/RedeemOfferCodeDialo
 interface Redemption {
  id: string;
  redemption_code: string;
- user_id: string;
- redeemed_at: string;
+ user_id: string | null;
+ redeemed_at: string | null;
  partner_confirmed: boolean;
  created_at: string;
+ source?: "checkin_unlock" | "pawbucks";
  profiles?: {
  full_name: string;
  email: string;
@@ -217,14 +218,16 @@ export default function MerchantOfferRedemptions() {
  <div className="flex items-center gap-2 mb-1">
  <p className="font-mono font-semibold">{redemption.redemption_code}</p>
  <Badge variant={redemption.partner_confirmed ?"default" :"secondary"}>
- {redemption.partner_confirmed ?"Confirmed" :"Pending"}
+ {redemption.partner_confirmed ?"Redeemed" :"Awaiting redemption"}
  </Badge>
  </div>
  <p className="text-sm text-muted-foreground">
  {redemption.profiles?.full_name ||"Unknown User"} ({redemption.profiles?.email ||"No email"})
  </p>
  <p className="text-xs text-muted-foreground">
- Redeemed: {new Date(redemption.redeemed_at || redemption.created_at).toLocaleString()}
+ {redemption.partner_confirmed && redemption.redeemed_at
+  ? `Redeemed: ${new Date(redemption.redeemed_at).toLocaleString()}`
+  : `Code issued: ${new Date(redemption.created_at).toLocaleString()}`}
  </p>
  </div>
  {!redemption.partner_confirmed && (
@@ -233,7 +236,7 @@ export default function MerchantOfferRedemptions() {
  onClick={() => handleConfirmRedemption(redemption.redemption_code)}
  >
  <CheckCircle2 className="mr-2 h-4 w-4" />
- Confirm
+ Mark Redeemed
  </Button>
  )}
  </div>

@@ -26,6 +26,15 @@ export default function MerchantOfferCodes() {
  const [codeCount, setCodeCount] = useState(10);
  const [dialogOpen, setDialogOpen] = useState(false);
 
+ const counts = useMemo(
+  () => ({
+   available: codes.filter((c) => c.status === "available").length,
+   claimed: codes.filter((c) => c.status === "claimed").length,
+   redeemed: codes.filter((c) => c.status === "redeemed").length,
+  }),
+  [codes],
+ );
+
  useEffect(() => {
  const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
  setUser(session?.user ?? null);
@@ -199,7 +208,9 @@ export default function MerchantOfferCodes() {
  <div className="flex items-center justify-between">
  <div>
  <CardTitle>Generated Codes</CardTitle>
- <CardDescription>{codes.length} codes ready to use</CardDescription>
+ <CardDescription>
+  {codes.length} total &middot; {counts.available} available &middot; {counts.claimed} issued &middot; {counts.redeemed} redeemed
+ </CardDescription>
  </div>
  <div className="flex gap-2">
  <Button variant="outline" size="sm" onClick={handleCopyAll}>
