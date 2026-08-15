@@ -191,7 +191,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
 
   const { data: overrides = [] } = useQuery({
     queryKey: ["merchant-overrides", merchantId],
-    queryFn: () => schedulingService.getOverrides(merchantId),
+    queryFn: () => schedulingService.getPublicOverrides(merchantId),
   });
 
   const { data: merchantPaymentInfo } = useQuery({

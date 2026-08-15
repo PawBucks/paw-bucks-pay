@@ -64,7 +64,7 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
     queryFn: async (): Promise<CatalogSource[]> => {
       const [{ data: invItems }, { data: services }, { data: storeItems }] = await Promise.all([
         supabase
-          .from("invoice_catalog_items")
+          .from("invoice_catalog_items_public" as any)
           .select("id, name, unit_price, sku, category")
           .eq("merchant_id", merchantId)
           .eq("is_active", true)
