@@ -61,40 +61,89 @@ serve(async (req) => {
       throw new Error("Offer not found");
     }
 
-    // Read redemptions from pawbucks_activity (the actual source of truth
-    // populated by the redeem-pawbucks edge function).
-    let query = supabaseClient
+    type Unified = {
+      id: string;
+      user_id: string | null;
+      redemption_code: string;
+      partner_confirmed: boolean;
+      redeemed_at: string | null;
+      created_at: string;
+      coins_spent: number;
+      description: string | null;
+      source: "checkin_unlock" | "pawbucks";
+    };
+
+    // Source A: codes unlocked in-store via QR check-in (offer_redemptions).
+    // Only rows claimed by a customer count — unassigned pre-generated codes
+    // in the merchant's pool are not redemptions.
+    let unlockQuery = supabaseClient
+      .from("offer_redemptions")
+      .select("id, user_id, redemption_code, redeemed_at, partner_confirmed, created_at")
+      .eq("offer_id", offerId)
+      .not("user_id", "is", null);
+
+    // Source B: PawBucks redemption codes (pawbucks_activity).
+    let pbQuery = supabaseClient
       .from("pawbucks_activity")
-      .select(
-        "id, user_id, redemption_code, redemption_used, amount, description, created_at, offer_id, partner_id",
-        { count: "exact" }
-      )
+      .select("id, user_id, redemption_code, redemption_used, amount, description, created_at, offer_id, partner_id")
       .eq("type", "redeem")
       .not("redemption_code", "is", null)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+      // Prefer filtering by offer_id (new rows). Fall back to partner_id for
+      // legacy rows that were inserted before offer_id existed.
+      .or(`offer_id.eq.${offerId},and(offer_id.is.null,partner_id.eq.${offer.partner_id ?? ""})`);
 
-    // Prefer filtering by offer_id (new rows). Fall back to partner_id for
-    // legacy rows that were inserted before offer_id existed.
-    query = query.or(`offer_id.eq.${offerId},and(offer_id.is.null,partner_id.eq.${offer.partner_id ?? ""})`);
-
-    if (startDate) query = query.gte("created_at", startDate);
-    if (endDate) query = query.lte("created_at", endDate);
-
-    if (status === "confirmed") {
-      query = query.eq("redemption_used", true);
-    } else if (status === "pending") {
-      query = query.eq("redemption_used", false);
+    if (startDate) {
+      unlockQuery = unlockQuery.gte("created_at", startDate);
+      pbQuery = pbQuery.gte("created_at", startDate);
+    }
+    if (endDate) {
+      unlockQuery = unlockQuery.lte("created_at", endDate);
+      pbQuery = pbQuery.lte("created_at", endDate);
     }
 
-    const { data: rawRedemptions, error: redemptionsError, count } = await query;
+    const [{ data: unlockRows, error: unlockError }, { data: pbRows, error: pbError }] =
+      await Promise.all([unlockQuery, pbQuery]);
 
-    if (redemptionsError) {
-      throw redemptionsError;
-    }
+    if (unlockError) throw unlockError;
+    if (pbError) throw pbError;
+
+    const unified: Unified[] = [
+      ...((unlockRows ?? []) as any[]).map((r) => ({
+        id: r.id as string,
+        user_id: r.user_id as string | null,
+        redemption_code: r.redemption_code as string,
+        partner_confirmed: !!r.redeemed_at,
+        redeemed_at: (r.redeemed_at as string | null) ?? null,
+        created_at: r.created_at as string,
+        coins_spent: 0,
+        description: null,
+        source: "checkin_unlock" as const,
+      })),
+      ...((pbRows ?? []) as any[]).map((r) => ({
+        id: r.id as string,
+        user_id: r.user_id as string | null,
+        redemption_code: r.redemption_code as string,
+        partner_confirmed: !!r.redemption_used,
+        // A PawBucks code is only "redeemed" once the merchant confirms it.
+        redeemed_at: r.redemption_used ? (r.created_at as string) : null,
+        created_at: r.created_at as string,
+        coins_spent: Math.abs(r.amount ?? 0),
+        description: (r.description as string | null) ?? null,
+        source: "pawbucks" as const,
+      })),
+    ].filter((r) => {
+      if (status === "confirmed") return r.partner_confirmed;
+      if (status === "pending") return !r.partner_confirmed;
+      return true;
+    });
+
+    unified.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+
+    const count = unified.length;
+    const pageRows = unified.slice(offset, offset + limit);
 
     // Hydrate profile info for each user_id in a single follow-up query.
-    const userIds = Array.from(new Set((rawRedemptions ?? []).map((r) => r.user_id).filter(Boolean)));
+    const userIds = Array.from(new Set(pageRows.map((r) => r.user_id).filter(Boolean))) as string[];
     let profilesById: Record<string, { full_name: string; email: string }> = {};
     if (userIds.length > 0) {
       const { data: profiles } = await supabaseClient
@@ -104,16 +153,9 @@ serve(async (req) => {
       profilesById = Object.fromEntries((profiles ?? []).map((p) => [p.id, { full_name: p.full_name, email: p.email }]));
     }
 
-    const redemptions = (rawRedemptions ?? []).map((r) => ({
-      id: r.id,
-      user_id: r.user_id,
-      redemption_code: r.redemption_code,
-      partner_confirmed: !!r.redemption_used,
-      redeemed_at: r.created_at,
-      created_at: r.created_at,
-      coins_spent: Math.abs(r.amount ?? 0),
-      description: r.description,
-      profiles: profilesById[r.user_id] ?? null,
+    const redemptions = pageRows.map((r) => ({
+      ...r,
+      profiles: r.user_id ? profilesById[r.user_id] ?? null : null,
     }));
 
     console.log(`Listed ${redemptions.length} redemptions for offer ${offerId}`);
