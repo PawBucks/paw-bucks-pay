@@ -258,6 +258,26 @@ export const schedulingService = {
  },
 
  // === AVAILABILITY OVERRIDES ===
+ // Public/booking-side read: only exposes booking-relevant fields (no internal reason notes)
+ async getPublicOverrides(merchantId: string, startDate?: string, endDate?: string): Promise<AvailabilityOverride[]> {
+ let query = (supabase as any)
+ .from('merchant_availability_overrides_public')
+ .select('id, merchant_id, override_date, is_available, start_time, end_time')
+ .eq('merchant_id', merchantId)
+ .order('override_date');
+
+ if (startDate) {
+ query = query.gte('override_date', startDate);
+ }
+ if (endDate) {
+ query = query.lte('override_date', endDate);
+ }
+
+ const { data, error } = await query;
+ if (error) throw error;
+ return (data || []) as AvailabilityOverride[];
+ },
+
  async getOverrides(merchantId: string, startDate?: string, endDate?: string): Promise<AvailabilityOverride[]> {
  let query = supabase
  .from('merchant_availability_overrides')
