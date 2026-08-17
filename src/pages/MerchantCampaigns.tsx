@@ -216,38 +216,31 @@ export default function MerchantCampaigns() {
 
  setSavingTwilio(true);
  try {
- if (hasTwilio) {
- const updates: any = {
- twilio_account_sid: twilioSid,
- twilio_phone_number: twilioPhone,
- };
- if (twilioToken.trim()) updates.twilio_auth_token = twilioToken;
+      if (!hasTwilio && !twilioToken.trim()) {
+        toast.error("Auth token is required for initial setup");
+        setSavingTwilio(false);
+        return;
+      }
 
- const { error } = await supabase
- .from("merchant_twilio_settings")
- .update(updates)
- .eq("merchant_id", merchantId!);
- if (error) throw error;
- } else {
- if (!twilioToken.trim()) {
- toast.error("Auth token is required for initial setup");
- setSavingTwilio(false);
- return;
- }
- const { error } = await supabase
- .from("merchant_twilio_settings")
- .insert({
- merchant_id: merchantId!,
- twilio_account_sid: twilioSid,
- twilio_auth_token: twilioToken,
- twilio_phone_number: twilioPhone,
- });
- if (error) throw error;
- }
+      // Credentials are written server-side only; the client never reads them back.
+      const { data, error } = await supabase.functions.invoke("merchant-save-twilio-settings", {
+        body: {
+          twilio_account_sid: twilioSid.trim(),
+          twilio_phone_number: twilioPhone.trim(),
+          ...(twilioToken.trim() ? { twilio_auth_token: twilioToken.trim() } : {}),
+        },
+      });
+      if (error) throw error;
+      if (!data?.success) {
+        toast.error(data?.error || "Failed to save settings");
+        setSavingTwilio(false);
+        return;
+      }
 
- toast.success("Twilio settings saved");
- setHasTwilio(true);
- setShowSettings(false);
+      toast.success("Twilio settings saved");
+      setHasTwilio(true);
+      setTwilioToken("");
+      setShowSettings(false);
  } catch (err: any) {
  toast.error(err.message ||"Failed to save settings");
  } finally {
