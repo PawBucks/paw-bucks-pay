@@ -10,6 +10,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -17,6 +24,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { Formatters } from "@/utils/formatters";
 
@@ -56,6 +64,7 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
   const [open, setOpen] = useState(items.length > 0);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (items.length > 0 && !open) setOpen(true);
@@ -128,6 +137,77 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
   const removeItem = (key: string) => {
     onChange(items.filter((i) => i.key !== key));
   };
+
+  const catalogPicker = (
+    <Command shouldFilter={false} className="flex flex-col h-full min-h-0 bg-transparent">
+      <div className="flex items-center border-b border-border/60 px-2 shrink-0 bg-background">
+        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <CommandInput
+          placeholder="Search catalog…"
+          value={search}
+          onValueChange={setSearch}
+          className="h-11 border-0 ring-0 focus-visible:ring-0 placeholder:text-muted-foreground/70"
+        />
+        {search && (
+          <button
+            type="button"
+            aria-label="Clear search"
+            onClick={() => setSearch("")}
+            className="shrink-0 rounded-sm p-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      <CommandList
+        className="flex-1 min-h-0 max-h-none overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      >
+        {catalog.length === 0 && (
+          <div className="py-6 px-4 text-center text-muted-foreground text-sm">
+            No catalog items yet.
+            <br />
+            Add a custom line instead.
+          </div>
+        )}
+        <CommandEmpty>
+          <div className="py-6 text-center text-muted-foreground text-sm">No matches</div>
+        </CommandEmpty>
+        {Object.entries(grouped).map(([group, list]) => (
+          <CommandGroup
+            key={group}
+            heading={group}
+            className="[&_[cmdk-group-heading]]:sticky [&_[cmdk-group-heading]]:top-0 [&_[cmdk-group-heading]]:z-[1] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:bg-background"
+          >
+            {list.map((it) => (
+              <CommandItem
+                key={`${it.source_type}-${it.id}`}
+                value={`${it.source_type}-${it.id}`}
+                onSelect={() => addFromCatalog(it)}
+                className="flex items-center justify-between gap-2 cursor-pointer py-3 px-2 min-h-[48px] aria-selected:bg-primary/10"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground truncate">{it.name}</p>
+                  {it.sku && (
+                    <p className="text-[10px] text-muted-foreground/80 truncate">{it.sku}</p>
+                  )}
+                </div>
+                <span className="text-xs font-semibold text-primary shrink-0">
+                  {Formatters.currency(it.unit_price)}
+                </span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        ))}
+      </CommandList>
+    </Command>
+  );
+
+  const triggerButton = (
+    <Button type="button" variant="outline" size="sm" className="gap-2">
+      <Package className="w-4 h-4" />
+      Add from catalog
+    </Button>
+  );
 
   return (
     <div className="space-y-3">
@@ -222,88 +302,33 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
           )}
 
           <div className="flex flex-wrap gap-2">
-            <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
-              <PopoverTrigger asChild>
-                <Button type="button" variant="outline" size="sm" className="gap-2">
-                  <Package className="w-4 h-4" />
-                  Add from catalog
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-[min(92vw,22rem)] p-0 max-h-[min(80vh,30rem)]"
-                align="start"
-                sideOffset={4}
-                avoidCollisions={false}
-              >
-                <Command shouldFilter={false} className="flex flex-col max-h-[min(80vh,30rem)]">
-                  <div className="flex items-center border-b border-border/60 px-2 shrink-0 bg-background z-10">
-                    <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <CommandInput
-                      placeholder="Search catalog…"
-                      value={search}
-                      onValueChange={setSearch}
-                      className="h-9 border-0 ring-0 focus-visible:ring-0 placeholder:text-muted-foreground/70"
-                    />
-                    {search && (
-                      <button
-                        type="button"
-                        aria-label="Clear search"
-                        onClick={() => setSearch("")}
-                        className="shrink-0 rounded-sm p-1 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </div>
-                  <CommandList
-                    className="flex-1 min-h-0 overflow-y-auto overscroll-contain scroll-smooth"
-                    style={{
-                      WebkitOverflowScrolling: "touch",
-                      overscrollBehavior: "contain",
-                      scrollPaddingTop: "8px",
-                      scrollPaddingBottom: "8px",
-                    }}
-                  >
-                    {catalog.length === 0 && (
-                      <div className="py-6 text-center text-muted-foreground text-sm">
-                        No catalog items yet.
-                        <br />
-                        Add a custom line below.
-                      </div>
-                    )}
-                    <CommandEmpty>
-                      <div className="py-6 text-center text-muted-foreground text-sm">
-                        No matches
-                      </div>
-                    </CommandEmpty>
-                    {Object.entries(grouped).map(([group, list]) => (
-                      <CommandGroup key={group} heading={group} className="[&_[cmdk-group-heading]]:sticky [&_[cmdk-group-heading]]:top-0 [&_[cmdk-group-heading]]:z-[1] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:bg-muted/80 [&_[cmdk-group-heading]]:backdrop-blur-sm">
-                        {list.map((it) => (
-                          <CommandItem
-                            key={`${it.source_type}-${it.id}`}
-                            value={`${it.source_type}-${it.id}`}
-                            onSelect={() => addFromCatalog(it)}
-                            className="flex items-center justify-between gap-2 cursor-pointer py-3 px-2 min-h-[44px] aria-selected:bg-primary/10"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-foreground truncate">{it.name}</p>
-                              {it.sku && (
-                                <p className="text-[10px] text-muted-foreground/80 truncate">
-                                  {it.sku}
-                                </p>
-                              )}
-                            </div>
-                            <span className="text-xs font-semibold text-primary shrink-0">
-                              {Formatters.currency(it.unit_price)}
-                            </span>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    ))}
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            {isMobile ? (
+              <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>
+                <SheetTrigger asChild>{triggerButton}</SheetTrigger>
+                <SheetContent
+                  side="bottom"
+                  className="p-0 h-[85dvh] max-h-[85dvh] flex flex-col rounded-t-xl"
+                >
+                  <SheetHeader className="px-4 pt-4 pb-2 shrink-0 text-left">
+                    <SheetTitle className="text-base">Add from catalog</SheetTitle>
+                  </SheetHeader>
+                  <div className="flex-1 min-h-0 flex flex-col">{catalogPicker}</div>
+                </SheetContent>
+              </Sheet>
+            ) : (
+              <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+                <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+                <PopoverContent
+                  className="w-[min(92vw,22rem)] p-0 h-[min(70vh,28rem)] flex flex-col overflow-hidden"
+                  align="start"
+                  side="bottom"
+                  sideOffset={4}
+                  collisionPadding={12}
+                >
+                  {catalogPicker}
+                </PopoverContent>
+              </Popover>
+            )}
 
             <Button type="button" variant="outline" size="sm" className="gap-2" onClick={addCustom}>
               <Plus className="w-4 h-4" />
