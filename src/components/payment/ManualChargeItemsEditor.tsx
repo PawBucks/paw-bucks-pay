@@ -230,12 +230,13 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
                 </Button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-[min(92vw,22rem)] p-0"
+                className="w-[min(92vw,22rem)] p-0 max-h-[min(80vh,30rem)]"
                 align="start"
                 sideOffset={4}
+                avoidCollisions={false}
               >
-                <Command shouldFilter={false} className="flex flex-col">
-                  <div className="flex items-center border-b border-border/60 px-2">
+                <Command shouldFilter={false} className="flex flex-col max-h-[min(80vh,30rem)]">
+                  <div className="flex items-center border-b border-border/60 px-2 shrink-0 bg-background z-10">
                     <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                     <CommandInput
                       placeholder="Search catalog…"
@@ -254,7 +255,15 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
                       </button>
                     )}
                   </div>
-                  <CommandList className="max-h-[min(52vh,22rem)] overflow-y-auto overscroll-contain -webkit-overflow-scrolling-touch">
+                  <CommandList
+                    className="flex-1 min-h-0 overflow-y-auto overscroll-contain scroll-smooth"
+                    style={{
+                      WebkitOverflowScrolling: "touch",
+                      overscrollBehavior: "contain",
+                      scrollPaddingTop: "8px",
+                      scrollPaddingBottom: "8px",
+                    }}
+                  >
                     {catalog.length === 0 && (
                       <div className="py-6 text-center text-muted-foreground text-sm">
                         No catalog items yet.
@@ -268,13 +277,13 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
                       </div>
                     </CommandEmpty>
                     {Object.entries(grouped).map(([group, list]) => (
-                      <CommandGroup key={group} heading={group} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:bg-muted/50">
+                      <CommandGroup key={group} heading={group} className="[&_[cmdk-group-heading]]:sticky [&_[cmdk-group-heading]]:top-0 [&_[cmdk-group-heading]]:z-[1] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:bg-muted/80 [&_[cmdk-group-heading]]:backdrop-blur-sm">
                         {list.map((it) => (
                           <CommandItem
                             key={`${it.source_type}-${it.id}`}
                             value={`${it.source_type}-${it.id}`}
                             onSelect={() => addFromCatalog(it)}
-                            className="flex items-center justify-between gap-2 cursor-pointer py-2.5 px-2 aria-selected:bg-primary/10"
+                            className="flex items-center justify-between gap-2 cursor-pointer py-3 px-2 min-h-[44px] aria-selected:bg-primary/10"
                           >
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium text-foreground truncate">{it.name}</p>
