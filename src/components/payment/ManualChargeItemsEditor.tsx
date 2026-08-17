@@ -64,81 +64,12 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
   const { data: catalog = [] } = useQuery({
     queryKey: ["manual-charge-catalog", merchantId],
     queryFn: async (): Promise<CatalogSource[]> => {
-      const [{ data: invItems }, { data: services }, { data: storeItems }] = await Promise.all([
-        supabase
-          .from("invoice_catalog_items_public" as any)
-          .select("id, name, unit_price, sku, category")
-          .eq("merchant_id", merchantId)
-          .order("name"),
-        supabase
-          .from("merchant_services")
-          .select("id, name, price")
-          .eq("merchant_id", merchantId)
-          .eq("is_active", true)
-          .order("name"),
-        supabase
-          .from("pet_store_items")
-          .select("id, name, price, stock_quantity")
-          .eq("merchant_id", merchantId)
-          .eq("is_active", true)
-          .order("name"),
-      ]);
-
-      // Stripe storefront products (live products the merchant sells online)
-      let storefront: any[] = [];
-      try {
-        const { data: sf } = await supabase.functions.invoke("list-connect-products", {
-          body: { merchantId },
-        });
-        storefront = Array.isArray(sf?.products) ? sf.products : [];
-      } catch (_e) {
-        storefront = [];
-      }
-
-      const list: CatalogSource[] = [];
-      (invItems ?? []).forEach((it: any) =>
-        list.push({
-          id: it.id,
-          name: it.name,
-          unit_price: Number(it.unit_price ?? 0),
-          sku: it.sku ?? null,
-          source_type: "catalog_item",
-          group: it.category || "Catalog",
-        }),
-      );
-      (services ?? []).forEach((s: any) =>
-        list.push({
-          id: s.id,
-          name: s.name,
-          unit_price: Number(s.price ?? 0),
-          source_type: "merchant_service",
-          group: "Services",
-        }),
-      );
-      (storeItems ?? []).forEach((p: any) =>
-        list.push({
-          id: p.id,
-          name: p.name,
-          unit_price: Number(p.price ?? 0),
-          sku: null,
-          source_type: "pet_store_item",
-          group: "Store",
-        }),
-      );
-      storefront.forEach((p: any) => {
-        const cents = p?.price?.unit_amount;
-        if (typeof cents !== "number") return;
-        list.push({
-          id: p.id,
-          name: p.name,
-          unit_price: cents / 100,
-          // Stripe product ids aren't uuids, so they travel as the sku reference.
-          sku: p.id,
-          source_type: "custom",
-          group: "Storefront",
-        });
+      const { data, error } = await supabase.functions.invoke("list-connect-products", {
+        body: { merchantId },
       });
-      return list;
+      if (error) throw error;
+
+      return Array.isArray(data?.catalogItems) ? data.catalogItems : [];
     },
     enabled: !!merchantId && open,
     staleTime: 60_000,
