@@ -70,19 +70,6 @@ export const seoMeta = {
  ],
  canonical:"/merchants",
  },
- vets: {
- title:"For Veterinarians – PawBucks Vet Portal",
- description:
-"The complete veterinary practice platform: EMR, AI clinical tools, insurance automation, wellness plans, and growth — integrated with PawBucks rewards.",
- keywords: [
-"veterinary EMR",
-"vet practice software",
-"AI vet tools",
-"pet insurance automation",
-"vet wellness plans",
- ],
- canonical:"/vets",
- },
  directory: {
   title:"Pet Merchant Directory – Local Pet Businesses",
  description:

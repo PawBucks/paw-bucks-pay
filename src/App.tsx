@@ -70,7 +70,7 @@ const AdminMerchantServices = lazyWithRetry(() => import("./pages/AdminMerchantS
 const AdminUserDetail = lazyWithRetry(() => import("./pages/AdminUserDetail"),"AdminUserDetail");
 const PetHealth = lazyWithRetry(() => import("./pages/PetHealth"),"PetHealth");
 const VetDashboard = lazyWithRetry(() => import("./pages/VetDashboard"),"VetDashboard");
-const VetLanding = lazyWithRetry(() => import("./pages/VetLanding"),"VetLanding");
+
 const VetOnboarding = lazyWithRetry(() => import("./pages/VetOnboarding"),"VetOnboarding");
 const PawBucksWallet = lazyWithRetry(() => import("./pages/PawBucksWallet"),"PawBucksWallet");
 const PawBucksRedeem = lazyWithRetry(() => import("./pages/PawBucksRedeem"),"PawBucksRedeem");
@@ -181,8 +181,6 @@ const AppRoutes = () => {
  <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
  <Route path="/merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
  <Route path="/merchant-landing" element={<PageTransition><MerchantLanding /></PageTransition>} />
- <Route path="/vets" element={<PageTransition><VetLanding /></PageTransition>} />
- <Route path="/vet-landing" element={<PageTransition><VetLanding /></PageTransition>} />
  
  <Route path="/for-merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
  <Route path="/install" element={<PageTransition><Install /></PageTransition>} />

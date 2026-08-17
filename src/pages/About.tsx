@@ -758,7 +758,7 @@ const About = () => {
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
           <a href="/merchants">For Merchants</a>
-          <a href="/vets">For Vets</a>
+          
           <a href="mailto:Legal@PawBucks.app">Legal@PawBucks.app</a>
         </div>
       </footer>
