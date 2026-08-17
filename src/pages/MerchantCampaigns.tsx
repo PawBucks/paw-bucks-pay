@@ -137,45 +137,24 @@ export default function MerchantCampaigns() {
  async function loadRecipients() {
  if (!merchantId) return;
  setLoadingRecipients(true);
-
- // Get customers: people who transacted, subscribed, or follow
- const { data: transactions } = await supabase
- .from("transactions")
- .select("user_id")
- .eq("merchant_id", merchantId)
- .eq("status","completed");
-
- const { data: subscribers } = await supabase
- .from("merchant_subscriptions")
- .select("user_id")
- .eq("merchant_id", merchantId)
- .eq("status","active");
-
- // Combine unique user IDs
- const userIds = new Set<string>();
- transactions?.forEach((t: any) => t.user_id && userIds.add(t.user_id));
- subscribers?.forEach((s: any) => s.user_id && userIds.add(s.user_id));
-
- if (userIds.size === 0) {
+ try {
+ // Audience is built server-side: merchant customers, subscribers and
+ // uploaded/invoiced clients, minus anyone on do-not-contact.
+ const { data, error } = await supabase.functions.invoke("merchant-campaign-audience");
+ if (error) throw error;
+ if (data?.success) {
+ setRecipients((data.recipients as Recipient[]) || []);
+ setExcludedCount(data.counts?.excluded ?? 0);
+ } else {
  setRecipients([]);
- setLoadingRecipients(false);
- return;
+ toast.error(data?.error ||"Could not load your customer list");
  }
-
- const { data: profiles } = await supabase
- .from("profiles")
- .select("id, full_name, phone, email")
- .in("id", Array.from(userIds));
-
- const recipientList: Recipient[] = (profiles || []).map((p: any) => ({
- userId: p.id,
- name: p.full_name ||"Unknown",
- phone: p.phone || undefined,
- email: p.email || undefined,
- }));
-
- setRecipients(recipientList);
+ } catch (err: any) {
+ setRecipients([]);
+ toast.error(err.message ||"Could not load your customer list");
+ } finally {
  setLoadingRecipients(false);
+ }
  }
 
  useEffect(() => {
@@ -191,11 +170,11 @@ export default function MerchantCampaigns() {
  const filteredRecipients = recipients.filter((r) => {
  if (channel ==="sms") return !!r.phone;
  if (channel ==="email") return !!r.email;
- return true;
+ return !!r.userId;
  });
 
  if (filteredRecipients.length === 0) {
- toast.error(`No recipients with ${channel ==="sms" ?"phone numbers" : channel ==="email" ?"email addresses" :"accounts"} found`);
+ toast.error(`No recipients with ${channel ==="sms" ?"phone numbers" : channel ==="email" ?"email addresses" :"PawBucks accounts"} found`);
  return;
  }
 
