@@ -30,10 +30,12 @@ interface Campaign {
 }
 
 interface Recipient {
- userId: string;
+  userId?: string;
+  contactId?: string;
  name: string;
  phone?: string;
  email?: string;
+  source?: "customer" | "subscriber" | "imported";
 }
 
 interface TwilioSettings {
@@ -53,6 +55,7 @@ export default function MerchantCampaigns() {
  const [showSettings, setShowSettings] = useState(false);
  const [recipients, setRecipients] = useState<Recipient[]>([]);
  const [loadingRecipients, setLoadingRecipients] = useState(false);
+  const [excludedCount, setExcludedCount] = useState(0);
 
  // Form state
  const [title, setTitle] = useState("");
