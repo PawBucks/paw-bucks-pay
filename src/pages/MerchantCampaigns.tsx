@@ -30,10 +30,12 @@ interface Campaign {
 }
 
 interface Recipient {
- userId: string;
+  userId?: string;
+  contactId?: string;
  name: string;
  phone?: string;
  email?: string;
+  source?: "customer" | "subscriber" | "imported";
 }
 
 interface TwilioSettings {
@@ -53,6 +55,7 @@ export default function MerchantCampaigns() {
  const [showSettings, setShowSettings] = useState(false);
  const [recipients, setRecipients] = useState<Recipient[]>([]);
  const [loadingRecipients, setLoadingRecipients] = useState(false);
+  const [excludedCount, setExcludedCount] = useState(0);
 
  // Form state
  const [title, setTitle] = useState("");
@@ -134,45 +137,24 @@ export default function MerchantCampaigns() {
  async function loadRecipients() {
  if (!merchantId) return;
  setLoadingRecipients(true);
-
- // Get customers: people who transacted, subscribed, or follow
- const { data: transactions } = await supabase
- .from("transactions")
- .select("user_id")
- .eq("merchant_id", merchantId)
- .eq("status","completed");
-
- const { data: subscribers } = await supabase
- .from("merchant_subscriptions")
- .select("user_id")
- .eq("merchant_id", merchantId)
- .eq("status","active");
-
- // Combine unique user IDs
- const userIds = new Set<string>();
- transactions?.forEach((t: any) => t.user_id && userIds.add(t.user_id));
- subscribers?.forEach((s: any) => s.user_id && userIds.add(s.user_id));
-
- if (userIds.size === 0) {
+ try {
+ // Audience is built server-side: merchant customers, subscribers and
+ // uploaded/invoiced clients, minus anyone on do-not-contact.
+ const { data, error } = await supabase.functions.invoke("merchant-campaign-audience");
+ if (error) throw error;
+ if (data?.success) {
+ setRecipients((data.recipients as Recipient[]) || []);
+ setExcludedCount(data.counts?.excluded ?? 0);
+ } else {
  setRecipients([]);
- setLoadingRecipients(false);
- return;
+ toast.error(data?.error ||"Could not load your customer list");
  }
-
- const { data: profiles } = await supabase
- .from("profiles")
- .select("id, full_name, phone, email")
- .in("id", Array.from(userIds));
-
- const recipientList: Recipient[] = (profiles || []).map((p: any) => ({
- userId: p.id,
- name: p.full_name ||"Unknown",
- phone: p.phone || undefined,
- email: p.email || undefined,
- }));
-
- setRecipients(recipientList);
+ } catch (err: any) {
+ setRecipients([]);
+ toast.error(err.message ||"Could not load your customer list");
+ } finally {
  setLoadingRecipients(false);
+ }
  }
 
  useEffect(() => {
@@ -188,11 +170,11 @@ export default function MerchantCampaigns() {
  const filteredRecipients = recipients.filter((r) => {
  if (channel ==="sms") return !!r.phone;
  if (channel ==="email") return !!r.email;
- return true;
+ return !!r.userId;
  });
 
  if (filteredRecipients.length === 0) {
- toast.error(`No recipients with ${channel ==="sms" ?"phone numbers" : channel ==="email" ?"email addresses" :"accounts"} found`);
+ toast.error(`No recipients with ${channel ==="sms" ?"phone numbers" : channel ==="email" ?"email addresses" :"PawBucks accounts"} found`);
  return;
  }
 
@@ -429,12 +411,22 @@ export default function MerchantCampaigns() {
  <p className="text-xs text-muted-foreground">Loading customers...</p>
  ) : (
  <div className="text-xs text-muted-foreground space-y-0.5">
- <p>{recipients.length} total customers</p>
+ <p>{recipients.length} total customers &amp; clients</p>
+ <p>
+ {recipients.filter((r) => r.source ==="imported").length} uploaded clients ·{""}
+ {recipients.filter((r) => r.source !=="imported").length} platform customers
+ </p>
+ {channel ==="push" && (
+ <p>{recipients.filter((r) => r.userId).length} with PawBucks accounts</p>
+ )}
  {channel ==="sms" && (
  <p>{recipients.filter((r) => r.phone).length} with phone numbers</p>
  )}
  {channel ==="email" && (
  <p>{recipients.filter((r) => r.email).length} with email addresses</p>
+ )}
+ {excludedCount > 0 && (
+ <p>{excludedCount} excluded (do not contact)</p>
  )}
  </div>
  )}

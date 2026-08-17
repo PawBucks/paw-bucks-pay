@@ -7,7 +7,8 @@ const corsHeaders = {
 };
 
 interface Recipient {
-  userId: string;
+  userId?: string;
+  contactId?: string;
   name: string;
   phone?: string;
   email?: string;
@@ -113,6 +114,9 @@ serve(async (req) => {
     const requestedIds = Array.from(
       new Set(recipients.map((r) => r.userId).filter((id): id is string => !!id))
     );
+    const requestedContactIds = Array.from(
+      new Set(recipients.map((r) => r.contactId).filter((id): id is string => !!id))
+    );
 
     const allowedIds = new Set<string>();
     if (requestedIds.length > 0) {
@@ -130,7 +134,27 @@ serve(async (req) => {
       for (const row of msgRes.data ?? []) row.user_id && allowedIds.add(row.user_id);
     }
 
-    const safeRecipients = recipients.filter((r) => r.userId && allowedIds.has(r.userId));
+    // Merchant-uploaded clients: must belong to this merchant and not be opted out.
+    const contactById = new Map<string, { name: string | null; email: string | null; phone: string | null }>();
+    if (requestedContactIds.length > 0) {
+      const { data: clientRows } = await supabaseAdmin
+        .from("invoice_clients")
+        .select("id, name, email, phone, is_active, do_not_contact")
+        .eq("merchant_id", merchantId)
+        .in("id", requestedContactIds);
+      for (const row of clientRows ?? []) {
+        if ((row as any).is_active === false || (row as any).do_not_contact === true) continue;
+        contactById.set(row.id as string, {
+          name: (row as any).name ?? null,
+          email: (row as any).email ?? null,
+          phone: (row as any).phone ?? null,
+        });
+      }
+    }
+
+    const safeRecipients = recipients.filter((r) =>
+      (r.userId && allowedIds.has(r.userId)) || (r.contactId && contactById.has(r.contactId))
+    );
     const skippedCount = recipients.length - safeRecipients.length;
 
     if (safeRecipients.length === 0) {
@@ -147,7 +171,7 @@ serve(async (req) => {
     // SECURITY: never trust merchant-supplied phone/email. Resolve contact details
     // server-side from the verified user's profile so messages can only ever go
     // to the legitimate owner of each userId.
-    const safeUserIds = safeRecipients.map((r) => r.userId);
+    const safeUserIds = safeRecipients.map((r) => r.userId).filter((id): id is string => !!id);
     const { data: profileRows } = await supabaseAdmin
       .from("profiles")
       .select("id, full_name, email, phone")
@@ -162,10 +186,10 @@ serve(async (req) => {
     }
     // Override any client-supplied contact fields with server-side values.
     for (const r of safeRecipients) {
-      const p = profileById.get(r.userId);
+      const p = r.userId ? profileById.get(r.userId) : contactById.get(r.contactId!);
       r.email = p?.email ?? undefined;
       r.phone = p?.phone ?? undefined;
-      if (!r.name) r.name = p?.full_name ?? "";
+      if (!r.name) r.name = (p as any)?.full_name ?? (p as any)?.name ?? "";
     }
 
     // Create campaign record
@@ -198,6 +222,16 @@ serve(async (req) => {
       // Send in-app push notifications
       for (const recipient of safeRecipients) {
         try {
+          if (!recipient.userId) {
+            await supabaseAdmin.from("merchant_campaign_recipients").insert({
+              campaign_id: campaign.id,
+              client_id: recipient.contactId ?? null,
+              status: "failed",
+              error_message: "Imported client has no PawBucks account (use email or SMS)",
+            });
+            failedCount++;
+            continue;
+          }
           await supabaseAdmin.from("notifications").insert({
             user_id: recipient.userId,
             title: `${businessName}: ${title}`,
@@ -207,7 +241,8 @@ serve(async (req) => {
 
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
-            user_id: recipient.userId,
+            user_id: recipient.userId ?? null,
+            client_id: recipient.contactId ?? null,
             status: "sent",
             sent_at: new Date().toISOString(),
           });
@@ -215,7 +250,8 @@ serve(async (req) => {
         } catch (err) {
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
-            user_id: recipient.userId,
+            user_id: recipient.userId ?? null,
+            client_id: recipient.contactId ?? null,
             status: "failed",
             error_message: err instanceof Error ? err.message : "Unknown error",
           });
@@ -229,8 +265,8 @@ serve(async (req) => {
           if (!recipient.email) {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
-              user_id: recipient.userId,
-              // email omitted (resolved server-side, not stored as raw PII),
+              user_id: recipient.userId ?? null,
+              client_id: recipient.contactId ?? null,
               status: "failed",
               error_message: "No email address",
             });
@@ -243,7 +279,7 @@ serve(async (req) => {
             body: {
               templateName: "merchant-campaign",
               recipientEmail: recipient.email,
-              idempotencyKey: `merchant-campaign-${campaign.id}-${recipient.userId}`,
+              idempotencyKey: `merchant-campaign-${campaign.id}-${recipient.userId ?? recipient.contactId}`,
               templateData: {
                 businessName,
                 title,
@@ -253,7 +289,7 @@ serve(async (req) => {
             },
           });
 
-          if (emailError) {
+          if (emailError && recipient.userId) {
             // Fallback: just log as sent with notification
             console.log("Email function not available, falling back to notification");
             await supabaseAdmin.from("notifications").insert({
@@ -266,7 +302,8 @@ serve(async (req) => {
 
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
-            user_id: recipient.userId,
+            user_id: recipient.userId ?? null,
+            client_id: recipient.contactId ?? null,
             // email omitted (resolved server-side, not stored as raw PII),
             status: "sent",
             sent_at: new Date().toISOString(),
@@ -275,7 +312,8 @@ serve(async (req) => {
         } catch (err) {
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
-            user_id: recipient.userId,
+            user_id: recipient.userId ?? null,
+            client_id: recipient.contactId ?? null,
             // email omitted (resolved server-side, not stored as raw PII),
             status: "failed",
             error_message: err instanceof Error ? err.message : "Unknown error",
@@ -312,8 +350,8 @@ serve(async (req) => {
           if (!recipient.phone) {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
-              user_id: recipient.userId,
-              // phone omitted (resolved server-side, not stored as raw PII),
+              user_id: recipient.userId ?? null,
+              client_id: recipient.contactId ?? null,
               status: "failed",
               error_message: "No phone number",
             });
@@ -347,7 +385,7 @@ serve(async (req) => {
           if (response.ok) {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
-              user_id: recipient.userId,
+              user_id: recipient.userId ?? null,
               // phone omitted (resolved server-side, not stored as raw PII),
               status: "sent",
               sent_at: new Date().toISOString(),
@@ -356,7 +394,7 @@ serve(async (req) => {
           } else {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
-              user_id: recipient.userId,
+              user_id: recipient.userId ?? null,
               // phone omitted (resolved server-side, not stored as raw PII),
               status: "failed",
               error_message: result.message || "Twilio error",
@@ -367,7 +405,8 @@ serve(async (req) => {
           const errorMessage = err instanceof Error ? err.message : "Send failed";
           await supabaseAdmin.from("merchant_campaign_recipients").insert({
             campaign_id: campaign.id,
-            user_id: recipient.userId,
+            user_id: recipient.userId ?? null,
+            client_id: recipient.contactId ?? null,
             // phone omitted (resolved server-side, not stored as raw PII),
             status: "failed",
             error_message: errorMessage,
