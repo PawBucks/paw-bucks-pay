@@ -28,6 +28,8 @@ export type LineItem = {
   sku?: string | null;
   quantity: number;
   unit_price: number;
+  /** Set for items pulled from the merchant's catalog — name/price are fixed by the merchant. */
+  locked?: boolean;
 };
 
 type CatalogSource = {
@@ -82,6 +84,17 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
           .order("name"),
       ]);
 
+      // Stripe storefront products (live products the merchant sells online)
+      let storefront: any[] = [];
+      try {
+        const { data: sf } = await supabase.functions.invoke("list-connect-products", {
+          body: { merchantId },
+        });
+        storefront = Array.isArray(sf?.products) ? sf.products : [];
+      } catch (_e) {
+        storefront = [];
+      }
+
       const list: CatalogSource[] = [];
       (invItems ?? []).forEach((it: any) =>
         list.push({
@@ -112,6 +125,19 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
           group: "Store",
         }),
       );
+      storefront.forEach((p: any) => {
+        const cents = p?.price?.unit_amount;
+        if (typeof cents !== "number") return;
+        list.push({
+          id: p.id,
+          name: p.name,
+          unit_price: cents / 100,
+          // Stripe product ids aren't uuids, so they travel as the sku reference.
+          sku: p.id,
+          source_type: "custom",
+          group: "Storefront",
+        });
+      });
       return list;
     },
     enabled: !!merchantId && open,
@@ -139,11 +165,12 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
       {
         key: newKey(),
         source_type: src.source_type,
-        source_id: src.id,
+        source_id: src.source_type === "custom" ? null : src.id,
         name: src.name,
         sku: src.sku ?? null,
         quantity: 1,
         unit_price: src.unit_price,
+        locked: true,
       },
     ]);
     setPickerOpen(false);
