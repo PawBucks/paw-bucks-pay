@@ -28,6 +28,8 @@ export type LineItem = {
   sku?: string | null;
   quantity: number;
   unit_price: number;
+  /** Set for items pulled from the merchant's catalog — name/price are fixed by the merchant. */
+  locked?: boolean;
 };
 
 type CatalogSource = {
@@ -82,6 +84,17 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
           .order("name"),
       ]);
 
+      // Stripe storefront products (live products the merchant sells online)
+      let storefront: any[] = [];
+      try {
+        const { data: sf } = await supabase.functions.invoke("list-connect-products", {
+          body: { merchantId },
+        });
+        storefront = Array.isArray(sf?.products) ? sf.products : [];
+      } catch (_e) {
+        storefront = [];
+      }
+
       const list: CatalogSource[] = [];
       (invItems ?? []).forEach((it: any) =>
         list.push({
@@ -112,6 +125,19 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
           group: "Store",
         }),
       );
+      storefront.forEach((p: any) => {
+        const cents = p?.price?.unit_amount;
+        if (typeof cents !== "number") return;
+        list.push({
+          id: p.id,
+          name: p.name,
+          unit_price: cents / 100,
+          // Stripe product ids aren't uuids, so they travel as the sku reference.
+          sku: p.id,
+          source_type: "custom",
+          group: "Storefront",
+        });
+      });
       return list;
     },
     enabled: !!merchantId && open,
@@ -139,11 +165,12 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
       {
         key: newKey(),
         source_type: src.source_type,
-        source_id: src.id,
+        source_id: src.source_type === "custom" ? null : src.id,
         name: src.name,
         sku: src.sku ?? null,
         quantity: 1,
         unit_price: src.unit_price,
+        locked: true,
       },
     ]);
     setPickerOpen(false);
@@ -197,12 +224,21 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
                   key={it.key}
                   className="grid grid-cols-[1fr_64px_84px_28px] gap-2 items-center bg-muted/40 border border-border/60 rounded-md p-2"
                 >
-                  <Input
-                    value={it.name}
-                    placeholder="Item name"
-                    onChange={(e) => updateItem(it.key, { name: e.target.value })}
-                    className="h-8 text-sm"
-                  />
+                  {it.locked ? (
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{it.name}</p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Merchant price
+                      </p>
+                    </div>
+                  ) : (
+                    <Input
+                      value={it.name}
+                      placeholder="Item name"
+                      onChange={(e) => updateItem(it.key, { name: e.target.value })}
+                      className="h-8 text-sm"
+                    />
+                  )}
                   <Input
                     type="number"
                     inputMode="numeric"
@@ -216,19 +252,25 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
                     }
                     className="h-8 text-sm text-center"
                   />
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="0.01"
-                    value={it.unit_price}
-                    onChange={(e) =>
-                      updateItem(it.key, {
-                        unit_price: Math.max(0, Number(e.target.value) || 0),
-                      })
-                    }
-                    className="h-8 text-sm text-right"
-                  />
+                  {it.locked ? (
+                    <div className="h-8 flex items-center justify-end px-2 text-sm font-medium tabular-nums text-foreground">
+                      {Formatters.currency(it.unit_price)}
+                    </div>
+                  ) : (
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="0.01"
+                      value={it.unit_price}
+                      onChange={(e) =>
+                        updateItem(it.key, {
+                          unit_price: Math.max(0, Number(e.target.value) || 0),
+                        })
+                      }
+                      className="h-8 text-sm text-right"
+                    />
+                  )}
                   <button
                     type="button"
                     aria-label="Remove item"
@@ -313,4 +355,4 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
 export const itemsToPayload = (items: LineItem[]) =>
   items
     .filter((i) => i.name.trim() && i.quantity > 0 && i.unit_price >= 0)
-    .map(({ key: _key, ...rest }) => rest);
+    .map(({ key: _key, locked: _locked, ...rest }) => rest);
