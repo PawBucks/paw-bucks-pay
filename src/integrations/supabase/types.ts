@@ -4380,6 +4380,7 @@ export type Database = {
           company_name: string | null
           country: string | null
           created_at: string
+          do_not_contact: boolean
           email: string
           id: string
           is_active: boolean | null
@@ -4399,6 +4400,7 @@ export type Database = {
           company_name?: string | null
           country?: string | null
           created_at?: string
+          do_not_contact?: boolean
           email: string
           id?: string
           is_active?: boolean | null
@@ -4418,6 +4420,7 @@ export type Database = {
           company_name?: string | null
           country?: string | null
           created_at?: string
+          do_not_contact?: boolean
           email?: string
           id?: string
           is_active?: boolean | null
@@ -5855,30 +5858,33 @@ export type Database = {
       merchant_campaign_recipients: {
         Row: {
           campaign_id: string
+          client_id: string | null
           created_at: string
           error_message: string | null
           id: string
           sent_at: string | null
           status: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           campaign_id: string
+          client_id?: string | null
           created_at?: string
           error_message?: string | null
           id?: string
           sent_at?: string | null
           status?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           campaign_id?: string
+          client_id?: string | null
           created_at?: string
           error_message?: string | null
           id?: string
           sent_at?: string | null
           status?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -5886,6 +5892,13 @@ export type Database = {
             columns: ["campaign_id"]
             isOneToOne: false
             referencedRelation: "merchant_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_campaign_recipients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_clients"
             referencedColumns: ["id"]
           },
         ]
