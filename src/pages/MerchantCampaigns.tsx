@@ -411,12 +411,22 @@ export default function MerchantCampaigns() {
  <p className="text-xs text-muted-foreground">Loading customers...</p>
  ) : (
  <div className="text-xs text-muted-foreground space-y-0.5">
- <p>{recipients.length} total customers</p>
+ <p>{recipients.length} total customers &amp; clients</p>
+ <p>
+ {recipients.filter((r) => r.source ==="imported").length} uploaded clients ·{""}
+ {recipients.filter((r) => r.source !=="imported").length} platform customers
+ </p>
+ {channel ==="push" && (
+ <p>{recipients.filter((r) => r.userId).length} with PawBucks accounts</p>
+ )}
  {channel ==="sms" && (
  <p>{recipients.filter((r) => r.phone).length} with phone numbers</p>
  )}
  {channel ==="email" && (
  <p>{recipients.filter((r) => r.email).length} with email addresses</p>
+ )}
+ {excludedCount > 0 && (
+ <p>{excludedCount} excluded (do not contact)</p>
  )}
  </div>
  )}
