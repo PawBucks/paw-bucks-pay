@@ -579,7 +579,7 @@ const Index = () => {
  </div>
  </div>
  <div className="pl-earn-example">
- <strong>Example:</strong> Spend $200 at a partner vet on PawPass+ → earn <strong>6,000 PawBucks ($6 value)</strong> redeemable at any partner merchant.
+ <strong>Example:</strong> Spend $200 at a partner on PawPass+ → earn <strong>6,000 PawBucks ($6 value)</strong> redeemable at any partner merchant.
  </div>
  </div>
  </div>
