@@ -478,7 +478,7 @@ const Index = () => {
  const goDirectory = () => navigate("/directory");
  const goLostPets = () => navigate("/lost-pets");
  const goMerchants = () => navigate("/merchants");
- const goVets = () => navigate("/vets");
+ 
 
  return (
  <div className="pl-root">
@@ -498,7 +498,7 @@ const Index = () => {
  <div className="pl-nav-links">
  <a onClick={goDirectory} role="button" tabIndex={0}>Discover</a>
  <a onClick={goMerchants} role="button" tabIndex={0}>For Merchants</a>
- <a onClick={goVets} role="button" tabIndex={0}>For Vets</a>
+ 
  <a onClick={goLostPets} role="button" tabIndex={0}>Lost Pets</a>
  <a onClick={goSignin} role="button" tabIndex={0}>Sign In</a>
  <button className="pl-nav-cta" onClick={goSignup}>Get Started</button>
@@ -645,7 +645,7 @@ const Index = () => {
  <a href="/privacy">Privacy</a>
  <a href="/terms">Terms</a>
  <a href="/merchants">For Merchants</a>
- <a href="/vets">For Vets</a>
+ 
  </div>
  </footer>
  </div>
