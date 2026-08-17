@@ -58,36 +58,28 @@ serve(async (req) => {
       .eq('approval_status', 'approved')
       .single();
 
-    if (merchantError || !merchant?.stripe_account_id) {
-      console.log('Merchant not found or no stripe account:', merchantId);
+    if (merchantError || !merchant) {
       return new Response(
-        JSON.stringify({ 
-          success: true, 
-          products: [],
-          message: 'Merchant not found or not connected to Stripe'
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        }
+        JSON.stringify({ success: false, error: 'Merchant not found' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 },
       );
     }
 
     const stripeAccountId = merchant.stripe_account_id;
 
-    console.log('Listing products for merchant:', merchantId, 'stripe account:', stripeAccountId.substring(0, 10) + '...');
+    console.log('Listing catalog for merchant:', merchantId);
 
     // STEP 4: List products from the CONNECTED ACCOUNT
-    const products = await stripe.products.list(
-      {
-        limit: 100,
-        active: true,
-        expand: ['data.default_price'],
-      },
-      {
-        stripeAccount: stripeAccountId,
-      }
-    );
+    const products = stripeAccountId
+      ? await stripe.products.list(
+          {
+            limit: 100,
+            active: true,
+            expand: ['data.default_price'],
+          },
+          { stripeAccount: stripeAccountId },
+        )
+      : { data: [], has_more: false };
 
     // STEP 5: Filter out subscription products (those with platform: "pawbucks" metadata)
     // Subscription products are managed separately via merchant_subscription_plans table
@@ -217,7 +209,7 @@ serve(async (req) => {
         products: productsData,
         catalogItems,
         has_more: products.has_more,
-        connectedAccountId: stripeAccountId, // Return for subscription checkout flow
+        connectedAccountId: stripeAccountId ?? null, // Return for subscription checkout flow
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
