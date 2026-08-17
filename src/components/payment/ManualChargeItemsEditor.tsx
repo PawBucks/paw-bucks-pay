@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Trash2, Package, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, Package, ChevronDown, ChevronUp, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -229,32 +229,62 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
                   Add from catalog
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-0" align="start">
-                <Command shouldFilter={false}>
-                  <CommandInput
-                    placeholder="Search items, services, products..."
-                    value={search}
-                    onValueChange={setSearch}
-                  />
-                  <CommandList className="max-h-64">
+              <PopoverContent
+                className="w-[min(92vw,22rem)] p-0"
+                align="start"
+                sideOffset={4}
+              >
+                <Command shouldFilter={false} className="flex flex-col">
+                  <div className="flex items-center border-b border-border/60 px-2">
+                    <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <CommandInput
+                      placeholder="Search catalog…"
+                      value={search}
+                      onValueChange={setSearch}
+                      className="h-9 border-0 ring-0 focus-visible:ring-0 placeholder:text-muted-foreground/70"
+                    />
+                    {search && (
+                      <button
+                        type="button"
+                        aria-label="Clear search"
+                        onClick={() => setSearch("")}
+                        className="shrink-0 rounded-sm p-1 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                  <CommandList className="max-h-[min(52vh,22rem)] overflow-y-auto overscroll-contain -webkit-overflow-scrolling-touch">
+                    {catalog.length === 0 && (
+                      <div className="py-6 text-center text-muted-foreground text-sm">
+                        No catalog items yet.
+                        <br />
+                        Add a custom line below.
+                      </div>
+                    )}
                     <CommandEmpty>
-                      <div className="py-4 text-center text-muted-foreground text-sm">
-                        {catalog.length === 0
-                          ? "No catalog items yet. Add a custom line below."
-                          : "No matches"}
+                      <div className="py-6 text-center text-muted-foreground text-sm">
+                        No matches
                       </div>
                     </CommandEmpty>
                     {Object.entries(grouped).map(([group, list]) => (
-                      <CommandGroup key={group} heading={group}>
+                      <CommandGroup key={group} heading={group} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:bg-muted/50">
                         {list.map((it) => (
                           <CommandItem
                             key={`${it.source_type}-${it.id}`}
                             value={`${it.source_type}-${it.id}`}
                             onSelect={() => addFromCatalog(it)}
-                            className="flex items-center justify-between cursor-pointer"
+                            className="flex items-center justify-between gap-2 cursor-pointer py-2.5 px-2 aria-selected:bg-primary/10"
                           >
-                            <span className="truncate">{it.name}</span>
-                            <span className="text-xs font-semibold text-primary ml-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-foreground truncate">{it.name}</p>
+                              {it.sku && (
+                                <p className="text-[10px] text-muted-foreground/80 truncate">
+                                  {it.sku}
+                                </p>
+                              )}
+                            </div>
+                            <span className="text-xs font-semibold text-primary shrink-0">
                               {Formatters.currency(it.unit_price)}
                             </span>
                           </CommandItem>
