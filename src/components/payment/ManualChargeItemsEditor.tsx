@@ -224,12 +224,21 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
                   key={it.key}
                   className="grid grid-cols-[1fr_64px_84px_28px] gap-2 items-center bg-muted/40 border border-border/60 rounded-md p-2"
                 >
-                  <Input
-                    value={it.name}
-                    placeholder="Item name"
-                    onChange={(e) => updateItem(it.key, { name: e.target.value })}
-                    className="h-8 text-sm"
-                  />
+                  {it.locked ? (
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{it.name}</p>
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                        Merchant price
+                      </p>
+                    </div>
+                  ) : (
+                    <Input
+                      value={it.name}
+                      placeholder="Item name"
+                      onChange={(e) => updateItem(it.key, { name: e.target.value })}
+                      className="h-8 text-sm"
+                    />
+                  )}
                   <Input
                     type="number"
                     inputMode="numeric"
@@ -243,19 +252,25 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
                     }
                     className="h-8 text-sm text-center"
                   />
-                  <Input
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="0.01"
-                    value={it.unit_price}
-                    onChange={(e) =>
-                      updateItem(it.key, {
-                        unit_price: Math.max(0, Number(e.target.value) || 0),
-                      })
-                    }
-                    className="h-8 text-sm text-right"
-                  />
+                  {it.locked ? (
+                    <div className="h-8 flex items-center justify-end px-2 text-sm font-medium tabular-nums text-foreground">
+                      {Formatters.currency(it.unit_price)}
+                    </div>
+                  ) : (
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="0.01"
+                      value={it.unit_price}
+                      onChange={(e) =>
+                        updateItem(it.key, {
+                          unit_price: Math.max(0, Number(e.target.value) || 0),
+                        })
+                      }
+                      className="h-8 text-sm text-right"
+                    />
+                  )}
                   <button
                     type="button"
                     aria-label="Remove item"
@@ -340,4 +355,4 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
 export const itemsToPayload = (items: LineItem[]) =>
   items
     .filter((i) => i.name.trim() && i.quantity > 0 && i.unit_price >= 0)
-    .map(({ key: _key, ...rest }) => rest);
+    .map(({ key: _key, locked: _locked, ...rest }) => rest);
