@@ -138,6 +138,77 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
     onChange(items.filter((i) => i.key !== key));
   };
 
+  const catalogPicker = (
+    <Command shouldFilter={false} className="flex flex-col h-full min-h-0 bg-transparent">
+      <div className="flex items-center border-b border-border/60 px-2 shrink-0 bg-background">
+        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <CommandInput
+          placeholder="Search catalog…"
+          value={search}
+          onValueChange={setSearch}
+          className="h-11 border-0 ring-0 focus-visible:ring-0 placeholder:text-muted-foreground/70"
+        />
+        {search && (
+          <button
+            type="button"
+            aria-label="Clear search"
+            onClick={() => setSearch("")}
+            className="shrink-0 rounded-sm p-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      <CommandList
+        className="flex-1 min-h-0 max-h-none overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      >
+        {catalog.length === 0 && (
+          <div className="py-6 px-4 text-center text-muted-foreground text-sm">
+            No catalog items yet.
+            <br />
+            Add a custom line instead.
+          </div>
+        )}
+        <CommandEmpty>
+          <div className="py-6 text-center text-muted-foreground text-sm">No matches</div>
+        </CommandEmpty>
+        {Object.entries(grouped).map(([group, list]) => (
+          <CommandGroup
+            key={group}
+            heading={group}
+            className="[&_[cmdk-group-heading]]:sticky [&_[cmdk-group-heading]]:top-0 [&_[cmdk-group-heading]]:z-[1] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:bg-background"
+          >
+            {list.map((it) => (
+              <CommandItem
+                key={`${it.source_type}-${it.id}`}
+                value={`${it.source_type}-${it.id}`}
+                onSelect={() => addFromCatalog(it)}
+                className="flex items-center justify-between gap-2 cursor-pointer py-3 px-2 min-h-[48px] aria-selected:bg-primary/10"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground truncate">{it.name}</p>
+                  {it.sku && (
+                    <p className="text-[10px] text-muted-foreground/80 truncate">{it.sku}</p>
+                  )}
+                </div>
+                <span className="text-xs font-semibold text-primary shrink-0">
+                  {Formatters.currency(it.unit_price)}
+                </span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        ))}
+      </CommandList>
+    </Command>
+  );
+
+  const triggerButton = (
+    <Button type="button" variant="outline" size="sm" className="gap-2">
+      <Package className="w-4 h-4" />
+      Add from catalog
+    </Button>
+  );
+
   return (
     <div className="space-y-3">
       <button
