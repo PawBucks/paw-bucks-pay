@@ -183,7 +183,7 @@ const AppRoutes = () => {
  <Route path="/merchant-landing" element={<PageTransition><MerchantLanding /></PageTransition>} />
  <Route path="/vets" element={<PageTransition><VetLanding /></PageTransition>} />
  <Route path="/vet-landing" element={<PageTransition><VetLanding /></PageTransition>} />
- <Route path="/for-vets" element={<PageTransition><VetLanding /></PageTransition>} />
+ 
  <Route path="/for-merchants" element={<PageTransition><MerchantLanding /></PageTransition>} />
  <Route path="/install" element={<PageTransition><Install /></PageTransition>} />
  <Route path="/directory" element={<PageTransition><MerchantDirectory /></PageTransition>} />
