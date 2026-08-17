@@ -60,7 +60,7 @@ PawBucks offers a complete veterinary practice management suite:
  - [Marketplace](/pet-store): Shop pet food, toys, and supplies and earn rewards.
 - [Lost Pets](/lost-pets): Create and share lost pet flyers and activate the community.
 - [For Pet Merchants](/merchants): Grow your pet business with performance-based customer acquisition.
-- [For Veterinarians](/vets): Vet practice platform — EMR, AI clinical tools, insurance automation.
+
 - [Referrals](/referrals): Earn rewards by referring friends and merchants.
 - [Install the App](/install): Install PawBucks as a PWA on iOS, Android, Mac, or Windows.
 - [Privacy Policy](/privacy): How we collect, use, and protect your data.
