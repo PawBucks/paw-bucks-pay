@@ -10,6 +10,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -17,6 +24,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { Formatters } from "@/utils/formatters";
 
@@ -56,6 +64,7 @@ export const ManualChargeItemsEditor = ({ merchantId, items, onChange }: Props) 
   const [open, setOpen] = useState(items.length > 0);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (items.length > 0 && !open) setOpen(true);
