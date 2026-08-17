@@ -266,7 +266,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId ?? null,
-              // email omitted (resolved server-side, not stored as raw PII),
+              client_id: recipient.contactId ?? null,
               status: "failed",
               error_message: "No email address",
             });
@@ -279,7 +279,7 @@ serve(async (req) => {
             body: {
               templateName: "merchant-campaign",
               recipientEmail: recipient.email,
-              idempotencyKey: `merchant-campaign-${campaign.id}-${recipient.userId}`,
+              idempotencyKey: `merchant-campaign-${campaign.id}-${recipient.userId ?? recipient.contactId}`,
               templateData: {
                 businessName,
                 title,
@@ -351,7 +351,7 @@ serve(async (req) => {
             await supabaseAdmin.from("merchant_campaign_recipients").insert({
               campaign_id: campaign.id,
               user_id: recipient.userId ?? null,
-              // phone omitted (resolved server-side, not stored as raw PII),
+              client_id: recipient.contactId ?? null,
               status: "failed",
               error_message: "No phone number",
             });
