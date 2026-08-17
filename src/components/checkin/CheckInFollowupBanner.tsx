@@ -91,35 +91,29 @@ export const CheckInFollowupBanner = ({ userId }: CheckInFollowupBannerProps) =>
 
  setSubmitting(true);
  const followup = followups.find((f) => f.id === followupId);
- const pbPerDollar = getPBPerDollar();
- const estimatedPB = Math.floor(amount * pbPerDollar);
-
- // Mark followup as answered
- await supabase
- .from("checkin_followups")
- .update({ status:"answered", response:"yes", answered_at: new Date().toISOString() })
- .eq("id", followupId);
-
  const pbUsedAmount = pawbucksUsed ? parseInt(pawbucksUsed, 10) : 0;
- const pbUsedLabel = pbUsedAmount > 0 ? ` | ${pbUsedAmount.toLocaleString()} PB redeemed` :"";
 
- // Issue provisional credit instantly
- const { error: creditError } = await supabase.from("pawbucks_activity").insert({
- user_id: userId,
- type:"earn",
- amount: estimatedPB,
- source:"checkin_provisional",
- description: `Provisional credit — ${followup?.entity_name} (${Formatters.currency(amount)}${pbUsedLabel})`,
- pawbucks_status:"pending",
- vest_date: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
- });
+ // Provisional credit is issued server-side: the routine verifies the visit
+ // belongs to this user and computes the reward from their real tier.
+ const { data: creditResult, error: creditError } = await supabase.rpc(
+ "submit_checkin_purchase",
+ {
+ p_followup_id: followupId,
+ p_spend_amount: amount,
+ p_pawbucks_used: Number.isFinite(pbUsedAmount) ? pbUsedAmount : 0,
+ },
+ );
 
- if (creditError) {
- console.error("Failed to issue provisional credit:", creditError);
- toast.error("Something went wrong. Please try again.");
+ const creditRow = Array.isArray(creditResult) ? creditResult[0] : creditResult;
+
+ if (creditError || !creditRow?.success) {
+ console.error("Failed to issue provisional credit:", creditError || creditRow?.message);
+ toast.error(creditRow?.message || "Something went wrong. Please try again.");
  setSubmitting(false);
  return;
  }
+
+ const estimatedPB = Number(creditRow.pawbucks) || 0;
 
  // Show success with receipt prompt
  setCreditedFollowup({ id: followupId, amount, pawbucks: estimatedPB });

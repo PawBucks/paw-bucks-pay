@@ -16370,6 +16370,18 @@ export type Database = {
         Args: { _key: string; _value: string }
         Returns: undefined
       }
+      submit_checkin_purchase: {
+        Args: {
+          p_followup_id: string
+          p_pawbucks_used?: number
+          p_spend_amount: number
+        }
+        Returns: {
+          message: string
+          pawbucks: number
+          success: boolean
+        }[]
+      }
       use_pet_fund_credit: {
         Args: { p_amount: number; p_transaction_id?: string; p_user_id: string }
         Returns: boolean
