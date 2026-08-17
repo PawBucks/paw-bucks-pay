@@ -15889,6 +15889,7 @@ export type Database = {
         }
         Returns: Json
       }
+      current_user_email_confirmed: { Args: never; Returns: boolean }
       default_pawbucks_cap_pct: {
         Args: { p_business_type: string }
         Returns: number
