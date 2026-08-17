@@ -7,7 +7,8 @@ const corsHeaders = {
 };
 
 interface Recipient {
-  userId: string;
+  userId?: string;
+  contactId?: string;
   name: string;
   phone?: string;
   email?: string;
@@ -113,6 +114,9 @@ serve(async (req) => {
     const requestedIds = Array.from(
       new Set(recipients.map((r) => r.userId).filter((id): id is string => !!id))
     );
+    const requestedContactIds = Array.from(
+      new Set(recipients.map((r) => r.contactId).filter((id): id is string => !!id))
+    );
 
     const allowedIds = new Set<string>();
     if (requestedIds.length > 0) {
@@ -130,7 +134,27 @@ serve(async (req) => {
       for (const row of msgRes.data ?? []) row.user_id && allowedIds.add(row.user_id);
     }
 
-    const safeRecipients = recipients.filter((r) => r.userId && allowedIds.has(r.userId));
+    // Merchant-uploaded clients: must belong to this merchant and not be opted out.
+    const contactById = new Map<string, { name: string | null; email: string | null; phone: string | null }>();
+    if (requestedContactIds.length > 0) {
+      const { data: clientRows } = await supabaseAdmin
+        .from("invoice_clients")
+        .select("id, name, email, phone, is_active, do_not_contact")
+        .eq("merchant_id", merchantId)
+        .in("id", requestedContactIds);
+      for (const row of clientRows ?? []) {
+        if ((row as any).is_active === false || (row as any).do_not_contact === true) continue;
+        contactById.set(row.id as string, {
+          name: (row as any).name ?? null,
+          email: (row as any).email ?? null,
+          phone: (row as any).phone ?? null,
+        });
+      }
+    }
+
+    const safeRecipients = recipients.filter((r) =>
+      (r.userId && allowedIds.has(r.userId)) || (r.contactId && contactById.has(r.contactId))
+    );
     const skippedCount = recipients.length - safeRecipients.length;
 
     if (safeRecipients.length === 0) {
@@ -147,7 +171,7 @@ serve(async (req) => {
     // SECURITY: never trust merchant-supplied phone/email. Resolve contact details
     // server-side from the verified user's profile so messages can only ever go
     // to the legitimate owner of each userId.
-    const safeUserIds = safeRecipients.map((r) => r.userId);
+    const safeUserIds = safeRecipients.map((r) => r.userId).filter((id): id is string => !!id);
     const { data: profileRows } = await supabaseAdmin
       .from("profiles")
       .select("id, full_name, email, phone")
@@ -162,10 +186,10 @@ serve(async (req) => {
     }
     // Override any client-supplied contact fields with server-side values.
     for (const r of safeRecipients) {
-      const p = profileById.get(r.userId);
+      const p = r.userId ? profileById.get(r.userId) : contactById.get(r.contactId!);
       r.email = p?.email ?? undefined;
       r.phone = p?.phone ?? undefined;
-      if (!r.name) r.name = p?.full_name ?? "";
+      if (!r.name) r.name = (p as any)?.full_name ?? (p as any)?.name ?? "";
     }
 
     // Create campaign record
