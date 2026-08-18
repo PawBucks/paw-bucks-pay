@@ -93,6 +93,19 @@ export function usePawBucksRealtime(userId: string | undefined) {
  */
 export function useMerchantPawBucksRealtime(merchantId: string | undefined) {
  const queryClient = useQueryClient();
+ const pendingRef = useRef<Set<string>>(new Set());
+ const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+ const queueInvalidate = (keys: string[]) => {
+ keys.forEach((k) => pendingRef.current.add(k));
+ if (timerRef.current) return;
+ timerRef.current = setTimeout(() => {
+ const batched = Array.from(pendingRef.current);
+ pendingRef.current.clear();
+ timerRef.current = null;
+ batched.forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
+ }, 400);
+ };
 
  useEffect(() => {
  if (!merchantId) return;
