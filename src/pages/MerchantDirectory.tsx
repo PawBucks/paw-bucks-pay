@@ -115,11 +115,10 @@ const MerchantDirectory = () => {
   // Rotate sponsored ads every 15s, and make sure the top and inline
   // placements show different merchants whenever possible.
   const [adTick, setAdTick] = useState(0);
-  useEffect(() => {
-    if (adMerchants.length <= 1) return;
-    const id = setInterval(() => setAdTick((t) => t + 1), 15000);
-    return () => clearInterval(id);
-  }, [adMerchants.length]);
+  useVisibleInterval(
+    () => setAdTick((t) => t + 1),
+    adMerchants.length > 1 ? 15000 : null
+  );
   const adCount = adMerchants.length;
   const topAdMerchant = adCount > 0 ? adMerchants[adTick % adCount] : undefined;
   const inlineOffset = adCount > 1 ? Math.max(1, Math.floor(adCount / 2)) : 0;
