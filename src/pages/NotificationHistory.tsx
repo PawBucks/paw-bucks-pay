@@ -72,7 +72,8 @@ export default function NotificationHistory() {
  .from("notifications")
  .select("*")
  .eq("user_id", user.id)
- .order("created_at", { ascending: false });
+ .order("created_at", { ascending: false })
+ .limit(200);
 
  if (category !=="all") {
  query = query.eq("category", category);

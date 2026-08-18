@@ -114,9 +114,10 @@ export const checkForUpdates = async (callback: () => void) => {
         activateWaiting(registration.waiting);
       };
 
-      // Check immediately, then every 15 seconds.
+      // Check immediately, then every 10 minutes. Polling every 15s made the
+      // app feel janky (constant SW work + surprise reloads mid-session).
       triggerUpdate();
-      const interval = window.setInterval(triggerUpdate, 15_000);
+      const interval = window.setInterval(triggerUpdate, 10 * 60_000);
 
       // Check whenever the tab regains focus / visibility (covers users who
       // leave the tab open for hours/days).
@@ -128,12 +129,9 @@ export const checkForUpdates = async (callback: () => void) => {
       window.addEventListener('online', triggerUpdate);
 
       // When a new SW takes control, force a reload so all open tabs sync.
-      let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        refreshing = true;
-        console.log('[PWA] Controller changed, reloading for fresh version...');
-        hardReload();
+        console.log('[PWA] Controller changed, scheduling refresh...');
+        scheduleReload();
       });
 
       return () => {
@@ -155,6 +153,41 @@ const hardReload = () => {
   } catch {
     window.location.reload();
   }
+};
+
+// Reload only at a safe moment: never while the user is typing, mid-form, or
+// actively interacting. Waits until the tab is hidden, or the user has been
+// idle for a while. Prevents the "app randomly reloaded on me" glitchiness.
+let reloadScheduled = false;
+const scheduleReload = () => {
+  if (reloadScheduled) return;
+  reloadScheduled = true;
+
+  const isBusy = () => {
+    const el = document.activeElement as HTMLElement | null;
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+  };
+
+  let idleTimer: number | undefined;
+  const armIdle = () => {
+    window.clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(() => {
+      if (!isBusy()) hardReload();
+      else armIdle();
+    }, 60_000);
+  };
+
+  const onHidden = () => {
+    if (document.visibilityState === 'hidden' && !isBusy()) hardReload();
+  };
+
+  document.addEventListener('visibilitychange', onHidden);
+  ['pointerdown', 'keydown', 'scroll'].forEach((evt) =>
+    window.addEventListener(evt, armIdle, { passive: true })
+  );
+  armIdle();
 };
 
 // Fallback for non-PWA / no-SW environments: poll index.html and detect a new
@@ -202,9 +235,9 @@ export const startBuildVersionPolling = () => {
       if (scriptMatches.length === 0) return;
       const hash = await hashString(scriptMatches.join('|'));
       if (lastHash && lastHash !== hash) {
-        console.log('[PWA] New build detected via index.html hash, reloading...');
+        console.log('[PWA] New build detected via index.html hash, scheduling reload...');
         stopped = true;
-        hardReload();
+        scheduleReload();
         return;
       }
       lastHash = hash;
@@ -214,7 +247,7 @@ export const startBuildVersionPolling = () => {
   };
 
   check();
-  const interval = window.setInterval(check, 15_000);
+  const interval = window.setInterval(check, 10 * 60_000);
   const onVisible = () => {
     if (document.visibilityState === 'visible') check();
   };

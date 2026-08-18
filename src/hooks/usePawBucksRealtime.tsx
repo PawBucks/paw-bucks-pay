@@ -1,4 +1,4 @@
-import { useEffect } from"react";
+import { useEffect, useRef } from"react";
 import { useQueryClient } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
 
@@ -10,6 +10,22 @@ import { supabase } from"@/integrations/supabase/client";
  */
 export function usePawBucksRealtime(userId: string | undefined) {
  const queryClient = useQueryClient();
+ const pendingRef = useRef<Set<string>>(new Set());
+ const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+ // Coalesce bursts of realtime events into a single invalidation pass.
+ // Previously every row change fired 4-7 invalidateQueries calls, each
+ // triggering its own refetch cascade and re-render storm.
+ const queueInvalidate = (keys: string[]) => {
+ keys.forEach((k) => pendingRef.current.add(k));
+ if (timerRef.current) return;
+ timerRef.current = setTimeout(() => {
+ const keys = Array.from(pendingRef.current);
+ pendingRef.current.clear();
+ timerRef.current = null;
+ keys.forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
+ }, 400);
+ };
 
  useEffect(() => {
  if (!userId) return;
@@ -26,14 +42,7 @@ export function usePawBucksRealtime(userId: string | undefined) {
  filter: `user_id=eq.${userId}`,
  },
  (payload) => {
- console.log('[Realtime] PawBucks wallet update:', payload);
- // Invalidate all PawBucks-related queries with various key formats
- queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet', userId] });
- queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet', userId] });
- queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet'] });
- queryClient.invalidateQueries({ queryKey: ['pawbucks-wallet'] });
- queryClient.invalidateQueries({ queryKey: ['wallet', userId] });
- queryClient.invalidateQueries({ queryKey: ['wallet'] });
+ queueInvalidate(['pawbucks_wallet','pawbucks-wallet','wallet']);
  }
  )
  .on(
@@ -45,12 +54,7 @@ export function usePawBucksRealtime(userId: string | undefined) {
  filter: `user_id=eq.${userId}`,
  },
  (payload) => {
- console.log('[Realtime] PawBucks activity:', payload);
- // Invalidate activity queries with various key formats
- queryClient.invalidateQueries({ queryKey: ['pawbucks_activity', userId] });
- queryClient.invalidateQueries({ queryKey: ['pawbucks-activity', userId] });
- queryClient.invalidateQueries({ queryKey: ['pawbucks_activity'] });
- queryClient.invalidateQueries({ queryKey: ['pawbucks-activity'] });
+ queueInvalidate(['pawbucks_activity','pawbucks-activity']);
  }
  )
  .on(
@@ -62,20 +66,21 @@ export function usePawBucksRealtime(userId: string | undefined) {
  filter: `user_id=eq.${userId}`,
  },
  (payload) => {
- console.log('[Realtime] Transaction update:', payload);
- // Invalidate all transaction-related queries
- queryClient.invalidateQueries({ queryKey: ['transactions', userId] });
- queryClient.invalidateQueries({ queryKey: ['transactions'] });
- queryClient.invalidateQueries({ queryKey: ['budget-transactions', userId] });
- queryClient.invalidateQueries({ queryKey: ['wallet', userId] });
- queryClient.invalidateQueries({ queryKey: ['wallet'] });
- queryClient.invalidateQueries({ queryKey: ['pawbucks_wallet', userId] });
- queryClient.invalidateQueries({ queryKey: ['pawbucks_activity', userId] });
+ queueInvalidate([
+ 'transactions',
+ 'budget-transactions',
+ 'wallet',
+ 'pawbucks_wallet',
+ 'pawbucks-wallet',
+ 'pawbucks_activity',
+ 'pawbucks-activity',
+ ]);
  }
  )
  .subscribe();
 
  return () => {
+ if (timerRef.current) clearTimeout(timerRef.current);
  supabase.removeChannel(channel);
  };
  }, [userId, queryClient]);
@@ -88,6 +93,19 @@ export function usePawBucksRealtime(userId: string | undefined) {
  */
 export function useMerchantPawBucksRealtime(merchantId: string | undefined) {
  const queryClient = useQueryClient();
+ const pendingRef = useRef<Set<string>>(new Set());
+ const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+ const queueInvalidate = (keys: string[]) => {
+ keys.forEach((k) => pendingRef.current.add(k));
+ if (timerRef.current) return;
+ timerRef.current = setTimeout(() => {
+ const batched = Array.from(pendingRef.current);
+ pendingRef.current.clear();
+ timerRef.current = null;
+ batched.forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
+ }, 400);
+ };
 
  useEffect(() => {
  if (!merchantId) return;
@@ -103,10 +121,7 @@ export function useMerchantPawBucksRealtime(merchantId: string | undefined) {
  filter: `merchant_id=eq.${merchantId}`,
  },
  (payload) => {
- console.log('[Realtime] Merchant PawBucks wallet update:', payload);
- queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet', merchantId] });
- queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-wallet'] });
- queryClient.invalidateQueries({ queryKey: ['merchant-analytics'] });
+ queueInvalidate(['merchant-pawbucks-wallet','merchant-analytics']);
  }
  )
  .on(
@@ -118,9 +133,7 @@ export function useMerchantPawBucksRealtime(merchantId: string | undefined) {
  filter: `merchant_id=eq.${merchantId}`,
  },
  (payload) => {
- console.log('[Realtime] Merchant PawBucks activity:', payload);
- queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity', merchantId] });
- queryClient.invalidateQueries({ queryKey: ['merchant-pawbucks-activity'] });
+ queueInvalidate(['merchant-pawbucks-activity']);
  }
  )
  .on(
@@ -132,17 +145,17 @@ export function useMerchantPawBucksRealtime(merchantId: string | undefined) {
  filter: `merchant_id=eq.${merchantId}`,
  },
  (payload) => {
- console.log('[Realtime] Merchant transaction update:', payload);
- // Invalidate all merchant transaction queries
- queryClient.invalidateQueries({ queryKey: ['merchant-transactions', merchantId] });
- queryClient.invalidateQueries({ queryKey: ['merchant-transactions'] });
- queryClient.invalidateQueries({ queryKey: ['merchant-analytics'] });
- queryClient.invalidateQueries({ queryKey: ['merchant-dashboard'] });
+ queueInvalidate([
+ 'merchant-transactions',
+ 'merchant-analytics',
+ 'merchant-dashboard',
+ ]);
  }
  )
  .subscribe();
 
  return () => {
+ if (timerRef.current) clearTimeout(timerRef.current);
  supabase.removeChannel(channel);
  };
  }, [merchantId, queryClient]);

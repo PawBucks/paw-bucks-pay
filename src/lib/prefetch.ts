@@ -10,6 +10,17 @@ type PrefetchOptions = {
 const prefetchedRoutes = new Set<string>();
 
 /**
+ * Route -> lazy chunk map. In a client-rendered SPA there is no per-route
+ * document to prefetch, so warming the actual JS chunk is what makes
+ * navigation instant.
+ */
+const criticalChunks: Record<string, () => Promise<unknown>> = {
+ '/home': () => import('@/pages/SimpleHome'),
+ '/discover': () => import('@/pages/Discover'),
+ '/wallet': () => import('@/pages/Wallet'),
+};
+
+/**
  * Prefetch a route by creating a hidden link and triggering a hover/click
  */
 export const prefetchRoute = (path: string, options: PrefetchOptions = {}) => {
@@ -44,15 +55,13 @@ export const prefetchRoute = (path: string, options: PrefetchOptions = {}) => {
  * Prefetch critical routes on initial load
  */
 export const prefetchCriticalRoutes = () => {
- const criticalRoutes = [
- { path:'/home', priority:'high' as const },
- { path:'/auth', priority:'high' as const },
- { path:'/discover', priority:'low' as const },
- { path:'/wallet', priority:'low' as const },
- ];
- 
- criticalRoutes.forEach((route, index) => {
- prefetchRoute(route.path, { timeout: index * 500, priority: route.priority });
+ // Only warm real route chunks. The previous implementation injected
+ // <link rel="prefetch" as="document"> tags for SPA paths, which just
+ // re-requested index.html and burned bandwidth without speeding anything up.
+ Object.entries(criticalChunks).forEach(([path, load]) => {
+ if (prefetchedRoutes.has(path)) return;
+ prefetchedRoutes.add(path);
+ prefetchModule(load);
  });
 };
 
