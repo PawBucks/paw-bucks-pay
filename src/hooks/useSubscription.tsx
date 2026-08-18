@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from'react';
+import { useCallback } from'react';
 import { supabase } from'@/integrations/supabase/client';
 import { useAuth } from'./useAuth';
-import { useQuery } from'@tanstack/react-query';
+import { useQuery, useQueryClient } from'@tanstack/react-query';
 
 type SubscriptionStatus = {
  subscribed: boolean;
@@ -25,62 +25,44 @@ const defaultSubscription: SubscriptionStatus = {
 
 export const useSubscription = () => {
  const { user, session } = useAuth();
- const [subscription, setSubscription] = useState<SubscriptionStatus>(defaultSubscription);
- const [loading, setLoading] = useState(true);
+ const queryClient = useQueryClient();
 
- const checkSubscription = useCallback(async () => {
- // Only check if we have both a user and a valid session
- if (!user || !session?.access_token) {
- setSubscription(defaultSubscription);
- setLoading(false);
- return;
- }
-
- try {
+ // Single shared query for the whole app: every component that calls
+ // useSubscription() now reads the same cache entry instead of firing its own
+ // `check-subscription` edge function call (and its own 30s interval).
+ const { data: subscription = defaultSubscription, isLoading } = useQuery({
+ queryKey: ["subscription-status", user?.id],
+ enabled: !!user?.id && !!session?.access_token,
+ // Kept fresh long enough that navigating between pages never refetches.
+ staleTime: 1000 * 60 * 5,
+ gcTime: 1000 * 60 * 30,
+ refetchOnMount: false,
+ refetchOnWindowFocus: false,
+ retry: false,
+ queryFn: async (): Promise<SubscriptionStatus> => {
  // Short-circuit for admin/superadmin users — they don't have subscriptions
  const { data: roles } = await supabase
  .from('user_roles')
  .select('role')
- .eq('user_id', user.id);
+ .eq('user_id', user!.id);
  const isAdmin = roles?.some((r: any) => r.role ==='admin' || r.role ==='superadmin');
- if (isAdmin) {
- setSubscription(defaultSubscription);
- setLoading(false);
- return;
- }
+ if (isAdmin) return defaultSubscription;
 
  const { data, error } = await supabase.functions.invoke('check-subscription');
-
  if (error) {
- // Don't throw on auth errors, just reset to default
- if (error.message?.includes('Auth') || error.message?.includes('session')) {
- console.warn('[useSubscription] Auth issue, resetting subscription state');
- setSubscription(defaultSubscription);
- } else {
- console.error('[useSubscription] Error:', error);
+ console.warn('[useSubscription] check-subscription failed:', error.message);
+ return defaultSubscription;
  }
- return;
- }
+ return (data as SubscriptionStatus) ?? defaultSubscription;
+ },
+ });
 
- if (data) {
- setSubscription(data);
- }
- } catch (error) {
- console.error('[useSubscription] Failed to check subscription:', error);
- } finally {
- setLoading(false);
- }
- }, [user, session?.access_token]);
+ const loading = !!user?.id && !!session?.access_token ? isLoading : false;
 
- useEffect(() => {
- checkSubscription();
-
- // Only set up interval if user is authenticated
- if (user && session?.access_token) {
- const interval = setInterval(checkSubscription, 30000);
- return () => clearInterval(interval);
- }
- }, [user, session?.access_token, checkSubscription]);
+ // Explicit refresh (after checkout, cancel, upgrade, etc.)
+ const checkSubscription = useCallback(async () => {
+ await queryClient.invalidateQueries({ queryKey: ["subscription-status", user?.id] });
+ }, [queryClient, user?.id]);
 
  // Auto-redeem preference
  const { data: autoRedeemPref } = useQuery({
