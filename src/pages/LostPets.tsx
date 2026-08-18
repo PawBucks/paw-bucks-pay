@@ -140,7 +140,8 @@ const LostPets = () => {
         .from("lost_pet_posts_public" as any)
  .select("*")
  .eq("is_active", true)
- .order("created_at", { ascending: false });
+ .order("created_at", { ascending: false })
+ .limit(100);
  
  if (statusFilter !=="all") {
  query = query.eq("status", statusFilter);
