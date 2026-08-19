@@ -21,6 +21,7 @@ import { FlashSaleDialog } from"@/components/scheduling/FlashSaleDialog";
 import { IntakeQuestionsManager } from"@/components/scheduling/IntakeQuestionsManager";
 import { GroomingSettingsTab } from"@/components/scheduling/GroomingSettingsTab";
 import { SmartScheduleTab } from"@/components/scheduling/SmartScheduleTab";
+import { ExternalCalendarSettings } from"@/components/scheduling/ExternalCalendarSettings";
 import { MerchantWorkspaceLayout, WorkspacePageHeader } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { 
  schedulingService, 
@@ -315,6 +316,7 @@ const MerchantScheduling = () => {
  Routes
  </TabsTrigger>
  <TabsTrigger value="intake">Intake Forms</TabsTrigger>
+ <TabsTrigger value="calendars">Calendar Sync</TabsTrigger>
  {getNormalizedCategory(businessType) ==='grooming' && (
  <TabsTrigger value="grooming" className="gap-1">
  <Dog className="w-3.5 h-3.5" aria-hidden="true" />
@@ -412,6 +414,10 @@ const MerchantScheduling = () => {
  {merchantId && (
  <SmartScheduleTab merchantId={merchantId} />
  )}
+ </TabsContent>
+
+ <TabsContent value="calendars">
+ {merchantId && <ExternalCalendarSettings merchantId={merchantId} />}
  </TabsContent>
 
  {getNormalizedCategory(businessType) ==='grooming' && merchantId && (
