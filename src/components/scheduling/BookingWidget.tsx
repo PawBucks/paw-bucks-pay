@@ -35,6 +35,8 @@ import {
   tzAbbr,
 } from "@/lib/timezone";
 import { cn } from "@/lib/utils";
+import { useExternalBooking } from "@/hooks/useExternalBooking";
+import { ExternalBookingCard } from "./ExternalBookingCard";
 
 // ── Earn multiplier per tier (PB earned per $1 spent) ────────────────────────
 const TIER_MULTIPLIER: Record<string, number> = {
@@ -137,6 +139,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
   const earnMultiplier = tierMultiplier(userTier);
 
   const { spendableBalance } = useSpendablePawBucks(user?.id);
+  const { data: externalBooking } = useExternalBooking(merchantId);
 
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -517,6 +520,12 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
       </div>
     );
   }
+  // ── External calendar (Calendly / Cal.com / Acuity / PetDesk) ───────────────
+  if (externalBooking && (externalBooking.replace_in_app_booking || services.length === 0)) {
+    return (
+      <ExternalBookingCard integration={externalBooking} merchantName={merchantName} exclusive />
+    );
+  }
   if (services.length === 0) return null;
 
   // ── Success screen ─────────────────────────────────────────────────────────
@@ -573,6 +582,9 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
   // ── Render header + step indicator ─────────────────────────────────────────
   return (
     <div>
+      {externalBooking && (
+        <ExternalBookingCard integration={externalBooking} merchantName={merchantName} />
+      )}
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">

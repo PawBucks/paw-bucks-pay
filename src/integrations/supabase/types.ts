@@ -5807,6 +5807,57 @@ export type Database = {
           },
         ]
       }
+      merchant_booking_integrations: {
+        Row: {
+          booking_url: string
+          created_at: string
+          display_label: string | null
+          id: string
+          is_enabled: boolean
+          merchant_id: string
+          provider: string
+          replace_in_app_booking: boolean
+          updated_at: string
+        }
+        Insert: {
+          booking_url: string
+          created_at?: string
+          display_label?: string | null
+          id?: string
+          is_enabled?: boolean
+          merchant_id: string
+          provider: string
+          replace_in_app_booking?: boolean
+          updated_at?: string
+        }
+        Update: {
+          booking_url?: string
+          created_at?: string
+          display_label?: string | null
+          id?: string
+          is_enabled?: boolean
+          merchant_id?: string
+          provider?: string
+          replace_in_app_booking?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_booking_integrations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_booking_integrations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: true
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_business_hours: {
         Row: {
           close_time: string
