@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
         .eq("merchant_id", merchantId),
       admin
         .from("service_bookings")
-        .select("user_id, customer_name, customer_email, customer_phone, total_amount, status, created_at")
+        .select("user_id, customer_name, customer_email, customer_phone, status, created_at")
         .eq("merchant_id", merchantId),
       admin
         .from("merchant_subscriptions")
