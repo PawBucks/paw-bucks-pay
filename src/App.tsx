@@ -109,6 +109,7 @@ const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"),"AuthCal
 const MySubscriptions = lazyWithRetry(() => import("./pages/MySubscriptions"),"MySubscriptions");
 const AccountantPortal = lazyWithRetry(() => import("./pages/AccountantPortal"),"AccountantPortal");
 const MerchantInvoicing = lazyWithRetry(() => import("./pages/MerchantInvoicing"),"MerchantInvoicing");
+const MerchantCustomers = lazyWithRetry(() => import("./pages/MerchantCustomers"),"MerchantCustomers");
 const InvoicePayment = lazyWithRetry(() => import("./pages/InvoicePayment"),"InvoicePayment");
 const InvoicePaymentSuccess = lazyWithRetry(() => import("./pages/InvoicePaymentSuccess"),"InvoicePaymentSuccess");
 const MerchantSubscriptionPlans = lazyWithRetry(() => import("./pages/MerchantSubscriptionPlans"),"MerchantSubscriptionPlans");
@@ -296,6 +297,7 @@ const AppRoutes = () => {
  <Route path="/merchant/pawbucks" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPawBucksWalletPage /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/store-rewards" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantStoreRewards /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/invoicing" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantInvoicing /></PageTransition></ProtectedRoute>} />
+ <Route path="/merchant/customers" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantCustomers /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/subscription-plans" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantSubscriptionPlans /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/available-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantAvailableBalance /></PageTransition></ProtectedRoute>} />
  <Route path="/merchant/pending-balance" element={<ProtectedRoute allowedRoles={['merchant']}><PageTransition><MerchantPendingBalance /></PageTransition></ProtectedRoute>} />
