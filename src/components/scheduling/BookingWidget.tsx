@@ -520,14 +520,13 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
       </div>
     );
   }
-  if (services.length === 0) return null;
-
   // ── External calendar (Calendly / Cal.com / Acuity / PetDesk) ───────────────
-  if (externalBooking?.replace_in_app_booking) {
+  if (externalBooking && (externalBooking.replace_in_app_booking || services.length === 0)) {
     return (
       <ExternalBookingCard integration={externalBooking} merchantName={merchantName} exclusive />
     );
   }
+  if (services.length === 0) return null;
 
   // ── Success screen ─────────────────────────────────────────────────────────
   if (done && selectedServiceData && selectedDate && selectedSlot) {
