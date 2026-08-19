@@ -589,19 +589,14 @@ function LockedOfferCard({
             </Badge>
           </div>
 
-          {/* Blurred details — revealed only after an in-store QR check-in */}
-          <div
-            className="mt-1 select-none pointer-events-none"
-            aria-hidden="true"
-          >
-            <h3 className="font-bold text-lg truncate blur-[6px]">{o.title}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 blur-[5px]">
-              {o.description || "Offer details hidden until you scan in store."}
+          {/* Details visible; only the redemption code stays hidden until QR check-in */}
+          <div className="mt-1">
+            <h3 className="font-bold text-lg truncate">{o.title}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+              {o.description || "Scan this merchant's in-store QR code to unlock your code."}
             </p>
           </div>
-          <span className="sr-only">
-            Offer details are locked. Scan this merchant's in-store QR code to reveal.
-          </span>
+
 
           {o.merchant?.address && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
@@ -623,7 +618,7 @@ function LockedOfferCard({
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
             Redemption code
           </div>
-          <div className="font-mono text-lg font-semibold truncate blur-[6px] select-none">
+          <div className="font-mono text-lg font-semibold truncate select-none text-muted-foreground">
             XXXX-XXXX
           </div>
         </div>
