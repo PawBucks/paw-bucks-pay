@@ -618,7 +618,7 @@ function LockedOfferCard({
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
             Redemption code
           </div>
-          <div className="font-mono text-lg font-semibold truncate blur-[6px] select-none">
+          <div className="font-mono text-lg font-semibold truncate select-none text-muted-foreground">
             XXXX-XXXX
           </div>
         </div>
