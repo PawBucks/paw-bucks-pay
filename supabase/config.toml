@@ -392,3 +392,6 @@ verify_jwt = false
 
 [functions.clover-oauth-callback]
 verify_jwt = false
+
+[functions.merchant-customers]
+verify_jwt = true
