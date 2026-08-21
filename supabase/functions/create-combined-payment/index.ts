@@ -18,6 +18,15 @@ import {
   itemsToReceiptItems,
   type IncomingTransactionItem,
 } from "../_shared/transaction-items.ts";
+import {
+  getTaxConfig,
+  calculateTax,
+  linkTaxCalculation,
+  TaxUnavailableError,
+  type TaxCalculationResult,
+  type TaxLineInput,
+} from "../_shared/tax.ts";
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
