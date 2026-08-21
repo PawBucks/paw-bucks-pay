@@ -89,7 +89,7 @@ serve(async (req) => {
     // Load transaction
     const { data: transaction, error: txError } = await supabaseAdmin
       .from('transactions')
-      .select('id, stripe_payment_intent_id, amount, status, user_id, rewards_earned, pawbucks_used, amount_refunded, pawbucks_refunded, merchant_id, description')
+      .select('id, stripe_payment_intent_id, amount, status, user_id, rewards_earned, pawbucks_used, amount_refunded, pawbucks_refunded, merchant_id, description, tax_amount, tax_calculation_id')
       .eq('id', transactionId)
       .eq('merchant_id', merchant.id)
       .single();
