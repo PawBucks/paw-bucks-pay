@@ -219,6 +219,40 @@ serve(async (req) => {
       .eq('id', transactionId);
     logStep('Transaction updated', { newStatus, newAmountRefunded });
 
+    // ============================================================
+    // SALES TAX REVERSAL — proportional to the refunded merchandise.
+    // Tax is never recomputed here; the original calculation is the
+    // source of truth and is preserved (tax_reversals is append-only).
+    // ============================================================
+    if (transaction.tax_calculation_id || transaction.stripe_payment_intent_id) {
+      try {
+        const taxCents = Math.round(Number(transaction.tax_amount || 0) * 100);
+        const merchandiseTotalCents = Math.max(0, Math.round(totalAmount * 100) - taxCents);
+        const refundRatio = totalAmount > 0 ? refundAmount / totalAmount : 0;
+        const refundedTaxableCents = isFinalRefund
+          ? merchandiseTotalCents
+          : Math.round(merchandiseTotalCents * refundRatio);
+
+        const reversal = await reverseTaxForRefund(
+          new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', { apiVersion: '2023-10-16' }),
+          supabaseAdmin,
+          {
+            taxCalculationId: transaction.tax_calculation_id ?? null,
+            stripePaymentIntentId: transaction.stripe_payment_intent_id,
+            refundedTaxableCents,
+            full: isFinalRefund,
+            stripeRefundId: stripeRefund?.id ?? null,
+            reason: note || reason || 'requested_by_customer',
+            createdBy: user.id,
+          },
+        );
+        if (reversal) logStep('Tax reversed', { reversedTaxCents: reversal.reversedTaxCents });
+      } catch (taxErr) {
+        // Tax bookkeeping must never block a refund the customer is owed.
+        logStep('Tax reversal failed (non-fatal)', { error: String(taxErr) });
+      }
+    }
+
     // Restore inventory for items decremented on the original sale (full refund only).
     if (isFinalRefund) {
       try {
