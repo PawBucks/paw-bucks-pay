@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { z } from "https://esm.sh/zod@3.22.4";
+import { reverseTaxForRefund } from "../_shared/tax.ts";
 
 const refundSchema = z.object({
   transactionId: z.string().uuid(),
@@ -88,7 +89,7 @@ serve(async (req) => {
     // Load transaction
     const { data: transaction, error: txError } = await supabaseAdmin
       .from('transactions')
-      .select('id, stripe_payment_intent_id, amount, status, user_id, rewards_earned, pawbucks_used, amount_refunded, pawbucks_refunded, merchant_id, description')
+      .select('id, stripe_payment_intent_id, amount, status, user_id, rewards_earned, pawbucks_used, amount_refunded, pawbucks_refunded, merchant_id, description, tax_amount, tax_calculation_id')
       .eq('id', transactionId)
       .eq('merchant_id', merchant.id)
       .single();
@@ -217,6 +218,40 @@ serve(async (req) => {
       .update({ status: newStatus, amount_refunded: newAmountRefunded, pawbucks_refunded: newPbRefunded })
       .eq('id', transactionId);
     logStep('Transaction updated', { newStatus, newAmountRefunded });
+
+    // ============================================================
+    // SALES TAX REVERSAL — proportional to the refunded merchandise.
+    // Tax is never recomputed here; the original calculation is the
+    // source of truth and is preserved (tax_reversals is append-only).
+    // ============================================================
+    if (transaction.tax_calculation_id || transaction.stripe_payment_intent_id) {
+      try {
+        const taxCents = Math.round(Number(transaction.tax_amount || 0) * 100);
+        const merchandiseTotalCents = Math.max(0, Math.round(totalAmount * 100) - taxCents);
+        const refundRatio = totalAmount > 0 ? refundAmount / totalAmount : 0;
+        const refundedTaxableCents = isFinalRefund
+          ? merchandiseTotalCents
+          : Math.round(merchandiseTotalCents * refundRatio);
+
+        const reversal = await reverseTaxForRefund(
+          new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', { apiVersion: '2023-10-16' }),
+          supabaseAdmin,
+          {
+            taxCalculationId: transaction.tax_calculation_id ?? null,
+            stripePaymentIntentId: transaction.stripe_payment_intent_id,
+            refundedTaxableCents,
+            full: isFinalRefund,
+            stripeRefundId: stripeRefund?.id ?? null,
+            reason: note || reason || 'requested_by_customer',
+            createdBy: user.id,
+          },
+        );
+        if (reversal) logStep('Tax reversed', { reversedTaxCents: reversal.reversedTaxCents });
+      } catch (taxErr) {
+        // Tax bookkeeping must never block a refund the customer is owed.
+        logStep('Tax reversal failed (non-fatal)', { error: String(taxErr) });
+      }
+    }
 
     // Restore inventory for items decremented on the original sale (full refund only).
     if (isFinalRefund) {

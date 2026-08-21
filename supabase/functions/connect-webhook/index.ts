@@ -7,6 +7,11 @@ import {
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
 import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
+import {
+  commitTaxCalculation,
+  linkTaxCalculation,
+  reverseTaxForRefund,
+} from "../_shared/tax.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -735,6 +740,8 @@ serve(async (req) => {
               cashback_earned: pawbucksEarned,
               stripe_payment_intent_id: paymentIntent.id,
               description: description,
+              tax_amount: Number(paymentIntent.metadata?.tax_amount || 0),
+              tax_calculation_id: paymentIntent.metadata?.tax_calculation_id || null,
             })
             .select()
             .single();
@@ -743,6 +750,24 @@ serve(async (req) => {
             logStep("Error creating transaction", { error: txError.message });
           } else {
             logStep("Transaction created", { transactionId: transaction?.id, pawbucksEarned });
+          }
+
+          // Commit the Stripe Tax calculation into a permanent tax transaction
+          // now that the payment succeeded, and link it to this transaction row.
+          const taxCalculationId = paymentIntent.metadata?.tax_calculation_id || null;
+          if (taxCalculationId) {
+            try {
+              await linkTaxCalculation(supabaseAdmin, taxCalculationId, {
+                transactionId: transaction?.id ?? null,
+                stripePaymentIntentId: paymentIntent.id,
+              });
+              await commitTaxCalculation(stripe, supabaseAdmin, {
+                taxCalculationId,
+                stripePaymentIntentId: paymentIntent.id,
+              });
+            } catch (taxErr) {
+              logStep("Tax commit failed (non-fatal)", { error: String(taxErr) });
+            }
           }
 
           // Debit storefront PawBucks only after Stripe has confirmed payment.
@@ -1199,6 +1224,75 @@ serve(async (req) => {
               error: (notifyErr as Error).message,
             });
           }
+        }
+
+        break;
+      }
+
+      case "charge.refunded":
+      case "charge.dispute.closed": {
+        // Refunds and lost disputes reverse sales tax proportionally.
+        // Reversals are appended to tax_reversals; the original
+        // tax_calculations row is preserved and never recomputed.
+        const obj = event.data.object as Stripe.Charge | Stripe.Dispute;
+        const isDispute = event.type === "charge.dispute.closed";
+        const dispute = isDispute ? (obj as Stripe.Dispute) : null;
+
+        if (isDispute && dispute?.status !== "lost") {
+          logStep("Dispute closed without loss; no tax reversal", { status: dispute?.status });
+          break;
+        }
+
+        const charge = isDispute ? null : (obj as Stripe.Charge);
+        const paymentIntentId = typeof (isDispute ? dispute?.payment_intent : charge?.payment_intent) === "string"
+          ? ((isDispute ? dispute?.payment_intent : charge?.payment_intent) as string)
+          : null;
+
+        if (!paymentIntentId) {
+          logStep("No payment intent on refund/dispute event; skipping tax reversal");
+          break;
+        }
+
+        const { data: taxedTx } = await supabaseAdmin
+          .from("transactions")
+          .select("id, amount, tax_amount, tax_calculation_id")
+          .eq("stripe_payment_intent_id", paymentIntentId)
+          .maybeSingle();
+
+        const taxCents = Math.round(Number(taxedTx?.tax_amount || 0) * 100);
+        const totalCents = Math.round(Number(taxedTx?.amount || 0) * 100);
+        const merchandiseCents = Math.max(0, totalCents - taxCents);
+
+        // Refund amount reported by Stripe includes tax; strip the tax share
+        // so only the merchandise portion drives the proportional reversal.
+        const refundedGrossCents = isDispute
+          ? totalCents
+          : Number(charge?.amount_refunded || 0);
+        const isFull = isDispute || (totalCents > 0 && refundedGrossCents >= totalCents);
+        const refundedTaxableCents = isFull
+          ? merchandiseCents
+          : totalCents > 0
+            ? Math.round((merchandiseCents * refundedGrossCents) / totalCents)
+            : 0;
+
+        try {
+          const reversal = await reverseTaxForRefund(stripe, supabaseAdmin, {
+            taxCalculationId: taxedTx?.tax_calculation_id ?? null,
+            stripePaymentIntentId: paymentIntentId,
+            refundedTaxableCents,
+            full: isFull,
+            stripeRefundId: isDispute ? (dispute?.id ?? null) : (charge?.id ?? null),
+            reason: isDispute ? "dispute_lost" : "stripe_refund",
+          });
+          if (reversal) {
+            logStep("Tax reversed", {
+              paymentIntentId,
+              reversedTaxCents: reversal.reversedTaxCents,
+              full: isFull,
+            });
+          }
+        } catch (taxErr) {
+          logStep("Tax reversal failed (non-fatal)", { error: String(taxErr) });
         }
 
         break;
