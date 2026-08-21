@@ -878,7 +878,7 @@ serve(async (req) => {
         taxCalculationId: taxResult?.taxCalculationId ?? null,
         taxJurisdictions: taxResult?.jurisdictions ?? [],
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 - 0 + 0 === 400 ? 200 : 200 }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
