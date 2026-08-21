@@ -399,7 +399,7 @@ serve(async (req) => {
       pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
       const newStoreLockedUsdValue = storeLockedPawbucks * PAWBUCKS_TO_USD;
       totalPbUsdValue = pawbucksUsdValue + newStoreLockedUsdValue;
-      stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount;
+      stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount + taxUsd;
       // Guard against tiny float drift
       if (stripeAmount > 0 && stripeAmount < STRIPE_MIN_USD) {
         stripeAmount = STRIPE_MIN_USD;
