@@ -536,9 +536,18 @@ serve(async (req) => {
         application_fee: 0, // No fee on PawBucks payments
         cashback_earned: 0, // No cashback on PawBucks payments
         rewards_earned: 0,
+        tax_amount: 0, // PawBucks-only settlements carry no taxable card charge
+        tax_calculation_id: taxResult?.taxCalculationId ?? null,
         description: description || `PawBucks payment to ${merchant.business_name}`,
         status: 'completed',
       }).select().single();
+
+      if (taxResult?.taxCalculationId && transaction?.id) {
+        await linkTaxCalculation(supabaseAdmin, taxResult.taxCalculationId, {
+          transactionId: transaction.id,
+        });
+      }
+
 
       await supabaseAdmin.from('pawbucks_activity').insert({
         user_id: effectiveUserId,
