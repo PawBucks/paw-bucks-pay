@@ -803,6 +803,8 @@ serve(async (req) => {
           store_locked_pawbucks: storeLockedPawbucks.toString(),
           total_amount: totalAmount.toString(),
           tip_amount: tipAmount.toString(),
+          tax_amount: taxUsd.toFixed(2),
+          tax_calculation_id: taxResult?.taxCalculationId ?? '',
           pawbucks_earned: String(pawbucksEarned),
           platform: "pawbucks",
           charge_type: "direct",
@@ -818,6 +820,14 @@ serve(async (req) => {
       connectedAccount: merchant.stripe_account_id 
     });
 
+    // Attach the PaymentIntent to the tax calculation so the webhook can
+    // commit the Stripe Tax transaction once the payment succeeds.
+    if (taxResult?.taxCalculationId) {
+      await linkTaxCalculation(supabaseAdmin, taxResult.taxCalculationId, {
+        stripePaymentIntentId: paymentIntent.id,
+      });
+    }
+
     // Create pending payment record
     await supabaseAdmin
       .from("direct_payments")
@@ -832,12 +842,15 @@ serve(async (req) => {
         status: "pending",
         description: description || `Payment to ${merchant.business_name}`,
         pawbucks_earned: pawbucksEarned,
+        tax_amount: Math.round(taxUsd * 100),
+        tax_calculation_id: taxResult?.taxCalculationId ?? null,
         metadata: {
           business_name: merchant.business_name,
           charge_type: "direct",
           subscription_tier: subscriptionTier,
           pawbucks_amount: pawbucksAmount,
           total_amount: totalAmount,
+          tax_amount: taxUsd,
           items: lineItems,
         },
       });
@@ -859,7 +872,15 @@ serve(async (req) => {
         cashbackRate,
         applicationFee: platformFeeInCents,
         merchantName: merchant.business_name,
+        subtotal: baseAmount,
+        taxAmount: taxUsd,
+        taxLabel: taxResult?.taxLabel ?? 'Sales Tax',
+        taxCalculationId: taxResult?.taxCalculationId ?? null,
+        taxJurisdictions: taxResult?.jurisdictions ?? [],
       }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 - 0 + 0 === 400 ? 200 : 200 }
+    );
+
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
 
