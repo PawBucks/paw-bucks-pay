@@ -18,6 +18,15 @@ import {
   itemsToReceiptItems,
   type IncomingTransactionItem,
 } from "../_shared/transaction-items.ts";
+import {
+  getTaxConfig,
+  calculateTax,
+  linkTaxCalculation,
+  TaxUnavailableError,
+  type TaxCalculationResult,
+  type TaxLineInput,
+} from "../_shared/tax.ts";
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -45,7 +54,21 @@ const combinedPaymentSchema = z.object({
   description: z.string().max(500).optional(),
   autoRedeem: z.boolean().optional().default(false),
   items: z.array(itemSchema).max(100).optional(),
+  // Optional per-checkout tax location. When omitted we fall back to the
+  // customer's saved default address in `customer_tax_addresses`.
+  taxAddress: z
+    .object({
+      line1: z.string().trim().min(1).max(200),
+      line2: z.string().trim().max(200).nullable().optional(),
+      city: z.string().trim().min(1).max(100),
+      state: z.string().trim().min(2).max(50),
+      postal_code: z.string().trim().min(3).max(20),
+      country: z.string().trim().min(2).max(2).nullable().optional(),
+    })
+    .nullable()
+    .optional(),
 });
+
 
 // PawBucks conversion for pet owners: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
@@ -286,11 +309,76 @@ serve(async (req) => {
       });
     }
 
+
+    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+      apiVersion: '2024-12-18.acacia',
+    });
+
+    // ============================================================
+    // SALES TAX (Stripe Tax) — computed server-side only.
+    // Taxable base = merchandise/services subtotal BEFORE PawBucks.
+    // PawBucks redemptions never reduce the taxable amount, and tips
+    // are never taxed. Tax is added on top of the merchandise total.
+    // ============================================================
+    let taxResult: TaxCalculationResult | null = null;
+    let taxUsd = 0;
+    try {
+      const taxConfig = await getTaxConfig(supabaseAdmin);
+      if (taxConfig.enabled && baseAmount > 0) {
+        const taxItems: TaxLineInput[] = lineItems.length > 0
+          ? lineItems.map((li) => ({
+              source_type: li.source_type,
+              source_id: li.source_id ?? null,
+              name: li.name,
+              quantity: li.quantity,
+              unit_price: li.unit_price,
+            }))
+          : [{
+              source_type: 'custom',
+              source_id: null,
+              name: description || `Payment to ${merchant.business_name}`,
+              quantity: 1,
+              unit_price: baseAmount,
+            }];
+
+        taxResult = await calculateTax({
+          stripe,
+          admin: supabaseAdmin,
+          config: taxConfig,
+          userId: effectiveUserId,
+          merchantId,
+          connectedAccountId: merchant.stripe_account_id,
+          context: 'merchant_payment',
+          items: taxItems,
+          address: validation.data.taxAddress ?? null,
+        });
+
+        taxUsd = taxResult ? taxResult.taxAmountCents / 100 : 0;
+        logStep('Sales tax calculated', {
+          taxCalculationId: taxResult?.taxCalculationId,
+          taxUsd,
+          taxableCents: taxResult?.taxableAmountCents,
+          mode: taxResult?.mode,
+        });
+      }
+    } catch (taxErr) {
+      if (taxErr instanceof TaxUnavailableError) {
+        console.error('[TAX] Unavailable', { code: taxErr.code, detail: taxErr.detail });
+        return new Response(
+          JSON.stringify({ error: taxErr.message, taxError: taxErr.code }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        );
+      }
+      throw taxErr;
+    }
+
     // Calculate USD value of PawBucks - both regular and store-locked apply to base amount ONLY, not tip
     const storeLockedUsdValue = storeLockedPawbucks * PAWBUCKS_TO_USD;
     let pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
     let totalPbUsdValue = pawbucksUsdValue + storeLockedUsdValue;
-    let stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount; // Tip always goes to card
+    // Tip and sales tax are always charged to the card (never covered by PawBucks)
+    let stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount + taxUsd;
+
 
     // Stripe minimum charge is $0.50. If PawBucks would reduce the card portion
     // below $0.50 (but not to $0.00), scale back the PawBucks applied so the
@@ -311,7 +399,7 @@ serve(async (req) => {
       pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
       const newStoreLockedUsdValue = storeLockedPawbucks * PAWBUCKS_TO_USD;
       totalPbUsdValue = pawbucksUsdValue + newStoreLockedUsdValue;
-      stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount;
+      stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount + taxUsd;
       // Guard against tiny float drift
       if (stripeAmount > 0 && stripeAmount < STRIPE_MIN_USD) {
         stripeAmount = STRIPE_MIN_USD;
@@ -448,9 +536,18 @@ serve(async (req) => {
         application_fee: 0, // No fee on PawBucks payments
         cashback_earned: 0, // No cashback on PawBucks payments
         rewards_earned: 0,
+        tax_amount: 0, // PawBucks-only settlements carry no taxable card charge
+        tax_calculation_id: taxResult?.taxCalculationId ?? null,
         description: description || `PawBucks payment to ${merchant.business_name}`,
         status: 'completed',
       }).select().single();
+
+      if (taxResult?.taxCalculationId && transaction?.id) {
+        await linkTaxCalculation(supabaseAdmin, taxResult.taxCalculationId, {
+          transactionId: transaction.id,
+        });
+      }
+
 
       await supabaseAdmin.from('pawbucks_activity').insert({
         user_id: effectiveUserId,
@@ -590,9 +687,8 @@ serve(async (req) => {
       throw new Error(`${merchant.business_name} is not currently able to accept payments. Please try again later or contact the business directly.`);
     }
 
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2024-12-18.acacia',
-    });
+    // (Stripe client already initialized above for tax calculation.)
+
 
     // Verify the connected account can actually accept payments
     try {
@@ -643,9 +739,10 @@ serve(async (req) => {
     const cashbackRate = resolvedTier.multiplier;
     const subscriptionTier = resolvedTier.label;
 
-    // Calculate amounts - PawBucks earned on Stripe portion only
+    // Calculate amounts - PawBucks earned on Stripe portion only, never on sales tax
     const stripeAmountInCents = Math.round(stripeAmount * 100);
-    let pawbucksEarned = Math.round(stripeAmount * cashbackRate);
+    const earnableStripeAmount = Math.max(0, stripeAmount - taxUsd);
+    let pawbucksEarned = Math.round(earnableStripeAmount * cashbackRate);
 
     // Global kill-switch: SuperAdmin can disable PawBucks earning for pet owners platform-wide
     {
@@ -661,10 +758,12 @@ serve(async (req) => {
         pawbucksEarned = 0;
       }
     }
-    // Success Fee: 3% applies ONLY to the non-tip Stripe portion.
-    // Tips are always passed through 100% to the merchant (never charged a Success Fee).
-    const feeableStripeAmount = Math.max(0, stripeAmount - tipAmount);
+    // Success Fee: 3% applies ONLY to the non-tip, non-tax Stripe portion.
+    // Tips are always passed through 100% to the merchant, and sales tax is
+    // never subject to a Success Fee.
+    const feeableStripeAmount = Math.max(0, stripeAmount - tipAmount - taxUsd);
     const platformFeeInCents = Math.round(feeableStripeAmount * PLATFORM_FEE_PERCENT * 100);
+
 
     logStep('Stripe payment calculation', {
       stripeAmount,
@@ -704,6 +803,8 @@ serve(async (req) => {
           store_locked_pawbucks: storeLockedPawbucks.toString(),
           total_amount: totalAmount.toString(),
           tip_amount: tipAmount.toString(),
+          tax_amount: taxUsd.toFixed(2),
+          tax_calculation_id: taxResult?.taxCalculationId ?? '',
           pawbucks_earned: String(pawbucksEarned),
           platform: "pawbucks",
           charge_type: "direct",
@@ -719,6 +820,14 @@ serve(async (req) => {
       connectedAccount: merchant.stripe_account_id 
     });
 
+    // Attach the PaymentIntent to the tax calculation so the webhook can
+    // commit the Stripe Tax transaction once the payment succeeds.
+    if (taxResult?.taxCalculationId) {
+      await linkTaxCalculation(supabaseAdmin, taxResult.taxCalculationId, {
+        stripePaymentIntentId: paymentIntent.id,
+      });
+    }
+
     // Create pending payment record
     await supabaseAdmin
       .from("direct_payments")
@@ -733,12 +842,15 @@ serve(async (req) => {
         status: "pending",
         description: description || `Payment to ${merchant.business_name}`,
         pawbucks_earned: pawbucksEarned,
+        tax_amount: Math.round(taxUsd * 100),
+        tax_calculation_id: taxResult?.taxCalculationId ?? null,
         metadata: {
           business_name: merchant.business_name,
           charge_type: "direct",
           subscription_tier: subscriptionTier,
           pawbucks_amount: pawbucksAmount,
           total_amount: totalAmount,
+          tax_amount: taxUsd,
           items: lineItems,
         },
       });
@@ -760,9 +872,16 @@ serve(async (req) => {
         cashbackRate,
         applicationFee: platformFeeInCents,
         merchantName: merchant.business_name,
+        subtotal: baseAmount,
+        taxAmount: taxUsd,
+        taxLabel: taxResult?.taxLabel ?? 'Sales Tax',
+        taxCalculationId: taxResult?.taxCalculationId ?? null,
+        taxJurisdictions: taxResult?.jurisdictions ?? [],
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
+
+
 
   } catch (error: unknown) {
     // Log full error details for debugging
