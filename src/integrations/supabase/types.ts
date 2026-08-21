@@ -2368,6 +2368,57 @@ export type Database = {
           },
         ]
       }
+      customer_tax_addresses: {
+        Row: {
+          city: string
+          country: string
+          created_at: string
+          id: string
+          is_default: boolean
+          kind: string
+          line1: string
+          line2: string | null
+          postal_code: string
+          state: string
+          updated_at: string
+          user_id: string
+          validated_at: string | null
+          validation_source: string | null
+        }
+        Insert: {
+          city: string
+          country?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          kind?: string
+          line1: string
+          line2?: string | null
+          postal_code: string
+          state: string
+          updated_at?: string
+          user_id: string
+          validated_at?: string | null
+          validation_source?: string | null
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          kind?: string
+          line1?: string
+          line2?: string | null
+          postal_code?: string
+          state?: string
+          updated_at?: string
+          user_id?: string
+          validated_at?: string | null
+          validation_source?: string | null
+        }
+        Relationships: []
+      }
       diagnostic_ai_analyses: {
         Row: {
           ai_anomalies_detected: Json | null
@@ -2520,6 +2571,8 @@ export type Database = {
           pawbucks_earned: number | null
           status: string
           stripe_payment_intent_id: string
+          tax_amount: number
+          tax_calculation_id: string | null
           updated_at: string
           user_id: string | null
         }
@@ -2537,6 +2590,8 @@ export type Database = {
           pawbucks_earned?: number | null
           status?: string
           stripe_payment_intent_id: string
+          tax_amount?: number
+          tax_calculation_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -2554,6 +2609,8 @@ export type Database = {
           pawbucks_earned?: number | null
           status?: string
           stripe_payment_intent_id?: string
+          tax_amount?: number
+          tax_calculation_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -4313,7 +4370,11 @@ export type Database = {
           merchant_id: string
           name: string
           sku: string | null
+          tax_behavior: string
+          tax_category_key: string | null
           tax_rate: number | null
+          tax_review_required: boolean
+          taxable: boolean | null
           unit_price: number
           unit_type: string | null
           updated_at: string
@@ -4328,7 +4389,11 @@ export type Database = {
           merchant_id: string
           name: string
           sku?: string | null
+          tax_behavior?: string
+          tax_category_key?: string | null
           tax_rate?: number | null
+          tax_review_required?: boolean
+          taxable?: boolean | null
           unit_price?: number
           unit_type?: string | null
           updated_at?: string
@@ -4343,7 +4408,11 @@ export type Database = {
           merchant_id?: string
           name?: string
           sku?: string | null
+          tax_behavior?: string
+          tax_category_key?: string | null
           tax_rate?: number | null
+          tax_review_required?: boolean
+          taxable?: boolean | null
           unit_price?: number
           unit_type?: string | null
           updated_at?: string
@@ -4369,6 +4438,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "merchants_public"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_catalog_items_tax_category_key_fkey"
+            columns: ["tax_category_key"]
+            isOneToOne: false
+            referencedRelation: "tax_categories"
+            referencedColumns: ["key"]
           },
         ]
       }
@@ -6301,6 +6377,10 @@ export type Database = {
           price_pawbucks: number
           price_usd: number
           short_description: string | null
+          tax_behavior: string
+          tax_category_key: string | null
+          tax_review_required: boolean
+          taxable: boolean | null
           updated_at: string | null
         }
         Insert: {
@@ -6319,6 +6399,10 @@ export type Database = {
           price_pawbucks?: number
           price_usd?: number
           short_description?: string | null
+          tax_behavior?: string
+          tax_category_key?: string | null
+          tax_review_required?: boolean
+          taxable?: boolean | null
           updated_at?: string | null
         }
         Update: {
@@ -6337,9 +6421,21 @@ export type Database = {
           price_pawbucks?: number
           price_usd?: number
           short_description?: string | null
+          tax_behavior?: string
+          tax_category_key?: string | null
+          tax_review_required?: boolean
+          taxable?: boolean | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "merchant_market_services_tax_category_key_fkey"
+            columns: ["tax_category_key"]
+            isOneToOne: false
+            referencedRelation: "tax_categories"
+            referencedColumns: ["key"]
+          },
+        ]
       }
       merchant_message_attachments: {
         Row: {
@@ -6977,6 +7073,10 @@ export type Database = {
           price: number
           require_deposit: boolean | null
           requires_pet: boolean
+          tax_behavior: string
+          tax_category_key: string | null
+          tax_review_required: boolean
+          taxable: boolean | null
           updated_at: string
         }
         Insert: {
@@ -7005,6 +7105,10 @@ export type Database = {
           price?: number
           require_deposit?: boolean | null
           requires_pet?: boolean
+          tax_behavior?: string
+          tax_category_key?: string | null
+          tax_review_required?: boolean
+          taxable?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -7033,6 +7137,10 @@ export type Database = {
           price?: number
           require_deposit?: boolean | null
           requires_pet?: boolean
+          tax_behavior?: string
+          tax_category_key?: string | null
+          tax_review_required?: boolean
+          taxable?: boolean | null
           updated_at?: string
         }
         Relationships: [
@@ -7056,6 +7164,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "merchants_public"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_services_tax_category_key_fkey"
+            columns: ["tax_category_key"]
+            isOneToOne: false
+            referencedRelation: "tax_categories"
+            referencedColumns: ["key"]
           },
         ]
       }
@@ -10000,6 +10115,10 @@ export type Database = {
           rating_count: number | null
           sku: string | null
           stock_quantity: number
+          tax_behavior: string
+          tax_category_key: string | null
+          tax_review_required: boolean
+          taxable: boolean | null
           updated_at: string
         }
         Insert: {
@@ -10020,6 +10139,10 @@ export type Database = {
           rating_count?: number | null
           sku?: string | null
           stock_quantity?: number
+          tax_behavior?: string
+          tax_category_key?: string | null
+          tax_review_required?: boolean
+          taxable?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -10040,6 +10163,10 @@ export type Database = {
           rating_count?: number | null
           sku?: string | null
           stock_quantity?: number
+          tax_behavior?: string
+          tax_category_key?: string | null
+          tax_review_required?: boolean
+          taxable?: boolean | null
           updated_at?: string
         }
         Relationships: [
@@ -10063,6 +10190,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "merchants_public"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_store_items_tax_category_key_fkey"
+            columns: ["tax_category_key"]
+            isOneToOne: false
+            referencedRelation: "tax_categories"
+            referencedColumns: ["key"]
           },
         ]
       }
@@ -10113,6 +10247,9 @@ export type Database = {
           created_at: string
           id: string
           status: string
+          subtotal_amount: number | null
+          tax_amount: number
+          tax_calculation_id: string | null
           total_amount: number
           updated_at: string
           user_id: string
@@ -10121,6 +10258,9 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string
+          subtotal_amount?: number | null
+          tax_amount?: number
+          tax_calculation_id?: string | null
           total_amount: number
           updated_at?: string
           user_id: string
@@ -10129,6 +10269,9 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string
+          subtotal_amount?: number | null
+          tax_amount?: number
+          tax_calculation_id?: string | null
           total_amount?: number
           updated_at?: string
           user_id?: string
@@ -12717,6 +12860,274 @@ export type Database = {
           },
         ]
       }
+      tax_calculation_line_items: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          jurisdiction: Json | null
+          name: string
+          quantity: number
+          reference: string | null
+          source_id: string | null
+          source_type: string | null
+          stripe_line_item_id: string | null
+          stripe_tax_code: string | null
+          tax_amount_cents: number
+          tax_behavior: string
+          tax_breakdown: Json | null
+          tax_calculation_id: string
+          tax_category_key: string | null
+          tax_rate: number | null
+          taxable_amount_cents: number
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          jurisdiction?: Json | null
+          name: string
+          quantity?: number
+          reference?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          stripe_line_item_id?: string | null
+          stripe_tax_code?: string | null
+          tax_amount_cents?: number
+          tax_behavior?: string
+          tax_breakdown?: Json | null
+          tax_calculation_id: string
+          tax_category_key?: string | null
+          tax_rate?: number | null
+          taxable_amount_cents?: number
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          jurisdiction?: Json | null
+          name?: string
+          quantity?: number
+          reference?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          stripe_line_item_id?: string | null
+          stripe_tax_code?: string | null
+          tax_amount_cents?: number
+          tax_behavior?: string
+          tax_breakdown?: Json | null
+          tax_calculation_id?: string
+          tax_category_key?: string | null
+          tax_rate?: number | null
+          taxable_amount_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_calculation_line_items_tax_calculation_id_fkey"
+            columns: ["tax_calculation_id"]
+            isOneToOne: false
+            referencedRelation: "tax_calculations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_calculations: {
+        Row: {
+          address: Json | null
+          connected_account_id: string | null
+          context: string
+          created_at: string
+          currency: string
+          effective_tax_rate: number | null
+          error_message: string | null
+          exempt_amount_cents: number
+          expires_at: string | null
+          id: string
+          invoice_id: string | null
+          jurisdictions: Json
+          merchant_id: string | null
+          order_id: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_response: Json | null
+          stripe_tax_calculation_id: string | null
+          stripe_tax_transaction_id: string | null
+          subtotal_cents: number
+          tax_amount_cents: number
+          tax_collection_mode: string
+          taxable_amount_cents: number
+          total_cents: number
+          transaction_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: Json | null
+          connected_account_id?: string | null
+          context?: string
+          created_at?: string
+          currency?: string
+          effective_tax_rate?: number | null
+          error_message?: string | null
+          exempt_amount_cents?: number
+          expires_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          jurisdictions?: Json
+          merchant_id?: string | null
+          order_id?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_response?: Json | null
+          stripe_tax_calculation_id?: string | null
+          stripe_tax_transaction_id?: string | null
+          subtotal_cents?: number
+          tax_amount_cents?: number
+          tax_collection_mode?: string
+          taxable_amount_cents?: number
+          total_cents?: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: Json | null
+          connected_account_id?: string | null
+          context?: string
+          created_at?: string
+          currency?: string
+          effective_tax_rate?: number | null
+          error_message?: string | null
+          exempt_amount_cents?: number
+          expires_at?: string | null
+          id?: string
+          invoice_id?: string | null
+          jurisdictions?: Json
+          merchant_id?: string | null
+          order_id?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_response?: Json | null
+          stripe_tax_calculation_id?: string | null
+          stripe_tax_transaction_id?: string | null
+          subtotal_cents?: number
+          tax_amount_cents?: number
+          tax_collection_mode?: string
+          taxable_amount_cents?: number
+          total_cents?: number
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_calculations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_calculations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_categories: {
+        Row: {
+          active: boolean
+          applies_to: string
+          created_at: string
+          description: string | null
+          id: string
+          key: string
+          label: string
+          requires_review: boolean
+          sort_order: number
+          stripe_tax_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          applies_to?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          key: string
+          label: string
+          requires_review?: boolean
+          sort_order?: number
+          stripe_tax_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          applies_to?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          key?: string
+          label?: string
+          requires_review?: boolean
+          sort_order?: number
+          stripe_tax_code?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tax_reversals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          mode: string
+          reason: string | null
+          reversed_tax_amount_cents: number
+          reversed_taxable_amount_cents: number
+          stripe_refund_id: string | null
+          stripe_reversal_transaction_id: string | null
+          stripe_tax_transaction_id: string | null
+          tax_calculation_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          mode?: string
+          reason?: string | null
+          reversed_tax_amount_cents?: number
+          reversed_taxable_amount_cents?: number
+          stripe_refund_id?: string | null
+          stripe_reversal_transaction_id?: string | null
+          stripe_tax_transaction_id?: string | null
+          tax_calculation_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          mode?: string
+          reason?: string | null
+          reversed_tax_amount_cents?: number
+          reversed_taxable_amount_cents?: number
+          stripe_refund_id?: string | null
+          stripe_reversal_transaction_id?: string | null
+          stripe_tax_transaction_id?: string | null
+          tax_calculation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_reversals_tax_calculation_id_fkey"
+            columns: ["tax_calculation_id"]
+            isOneToOne: false
+            referencedRelation: "tax_calculations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       text_campaigns: {
         Row: {
           created_at: string
@@ -13043,6 +13454,8 @@ export type Database = {
           status: string
           stripe_amount: number | null
           stripe_payment_intent_id: string | null
+          tax_amount: number
+          tax_calculation_id: string | null
           updated_at: string
           user_id: string | null
         }
@@ -13062,6 +13475,8 @@ export type Database = {
           status?: string
           stripe_amount?: number | null
           stripe_payment_intent_id?: string | null
+          tax_amount?: number
+          tax_calculation_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -13081,6 +13496,8 @@ export type Database = {
           status?: string
           stripe_amount?: number | null
           stripe_payment_intent_id?: string | null
+          tax_amount?: number
+          tax_calculation_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -16202,6 +16619,10 @@ export type Database = {
         }[]
       }
       get_spendable_pawbucks: { Args: { p_user_id: string }; Returns: number }
+      get_tax_report: {
+        Args: { p_end?: string; p_start?: string }
+        Returns: Json
+      }
       get_underwriting_signals: {
         Args: { p_merchant_id: string }
         Returns: {
