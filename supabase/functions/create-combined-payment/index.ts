@@ -678,9 +678,8 @@ serve(async (req) => {
       throw new Error(`${merchant.business_name} is not currently able to accept payments. Please try again later or contact the business directly.`);
     }
 
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2024-12-18.acacia',
-    });
+    // (Stripe client already initialized above for tax calculation.)
+
 
     // Verify the connected account can actually accept payments
     try {
