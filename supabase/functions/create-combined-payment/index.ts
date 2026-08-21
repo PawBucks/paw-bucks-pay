@@ -739,9 +739,10 @@ serve(async (req) => {
     const cashbackRate = resolvedTier.multiplier;
     const subscriptionTier = resolvedTier.label;
 
-    // Calculate amounts - PawBucks earned on Stripe portion only
+    // Calculate amounts - PawBucks earned on Stripe portion only, never on sales tax
     const stripeAmountInCents = Math.round(stripeAmount * 100);
-    let pawbucksEarned = Math.round(stripeAmount * cashbackRate);
+    const earnableStripeAmount = Math.max(0, stripeAmount - taxUsd);
+    let pawbucksEarned = Math.round(earnableStripeAmount * cashbackRate);
 
     // Global kill-switch: SuperAdmin can disable PawBucks earning for pet owners platform-wide
     {
@@ -757,10 +758,12 @@ serve(async (req) => {
         pawbucksEarned = 0;
       }
     }
-    // Success Fee: 3% applies ONLY to the non-tip Stripe portion.
-    // Tips are always passed through 100% to the merchant (never charged a Success Fee).
-    const feeableStripeAmount = Math.max(0, stripeAmount - tipAmount);
+    // Success Fee: 3% applies ONLY to the non-tip, non-tax Stripe portion.
+    // Tips are always passed through 100% to the merchant, and sales tax is
+    // never subject to a Success Fee.
+    const feeableStripeAmount = Math.max(0, stripeAmount - tipAmount - taxUsd);
     const platformFeeInCents = Math.round(feeableStripeAmount * PLATFORM_FEE_PERCENT * 100);
+
 
     logStep('Stripe payment calculation', {
       stripeAmount,
