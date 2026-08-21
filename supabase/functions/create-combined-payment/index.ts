@@ -309,11 +309,76 @@ serve(async (req) => {
       });
     }
 
+
+    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
+      apiVersion: '2024-12-18.acacia',
+    });
+
+    // ============================================================
+    // SALES TAX (Stripe Tax) — computed server-side only.
+    // Taxable base = merchandise/services subtotal BEFORE PawBucks.
+    // PawBucks redemptions never reduce the taxable amount, and tips
+    // are never taxed. Tax is added on top of the merchandise total.
+    // ============================================================
+    let taxResult: TaxCalculationResult | null = null;
+    let taxUsd = 0;
+    try {
+      const taxConfig = await getTaxConfig(supabaseAdmin);
+      if (taxConfig.enabled && baseAmount > 0) {
+        const taxItems: TaxLineInput[] = lineItems.length > 0
+          ? lineItems.map((li) => ({
+              source_type: li.source_type,
+              source_id: li.source_id ?? null,
+              name: li.name,
+              quantity: li.quantity,
+              unit_price: li.unit_price,
+            }))
+          : [{
+              source_type: 'custom',
+              source_id: null,
+              name: description || `Payment to ${merchant.business_name}`,
+              quantity: 1,
+              unit_price: baseAmount,
+            }];
+
+        taxResult = await calculateTax({
+          stripe,
+          admin: supabaseAdmin,
+          config: taxConfig,
+          userId: effectiveUserId,
+          merchantId,
+          connectedAccountId: merchant.stripe_account_id,
+          context: 'merchant_payment',
+          items: taxItems,
+          address: validation.data.taxAddress ?? null,
+        });
+
+        taxUsd = taxResult ? taxResult.taxAmountCents / 100 : 0;
+        logStep('Sales tax calculated', {
+          taxCalculationId: taxResult?.taxCalculationId,
+          taxUsd,
+          taxableCents: taxResult?.taxableAmountCents,
+          mode: taxResult?.mode,
+        });
+      }
+    } catch (taxErr) {
+      if (taxErr instanceof TaxUnavailableError) {
+        console.error('[TAX] Unavailable', { code: taxErr.code, detail: taxErr.detail });
+        return new Response(
+          JSON.stringify({ error: taxErr.message, taxError: taxErr.code }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        );
+      }
+      throw taxErr;
+    }
+
     // Calculate USD value of PawBucks - both regular and store-locked apply to base amount ONLY, not tip
     const storeLockedUsdValue = storeLockedPawbucks * PAWBUCKS_TO_USD;
     let pawbucksUsdValue = pawbucksAmount * PAWBUCKS_TO_USD;
     let totalPbUsdValue = pawbucksUsdValue + storeLockedUsdValue;
-    let stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount; // Tip always goes to card
+    // Tip and sales tax are always charged to the card (never covered by PawBucks)
+    let stripeAmount = Math.max(0, baseAmount - totalPbUsdValue) + tipAmount + taxUsd;
+
 
     // Stripe minimum charge is $0.50. If PawBucks would reduce the card portion
     // below $0.50 (but not to $0.00), scale back the PawBucks applied so the
