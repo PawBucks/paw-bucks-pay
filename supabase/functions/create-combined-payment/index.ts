@@ -54,7 +54,21 @@ const combinedPaymentSchema = z.object({
   description: z.string().max(500).optional(),
   autoRedeem: z.boolean().optional().default(false),
   items: z.array(itemSchema).max(100).optional(),
+  // Optional per-checkout tax location. When omitted we fall back to the
+  // customer's saved default address in `customer_tax_addresses`.
+  taxAddress: z
+    .object({
+      line1: z.string().trim().min(1).max(200),
+      line2: z.string().trim().max(200).nullable().optional(),
+      city: z.string().trim().min(1).max(100),
+      state: z.string().trim().min(2).max(50),
+      postal_code: z.string().trim().min(3).max(20),
+      country: z.string().trim().min(2).max(2).nullable().optional(),
+    })
+    .nullable()
+    .optional(),
 });
+
 
 // PawBucks conversion for pet owners: 1000 PawBucks = $1.00 (1 PawBuck = $0.001)
 const PAWBUCKS_TO_USD = 0.001;
