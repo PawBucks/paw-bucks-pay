@@ -100,20 +100,46 @@ const AdminPetFestRsvps = () => {
   useEffect(() => {
     let active = true;
     const loadFunnel = async () => {
-      const [{ data: reservations }, { data: events }] = await Promise.all([
-        supabase.from("petfest_bonus_reservations").select("id, status"),
-        supabase.from("petfest_bonus_events").select("event_type, reservation_id, user_id, email"),
+      const [resRes, evRes] = await Promise.all([
+        supabase
+          .from("petfest_bonus_reservations")
+          .select("id, status, expires_at, claimed_at"),
+        supabase
+          .from("petfest_bonus_events")
+          .select("event_type, reservation_id, user_id, email"),
       ]);
       if (!active) return;
+      if (resRes.error || evRes.error) {
+        console.error("Failed to load PetFest bonus funnel", resRes.error ?? evRes.error);
+        toast.error("Could not load the bonus funnel");
+        return;
+      }
+      const reservations = resRes.data ?? [];
+      const events = evRes.data ?? [];
       const uniq = (rows: { reservation_id: string | null; user_id: string | null; email: string | null }[]) =>
-        new Set(rows.map((r) => r.reservation_id ?? r.user_id ?? r.email ?? Math.random().toString())).size;
-      const byType = (type: string) => (events ?? []).filter((e) => e.event_type === type);
+        new Set(
+          rows.map((r, i) => r.reservation_id ?? r.user_id ?? r.email ?? `anon-${i}`),
+        ).size;
+      const byType = (type: string) => events.filter((e) => e.event_type === type);
+
+      // Reservation rows are the source of truth for grants/expiry; events are
+      // only used for the top-of-funnel steps (and as a fallback for grants).
+      const granted = reservations.filter(
+        (r) => r.status === "claimed" || !!r.claimed_at,
+      ).length;
+      const expired = reservations.filter(
+        (r) =>
+          r.status !== "claimed" &&
+          !r.claimed_at &&
+          new Date(r.expires_at as string).getTime() <= Date.now(),
+      ).length;
+
       setFunnel({
-        reserved: (reservations ?? []).length,
+        reserved: reservations.length,
         ctaClicks: uniq(byType("cta_click")),
         signupStarted: uniq(byType("signup_started")),
-        granted: byType("claim_granted").length,
-        expired: byType("claim_expired").length,
+        granted: Math.max(granted, byType("claim_granted").length),
+        expired,
       });
     };
     loadFunnel();
@@ -124,11 +150,23 @@ const AdminPetFestRsvps = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "petfest_bonus_reservations" }, () => loadFunnel())
       .subscribe();
 
+    // Reservations expire purely by time, so refresh on a timer + on refocus.
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") loadFunnel();
+    }, 30_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") loadFunnel();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
       active = false;
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
       supabase.removeChannel(channel);
     };
   }, []);
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
