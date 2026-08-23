@@ -10664,6 +10664,146 @@ export type Database = {
           },
         ]
       }
+      petfest_passport_booths: {
+        Row: {
+          booth_number: string
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          is_required: boolean
+          name: string
+          pawbucks_reward: number
+          qr_token: string
+          sort_order: number
+          sponsor_name: string
+          updated_at: string
+        }
+        Insert: {
+          booth_number?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          name: string
+          pawbucks_reward?: number
+          qr_token?: string
+          sort_order?: number
+          sponsor_name?: string
+          updated_at?: string
+        }
+        Update: {
+          booth_number?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          name?: string
+          pawbucks_reward?: number
+          qr_token?: string
+          sort_order?: number
+          sponsor_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      petfest_passport_completions: {
+        Row: {
+          bonus_pawbucks: number
+          completed_at: string
+          created_at: string
+          id: string
+          stamps_count: number
+          user_id: string
+        }
+        Insert: {
+          bonus_pawbucks?: number
+          completed_at?: string
+          created_at?: string
+          id?: string
+          stamps_count?: number
+          user_id: string
+        }
+        Update: {
+          bonus_pawbucks?: number
+          completed_at?: string
+          created_at?: string
+          id?: string
+          stamps_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      petfest_passport_settings: {
+        Row: {
+          completion_bonus_pawbucks: number
+          created_at: string
+          event_label: string
+          id: boolean
+          is_live: boolean
+          required_stamps: number
+          updated_at: string
+        }
+        Insert: {
+          completion_bonus_pawbucks?: number
+          created_at?: string
+          event_label?: string
+          id?: boolean
+          is_live?: boolean
+          required_stamps?: number
+          updated_at?: string
+        }
+        Update: {
+          completion_bonus_pawbucks?: number
+          created_at?: string
+          event_label?: string
+          id?: boolean
+          is_live?: boolean
+          required_stamps?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      petfest_passport_stamps: {
+        Row: {
+          booth_id: string
+          created_at: string
+          id: string
+          pawbucks_awarded: number
+          scanned_at: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          booth_id: string
+          created_at?: string
+          id?: string
+          pawbucks_awarded?: number
+          scanned_at?: string
+          source?: string
+          user_id: string
+        }
+        Update: {
+          booth_id?: string
+          created_at?: string
+          id?: string
+          pawbucks_awarded?: number
+          scanned_at?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "petfest_passport_stamps_booth_id_fkey"
+            columns: ["booth_id"]
+            isOneToOne: false
+            referencedRelation: "petfest_passport_booths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       petfest_rsvps: {
         Row: {
           created_at: string
@@ -16743,6 +16883,23 @@ export type Database = {
         }[]
       }
       get_pet_digital_id: { Args: { p_token: string }; Returns: Json }
+      get_petfest_passport_booths_admin: {
+        Args: never
+        Returns: {
+          booth_number: string
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          is_required: boolean
+          name: string
+          pawbucks_reward: number
+          qr_token: string
+          sort_order: number
+          sponsor_name: string
+          stamp_count: number
+        }[]
+      }
       get_reviewer_display_name: {
         Args: { reviewer_id: string }
         Returns: string
