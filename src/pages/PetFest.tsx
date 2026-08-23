@@ -278,6 +278,14 @@ const PetFest = () => {
                     </div>
                   ))}
                 </div>
+                <div className="passport-actions">
+                  <Link to="/petfest/passport" className="btn btn-primary">
+                    Open my passport
+                  </Link>
+                  <Link to="/petfest/passport/print" className="btn btn-secondary">
+                    Print a paper passport
+                  </Link>
+                </div>
               </div>
 
               <div className="passport-card">
