@@ -64,7 +64,7 @@ export function PMSIntegrationManager({ vetId }: PMSIntegrationManagerProps) {
  queryKey: ["pms-integrations", vetId],
  queryFn: async () => {
  const { data, error } = await supabase
- .from("vet_pms_integrations")
+ .from("vet_pms_integrations_safe")
         .select("id, vet_id, provider, provider_name, api_endpoint, client_id, practice_id, is_active, sync_direction, last_sync_at, sync_frequency_minutes, settings, created_at, updated_at")
  .eq("vet_id", vetId)
  .order("created_at", { ascending: false });
