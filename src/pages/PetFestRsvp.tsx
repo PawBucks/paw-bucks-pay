@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -26,6 +26,8 @@ const PetFestRsvp = () => {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const mountedAt = useRef(Date.now());
+  const [honeypot, setHoneypot] = useState("");
   const [form, setForm] = useState({
     fullName: "",
     email: "",
