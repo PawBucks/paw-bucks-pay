@@ -43,7 +43,7 @@ serve(async (req) => {
   try {
     const parsed = BodySchema.safeParse(await req.json());
     if (!parsed.success) {
-      return json({ error: "Please check the form fields and try again.", fields: parsed.error.flatten().fieldErrors }, 400);
+      return json({ error: "Please check the form fields and try again.", fields: parsed.error.flatten().fieldErrors });
     }
     const v = parsed.data;
 
@@ -55,13 +55,13 @@ serve(async (req) => {
 
     // 2. Too-fast submission (form filled in under 2.5s = script).
     if (typeof v.elapsedMs === "number" && v.elapsedMs < 2500) {
-      return json({ error: "That was a bit too fast — please review your details and submit again." }, 429);
+      return json({ error: "That was a bit too fast — please review your details and submit again." });
     }
 
     // 3. Content heuristics.
     if (looksLikeSpam(v)) {
       console.log("petfest rsvp: spam heuristics triggered");
-      return json({ error: "We couldn't accept this submission. Please contact us if this is a mistake." }, 400);
+      return json({ error: "We couldn't accept this submission. Please contact us if this is a mistake." });
     }
 
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
@@ -97,10 +97,10 @@ serve(async (req) => {
 
       if (recent && recent.length > 0) {
         if (Date.now() - new Date(recent[0].created_at).getTime() < 30_000) {
-          return json({ error: "Please wait a moment before submitting another RSVP." }, 429);
+          return json({ error: "Please wait a moment before submitting another RSVP." });
         }
         if (recent.length >= 3) {
-          return json({ error: "Too many RSVPs from this connection. Please try again later." }, 429);
+          return json({ error: "Too many RSVPs from this connection. Please try again later." });
         }
       }
     }
