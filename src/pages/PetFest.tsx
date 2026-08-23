@@ -145,7 +145,7 @@ const PetFest = () => {
               <span className="word-pet">PET</span>
               <span className="word-fest">FEST</span>
             </h1>
-            <p className="hero-tagline">The neighborhood's biggest day for pets.</p>
+            <p className="hero-tagline">West Los Angeles' biggest day for pets.</p>
             <p className="hero-description">
               Bring your whole pack for a day of local pet businesses, rescue groups, expert advice,
               shopping, community and <strong>15,000 PawBucks up for grabs</strong>.
