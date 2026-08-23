@@ -275,12 +275,23 @@ const Auth = () => {
 
         // Merchants without a merchants row need to finish onboarding first.
         if (route === ROUTES.MERCHANT_DASHBOARD) {
-          const { data: merchantData } = await supabase
-            .from("merchants")
-            .select("id")
-            .eq("user_id", userId)
-            .maybeSingle();
-          navigate(merchantData ? ROUTES.MERCHANT_DASHBOARD :"/merchant-onboarding");
+          const [{ data: merchantData }, { data: vetRow }] = await Promise.all([
+            supabase.from("merchants").select("id").eq("user_id", userId).maybeSingle(),
+            supabase.from("partner_vets").select("id").eq("user_id", userId).maybeSingle(),
+          ]);
+          if (vetRow) {
+            navigate(ROUTES.MERCHANT_DASHBOARD);
+            return;
+          }
+          if (merchantData) {
+            navigate(ROUTES.MERCHANT_DASHBOARD);
+            return;
+          }
+          // No business record yet: honour the signup intent so a veterinary
+          // practice never lands in the generic merchant onboarding form.
+          const { data: authUser } = await supabase.auth.getUser();
+          const intent = (authUser?.user?.user_metadata as Record<string, unknown> | undefined)?.signup_intent;
+          navigate(intent === "vet" ?"/vet-onboarding" :"/merchant-onboarding");
           return;
         }
 
