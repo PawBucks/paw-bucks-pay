@@ -357,6 +357,7 @@ const Auth = () => {
  userType,
  phone: validatedData.phone,
  referralCode: validatedData.referralCode || undefined,
+ signupIntent: signupRole ==="vet" ?"vet" : undefined,
  redirectUrl,
  },
  });
