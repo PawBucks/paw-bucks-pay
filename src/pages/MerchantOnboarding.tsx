@@ -218,6 +218,15 @@ const MerchantOnboarding = () => {
  e.preventDefault();
  if (!user) return;
 
+ // Veterinary practices are a distinct persona (partner_vets), not a merchant
+ // record tagged "veterinary". Route them to the clinical onboarding instead of
+ // creating a merchant row that can never behave like a vet account.
+ if (businessCategories.includes("veterinary") || businessType ==="veterinary") {
+ toast.info("Veterinary practices onboard through the Veterinary Practice application.");
+ navigate("/vet-onboarding");
+ return;
+ }
+
  setIsLoading(true);
 
  try {
