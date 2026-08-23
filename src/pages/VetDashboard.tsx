@@ -5,7 +5,17 @@ import { useAuth } from"@/hooks/useAuth";
 import { Header } from"@/components/Header";
 import { SEO } from"@/components/SEO";
 import { Card } from"@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
+import {
+ Select,
+ SelectContent,
+ SelectGroup,
+ SelectItem,
+ SelectLabel,
+ SelectTrigger,
+ SelectValue,
+} from"@/components/ui/select";
+import { cn } from"@/lib/utils";
+
 import {
  EMRDashboard,
  ConsentManagement,
@@ -65,6 +75,8 @@ export default function VetDashboard() {
  unreadMessages: 0,
  });
  const [editProfileOpen, setEditProfileOpen] = useState(false);
+ const [activeTab, setActiveTab] = useState("emr");
+
 
  useEffect(() => {
  const checkAuth = async () => {
@@ -155,298 +167,233 @@ export default function VetDashboard() {
  return null;
  }
 
- return (
- <div className="min-h-screen bg-background">
- <SEO title="Veterinary Portal" description="Manage your veterinary practice" />
- <Header />
-  <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8 space-y-6">
-  <EditorialPageHeader
-    eyebrow="Veterinary Portal"
-    title={
-      <span className="inline-flex items-center gap-3 align-middle">
-        {vetInfo.logo_url ? (
-          <img src={vetInfo.logo_url} alt={vetInfo.name} className="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover border border-border" />
-        ) : (
-          <span className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Stethoscope className="w-5 h-5 md:w-6 md:h-6 text-primary" aria-hidden="true" />
-          </span>
+  const NAV: { section: string; items: { value: string; label: string; icon: typeof FileText; badge?: number }[] }[] = [
+    {
+      section: "Clinical",
+      items: [
+        { value: "emr", label: "Patient Records", icon: FileText },
+        { value: "ai-assistant", label: "Clinical AI", icon: Sparkles },
+        { value: "refills", label: "Prescription Refills", icon: Pill },
+        { value: "consent", label: "Consent Forms", icon: FileSignature },
+        { value: "wellness", label: "Wellness Plans", icon: Heart },
+        { value: "reminders", label: "Reminders", icon: Bell },
+      ],
+    },
+    {
+      section: "Clients",
+      items: [
+        { value: "messages", label: "Messages", icon: MessageSquare, badge: stats.unreadMessages },
+        { value: "checkins", label: "Check-Ins", icon: QrCode },
+        { value: "care-network", label: "Care Network", icon: Link2 },
+        { value: "loyalty-program", label: "Loyalty", icon: Stamp },
+        { value: "promotions", label: "Promotions", icon: Sparkles },
+      ],
+    },
+    {
+      section: "Business",
+      items: [
+        { value: "financial", label: "Payments", icon: Wallet },
+        { value: "claim-recovery", label: "Claim Recovery", icon: Scale },
+        { value: "growth", label: "Practice Growth", icon: TrendingUp },
+        { value: "quick-actions", label: "Quick Actions", icon: Zap },
+        { value: "sales-report", label: "Reports", icon: BarChart3 },
+      ],
+    },
+    {
+      section: "Integrations",
+      items: [
+        { value: "data-sync", label: "Data Sync", icon: BarChart3 },
+        { value: "data-bridge", label: "Data Bridge", icon: ArrowRightLeft },
+      ],
+    },
+    {
+      section: "Account",
+      items: [
+        { value: "settings", label: "Practice Settings", icon: Settings },
+        { value: "support", label: "Support", icon: LifeBuoy },
+      ],
+    },
+  ];
+
+  const allItems = NAV.flatMap((s) => s.items);
+  const activeItem = allItems.find((i) => i.value === activeTab);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <SEO title="Veterinary Portal" description="Manage your veterinary practice" />
+      <Header />
+      <div className="container max-w-7xl mx-auto px-4 py-6 md:py-8 space-y-6">
+        <div className="flex items-center gap-3">
+          {vetInfo.logo_url ? (
+            <img src={vetInfo.logo_url} alt={vetInfo.name} className="w-11 h-11 rounded-xl object-cover border border-border" />
+          ) : (
+            <span className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Stethoscope className="w-5 h-5 text-primary" aria-hidden="true" />
+            </span>
+          )}
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Veterinary Portal</p>
+            <h1 className="text-xl md:text-2xl font-semibold truncate">{vetInfo.name}</h1>
+          </div>
+        </div>
+
+        {vetInfo.approval_status !== 'approved' && (
+          <PendingApprovalNotice
+            entityType="vet"
+            approvalStatus={vetInfo.approval_status || 'pending'}
+            denialReason={vetInfo.denial_reason}
+          />
         )}
-        <span>{vetInfo.name}</span>
-      </span>
-    }
-    subtitle="Manage your patients, medical records, prescriptions, and practice growth — all in one calm, focused workspace."
-  />
 
- {/* Pending Approval Notice */}
- {vetInfo.approval_status !=='approved' && (
- <PendingApprovalNotice 
- entityType="vet" 
- approvalStatus={vetInfo.approval_status ||'pending'}
- denialReason={vetInfo.denial_reason}
- />
- )}
+        <LostPetAlertsWidget vetId={vetInfo.id} />
 
- {/* Lost Pet Alerts - Always visible at top */}
- <LostPetAlertsWidget vetId={vetInfo.id} />
+        {/* Compact stats strip */}
+        <Card className="divide-y sm:divide-y-0 sm:divide-x divide-border grid sm:grid-cols-4 overflow-hidden">
+          {[
+            { icon: Users, label: "Patients", value: String(stats.totalPatients) },
+            { icon: Pill, label: "Pending Refills", value: String(stats.pendingRefills) },
+            { icon: MessageSquare, label: "Unread", value: String(stats.unreadMessages) },
+            { icon: FileText, label: "Location", value: vetInfo.location },
+          ].map(({ icon: Icon, label, value }) => (
+            <div key={label} className="flex items-center gap-3 p-4">
+              <Icon className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
+                <p className="text-base font-semibold tabular-nums truncate">{value}</p>
+              </div>
+            </div>
+          ))}
+        </Card>
 
- {/* Stats Grid - Clean professional cards */}
- <div className="grid gap-4 md:grid-cols-4">
- <Card className="p-5">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-lg bg-primary/8 flex items-center justify-center">
- <Users className="w-5 h-5 text-primary" aria-hidden="true" />
- </div>
- <div>
- <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Patients</p>
- <p className="text-xl font-bold tabular-nums">{stats.totalPatients}</p>
- </div>
- </div>
- </Card>
+        <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+          {/* Mobile nav */}
+          <div className="lg:hidden">
+            <Select value={activeTab} onValueChange={setActiveTab}>
+              <SelectTrigger className="w-full">
+                <SelectValue>{activeItem?.label}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {NAV.map((section) => (
+                  <SelectGroup key={section.section}>
+                    <SelectLabel>{section.section}</SelectLabel>
+                    {section.items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
- <Card className="p-5">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-lg bg-[hsl(var(--warning))]/10 flex items-center justify-center">
- <Pill className="w-5 h-5 text-[hsl(var(--warning))]" />
- </div>
- <div>
- <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending Refills</p>
- <p className="text-xl font-bold tabular-nums">{stats.pendingRefills}</p>
- </div>
- </div>
- </Card>
+          {/* Desktop nav */}
+          <nav className="hidden lg:block self-start sticky top-20 space-y-5">
+            {NAV.map((section) => (
+              <div key={section.section}>
+                <p className="px-2 mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  {section.section}
+                </p>
+                <div className="space-y-0.5">
+                  {section.items.map(({ value, label, icon: Icon, badge }) => (
+                    <button
+                      key={value}
+                      onClick={() => setActiveTab(value)}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-left transition-colors",
+                        activeTab === value
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <span className="truncate">{label}</span>
+                      {badge ? (
+                        <span className="ml-auto text-[10px] font-semibold rounded-full bg-destructive text-destructive-foreground px-1.5 py-0.5">
+                          {badge}
+                        </span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </nav>
 
- <Card className="p-5">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-lg bg-[hsl(var(--info))]/10 flex items-center justify-center">
- <MessageSquare className="w-5 h-5 text-[hsl(var(--info))]" aria-hidden="true" />
- </div>
- <div>
- <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Unread</p>
- <p className="text-xl font-bold tabular-nums">{stats.unreadMessages}</p>
- </div>
- </div>
- </Card>
+          <div className="min-w-0">
+            {activeTab === "emr" && <EMRDashboard vetId={vetInfo.id} />}
+            {activeTab === "ai-assistant" && <AIClinicalAssistant vetId={vetInfo.id} />}
+            {activeTab === "messages" && <SecureMessagingTab vetId={vetInfo.id} />}
+            {activeTab === "refills" && <PrescriptionRefillsTab vetId={vetInfo.id} />}
+            {activeTab === "reminders" && <ComplianceRemindersTab vetId={vetInfo.id} />}
+            {activeTab === "consent" && <ConsentManagement vetId={vetInfo.id} />}
+            {activeTab === "care-network" && <CollaborativeCareTab vetId={vetInfo.id} />}
+            {activeTab === "data-sync" && <MerchantDataSyncTab vetId={vetInfo.id} />}
+            {activeTab === "data-bridge" && <DataBridgeTab vetId={vetInfo.id} />}
+            {activeTab === "financial" && <FinancialFrictionTab vetId={vetInfo.id} />}
+            {activeTab === "growth" && <PracticeGrowthTab vetId={vetInfo.id} />}
+            {activeTab === "wellness" && <WellnessPlansTab vetId={vetInfo.id} />}
+            {activeTab === "claim-recovery" && <ClaimRecoveryDashboard vetId={vetInfo.id} />}
+            {activeTab === "quick-actions" && <VetQuickActionsTab vetId={vetInfo.id} hasStripeAccount={false} />}
+            {activeTab === "loyalty-program" && <MerchantLoyaltyProgramTab merchantId={vetInfo.id} />}
+            {activeTab === "sales-report" && (
+              <SalesReportGenerator entityId={vetInfo.id} entityType="vet" entityName={vetInfo.name} />
+            )}
+            {activeTab === "support" && <SupportTab submitterType="vet" entityId={vetInfo.id} />}
+            {activeTab === "checkins" && (
+              <CheckInDashboard entityId={vetInfo.id} entityType="vet" entityName={vetInfo.name} />
+            )}
+            {activeTab === "promotions" && (
+              <PromotionInvitationsInbox recipientType="vet" recipientId={vetInfo.id} />
+            )}
+            {activeTab === "settings" && (
+              <Card className="p-6">
+                <div className="flex items-start justify-between mb-4 gap-3 flex-wrap">
+                  <div>
+                    <h3 className="text-lg font-semibold">Practice Profile</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Update your practice name, contact info, logo, and "About" description.
+                    </p>
+                  </div>
+                  <Button onClick={() => setEditProfileOpen(true)} className="gap-2">
+                    <Pencil className="w-4 h-4" />
+                    Edit Profile
+                  </Button>
+                </div>
+                {vetInfo.clinic_bio && (
+                  <div className="mb-6 p-4 rounded-lg bg-muted/40 border border-border">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">About</p>
+                    <p className="text-sm whitespace-pre-wrap">{vetInfo.clinic_bio}</p>
+                  </div>
+                )}
+                <h3 className="text-lg font-semibold mb-4">Policy Documents</h3>
+                {user && vetInfo && (
+                  <PolicyDocumentUpload
+                    userId={user.id}
+                    entityId={vetInfo.id}
+                    entityType="vet"
+                    tosUrl={vetInfo.tos_url}
+                    privacyPolicyUrl={vetInfo.privacy_policy_url}
+                    shippingReturnsPolicyUrl={vetInfo.shipping_returns_policy_url}
+                    onUpdate={() => loadVetInfo(user.id)}
+                  />
+                )}
+              </Card>
+            )}
+          </div>
+        </div>
 
- <Card className="p-5">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-lg bg-[hsl(var(--success))]/10 flex items-center justify-center">
- <FileText className="w-5 h-5 text-[hsl(var(--success))]" aria-hidden="true" />
- </div>
- <div>
- <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</p>
- <p className="text-sm font-medium truncate max-w-[140px]">{vetInfo.location}</p>
- </div>
- </div>
- </Card>
- </div>
-
- <Tabs defaultValue="emr" className="space-y-4">
- <TabsList className="grid w-full grid-cols-8 lg:grid-cols-16">
- <TabsTrigger value="emr" className="flex items-center gap-1">
- <FileText className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">EMR</span>
- </TabsTrigger>
- <TabsTrigger value="ai-assistant" className="flex items-center gap-1">
- <Sparkles className="w-4 h-4" />
- <span className="hidden sm:inline">AI</span>
- </TabsTrigger>
- <TabsTrigger value="messages" className="flex items-center gap-1">
- <MessageSquare className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">Messages</span>
- {stats.unreadMessages > 0 && (
- <span className="bg-destructive text-white text-xs rounded-full px-1.5 py-0.5 ml-1">
- {stats.unreadMessages}
- </span>
- )}
- </TabsTrigger>
- <TabsTrigger value="refills" className="flex items-center gap-1">
- <Pill className="w-4 h-4" />
- <span className="hidden sm:inline">Refills</span>
- </TabsTrigger>
- <TabsTrigger value="reminders" className="flex items-center gap-1">
- <Bell className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">Reminders</span>
- </TabsTrigger>
- <TabsTrigger value="consent" className="flex items-center gap-1">
- <FileSignature className="w-4 h-4" />
- <span className="hidden sm:inline">Consent</span>
- </TabsTrigger>
- <TabsTrigger value="care-network" className="flex items-center gap-1">
- <Link2 className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">Network</span>
- </TabsTrigger>
- <TabsTrigger value="data-sync" className="flex items-center gap-1">
- <BarChart3 className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">Sync</span>
- </TabsTrigger>
- <TabsTrigger value="data-bridge" className="flex items-center gap-1">
- <ArrowRightLeft className="w-4 h-4" />
- <span className="hidden sm:inline">Bridge</span>
- </TabsTrigger>
- <TabsTrigger value="financial" className="flex items-center gap-1">
- <Wallet className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">Financial</span>
- </TabsTrigger>
- <TabsTrigger value="growth" className="flex items-center gap-1">
- <TrendingUp className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">Growth</span>
- </TabsTrigger>
- <TabsTrigger value="wellness" className="flex items-center gap-1">
- <Heart className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">Wellness</span>
- </TabsTrigger>
- <TabsTrigger value="claim-recovery" className="flex items-center gap-1">
- <Scale className="w-4 h-4" />
- <span className="hidden sm:inline">Recovery</span>
- </TabsTrigger>
- <TabsTrigger value="quick-actions" className="flex items-center gap-1">
- <Zap className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">Actions</span>
- </TabsTrigger>
- <TabsTrigger value="loyalty-program" className="flex items-center gap-1">
- <Stamp className="w-4 h-4" />
- <span className="hidden sm:inline">Loyalty</span>
- </TabsTrigger>
- <TabsTrigger value="sales-report" className="flex items-center gap-1">
- <BarChart3 className="w-4 h-4" aria-hidden="true" />
- <span className="hidden sm:inline">Reports</span>
- </TabsTrigger>
- <TabsTrigger value="support" className="flex items-center gap-1">
- <LifeBuoy className="w-4 h-4" />
- <span className="hidden sm:inline">Support</span>
- </TabsTrigger>
- <TabsTrigger value="checkins" className="flex items-center gap-1">
- <QrCode className="w-4 h-4" />
- <span className="hidden sm:inline">Check-Ins</span>
- </TabsTrigger>
- <TabsTrigger value="settings" className="flex items-center gap-1">
- <Settings className="w-4 h-4" />
- <span className="hidden sm:inline">Settings</span>
- </TabsTrigger>
-  <TabsTrigger value="promotions" className="flex items-center gap-1">
-   <Sparkles className="w-4 h-4" />
-   <span className="hidden sm:inline">Promotions</span>
-  </TabsTrigger>
- </TabsList>
-
- <TabsContent value="emr">
- <EMRDashboard vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="ai-assistant">
- <AIClinicalAssistant vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="messages">
- <SecureMessagingTab vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="refills">
- <PrescriptionRefillsTab vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="reminders">
- <ComplianceRemindersTab vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="consent">
- <ConsentManagement vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="care-network">
- <CollaborativeCareTab vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="data-sync">
- <MerchantDataSyncTab vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="data-bridge">
- <DataBridgeTab vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="financial">
- <FinancialFrictionTab vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="growth">
- <PracticeGrowthTab vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="wellness">
- <WellnessPlansTab vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="claim-recovery">
- <ClaimRecoveryDashboard vetId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="quick-actions">
- <VetQuickActionsTab vetId={vetInfo.id} hasStripeAccount={false} />
- </TabsContent>
-
- <TabsContent value="loyalty-program">
- <MerchantLoyaltyProgramTab merchantId={vetInfo.id} />
- </TabsContent>
-
- <TabsContent value="sales-report">
- <SalesReportGenerator entityId={vetInfo.id} entityType="vet" entityName={vetInfo.name} />
- </TabsContent>
-
- <TabsContent value="support">
- <SupportTab submitterType="vet" entityId={vetInfo.id} />
- </TabsContent>
- <TabsContent value="checkins">
- <CheckInDashboard entityId={vetInfo.id} entityType="vet" entityName={vetInfo.name} />
- </TabsContent>
-  <TabsContent value="promotions">
-   <PromotionInvitationsInbox recipientType="vet" recipientId={vetInfo.id} />
-  </TabsContent>
- <TabsContent value="settings">
- <Card className="p-6">
- <div className="flex items-start justify-between mb-4 gap-3 flex-wrap">
-   <div>
-     <h3 className="text-lg font-semibold">Practice Profile</h3>
-     <p className="text-sm text-muted-foreground">
-       Update your practice name, contact info, logo, and "About" description.
-     </p>
-   </div>
-   <Button onClick={() => setEditProfileOpen(true)} className="gap-2">
-     <Pencil className="w-4 h-4" />
-     Edit Profile
-   </Button>
- </div>
- {vetInfo.clinic_bio && (
-   <div className="mb-6 p-4 rounded-lg bg-muted/40 border border-border">
-     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">About</p>
-     <p className="text-sm whitespace-pre-wrap">{vetInfo.clinic_bio}</p>
-   </div>
- )}
- <h3 className="text-lg font-semibold mb-4">Policy Documents</h3>
- {user && vetInfo && (
- <PolicyDocumentUpload
- userId={user.id}
- entityId={vetInfo.id}
- entityType="vet"
- tosUrl={vetInfo.tos_url}
- privacyPolicyUrl={vetInfo.privacy_policy_url}
- shippingReturnsPolicyUrl={vetInfo.shipping_returns_policy_url}
- onUpdate={() => loadVetInfo(user.id)}
- />
- )}
- </Card>
- </TabsContent>
- </Tabs>
- {user && (
-   <EditVetProfileDialog
-     open={editProfileOpen}
-     onOpenChange={setEditProfileOpen}
-     vet={vetInfo}
-     userId={user.id}
-     onSaved={() => loadVetInfo(user.id)}
-   />
- )}
- </div>
- </div>
- );
+        {user && (
+          <EditVetProfileDialog
+            open={editProfileOpen}
+            onOpenChange={setEditProfileOpen}
+            vet={vetInfo}
+            userId={user.id}
+            onSaved={() => loadVetInfo(user.id)}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
+
