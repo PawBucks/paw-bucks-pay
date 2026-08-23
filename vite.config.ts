@@ -184,11 +184,6 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
   resolve: {
     alias: [
-      { find: /^react$/, replacement: path.join(rootReact, "index.js") },
-      { find: /^react\/jsx-runtime$/, replacement: path.join(rootReact, "jsx-runtime.js") },
-      { find: /^react\/jsx-dev-runtime$/, replacement: path.join(rootReact, "jsx-dev-runtime.js") },
-      { find: /^react-dom$/, replacement: path.join(rootReactDom, "index.js") },
-      { find: /^react-dom\/client$/, replacement: path.join(rootReactDom, "client.js") },
       { find: "@", replacement: path.resolve(__dirname, "./src") },
     ],
     // Force every optimized dependency and source module to share the same
