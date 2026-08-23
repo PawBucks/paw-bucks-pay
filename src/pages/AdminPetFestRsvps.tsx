@@ -130,7 +130,7 @@ const AdminPetFestRsvps = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEO title="PetFest RSVPs | PawBucks Admin" noindex />
+      <SEO title="PetFest RSVPs | PawBucks Admin" noIndex />
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="space-y-1">
