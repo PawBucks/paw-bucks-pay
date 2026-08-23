@@ -331,12 +331,7 @@
   .petfest .nav-btn{padding:10px 15px;font-size:14px}
   .petfest .hero{min-height:auto;padding:25px 0 50px}
   .petfest .hero h1{font-size:88px}
-  .petfest .hero-art{min-height:390px}
-  .petfest .paper{inset:20px 4px}
-  .petfest .pet{font-size:100px}
-  .petfest .pet.cat{font-size:78px}
-  .petfest .sun{width:105px;height:105px;font-size:18px}
-  .petfest .sticker{padding:9px 12px;font-size:14px}
+  .petfest .hero-art-img{max-width:340px}
   .petfest .event-grid{grid-template-columns:1fr 1fr}
   .petfest .event-item{border-right:0;border-bottom:1px dashed var(--pf-line);padding:12px}
   .petfest .experience-grid{grid-template-columns:1fr}
