@@ -10579,11 +10579,13 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          ip_address: string | null
           pet_birthday: string | null
           pet_breed: string | null
           pet_count: number
           pet_name: string
           phone: string
+          user_agent: string | null
           user_id: string | null
         }
         Insert: {
@@ -10591,11 +10593,13 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          ip_address?: string | null
           pet_birthday?: string | null
           pet_breed?: string | null
           pet_count?: number
           pet_name: string
           phone: string
+          user_agent?: string | null
           user_id?: string | null
         }
         Update: {
@@ -10603,11 +10607,13 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          ip_address?: string | null
           pet_birthday?: string | null
           pet_breed?: string | null
           pet_count?: number
           pet_name?: string
           phone?: string
+          user_agent?: string | null
           user_id?: string | null
         }
         Relationships: []
