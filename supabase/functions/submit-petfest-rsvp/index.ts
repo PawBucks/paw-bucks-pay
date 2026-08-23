@@ -140,23 +140,29 @@ serve(async (req) => {
       return json({ error: "We couldn't save your RSVP. Please try again." }, 500);
     }
 
-    // Reserve the 5,000 PawBucks PetFest sign-up bonus for exactly 5 minutes.
-    const BONUS_PB = 5000;
-    const BONUS_WINDOW_MS = 5 * 60 * 1000;
-    const expiresAt = new Date(Date.now() + BONUS_WINDOW_MS).toISOString();
-    const bonusToken = crypto.randomUUID();
-
-    const { data: reservation, error: reservationError } = await supabase
+    // A DB trigger reserves the 5,000 PawBucks PetFest bonus for 5 minutes on RSVP insert.
+    let { data: reservation, error: reservationError } = await supabase
       .from("petfest_bonus_reservations")
-      .insert({
-        rsvp_id: inserted.id,
-        email: emailLower,
-        token: bonusToken,
-        pawbucks_amount: BONUS_PB,
-        expires_at: expiresAt,
-      })
       .select("token, expires_at, pawbucks_amount")
-      .single();
+      .eq("rsvp_id", inserted.id)
+      .maybeSingle();
+
+    // Fallback: create it here if the trigger didn't (should not normally happen).
+    if (!reservation) {
+      const fallback = await supabase
+        .from("petfest_bonus_reservations")
+        .insert({
+          rsvp_id: inserted.id,
+          email: emailLower,
+          token: crypto.randomUUID(),
+          pawbucks_amount: 5000,
+          expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+        })
+        .select("token, expires_at, pawbucks_amount")
+        .single();
+      reservation = fallback.data;
+      reservationError = fallback.error;
+    }
 
     if (reservationError) {
       console.error("petfest bonus reservation error:", reservationError);

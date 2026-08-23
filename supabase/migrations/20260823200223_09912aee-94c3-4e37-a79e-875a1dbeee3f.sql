@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.create_petfest_bonus_reservation() FROM PUBLIC, anon, authenticated;
