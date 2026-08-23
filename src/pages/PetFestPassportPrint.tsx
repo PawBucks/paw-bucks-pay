@@ -55,10 +55,10 @@ const PetFestPassportPrint = () => {
       <section className="pf-form-section">
         <div className="wrap">
           <div className="pf-print-actions">
-            <button type="button" className="pf-btn pf-btn-primary" onClick={() => window.print()}>
+            <button type="button" className="btn btn-primary" onClick={() => window.print()}>
               Print this passport
             </button>
-            <Link className="pf-btn pf-btn-ghost" to="/petfest/passport">
+            <Link className="btn btn-secondary" to="/petfest/passport">
               Use the digital passport
             </Link>
           </div>

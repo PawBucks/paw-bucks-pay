@@ -243,7 +243,7 @@ const PetFestPassport = () => {
                   Your stamps and PawBucks land in your free PawBucks wallet, so you'll need an account to play
                   along.
                 </p>
-                <Link className="pf-btn pf-btn-primary" to={signInPath}>
+                <Link className="btn btn-primary" to={signInPath}>
                   Sign in or create a free account
                 </Link>
               </div>
@@ -283,13 +283,13 @@ const PetFestPassport = () => {
                 <div className="pf-passport-actions">
                   <button
                     type="button"
-                    className="pf-btn pf-btn-primary"
+                    className="btn btn-primary"
                     onClick={() => setScannerOpen((v) => !v)}
                     disabled={claiming}
                   >
                     {scannerOpen ? "Close scanner" : claiming ? "Stamping..." : "Scan a booth QR"}
                   </button>
-                  <Link className="pf-btn pf-btn-ghost" to="/petfest/passport/print">
+                  <Link className="btn btn-secondary" to="/petfest/passport/print">
                     Printable passport
                   </Link>
                 </div>
@@ -306,7 +306,7 @@ const PetFestPassport = () => {
                       placeholder="Booth code from the booth sign"
                       autoComplete="off"
                     />
-                    <button type="submit" className="pf-btn pf-btn-ghost" disabled={claiming}>
+                    <button type="submit" className="btn btn-secondary" disabled={claiming}>
                       Add stamp
                     </button>
                   </div>
