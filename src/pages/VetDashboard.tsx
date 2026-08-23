@@ -75,6 +75,8 @@ export default function VetDashboard() {
  unreadMessages: 0,
  });
  const [editProfileOpen, setEditProfileOpen] = useState(false);
+ const [activeTab, setActiveTab] = useState("emr");
+
 
  useEffect(() => {
  const checkAuth = async () => {
