@@ -4,6 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
+import pawMark from "@/assets/pawbucks-logo.png";
 import "./PetFest.css";
 
 const rsvpSchema = z.object({
@@ -104,7 +105,9 @@ const PetFestRsvp = () => {
       <section className="pf-form-section">
         <div className="wrap">
           <div className="pf-form-card">
-            <span className="pf-form-kicker">🐾 PetFest 2027 · March 20 · West LA</span>
+            <span className="pf-form-kicker">
+              <img src={pawMark} alt="" className="pf-paw pf-paw-xs" /> PetFest 2027 · March 20 · West LA
+            </span>
             <h1>Save your spot</h1>
             <p className="pf-form-intro">
               Admission is free — we just need a few details so we can print your PetFest Passport and say hi to your pet by name.
@@ -171,7 +174,13 @@ const PetFestRsvp = () => {
               </div>
 
               <button type="submit" className="btn btn-primary pf-submit" disabled={submitting}>
-                {submitting ? "Saving your spot..." : "🐾 Confirm My Free RSVP"}
+                {submitting ? (
+                  "Saving your spot..."
+                ) : (
+                  <>
+                    <img src={pawMark} alt="" className="pf-paw pf-paw-sm" /> Confirm My Free RSVP
+                  </>
+                )}
               </button>
               <p className="pf-form-note">
                 Free admission · No ticket needed · <Link to="/petfest">Back to PetFest</Link>

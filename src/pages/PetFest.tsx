@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
+import pawMark from "@/assets/pawbucks-logo.png";
+import brandLogo from "@/assets/logo.png";
 import "./PetFest.css";
 
 const EVENT_START = new Date("2027-03-20T10:00:00-07:00").getTime();
@@ -59,12 +61,12 @@ const experiences = [
     copy: "Browse products, discover new brands and find event-only offers you won't see every day.",
   },
   {
-    emoji: "🐾",
+    pawIcon: true,
     title: "Make new friends",
     copy: "Because sometimes the easiest way to meet your neighbors is through the furry family member walking beside you.",
   },
   {
-    emoji: "💰",
+    pawIcon: true,
     title: "Earn PawBucks",
     copy: "Explore the festival, complete your PetFest Passport and turn your adventure into rewards you can spend with PawBucks partners.",
   },
@@ -116,16 +118,17 @@ const PetFest = () => {
       />
 
       <div className="topbar">
-        <span>🐾 FREE ADMISSION · ONE DAY ONLY · WEST LA · MARCH 20, 2027 · 10 AM–6 PM 🐾</span>
+        <span>
+          <img src={pawMark} alt="" className="pf-paw pf-paw-xs" /> FREE ADMISSION · ONE DAY ONLY ·
+          WEST LA · MARCH 20, 2027 · 10 AM–6 PM{" "}
+          <img src={pawMark} alt="" className="pf-paw pf-paw-xs" />
+        </span>
       </div>
 
       <div className="wrap">
         <nav>
-          <Link to="/" className="pf-logo">
-            <span className="logo-paw">🐾</span>
-            <span>
-              Paw<b>Bucks</b>
-            </span>
+          <Link to="/" className="pf-logo" aria-label="PawBucks home">
+            <img src={brandLogo} alt="PawBucks" className="pf-brand-logo" />
           </Link>
           <Link to="/auth" className="nav-btn">
             Get Your Free Pass →
@@ -149,7 +152,7 @@ const PetFest = () => {
             </p>
             <div className="hero-buttons">
               <Link to="/petfest/rsvp" className="btn btn-primary">
-                🐾 Register Free
+                <img src={pawMark} alt="" className="pf-paw pf-paw-sm" /> Register Free
               </Link>
               <a href="#experience" className="btn btn-secondary">
                 Explore PetFest ↓
@@ -248,7 +251,11 @@ const PetFest = () => {
               <article className="experience" key={item.title}>
                 <span className="tape" aria-hidden="true" />
                 <div className="emoji" aria-hidden="true">
-                  {item.emoji}
+                  {"pawIcon" in item ? (
+                    <img src={pawMark} alt="" className="pf-paw pf-paw-lg" />
+                  ) : (
+                    item.emoji
+                  )}
                 </div>
                 <h3>{item.title}</h3>
                 <p>{item.copy}</p>
@@ -287,7 +294,7 @@ const PetFest = () => {
               <div className="passport-card">
                 <div className="tiny">PetFest 2027</div>
                 <div className="stamp" aria-hidden="true">
-                  🐾
+                  <img src={pawMark} alt="" className="pf-paw pf-paw-lg" />
                 </div>
                 <div className="amount">15K</div>
                 <div className="pb">PAWBUCKS</div>
@@ -384,7 +391,7 @@ const PetFest = () => {
               </div>
               <div className="venue-row">
                 <span className="venue-icon" aria-hidden="true">
-                  🐾
+                  <img src={pawMark} alt="" className="pf-paw pf-paw-sm" />
                 </span>
                 <div>
                   <strong>Bring your best friend</strong>
@@ -395,7 +402,9 @@ const PetFest = () => {
 
             <div className="map" aria-hidden="true">
               <div className="map-pin">📍</div>
-              <div className="map-note">PetFest lives here! 🐾</div>
+              <div className="map-note">
+                PetFest lives here! <img src={pawMark} alt="" className="pf-paw pf-paw-sm" />
+              </div>
             </div>
           </div>
         </div>
@@ -406,7 +415,10 @@ const PetFest = () => {
         <div className="wrap">
           <div className="final-card">
             <h2>
-              Your pet already said <span>“We're going.” 🐾</span>
+              Your pet already said{" "}
+              <span>
+                “We're going.” <img src={pawMark} alt="" className="pf-paw pf-paw-md" />
+              </span>
             </h2>
             <p>Admission is free. The rewards are real. And there's only one PetFest 2027.</p>
             <Link to="/petfest/rsvp" className="btn">
@@ -420,7 +432,8 @@ const PetFest = () => {
       <footer>
         <div className="wrap">
           <div className="footer-logo">
-            Paw<span>Bucks</span> presents PetFest 2027
+            <img src={brandLogo} alt="PawBucks" className="pf-brand-logo pf-brand-logo-footer" />
+            <span className="footer-presents">presents PetFest 2027</span>
           </div>
           <p>West Los Angeles Veterans Park · March 20, 2027</p>
           <p>#PawBucksPetFest2027</p>
