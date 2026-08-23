@@ -432,3 +432,97 @@
   .petfest .pf-brand-logo-footer{height:48px}
   .petfest .footer-presents{font-size:18px}
 }
+
+/* ===== PETFEST PASSPORT (digital + printable) ===== */
+.petfest .pf-passport-page{
+  position:relative;background:#fff;border:3px solid var(--pf-blue);border-radius:34px;
+  padding:40px 36px;box-shadow:9px 11px 0 var(--pf-blue);max-width:920px;margin:0 auto;
+}
+.petfest .pf-passport-head h1{font-size:clamp(32px,6vw,52px);line-height:.98;margin:0 0 10px;color:var(--pf-blue)}
+.petfest .pf-passport-gate{text-align:center;padding:22px 0 6px}
+.petfest .pf-passport-gate h2{font-size:clamp(24px,4vw,34px);margin:10px 0 6px;color:var(--pf-blue)}
+.petfest .pf-passport-gate p{margin:0 auto 18px;max-width:460px;line-height:1.55}
+.petfest .pf-passport-progress-card{
+  background:#fffdf7;border:2.5px dashed var(--pf-blue);border-radius:22px;padding:20px;margin:6px 0 20px;
+}
+.petfest .pf-passport-progress-top{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end}
+.petfest .pf-passport-progress-top .tiny{display:block;font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--pf-coral)}
+.petfest .pf-passport-progress-top strong{font-size:34px;line-height:1;color:var(--pf-blue)}
+.petfest .pf-passport-progress-top strong span{font-size:18px;opacity:.6}
+.petfest .pf-passport-earned{text-align:right}
+.petfest .pf-passport-bar{margin:14px 0 10px;height:16px;background:#fff;border:2.5px solid var(--pf-blue);border-radius:999px;overflow:hidden}
+.petfest .pf-passport-bar span{display:block;height:100%;background:var(--pf-coral);transition:width .5s ease}
+.petfest .pf-passport-hint,.petfest .pf-passport-complete{margin:0;font-size:15px;line-height:1.5;font-weight:600;color:var(--pf-blue)}
+.petfest .pf-passport-complete{color:var(--pf-coral)}
+.petfest .pf-passport-actions{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 18px}
+.petfest .pf-passport-actions .btn{border:0}
+.petfest .pf-passport-actions .btn-secondary{border:2.5px solid var(--pf-blue)}
+.petfest .pf-passport-reader{
+  width:100%;max-width:340px;margin:0 auto 18px;border:2.5px solid var(--pf-blue);border-radius:22px;overflow:hidden;background:#000;
+}
+.petfest .pf-passport-manual{display:flex;flex-direction:column;gap:7px;margin:0 0 26px}
+.petfest .pf-passport-manual label{font-weight:700;font-size:15px;color:var(--pf-blue)}
+.petfest .pf-passport-manual-row{display:flex;flex-wrap:wrap;gap:12px}
+.petfest .pf-passport-manual-row input{
+  flex:1 1 220px;min-width:0;font:inherit;font-size:16px;padding:13px 16px;border:2.5px solid var(--pf-blue);
+  border-radius:16px;background:#fffdf7;color:var(--pf-blue);outline:none;
+}
+.petfest .pf-passport-manual-row input:focus{box-shadow:3px 4px 0 var(--pf-coral)}
+.petfest .pf-passport-manual-row .btn{border:2.5px solid var(--pf-blue)}
+.petfest .pf-passport-subhead{font-size:clamp(22px,4vw,30px);margin:0 0 14px;color:var(--pf-blue)}
+.petfest .pf-stamp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px}
+.petfest .pf-stamp-slot{
+  text-align:center;background:#fffdf7;border:2.5px dashed var(--pf-blue);border-radius:22px;padding:18px 14px;
+}
+.petfest .pf-stamp-slot.is-stamped{background:var(--pf-yellow,#ffd85e);border-style:solid;box-shadow:4px 5px 0 var(--pf-blue)}
+.petfest .pf-stamp-mark{
+  width:58px;height:58px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;
+  border:2.5px solid var(--pf-blue);border-radius:50%;background:#fff;font-size:24px;font-weight:900;color:var(--pf-blue)
+}
+.petfest .pf-stamp-slot h3{font-size:17px;line-height:1.2;margin:0 0 4px;color:var(--pf-blue)}
+.petfest .pf-stamp-number,.petfest .pf-stamp-sponsor{display:block;font-size:13px;opacity:.75;margin:0 0 2px}
+.petfest .pf-stamp-reward{display:inline-block;margin-top:8px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--pf-coral)}
+.petfest .pf-passport-foot{margin:26px 0 0;text-align:center}
+.petfest .pf-passport-foot a{color:var(--pf-coral);font-weight:700}
+
+.petfest .pf-print-actions{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:0 0 24px}
+.petfest .pf-print-actions .btn{border:0}
+.petfest .pf-print-actions .btn-secondary{border:2.5px solid var(--pf-blue)}
+.petfest .pf-print-sheet{
+  background:#fff;border:3px solid var(--pf-blue);border-radius:28px;padding:34px;max-width:900px;margin:0 auto;
+}
+.petfest .pf-print-head{display:flex;gap:18px;align-items:center;border-bottom:2.5px dashed var(--pf-blue);padding-bottom:18px}
+.petfest .pf-print-logo{height:52px;width:auto;object-fit:contain}
+.petfest .pf-print-head h1{font-size:clamp(26px,4vw,38px);margin:0 0 4px;color:var(--pf-blue)}
+.petfest .pf-print-head p{margin:0;font-size:15px;line-height:1.5}
+.petfest .pf-print-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:20px 0}
+.petfest .pf-print-fields span{display:block;font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--pf-coral);margin-bottom:20px}
+.petfest .pf-print-fields i{display:block;border-bottom:2px solid var(--pf-blue)}
+.petfest .pf-print-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.petfest .pf-print-box{
+  border:2.5px dashed var(--pf-blue);border-radius:18px;padding:12px;text-align:center;display:flex;flex-direction:column;gap:4px;
+  break-inside:avoid;
+}
+.petfest .pf-print-box-title{font-weight:800;font-size:15px;color:var(--pf-blue)}
+.petfest .pf-print-box-sub{font-size:12.5px;opacity:.7}
+.petfest .pf-print-box-stamp{margin:8px auto;width:72px;height:72px;border:2px solid var(--pf-blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:.05em;text-transform:uppercase;opacity:.65}
+.petfest .pf-print-box-reward{font-size:12.5px;font-weight:800;color:var(--pf-coral)}
+.petfest .pf-print-foot{display:flex;flex-direction:column;gap:6px;margin-top:22px;border-top:2.5px dashed var(--pf-blue);padding-top:16px}
+.petfest .pf-print-foot strong{font-size:17px;color:var(--pf-blue)}
+.petfest .pf-print-foot span{font-size:13px;opacity:.75}
+
+@media (max-width:640px){
+  .petfest .pf-passport-page{padding:26px 18px;border-radius:26px;box-shadow:6px 7px 0 var(--pf-blue)}
+  .petfest .pf-passport-actions .btn,.petfest .pf-print-actions .btn{width:100%;justify-content:center;text-align:center}
+  .petfest .pf-passport-earned{text-align:left}
+  .petfest .pf-stamp-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+  .petfest .pf-print-sheet{padding:20px;border-radius:20px}
+  .petfest .pf-print-head{flex-direction:column;text-align:center}
+}
+
+@media print{
+  .petfest .pf-print-actions{display:none}
+  .petfest{background:#fff}
+  .petfest .pf-form-section{padding:0}
+  .petfest .pf-print-sheet{border:none;box-shadow:none;padding:0;max-width:none}
+}

@@ -66,6 +66,7 @@ const AdminDashboard = lazyWithRetry(() => import("./pages/AdminDashboard"),"Adm
 const AdminGuides = lazyWithRetry(() => import("./pages/AdminGuides"),"AdminGuides");
 const AdminLogin = lazyWithRetry(() => import("./pages/AdminLogin"),"AdminLogin");
 const AdminPetFestRsvps = lazyWithRetry(() => import("./pages/AdminPetFestRsvps"),"AdminPetFestRsvps");
+const AdminPetFestPassport = lazyWithRetry(() => import("./pages/AdminPetFestPassport"),"AdminPetFestPassport");
 const AdminResetPassword = lazyWithRetry(() => import("./pages/AdminResetPassword"),"AdminResetPassword");
 const AdminMerchantServices = lazyWithRetry(() => import("./pages/AdminMerchantServices"),"AdminMerchantServices");
 const AdminUserDetail = lazyWithRetry(() => import("./pages/AdminUserDetail"),"AdminUserDetail");
@@ -119,6 +120,8 @@ const PetFriendlyLosAngelesGuide = lazyWithRetry(() => import("./pages/PetFriend
 const PetFest = lazyWithRetry(() => import("./pages/PetFest"),"PetFest");
 const PetFestRsvp = lazyWithRetry(() => import("./pages/PetFestRsvp"),"PetFestRsvp");
 const PetFestRsvpSuccess = lazyWithRetry(() => import("./pages/PetFestRsvpSuccess"),"PetFestRsvpSuccess");
+const PetFestPassport = lazyWithRetry(() => import("./pages/PetFestPassport"),"PetFestPassport");
+const PetFestPassportPrint = lazyWithRetry(() => import("./pages/PetFestPassportPrint"),"PetFestPassportPrint");
 const MerchantAvailableBalance = lazyWithRetry(() => import("./pages/MerchantAvailableBalance"),"MerchantAvailableBalance");
 const MerchantPendingBalance = lazyWithRetry(() => import("./pages/MerchantPendingBalance"),"MerchantPendingBalance");
 const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalEarnings"),"MerchantTotalEarnings");
@@ -213,6 +216,8 @@ const AppRoutes = () => {
  <Route path="/petfest" element={<PageTransition><PetFest /></PageTransition>} />
  <Route path="/petfest/rsvp" element={<PageTransition><PetFestRsvp /></PageTransition>} />
  <Route path="/petfest/rsvp/success" element={<PageTransition><PetFestRsvpSuccess /></PageTransition>} />
+ <Route path="/petfest/passport" element={<PageTransition><PetFestPassport /></PageTransition>} />
+ <Route path="/petfest/passport/print" element={<PageTransition><PetFestPassportPrint /></PageTransition>} />
 
   {/* Authenticated pet owner routes */}
   <Route path="/home" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleHome /></PageTransition></ProtectedRoute>} />
@@ -268,6 +273,7 @@ const AppRoutes = () => {
  <Route path="/admin/reset-password" element={<PageTransition><AdminResetPassword /></PageTransition>} />
  <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><AdminDashboard /></PageTransition></ProtectedRoute>} />
 <Route path="/admin/petfest-rsvps" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><AdminPetFestRsvps /></PageTransition></ProtectedRoute>} />
+<Route path="/admin/petfest-passport" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><AdminPetFestPassport /></PageTransition></ProtectedRoute>} />
 <Route path="/admin/guides" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><AdminGuides /></PageTransition></ProtectedRoute>} />
  <Route path="/admin/merchant-services" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><AdminMerchantServices /></PageTransition></ProtectedRoute>} />
  <Route path="/admin/pet-store" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><PetStoreAdmin /></PageTransition></ProtectedRoute>} />
