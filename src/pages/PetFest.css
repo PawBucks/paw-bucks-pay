@@ -389,12 +389,37 @@
 }
 .petfest .pf-success-details strong{display:block;font-size:12.5px;letter-spacing:.09em;color:var(--pf-coral);margin-bottom:3px}
 .petfest .pf-success-actions{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+
+/* PetFest sign-up bonus offer */
+.petfest .pf-offer{
+  position:relative;text-align:center;background:var(--pf-yellow,#ffd85e);
+  border:3px solid var(--pf-blue);border-radius:26px;padding:26px 22px;
+  box-shadow:6px 7px 0 var(--pf-blue);margin:6px 0 26px;
+}
+.petfest .pf-offer-expired{background:#fffdf7;filter:none;opacity:.92}
+.petfest .pf-offer-flag{
+  display:inline-block;font-family:'Caveat',cursive;font-size:22px;color:var(--pf-blue);margin-bottom:2px;
+}
+.petfest .pf-offer-amount{font-size:clamp(30px,6vw,46px);line-height:1;margin:2px 0 6px;color:var(--pf-blue)}
+.petfest .pf-offer-value{font-size:16px;font-weight:700;margin:0 0 14px;color:var(--pf-blue)}
+.petfest .pf-offer-timer{
+  display:inline-flex;align-items:baseline;gap:8px;background:#fff;border:2.5px dashed var(--pf-blue);
+  border-radius:16px;padding:10px 18px;margin:0 auto 10px;
+}
+.petfest .pf-offer-clock{font-size:34px;font-weight:900;letter-spacing:.02em;color:var(--pf-coral);font-variant-numeric:tabular-nums}
+.petfest .pf-offer-clock-label{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--pf-blue)}
+.petfest .pf-offer-timer-done{display:block;font-size:15px;line-height:1.5;font-weight:600;color:var(--pf-blue);background:#fffdf7}
+.petfest .pf-offer-fine{font-size:13px;margin:0 0 14px;opacity:.75}
+.petfest .pf-offer-cta{border:0;width:100%;max-width:420px;justify-content:center;text-align:center}
 @media (max-width:640px){
   .petfest .pf-form-section{padding:40px 0 64px}
   .petfest .pf-form-card{padding:30px 20px;border-radius:26px;box-shadow:6px 7px 0 var(--pf-blue)}
   .petfest .pf-row{grid-template-columns:1fr}
   .petfest .pf-success-actions .btn{width:100%;justify-content:center;text-align:center}
+  .petfest .pf-offer{padding:22px 16px;border-radius:22px;box-shadow:5px 6px 0 var(--pf-blue)}
+  .petfest .pf-offer-clock{font-size:30px}
 }
+
 
 /* Official PawBucks brand marks */
 .petfest .pf-paw{display:inline-block;object-fit:contain;vertical-align:-0.18em}

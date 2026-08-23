@@ -1,5 +1,7 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { SEO } from "@/components/SEO";
+import pawMark from "@/assets/pawbucks-logo.png";
 import "./PetFest.css";
 
 interface RsvpState {
@@ -8,15 +10,45 @@ interface RsvpState {
   petCount?: number;
 }
 
+const OFFER_WINDOW_MS = 5 * 60 * 1000;
+const OFFER_KEY = "petfest_signup_offer_deadline";
+
+const useOfferCountdown = () => {
+  const deadline = useMemo(() => {
+    try {
+      const stored = Number(localStorage.getItem(OFFER_KEY));
+      if (stored && stored > Date.now()) return stored;
+      if (stored) return stored; // already expired, keep it expired
+      const fresh = Date.now() + OFFER_WINDOW_MS;
+      localStorage.setItem(OFFER_KEY, String(fresh));
+      return fresh;
+    } catch {
+      return Date.now() + OFFER_WINDOW_MS;
+    }
+  }, []);
+
+  const [msLeft, setMsLeft] = useState(() => Math.max(0, deadline - Date.now()));
+
+  useEffect(() => {
+    const id = setInterval(() => setMsLeft(Math.max(0, deadline - Date.now())), 250);
+    return () => clearInterval(id);
+  }, [deadline]);
+
+  const mins = Math.floor(msLeft / 60000);
+  const secs = Math.floor((msLeft % 60000) / 1000);
+  return { expired: msLeft <= 0, label: `${mins}:${String(secs).padStart(2, "0")}` };
+};
+
 const PetFestRsvpSuccess = () => {
   const { state } = useLocation();
   const rsvp = (state || {}) as RsvpState;
+  const { expired, label } = useOfferCountdown();
 
   return (
     <div className="petfest">
       <SEO
         title="You're In! PetFest 2027 RSVP Confirmed"
-        description="Your free PetFest 2027 RSVP is confirmed. See you March 20 in West Los Angeles."
+        description="Your free PetFest 2027 RSVP is confirmed. Claim 5,000 bonus PawBucks and see you March 20 in West Los Angeles."
         canonical="https://pawbucks.app/petfest/rsvp/success"
         noIndex
       />
@@ -34,6 +66,36 @@ const PetFestRsvpSuccess = () => {
               Keep this page handy — we'll reach out with PetFest updates before the big day.
             </p>
 
+            <div className={`pf-offer${expired ? " pf-offer-expired" : ""}`}>
+              <span className="pf-offer-flag">
+                <img src={pawMark} alt="" className="pf-paw pf-paw-xs" /> PetFest Sign-Up Bonus
+              </span>
+              <h2 className="pf-offer-amount">5,000 PawBucks</h2>
+              <p className="pf-offer-value">$5.00 USD value — free when you create your PawBucks account</p>
+
+              {expired ? (
+                <p className="pf-offer-timer pf-offer-timer-done">
+                  This bonus window closed. Create your free account anyway — you'll still earn PawBucks on every
+                  purchase at PawBucks merchants.
+                </p>
+              ) : (
+                <>
+                  <div className="pf-offer-timer" role="timer" aria-live="off">
+                    <span className="pf-offer-clock">{label}</span>
+                    <span className="pf-offer-clock-label">left to claim</span>
+                  </div>
+                  <p className="pf-offer-fine">
+                    Offer expires 5 minutes after your RSVP confirmation. One bonus per new account.
+                  </p>
+                </>
+              )}
+
+              <Link to="/auth?offer=petfest5000" className="btn btn-primary pf-offer-cta">
+                <img src={pawMark} alt="" className="pf-paw pf-paw-sm" />{" "}
+                {expired ? "Create My Free Account" : "Claim My 5,000 PawBucks"}
+              </Link>
+            </div>
+
             <div className="pf-success-details">
               <div>
                 <strong>📅 WHEN</strong>
@@ -41,7 +103,7 @@ const PetFestRsvpSuccess = () => {
               </div>
               <div>
                 <strong>📍 WHERE</strong>
-                West LA Veterans Park · 11301 Wilshire Blvd
+                Coming Soon
               </div>
               <div>
                 <strong>🎟️ COST</strong>
@@ -50,11 +112,8 @@ const PetFestRsvpSuccess = () => {
             </div>
 
             <div className="pf-success-actions">
-              <Link to="/petfest" className="btn btn-primary">
+              <Link to="/petfest" className="btn btn-secondary">
                 Back to PetFest
-              </Link>
-              <Link to="/auth" className="btn btn-secondary">
-                Start Earning PawBucks →
               </Link>
             </div>
             <p className="pf-form-note">#PawBucksPetFest2027</p>
