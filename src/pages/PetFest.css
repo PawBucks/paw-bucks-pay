@@ -116,7 +116,8 @@
 .petfest .hero-detail strong{display:block;color:var(--pf-teal);font-family:"Baloo 2";font-size:15px}
 
 /* HERO ART */
-.petfest .hero-art{position:relative;min-height:560px}
+.petfest .hero-art{position:relative;display:flex;align-items:center;justify-content:center}
+.petfest .hero-art-img{width:100%;max-width:640px;height:auto;display:block;border:3px solid var(--pf-blue);border-radius:24px;box-shadow:10px 12px 0 rgba(32,43,77,.12);transform:rotate(2deg)}
 .petfest .paper{
   position:absolute;inset:30px 15px;background:#fff;
   border:3px solid var(--pf-blue);
