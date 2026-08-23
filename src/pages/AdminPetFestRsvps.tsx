@@ -49,12 +49,14 @@ const AdminPetFestRsvps = () => {
   const [petFilter, setPetFilter] = useState("all");
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
+    let active = true;
+    const load = async (showSpinner = false) => {
+      if (showSpinner) setLoading(true);
       const { data, error } = await supabase
         .from("petfest_rsvps")
         .select("*")
         .order("created_at", { ascending: false });
+      if (!active) return;
       if (error) {
         console.error("Failed to load PetFest RSVPs", error);
         toast.error("Could not load RSVPs");
@@ -63,8 +65,29 @@ const AdminPetFestRsvps = () => {
       }
       setLoading(false);
     };
-    load();
+    load(true);
+
+    const channel = supabase
+      .channel("petfest-rsvps-admin")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "petfest_rsvps" },
+        () => load(),
+      )
+      .subscribe();
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      active = false;
+      document.removeEventListener("visibilitychange", onVisible);
+      supabase.removeChannel(channel);
+    };
   }, []);
+
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
