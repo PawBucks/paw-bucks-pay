@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from"react";
 import { User, Session } from"@supabase/supabase-js";
 import { supabase } from"@/integrations/supabase/client";
 import { getPreHydratedSession } from"@/lib/authPreHydrate";
+import { toast } from"sonner";
+import { claimPetFestBonus, readPetFestBonus } from"@/lib/petfestBonus";
+
 import {
   clearUserAccessCache,
   getAuthRedirectForUser,
