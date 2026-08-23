@@ -367,9 +367,7 @@ const PetFest = () => {
                 </div>
               </div>
               <div className="venue-row">
-                <span className="venue-icon" aria-hidden="true">
-                  📅
-                </span>
+                <span className="venue-icon" aria-hidden="true">📅</span>
                 <div>
                   <strong>Saturday, March 20, 2027</strong>
                   <span>10 AM – 6 PM</span>
