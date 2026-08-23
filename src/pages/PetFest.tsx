@@ -148,7 +148,7 @@ const PetFest = () => {
               shopping, community and <strong>15,000 PawBucks up for grabs</strong>.
             </p>
             <div className="hero-buttons">
-              <Link to="/auth" className="btn btn-primary">
+              <Link to="/petfest/rsvp" className="btn btn-primary">
                 🐾 Register Free
               </Link>
               <a href="#experience" className="btn btn-secondary">
@@ -409,7 +409,7 @@ const PetFest = () => {
               Your pet already said <span>“We're going.” 🐾</span>
             </h2>
             <p>Admission is free. The rewards are real. And there's only one PetFest 2027.</p>
-            <Link to="/auth" className="btn">
+            <Link to="/petfest/rsvp" className="btn">
               Reserve My Free Spot →
             </Link>
             <p className="final-note">March 20, 2027 · West LA · 10 AM–6 PM</p>
