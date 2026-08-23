@@ -188,13 +188,31 @@ const MerchantOnboarding = () => {
 
  setProfile(data);
 
+ // A registered veterinary practice belongs to the vet persona — never the
+ // merchant onboarding form.
+ const { data: vetRow } = await supabase
+ .from("partner_vets")
+ .select("id")
+ .eq("user_id", user.id)
+ .maybeSingle();
+ if (vetRow) {
+ navigate("/vet-dashboard");
+ return;
+ }
+
+ // Vet signup intent (chosen on the vet auth page) routes to vet onboarding.
+ if ((user.user_metadata as any)?.signup_intent ==="vet") {
+ navigate("/vet-onboarding");
+ return;
+ }
+
  // Check if merchant profile already exists
  if (data?.user_type ==="merchant") {
  const { data: merchantData } = await supabase
  .from("merchants")
- .select("*")
+ .select("id")
  .eq("user_id", user.id)
- .single();
+ .maybeSingle();
 
  if (merchantData) {
  navigate("/merchant-dashboard");
@@ -217,6 +235,15 @@ const MerchantOnboarding = () => {
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
  e.preventDefault();
  if (!user) return;
+
+ // Veterinary practices are a distinct persona (partner_vets), not a merchant
+ // record tagged "veterinary". Route them to the clinical onboarding instead of
+ // creating a merchant row that can never behave like a vet account.
+ if (businessCategories.includes("veterinary") || businessType ==="veterinary") {
+ toast.info("Veterinary practices onboard through the Veterinary Practice application.");
+ navigate("/vet-onboarding");
+ return;
+ }
 
  setIsLoading(true);
 
@@ -519,6 +546,21 @@ const MerchantOnboarding = () => {
  );
  })}
  </div>
+ {businessCategories.includes("veterinary") && (
+ <div className="mt-4 flex items-start gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
+ <Stethoscope className="w-5 h-5 text-primary shrink-0 mt-0.5" aria-hidden="true" />
+ <div className="space-y-2 min-w-0">
+ <p className="text-sm font-medium">Veterinary practices use a dedicated onboarding</p>
+ <p className="text-sm text-muted-foreground">
+ Clinics need license verification, insurance claim splicing, and PIMS setup —
+ which live in the Veterinary Practice application, not this merchant form.
+ </p>
+ <Button type="button" size="sm" onClick={() => navigate("/vet-onboarding")}>
+ Continue to Veterinary Onboarding
+ </Button>
+ </div>
+ </div>
+ )}
  {businessCategories.length > 0 && (
  <div className="mt-3 space-y-2">
  <p className="text-sm text-muted-foreground flex items-center gap-2">
