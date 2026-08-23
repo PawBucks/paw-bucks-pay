@@ -5,7 +5,17 @@ import { useAuth } from"@/hooks/useAuth";
 import { Header } from"@/components/Header";
 import { SEO } from"@/components/SEO";
 import { Card } from"@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from"@/components/ui/tabs";
+import {
+ Select,
+ SelectContent,
+ SelectGroup,
+ SelectItem,
+ SelectLabel,
+ SelectTrigger,
+ SelectValue,
+} from"@/components/ui/select";
+import { cn } from"@/lib/utils";
+
 import {
  EMRDashboard,
  ConsentManagement,
