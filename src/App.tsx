@@ -208,6 +208,8 @@ const AppRoutes = () => {
  <Route path="/guides/wellness-plans-comparison" element={<PageTransition><WellnessPlansGuide /></PageTransition>} />
  <Route path="/guides/pet-friendly-los-angeles" element={<PageTransition><PetFriendlyLosAngelesGuide /></PageTransition>} />
  <Route path="/petfest" element={<PageTransition><PetFest /></PageTransition>} />
+ <Route path="/petfest/rsvp" element={<PageTransition><PetFestRsvp /></PageTransition>} />
+ <Route path="/petfest/rsvp/success" element={<PageTransition><PetFestRsvpSuccess /></PageTransition>} />
 
   {/* Authenticated pet owner routes */}
   <Route path="/home" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleHome /></PageTransition></ProtectedRoute>} />
