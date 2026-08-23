@@ -200,7 +200,7 @@ serve(async (req) => {
       message: bonusAwarded
         ? `${booth.name} stamped. You completed your passport and earned a ${bonusAwarded.toLocaleString()} PawBucks bonus.`
         : `${booth.name} stamped — ${booth.pawbucks_reward.toLocaleString()} PawBucks added to your wallet.`,
-      type: "reward",
+      category: "reward",
       link_url: "/petfest/passport",
     });
 

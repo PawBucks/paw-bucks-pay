@@ -401,3 +401,6 @@ verify_jwt = false
 
 [functions.submit-petfest-rsvp]
 verify_jwt = false
+
+[functions.petfest-passport-scan]
+verify_jwt = true
