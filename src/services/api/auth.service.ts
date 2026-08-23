@@ -1,5 +1,6 @@
 import { supabase, ServiceResult } from"./base.service";
 import type { User, Session } from"@supabase/supabase-js";
+import { readPetFestBonus, trackPetFestBonusEvent } from"@/lib/petfestBonus";
 
 export const authService = {
  async getSession(): Promise<ServiceResult<Session>> {
@@ -13,6 +14,10 @@ export const authService = {
  },
 
  async signUp(email: string, password: string, metadata?: Record<string, unknown>) {
+ // Funnel analytics: a PetFest bonus reservation is pending for this browser.
+ if (readPetFestBonus()) {
+ trackPetFestBonusEvent("signup_started", { email });
+ }
  const { data, error } = await supabase.auth.signUp({
  email,
  password,
