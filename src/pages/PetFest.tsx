@@ -356,9 +356,7 @@ const PetFest = () => {
           <div className="venue">
             <div className="venue-card">
               <div className="venue-row">
-                <span className="venue-icon" aria-hidden="true">
-                  📍
-                </span>
+                <span className="venue-icon" aria-hidden="true">📍</span>
                 <div>
                   <strong>West Los Angeles Veterans Park</strong>
                   <span>
