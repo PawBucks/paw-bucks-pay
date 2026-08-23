@@ -116,7 +116,8 @@
 .petfest .hero-detail strong{display:block;color:var(--pf-teal);font-family:"Baloo 2";font-size:15px}
 
 /* HERO ART */
-.petfest .hero-art{position:relative;min-height:560px}
+.petfest .hero-art{position:relative;display:flex;align-items:center;justify-content:center}
+.petfest .hero-art-img{width:100%;max-width:640px;height:auto;display:block;border:3px solid var(--pf-blue);border-radius:24px;box-shadow:10px 12px 0 rgba(32,43,77,.12);transform:rotate(2deg)}
 .petfest .paper{
   position:absolute;inset:30px 15px;background:#fff;
   border:3px solid var(--pf-blue);
@@ -317,7 +318,7 @@
   .petfest .hero{grid-template-columns:1fr;text-align:center;padding-top:25px}
   .petfest .hero-description{margin:auto}
   .petfest .hero-buttons,.petfest .hero-details{justify-content:center}
-  .petfest .hero-art{min-height:500px;max-width:580px;width:100%;margin:auto;order:-1}
+  .petfest .hero-art{max-width:580px;width:100%;margin:auto;order:-1}
   .petfest .passport-grid,.petfest .fomo,.petfest .venue{grid-template-columns:1fr}
   .petfest .passport{padding:45px 30px}
   .petfest .experience-grid{grid-template-columns:1fr 1fr}
@@ -330,12 +331,7 @@
   .petfest .nav-btn{padding:10px 15px;font-size:14px}
   .petfest .hero{min-height:auto;padding:25px 0 50px}
   .petfest .hero h1{font-size:88px}
-  .petfest .hero-art{min-height:390px}
-  .petfest .paper{inset:20px 4px}
-  .petfest .pet{font-size:100px}
-  .petfest .pet.cat{font-size:78px}
-  .petfest .sun{width:105px;height:105px;font-size:18px}
-  .petfest .sticker{padding:9px 12px;font-size:14px}
+  .petfest .hero-art-img{max-width:340px}
   .petfest .event-grid{grid-template-columns:1fr 1fr}
   .petfest .event-item{border-right:0;border-bottom:1px dashed var(--pf-line);padding:12px}
   .petfest .experience-grid{grid-template-columns:1fr}

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import pawMark from "@/assets/pawbucks-logo.png";
 import brandLogo from "@/assets/logo.png";
+import petfestArt from "@/assets/petfest-2027.png";
 import "./PetFest.css";
 
 const EVENT_START = new Date("2027-03-20T10:00:00-07:00").getTime();
@@ -181,26 +182,14 @@ const PetFest = () => {
             </div>
           </div>
 
-          <div className="hero-art" aria-hidden="true">
-            <div className="paper" />
-            <div className="sun">
-              FREE
-              <br />
-              ENTRY!
-            </div>
-            <div className="doodle one">{"bring the\nwhole pack →"}</div>
-            <div className="doodle two">{"good dogs.\ngood people.\ngood day."}</div>
-            <div className="sticker reward">
-              15,000
-              <small>PawBucks</small>
-            </div>
-            <div className="sticker free">
-              $0
-              <small>To get in!</small>
-            </div>
-            <div className="pet dog">🐕</div>
-            <div className="pet cat">🐈</div>
-            <div className="pet ball">⚽</div>
+          <div className="hero-art">
+            <img
+              src={petfestArt}
+              alt="PetFest 2027 — a band of dogs performing on a globe stage, powered by PawBucks. Free entry, $0 to get in, 15,000 PawBucks up for grabs."
+              className="hero-art-img"
+              loading="eager"
+              fetchPriority="high"
+            />
           </div>
         </header>
       </div>
