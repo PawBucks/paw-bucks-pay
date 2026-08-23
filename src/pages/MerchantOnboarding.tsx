@@ -188,13 +188,31 @@ const MerchantOnboarding = () => {
 
  setProfile(data);
 
+ // A registered veterinary practice belongs to the vet persona — never the
+ // merchant onboarding form.
+ const { data: vetRow } = await supabase
+ .from("partner_vets")
+ .select("id")
+ .eq("user_id", user.id)
+ .maybeSingle();
+ if (vetRow) {
+ navigate("/vet-dashboard");
+ return;
+ }
+
+ // Vet signup intent (chosen on the vet auth page) routes to vet onboarding.
+ if ((user.user_metadata as any)?.signup_intent ==="vet") {
+ navigate("/vet-onboarding");
+ return;
+ }
+
  // Check if merchant profile already exists
  if (data?.user_type ==="merchant") {
  const { data: merchantData } = await supabase
  .from("merchants")
- .select("*")
+ .select("id")
  .eq("user_id", user.id)
- .single();
+ .maybeSingle();
 
  if (merchantData) {
  navigate("/merchant-dashboard");
