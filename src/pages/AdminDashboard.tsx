@@ -514,7 +514,16 @@ const AdminDashboard = () => {
  >
  <ExternalLink className="w-4 h-4 mr-2" />
   Marketplace Admin
- </Button>
+  </Button>
+  <Button
+  variant="ghost"
+  size="sm"
+  className="w-full justify-start text-muted-foreground hover:text-foreground"
+  onClick={() => navigate("/admin/petfest-rsvps")}
+  >
+  <ExternalLink className="w-4 h-4 mr-2" />
+  PetFest RSVPs
+  </Button>
  <Separator />
  <Button
  variant="ghost"
