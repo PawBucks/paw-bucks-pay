@@ -255,10 +255,12 @@
 .petfest .venue-card{background:#fff;border:3px solid var(--pf-blue);padding:32px;box-shadow:6px 7px 0 rgba(32,43,77,.12)}
 .petfest .venue-row{display:flex;gap:14px;padding:17px 0;border-bottom:2px dashed var(--pf-line)}
 .petfest .venue-row:last-child{border-bottom:0}
-.petfest .venue-icon{
+.petfest .venue-row .venue-icon{
   width:42px;height:42px;border:2px solid var(--pf-blue);background:var(--pf-teal);
-  color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;
+  color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  flex:none;font-size:22px;line-height:1;flex-shrink:0;overflow:hidden;
 }
+.petfest .venue-row .venue-icon img{width:22px;height:22px;object-fit:contain;display:block}
 .petfest .venue-row strong{display:block;font-family:"Baloo 2";color:var(--pf-blue);font-size:17px}
 .petfest .venue-row span{display:block;color:#625e51;font-size:13px;line-height:1.45}
 .petfest .map{

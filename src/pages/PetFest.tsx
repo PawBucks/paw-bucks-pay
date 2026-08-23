@@ -356,9 +356,7 @@ const PetFest = () => {
           <div className="venue">
             <div className="venue-card">
               <div className="venue-row">
-                <span className="venue-icon" aria-hidden="true">
-                  📍
-                </span>
+                <span className="venue-icon" aria-hidden="true">📍</span>
                 <div>
                   <strong>West Los Angeles Veterans Park</strong>
                   <span>
@@ -369,18 +367,14 @@ const PetFest = () => {
                 </div>
               </div>
               <div className="venue-row">
-                <span className="venue-icon" aria-hidden="true">
-                  📅
-                </span>
+                <span className="venue-icon" aria-hidden="true">📅</span>
                 <div>
                   <strong>Saturday, March 20, 2027</strong>
                   <span>10 AM – 6 PM</span>
                 </div>
               </div>
               <div className="venue-row">
-                <span className="venue-icon" aria-hidden="true">
-                  🎟️
-                </span>
+                <span className="venue-icon" aria-hidden="true">🎟️</span>
                 <div>
                   <strong>Free admission</strong>
                   <span>Registration is required.</span>
