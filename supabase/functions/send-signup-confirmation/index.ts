@@ -17,6 +17,8 @@ interface Body {
   phone?: string;
   referralCode?: string;
   redirectUrl?: string;
+  /** Signup intent captured on the auth page ("vet" = veterinary practice). */
+  signupIntent?: string;
 }
 
 function emailHtml(fullName: string, confirmUrl: string) {
@@ -80,6 +82,7 @@ serve(async (req: Request) => {
         full_name: body.fullName,
         user_type: body.userType,
         phone: body.phone || null,
+        signup_intent: body.signupIntent === "vet" ? "vet" : null,
       },
     });
 
