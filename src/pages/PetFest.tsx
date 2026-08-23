@@ -165,7 +165,7 @@ const PetFest = () => {
               </div>
               <div className="hero-detail">
                 <strong>📍 WHERE</strong>
-                West LA Veterans Park
+                Coming Soon
               </div>
               <div className="hero-detail">
                 <strong>🎟️ COST</strong>
