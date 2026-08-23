@@ -318,7 +318,7 @@
   .petfest .hero{grid-template-columns:1fr;text-align:center;padding-top:25px}
   .petfest .hero-description{margin:auto}
   .petfest .hero-buttons,.petfest .hero-details{justify-content:center}
-  .petfest .hero-art{min-height:500px;max-width:580px;width:100%;margin:auto;order:-1}
+  .petfest .hero-art{max-width:580px;width:100%;margin:auto;order:-1}
   .petfest .passport-grid,.petfest .fomo,.petfest .venue{grid-template-columns:1fr}
   .petfest .passport{padding:45px 30px}
   .petfest .experience-grid{grid-template-columns:1fr 1fr}
