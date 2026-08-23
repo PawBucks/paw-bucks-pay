@@ -48,7 +48,7 @@ export const useAuth = () => {
   const result = await claimPetFestBonus();
   if (result?.success) {
   toast.success(`${result.amount.toLocaleString()} PetFest PawBucks added to your wallet!`);
-  } else if (result && result.reason ==='expired') {
+  } else if (result && !result.success && result.reason ==='expired') {
   toast.info("Your PetFest bonus window closed, but you'll still earn PawBucks on every purchase.");
   }
   }, 0);
