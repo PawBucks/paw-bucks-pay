@@ -31,7 +31,7 @@ const PetFestRsvpSuccess = () => {
               {rsvp.petName
                 ? `We saved a spot for you and ${rsvp.petName}${rsvp.petCount && rsvp.petCount > 1 ? ` (plus ${rsvp.petCount - 1} more good ${rsvp.petCount - 1 === 1 ? "pet" : "pets"})` : ""}.`
                 : "We saved your spot at PetFest 2027."}{" "}
-              A confirmation is on its way to your inbox.
+              Keep this page handy — we'll reach out with PetFest updates before the big day.
             </p>
 
             <div className="pf-success-details">
