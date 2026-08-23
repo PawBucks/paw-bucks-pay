@@ -374,9 +374,7 @@ const PetFest = () => {
                 </div>
               </div>
               <div className="venue-row">
-                <span className="venue-icon" aria-hidden="true">
-                  🎟️
-                </span>
+                <span className="venue-icon" aria-hidden="true">🎟️</span>
                 <div>
                   <strong>Free admission</strong>
                   <span>Registration is required.</span>
