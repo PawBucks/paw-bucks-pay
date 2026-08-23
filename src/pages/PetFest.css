@@ -526,3 +526,7 @@
   .petfest .pf-form-section{padding:0}
   .petfest .pf-print-sheet{border:none;box-shadow:none;padding:0;max-width:none}
 }
+.petfest .passport-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:24px}
+.petfest .passport-actions .btn{border:0}
+.petfest .passport-actions .btn-secondary{border:2.5px solid var(--pf-blue)}
+@media (max-width:640px){.petfest .passport-actions .btn{width:100%;justify-content:center;text-align:center}}
