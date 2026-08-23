@@ -11079,6 +11079,13 @@ export type Database = {
             referencedRelation: "vet_pms_integrations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pms_field_mappings_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "vet_pms_integrations_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       pms_sync_logs: {
@@ -11133,6 +11140,13 @@ export type Database = {
             columns: ["integration_id"]
             isOneToOne: false
             referencedRelation: "vet_pms_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pms_sync_logs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "vet_pms_integrations_safe"
             referencedColumns: ["id"]
           },
         ]
@@ -11198,6 +11212,13 @@ export type Database = {
             columns: ["integration_id"]
             isOneToOne: false
             referencedRelation: "merchant_pos_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_transactions_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_pos_integrations_safe"
             referencedColumns: ["id"]
           },
           {
@@ -15574,6 +15595,13 @@ export type Database = {
             referencedRelation: "merchant_webhooks"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "webhook_delivery_logs_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_webhooks_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       webhook_logs: {
@@ -16192,6 +16220,66 @@ export type Database = {
           },
         ]
       }
+      merchant_pos_integrations_safe: {
+        Row: {
+          api_key_prefix: string | null
+          clover_merchant_id: string | null
+          clover_token_expires_at: string | null
+          created_at: string | null
+          has_clover_access_token: boolean | null
+          has_clover_refresh_token: boolean | null
+          id: string | null
+          is_active: boolean | null
+          last_used_at: string | null
+          merchant_id: string | null
+          name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          api_key_prefix?: string | null
+          clover_merchant_id?: string | null
+          clover_token_expires_at?: string | null
+          created_at?: string | null
+          has_clover_access_token?: never
+          has_clover_refresh_token?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_used_at?: string | null
+          merchant_id?: string | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          api_key_prefix?: string | null
+          clover_merchant_id?: string | null
+          clover_token_expires_at?: string | null
+          created_at?: string | null
+          has_clover_access_token?: never
+          has_clover_refresh_token?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_used_at?: string | null
+          merchant_id?: string | null
+          name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_pos_integrations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_pos_integrations_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_reviews_public: {
         Row: {
           created_at: string | null
@@ -16263,6 +16351,63 @@ export type Database = {
             foreignKeyName: "merchant_twilio_settings_merchant_id_fkey"
             columns: ["merchant_id"]
             isOneToOne: true
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_webhooks_safe: {
+        Row: {
+          created_at: string | null
+          events: string[] | null
+          failure_count: number | null
+          has_secret: boolean | null
+          id: string | null
+          is_active: boolean | null
+          last_triggered_at: string | null
+          merchant_id: string | null
+          name: string | null
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          events?: string[] | null
+          failure_count?: number | null
+          has_secret?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          merchant_id?: string | null
+          name?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          events?: string[] | null
+          failure_count?: number | null
+          has_secret?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_triggered_at?: string | null
+          merchant_id?: string | null
+          name?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_webhooks_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_webhooks_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
             referencedRelation: "merchants_public"
             referencedColumns: ["id"]
           },
@@ -16514,6 +16659,78 @@ export type Database = {
           id?: string | null
         }
         Relationships: []
+      }
+      vet_pms_integrations_safe: {
+        Row: {
+          api_endpoint: string | null
+          client_id: string | null
+          created_at: string | null
+          has_api_key: boolean | null
+          has_webhook_secret: boolean | null
+          id: string | null
+          is_active: boolean | null
+          last_sync_at: string | null
+          practice_id: string | null
+          provider: string | null
+          provider_name: string | null
+          settings: Json | null
+          sync_direction: string | null
+          sync_frequency_minutes: number | null
+          updated_at: string | null
+          vet_id: string | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          has_api_key?: never
+          has_webhook_secret?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          practice_id?: string | null
+          provider?: string | null
+          provider_name?: string | null
+          settings?: Json | null
+          sync_direction?: string | null
+          sync_frequency_minutes?: number | null
+          updated_at?: string | null
+          vet_id?: string | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          has_api_key?: never
+          has_webhook_secret?: never
+          id?: string | null
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          practice_id?: string | null
+          provider?: string | null
+          provider_name?: string | null
+          settings?: Json | null
+          sync_direction?: string | null
+          sync_frequency_minutes?: number | null
+          updated_at?: string | null
+          vet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vet_pms_integrations_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_pms_integrations_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
