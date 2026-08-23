@@ -68,6 +68,10 @@ const PetFestRsvp = () => {
         pet_birthday: v.petBirthday || null,
       });
       if (error) throw error;
+      // Fire-and-forget confirmation email (never blocks the success screen).
+      supabase.functions
+        .invoke("send-petfest-rsvp-confirmation", { body: { email: v.email } })
+        .catch((mailErr) => console.error("PetFest confirmation email failed", mailErr));
       navigate("/petfest/rsvp/success", {
         state: { name: v.fullName, petName: v.petName, petCount: v.petCount },
         replace: true,
