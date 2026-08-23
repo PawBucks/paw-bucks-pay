@@ -524,6 +524,15 @@ const AdminDashboard = () => {
   <ExternalLink className="w-4 h-4 mr-2" />
   PetFest RSVPs
   </Button>
+  <Button
+  variant="ghost"
+  size="sm"
+  className="w-full justify-start text-muted-foreground hover:text-foreground"
+  onClick={() => navigate("/admin/petfest-passport")}
+  >
+  <ExternalLink className="w-4 h-4 mr-2" />
+  PetFest Passport
+  </Button>
  <Separator />
  <Button
  variant="ghost"
