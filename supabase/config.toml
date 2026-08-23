@@ -395,3 +395,6 @@ verify_jwt = false
 
 [functions.merchant-customers]
 verify_jwt = true
+
+[functions.send-petfest-rsvp-confirmation]
+verify_jwt = false

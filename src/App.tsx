@@ -65,6 +65,7 @@ const VetLoanApply = lazyWithRetry(() => import("./pages/VetLoanApply"),"VetLoan
 const AdminDashboard = lazyWithRetry(() => import("./pages/AdminDashboard"),"AdminDashboard");
 const AdminGuides = lazyWithRetry(() => import("./pages/AdminGuides"),"AdminGuides");
 const AdminLogin = lazyWithRetry(() => import("./pages/AdminLogin"),"AdminLogin");
+const AdminPetFestRsvps = lazyWithRetry(() => import("./pages/AdminPetFestRsvps"),"AdminPetFestRsvps");
 const AdminResetPassword = lazyWithRetry(() => import("./pages/AdminResetPassword"),"AdminResetPassword");
 const AdminMerchantServices = lazyWithRetry(() => import("./pages/AdminMerchantServices"),"AdminMerchantServices");
 const AdminUserDetail = lazyWithRetry(() => import("./pages/AdminUserDetail"),"AdminUserDetail");
@@ -266,6 +267,7 @@ const AppRoutes = () => {
  <Route path="/admin" element={<PageTransition><AdminLogin /></PageTransition>} />
  <Route path="/admin/reset-password" element={<PageTransition><AdminResetPassword /></PageTransition>} />
  <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><AdminDashboard /></PageTransition></ProtectedRoute>} />
+<Route path="/admin/petfest-rsvps" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><AdminPetFestRsvps /></PageTransition></ProtectedRoute>} />
 <Route path="/admin/guides" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><AdminGuides /></PageTransition></ProtectedRoute>} />
  <Route path="/admin/merchant-services" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><AdminMerchantServices /></PageTransition></ProtectedRoute>} />
  <Route path="/admin/pet-store" element={<ProtectedRoute allowedRoles={['admin','superadmin']}><PageTransition><PetStoreAdmin /></PageTransition></ProtectedRoute>} />
