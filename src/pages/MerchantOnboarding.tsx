@@ -519,6 +519,21 @@ const MerchantOnboarding = () => {
  );
  })}
  </div>
+ {businessCategories.includes("veterinary") && (
+ <div className="mt-4 flex items-start gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
+ <Stethoscope className="w-5 h-5 text-primary shrink-0 mt-0.5" aria-hidden="true" />
+ <div className="space-y-2 min-w-0">
+ <p className="text-sm font-medium">Veterinary practices use a dedicated onboarding</p>
+ <p className="text-sm text-muted-foreground">
+ Clinics need license verification, insurance claim splicing, and PIMS setup —
+ which live in the Veterinary Practice application, not this merchant form.
+ </p>
+ <Button type="button" size="sm" onClick={() => navigate("/vet-onboarding")}>
+ Continue to Veterinary Onboarding
+ </Button>
+ </div>
+ </div>
+ )}
  {businessCategories.length > 0 && (
  <div className="mt-3 space-y-2">
  <p className="text-sm text-muted-foreground flex items-center gap-2">
