@@ -184,13 +184,11 @@ const PetFest = () => {
 
           <div className="hero-art">
             <img
-              src={petfestArt.url}
+              src={petfestArt}
               alt="PetFest 2027 — a band of dogs performing on a globe stage, powered by PawBucks. Free entry, $0 to get in, 15,000 PawBucks up for grabs."
               className="hero-art-img"
               loading="eager"
               fetchPriority="high"
-              width={1402}
-              height={1122}
             />
           </div>
         </header>
