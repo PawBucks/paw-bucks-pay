@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from"react";
 import { User, Session } from"@supabase/supabase-js";
 import { supabase } from"@/integrations/supabase/client";
 import { getPreHydratedSession } from"@/lib/authPreHydrate";
+import { toast } from"sonner";
+import { claimPetFestBonus, readPetFestBonus } from"@/lib/petfestBonus";
+
 import {
   clearUserAccessCache,
   getAuthRedirectForUser,
@@ -28,16 +31,29 @@ export const useAuth = () => {
  setUser(newSession?.user ?? null);
  setLoading(false);
 
- // Auto-detect timezone + enforce ban check on sign-in / refresh
- if (newSession?.user && (_event ==='SIGNED_IN' || _event ==='TOKEN_REFRESHED')) {
- const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
- if (detectedTz) {
- supabase
- .from('profiles')
- .update({ timezone: detectedTz })
- .eq('id', newSession.user.id)
- .then(() => {});
- }
+  // Auto-detect timezone + enforce ban check on sign-in / refresh
+  if (newSession?.user && (_event ==='SIGNED_IN' || _event ==='TOKEN_REFRESHED')) {
+  const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if (detectedTz) {
+  supabase
+  .from('profiles')
+  .update({ timezone: detectedTz })
+  .eq('id', newSession.user.id)
+  .then(() => {});
+  }
+
+  // Grant any reserved PetFest sign-up bonus (server enforces the 5-min window)
+  if (_event ==='SIGNED_IN' && readPetFestBonus()) {
+  setTimeout(async () => {
+  const result = await claimPetFestBonus();
+  if (result && result.success === true) {
+  toast.success(`${result.amount.toLocaleString()} PetFest PawBucks added to your wallet!`);
+  } else if (result && result.success === false && result.reason ==='expired') {
+  toast.info("Your PetFest bonus window closed, but you'll still earn PawBucks on every purchase.");
+  }
+  }, 0);
+  }
+
 
  // Defer ban check to avoid blocking auth callback
  setTimeout(async () => {

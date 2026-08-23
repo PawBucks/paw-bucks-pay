@@ -10573,6 +10573,97 @@ export type Database = {
           },
         ]
       }
+      petfest_bonus_events: {
+        Row: {
+          created_at: string
+          email: string | null
+          event_type: string
+          id: string
+          metadata: Json
+          reservation_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          reservation_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          reservation_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "petfest_bonus_events_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "petfest_bonus_reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      petfest_bonus_reservations: {
+        Row: {
+          claimed_at: string | null
+          claimed_user_id: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          pawbucks_amount: number
+          reserved_at: string
+          rsvp_id: string | null
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_user_id?: string | null
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          pawbucks_amount?: number
+          reserved_at?: string
+          rsvp_id?: string | null
+          status?: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_user_id?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          pawbucks_amount?: number
+          reserved_at?: string
+          rsvp_id?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "petfest_bonus_reservations_rsvp_id_fkey"
+            columns: ["rsvp_id"]
+            isOneToOne: false
+            referencedRelation: "petfest_rsvps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       petfest_rsvps: {
         Row: {
           created_at: string
@@ -16408,6 +16499,7 @@ export type Database = {
         Returns: number
       }
       expire_pawbucks: { Args: never; Returns: number }
+      expire_petfest_bonus_reservations: { Args: never; Returns: number }
       expire_unused_pet_fund_credits: { Args: never; Returns: number }
       find_merchant_by_qr_token: {
         Args: { p_token: string }

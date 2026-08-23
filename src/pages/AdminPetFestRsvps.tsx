@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Loader2, Search, Users, PawPrint, CalendarDays } from "lucide-react";
+import { ArrowLeft, Download, Loader2, Search, Users, PawPrint, CalendarDays, MousePointerClick, UserPlus, Gift, TimerOff } from "lucide-react";
 import { formatDateOnly } from "@/lib/timezone";
 
 interface Rsvp {
@@ -47,6 +47,13 @@ const AdminPetFestRsvps = () => {
   const [search, setSearch] = useState("");
   const [range, setRange] = useState("all");
   const [petFilter, setPetFilter] = useState("all");
+  const [funnel, setFunnel] = useState({
+    reserved: 0,
+    ctaClicks: 0,
+    signupStarted: 0,
+    granted: 0,
+    expired: 0,
+  });
 
   useEffect(() => {
     let active = true;
@@ -88,6 +95,40 @@ const AdminPetFestRsvps = () => {
     };
   }, []);
 
+
+  // 5,000 PawBucks bonus funnel: reservations -> CTA clicks -> sign-ups -> grants.
+  useEffect(() => {
+    let active = true;
+    const loadFunnel = async () => {
+      const [{ data: reservations }, { data: events }] = await Promise.all([
+        supabase.from("petfest_bonus_reservations").select("id, status"),
+        supabase.from("petfest_bonus_events").select("event_type, reservation_id, user_id, email"),
+      ]);
+      if (!active) return;
+      const uniq = (rows: { reservation_id: string | null; user_id: string | null; email: string | null }[]) =>
+        new Set(rows.map((r) => r.reservation_id ?? r.user_id ?? r.email ?? Math.random().toString())).size;
+      const byType = (type: string) => (events ?? []).filter((e) => e.event_type === type);
+      setFunnel({
+        reserved: (reservations ?? []).length,
+        ctaClicks: uniq(byType("cta_click")),
+        signupStarted: uniq(byType("signup_started")),
+        granted: byType("claim_granted").length,
+        expired: byType("claim_expired").length,
+      });
+    };
+    loadFunnel();
+
+    const channel = supabase
+      .channel("petfest-bonus-admin")
+      .on("postgres_changes", { event: "*", schema: "public", table: "petfest_bonus_events" }, () => loadFunnel())
+      .on("postgres_changes", { event: "*", schema: "public", table: "petfest_bonus_reservations" }, () => loadFunnel())
+      .subscribe();
+
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -173,6 +214,53 @@ const AdminPetFestRsvps = () => {
             Export CSV
           </Button>
         </div>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Gift className="w-4 h-4" /> 5,000 PawBucks Bonus Funnel
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Gift className="w-3 h-3" /> Reserved
+                </p>
+                <p className="text-xl font-bold">{funnel.reserved}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <MousePointerClick className="w-3 h-3" /> CTA clicks
+                </p>
+                <p className="text-xl font-bold">{funnel.ctaClicks}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <UserPlus className="w-3 h-3" /> Sign-ups started
+                </p>
+                <p className="text-xl font-bold">{funnel.signupStarted}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <PawPrint className="w-3 h-3" /> Bonuses granted
+                </p>
+                <p className="text-xl font-bold">{funnel.granted}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <TimerOff className="w-3 h-3" /> Expired
+                </p>
+                <p className="text-xl font-bold">{funnel.expired}</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Claim rate:{" "}
+              {funnel.reserved > 0 ? Math.round((funnel.granted / funnel.reserved) * 100) : 0}% of reservations ·{" "}
+              {funnel.ctaClicks > 0 ? Math.round((funnel.granted / funnel.ctaClicks) * 100) : 0}% of CTA clicks
+            </p>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card>

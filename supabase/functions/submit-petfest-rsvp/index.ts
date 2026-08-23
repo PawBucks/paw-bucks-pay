@@ -140,7 +140,40 @@ serve(async (req) => {
       return json({ error: "We couldn't save your RSVP. Please try again." }, 500);
     }
 
-    return json({ success: true, id: inserted.id });
+    // Reserve the 5,000 PawBucks PetFest sign-up bonus for exactly 5 minutes.
+    const BONUS_PB = 5000;
+    const BONUS_WINDOW_MS = 5 * 60 * 1000;
+    const expiresAt = new Date(Date.now() + BONUS_WINDOW_MS).toISOString();
+    const bonusToken = crypto.randomUUID();
+
+    const { data: reservation, error: reservationError } = await supabase
+      .from("petfest_bonus_reservations")
+      .insert({
+        rsvp_id: inserted.id,
+        email: emailLower,
+        token: bonusToken,
+        pawbucks_amount: BONUS_PB,
+        expires_at: expiresAt,
+      })
+      .select("token, expires_at, pawbucks_amount")
+      .single();
+
+    if (reservationError) {
+      console.error("petfest bonus reservation error:", reservationError);
+    }
+
+    return json({
+      success: true,
+      id: inserted.id,
+      bonus: reservation
+        ? {
+            token: reservation.token,
+            expiresAt: reservation.expires_at,
+            amount: reservation.pawbucks_amount,
+          }
+        : null,
+    });
+
   } catch (err) {
     console.error("submit-petfest-rsvp error:", err);
     return json({ error: "Unexpected error. Please try again." }, 500);

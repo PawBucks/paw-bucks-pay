@@ -2,30 +2,26 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import pawMark from "@/assets/pawbucks-logo.png";
+import { readPetFestBonus, trackPetFestBonusEvent } from "@/lib/petfestBonus";
 import "./PetFest.css";
 
 interface RsvpState {
   name?: string;
   petName?: string;
   petCount?: number;
+  bonus?: { token: string; expiresAt: string; amount: number } | null;
 }
 
-const OFFER_WINDOW_MS = 5 * 60 * 1000;
-const OFFER_KEY = "petfest_signup_offer_deadline";
+const FALLBACK_WINDOW_MS = 5 * 60 * 1000;
 
-const useOfferCountdown = () => {
+/** Counts down to the server-issued reservation expiry (never a client-invented deadline). */
+const useOfferCountdown = (serverExpiresAt?: string | null) => {
   const deadline = useMemo(() => {
-    try {
-      const stored = Number(localStorage.getItem(OFFER_KEY));
-      if (stored && stored > Date.now()) return stored;
-      if (stored) return stored; // already expired, keep it expired
-      const fresh = Date.now() + OFFER_WINDOW_MS;
-      localStorage.setItem(OFFER_KEY, String(fresh));
-      return fresh;
-    } catch {
-      return Date.now() + OFFER_WINDOW_MS;
-    }
-  }, []);
+    const stored = readPetFestBonus();
+    const iso = serverExpiresAt || stored?.expiresAt;
+    const parsed = iso ? new Date(iso).getTime() : NaN;
+    return Number.isFinite(parsed) ? parsed : Date.now() + FALLBACK_WINDOW_MS;
+  }, [serverExpiresAt]);
 
   const [msLeft, setMsLeft] = useState(() => Math.max(0, deadline - Date.now()));
 
@@ -42,7 +38,8 @@ const useOfferCountdown = () => {
 const PetFestRsvpSuccess = () => {
   const { state } = useLocation();
   const rsvp = (state || {}) as RsvpState;
-  const { expired, label } = useOfferCountdown();
+  const { expired, label } = useOfferCountdown(rsvp.bonus?.expiresAt);
+
 
   return (
     <div className="petfest">
@@ -90,7 +87,11 @@ const PetFestRsvpSuccess = () => {
                 </>
               )}
 
-              <Link to="/auth?offer=petfest5000" className="btn btn-primary pf-offer-cta">
+              <Link
+                to="/auth?offer=petfest5000"
+                className="btn btn-primary pf-offer-cta"
+                onClick={() => trackPetFestBonusEvent("cta_click", { expired })}
+              >
                 <img src={pawMark} alt="" className="pf-paw pf-paw-sm" />{" "}
                 {expired ? "Create My Free Account" : "Claim My 5,000 PawBucks"}
               </Link>
