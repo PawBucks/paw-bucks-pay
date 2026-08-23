@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -26,6 +26,8 @@ const PetFestRsvp = () => {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const mountedAt = useRef(Date.now());
+  const [honeypot, setHoneypot] = useState("");
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -55,19 +57,26 @@ const PetFestRsvp = () => {
     setErrors({});
     setSubmitting(true);
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
       const v = parsed.data;
-      const { error } = await supabase.from("petfest_rsvps").insert({
-        user_id: sessionData.session?.user.id ?? null,
-        full_name: v.fullName,
-        email: v.email,
-        phone: v.phone,
-        pet_count: v.petCount,
-        pet_name: v.petName,
-        pet_breed: v.petBreed || null,
-        pet_birthday: v.petBirthday || null,
+      // Submissions go through an edge function that applies bot + rate-limit checks.
+      const { data, error } = await supabase.functions.invoke("submit-petfest-rsvp", {
+        body: {
+          fullName: v.fullName,
+          email: v.email,
+          phone: v.phone,
+          petCount: v.petCount,
+          petName: v.petName,
+          petBreed: v.petBreed || null,
+          petBirthday: v.petBirthday || null,
+          honeypot,
+          elapsedMs: Date.now() - mountedAt.current,
+        },
       });
       if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
       // Fire-and-forget confirmation email (never blocks the success screen).
       supabase.functions
         .invoke("send-petfest-rsvp-confirmation", { body: { email: v.email } })
@@ -145,6 +154,20 @@ const PetFestRsvp = () => {
                   <input id="petBirthday" type="date" value={form.petBirthday} onChange={set("petBirthday")} />
                   {errors.petBirthday && <span className="pf-error">{errors.petBirthday}</span>}
                 </div>
+              </div>
+
+              {/* Honeypot: hidden from humans, bots fill it in */}
+              <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
+                <label htmlFor="pf-company">Company</label>
+                <input
+                  id="pf-company"
+                  name="company"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
               </div>
 
               <button type="submit" className="btn btn-primary pf-submit" disabled={submitting}>
