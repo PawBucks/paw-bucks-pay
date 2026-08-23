@@ -398,3 +398,6 @@ verify_jwt = true
 
 [functions.send-petfest-rsvp-confirmation]
 verify_jwt = false
+
+[functions.submit-petfest-rsvp]
+verify_jwt = false
