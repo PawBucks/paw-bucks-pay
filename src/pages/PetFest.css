@@ -395,3 +395,19 @@
   .petfest .pf-row{grid-template-columns:1fr}
   .petfest .pf-success-actions .btn{width:100%;justify-content:center;text-align:center}
 }
+
+/* Official PawBucks brand marks */
+.petfest .pf-paw{display:inline-block;object-fit:contain;vertical-align:-0.18em}
+.petfest .pf-paw-xs{width:16px;height:16px}
+.petfest .pf-paw-sm{width:22px;height:22px}
+.petfest .pf-paw-md{width:30px;height:30px}
+.petfest .pf-paw-lg{width:46px;height:46px;vertical-align:middle}
+.petfest .pf-brand-logo{height:72px;width:auto;object-fit:contain;display:block}
+.petfest .footer-logo{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.petfest .pf-brand-logo-footer{height:64px}
+.petfest .footer-presents{font-family:"Baloo 2";font-size:22px;font-weight:800;color:var(--pf-blue)}
+@media (max-width:640px){
+  .petfest .pf-brand-logo{height:54px}
+  .petfest .pf-brand-logo-footer{height:48px}
+  .petfest .footer-presents{font-size:18px}
+}
