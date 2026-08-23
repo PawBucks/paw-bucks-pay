@@ -4,6 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
+import { savePetFestBonus } from "@/lib/petfestBonus";
 import pawMark from "@/assets/pawbucks-logo.png";
 import "./PetFest.css";
 
@@ -82,8 +83,17 @@ const PetFestRsvp = () => {
       supabase.functions
         .invoke("send-petfest-rsvp-confirmation", { body: { email: v.email } })
         .catch((mailErr) => console.error("PetFest confirmation email failed", mailErr));
+      const bonus = data?.bonus ?? null;
+      if (bonus?.token) {
+        savePetFestBonus({
+          token: bonus.token,
+          expiresAt: bonus.expiresAt,
+          amount: bonus.amount ?? 5000,
+          email: v.email,
+        });
+      }
       navigate("/petfest/rsvp/success", {
-        state: { name: v.fullName, petName: v.petName, petCount: v.petCount },
+        state: { name: v.fullName, petName: v.petName, petCount: v.petCount, bonus },
         replace: true,
       });
     } catch (err) {
