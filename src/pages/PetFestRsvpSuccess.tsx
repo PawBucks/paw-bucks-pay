@@ -87,7 +87,11 @@ const PetFestRsvpSuccess = () => {
                 </>
               )}
 
-              <Link to="/auth?offer=petfest5000" className="btn btn-primary pf-offer-cta">
+              <Link
+                to="/auth?offer=petfest5000"
+                className="btn btn-primary pf-offer-cta"
+                onClick={() => trackPetFestBonusEvent("cta_click", { expired })}
+              >
                 <img src={pawMark} alt="" className="pf-paw pf-paw-sm" />{" "}
                 {expired ? "Create My Free Account" : "Claim My 5,000 PawBucks"}
               </Link>
