@@ -130,7 +130,7 @@ const PetFest = () => {
           <Link to="/" className="pf-logo" aria-label="PawBucks home">
             <img src={brandLogo} alt="PawBucks" className="pf-brand-logo" />
           </Link>
-          <Link to="/auth" className="nav-btn">
+          <Link to="/petfest/rsvp" className="nav-btn">
             Get Your Free Pass →
           </Link>
         </nav>
