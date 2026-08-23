@@ -181,26 +181,16 @@ const PetFest = () => {
             </div>
           </div>
 
-          <div className="hero-art" aria-hidden="true">
-            <div className="paper" />
-            <div className="sun">
-              FREE
-              <br />
-              ENTRY!
-            </div>
-            <div className="doodle one">{"bring the\nwhole pack →"}</div>
-            <div className="doodle two">{"good dogs.\ngood people.\ngood day."}</div>
-            <div className="sticker reward">
-              15,000
-              <small>PawBucks</small>
-            </div>
-            <div className="sticker free">
-              $0
-              <small>To get in!</small>
-            </div>
-            <div className="pet dog">🐕</div>
-            <div className="pet cat">🐈</div>
-            <div className="pet ball">⚽</div>
+          <div className="hero-art">
+            <img
+              src={petfestArt.url}
+              alt="PetFest 2027 — a band of dogs performing on a globe stage, powered by PawBucks. Free entry, $0 to get in, 15,000 PawBucks up for grabs."
+              className="hero-art-img"
+              loading="eager"
+              fetchPriority="high"
+              width={1402}
+              height={1122}
+            />
           </div>
         </header>
       </div>
