@@ -156,6 +156,20 @@ const PetFestRsvp = () => {
                 </div>
               </div>
 
+              {/* Honeypot: hidden from humans, bots fill it in */}
+              <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
+                <label htmlFor="pf-company">Company</label>
+                <input
+                  id="pf-company"
+                  name="company"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </div>
+
               <button type="submit" className="btn btn-primary pf-submit" disabled={submitting}>
                 {submitting ? "Saving your spot..." : "🐾 Confirm My Free RSVP"}
               </button>
