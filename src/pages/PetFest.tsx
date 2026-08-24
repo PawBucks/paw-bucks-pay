@@ -4,6 +4,7 @@ import { SEO } from "@/components/SEO";
 import pawMark from "@/assets/pawbucks-logo.png";
 import brandLogo from "@/assets/logo.png";
 import petfestArt from "@/assets/petfest-2027.png";
+import { PETFEST_VENDOR_TIERS } from "@/lib/petfestVendorTiers";
 import "./PetFest.css";
 
 const EVENT_START = new Date("2027-03-20T10:00:00-07:00").getTime();
