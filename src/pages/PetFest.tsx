@@ -62,7 +62,7 @@ const experiences = [
     copy: "Browse products, discover new brands and find event-only offers you won't see every day.",
   },
   {
-    pawIcon: true,
+    emoji: "🤝",
     title: "Make new friends",
     copy: "Because sometimes the easiest way to meet your neighbors is through the furry family member walking beside you.",
   },
