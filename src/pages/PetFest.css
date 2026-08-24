@@ -545,7 +545,8 @@
 .petfest .pro-banner p{margin:0;max-width:560px;font-size:16.5px;line-height:1.55;opacity:.92}
 .petfest .pro-banner-actions{display:flex;flex-direction:column;gap:12px;min-width:230px}
 .petfest .pro-banner-actions .btn{justify-content:center;text-align:center;border:0}
-.petfest .pro-banner-actions .btn-secondary{border:2.5px solid #fff}
+.petfest .pro-banner-actions .btn-secondary{border:2.5px solid #fff;color:var(--pf-blue)}
+.petfest .pro-banner-actions .btn-secondary:hover{color:#fff}
 .petfest .pro-tiers{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:36px;
 }
