@@ -401,7 +401,60 @@ const PetFest = () => {
         </div>
       </section>
 
+      {/* FOR PET PROS */}
+      <section className="pro-section" id="pet-pros">
+        <div className="wrap">
+          <div className="pro-banner">
+            <div>
+              <p className="eyebrow">Calling all vendors</p>
+              <h2>Are you a Westside pet pro?</h2>
+              <p>
+                Showcase your business to 1,000+ local pet parents. Booth spaces are limited across
+                three tiers — apply with your PawBucks Merchant or Vet account to claim yours.
+              </p>
+            </div>
+            <div className="pro-banner-actions">
+              <Link to="/petfest/vendors" className="btn btn-primary">
+                Apply to be a Vendor →
+              </Link>
+              <a href="#pro-tiers" className="btn btn-secondary">
+                See booth pricing
+              </a>
+            </div>
+          </div>
+
+          <div className="pro-tiers" id="pro-tiers">
+            {PETFEST_VENDOR_TIERS.map((tier) => (
+              <article key={tier.id} className={`pro-tier${tier.featured ? " featured" : ""}`}>
+                <span className="pro-tier-label">{tier.label}</span>
+                <h3>{tier.name}</h3>
+                <div className="pro-tier-price">
+                  ${tier.price.toLocaleString()}
+                  <span> / booth</span>
+                </div>
+                <div className="pro-tier-spaces">{tier.spaces} spaces available</div>
+                <p className="pro-tier-best">
+                  <strong>Best for:</strong> {tier.bestFor}
+                </p>
+                <ul className="pro-tier-list">
+                  {tier.includes.map((item) => (
+                    <li key={item}>
+                      <span aria-hidden="true">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link to={`/petfest/vendors?tier=${tier.id}#apply`} className="btn btn-primary">
+                  Apply for {tier.label}
+                </Link>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FINAL CTA */}
+
       <section className="final">
         <div className="wrap">
           <div className="final-card">
