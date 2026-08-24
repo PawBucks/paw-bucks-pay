@@ -532,3 +532,62 @@
 .petfest .passport-actions .btn{border:0}
 .petfest .passport-actions .btn-secondary{border:2.5px solid var(--pf-blue)}
 @media (max-width:640px){.petfest .passport-actions .btn{width:100%;justify-content:center;text-align:center}}
+
+/* ===== FOR PET PROS / VENDOR TIERS ===== */
+.petfest .pro-section{padding:70px 0 20px}
+.petfest .pro-banner{
+  position:relative;background:var(--pf-blue);color:#fff;border:3px solid var(--pf-blue);
+  border-radius:34px;padding:44px 40px;box-shadow:9px 11px 0 var(--pf-coral);
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:26px;
+}
+.petfest .pro-banner .eyebrow{color:#ffd9cf}
+.petfest .pro-banner h2{font-size:clamp(28px,4.4vw,44px);line-height:1.02;margin:6px 0 10px;color:#fff}
+.petfest .pro-banner p{margin:0;max-width:560px;font-size:16.5px;line-height:1.55;opacity:.92}
+.petfest .pro-banner-actions{display:flex;flex-direction:column;gap:12px;min-width:230px}
+.petfest .pro-banner-actions .btn{justify-content:center;text-align:center;border:0}
+.petfest .pro-banner-actions .btn-secondary{border:2.5px solid #fff;color:var(--pf-blue)}
+.petfest .pro-banner-actions .btn-secondary:hover{color:#fff}
+.petfest .pro-tiers{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:36px;
+}
+.petfest .pro-tier{
+  display:flex;flex-direction:column;gap:10px;background:#fff;border:3px solid var(--pf-blue);
+  border-radius:28px;padding:28px 24px;box-shadow:7px 8px 0 var(--pf-blue);
+}
+.petfest .pro-tier.featured{box-shadow:7px 8px 0 var(--pf-coral)}
+.petfest .pro-tier.selected{outline:3px dashed var(--pf-coral);outline-offset:6px}
+.petfest .pro-tier-label{
+  font-family:'Caveat',cursive;font-size:21px;color:var(--pf-coral);
+}
+.petfest .pro-tier h3{margin:0;font-size:22px;line-height:1.15;color:var(--pf-blue)}
+.petfest .pro-tier-price{font-size:34px;font-weight:900;color:var(--pf-blue);line-height:1}
+.petfest .pro-tier-price span{font-size:15px;font-weight:700;opacity:.6}
+.petfest .pro-tier-spaces{
+  align-self:flex-start;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  background:#fffdf7;border:2px solid var(--pf-blue);border-radius:999px;padding:5px 12px;color:var(--pf-blue);
+}
+.petfest .pro-tier-best{margin:4px 0 0;font-size:14.5px;line-height:1.5;opacity:.85}
+.petfest .pro-tier-list{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:9px}
+.petfest .pro-tier-list li{display:flex;gap:9px;font-size:14.5px;line-height:1.45}
+.petfest .pro-tier-list li span{color:var(--pf-coral);font-weight:900}
+.petfest .pro-tier .btn{margin-top:auto;justify-content:center;text-align:center;border:0}
+.petfest .pro-tier .btn-secondary{border:2.5px solid var(--pf-blue)}
+
+/* vendor application form fields */
+.petfest .pf-form > label{display:flex;flex-direction:column;gap:7px;font-weight:700;font-size:15px;color:var(--pf-blue)}
+.petfest .pf-form input:not([type="checkbox"]),
+.petfest .pf-form textarea{
+  width:100%;font:inherit;font-size:16px;padding:14px 16px;border:2.5px solid var(--pf-blue);
+  border-radius:16px;background:#fffdf7;color:var(--pf-blue);outline:none;font-weight:500;
+}
+.petfest .pf-form input:focus,.petfest .pf-form textarea:focus{box-shadow:3px 4px 0 var(--pf-coral)}
+.petfest .pf-form .pf-check{flex-direction:row;align-items:center;gap:10px}
+.petfest .pf-form .pf-check input{width:20px;height:20px;accent-color:var(--pf-coral)}
+.petfest .pf-form .btn{justify-content:center;text-align:center;border:0}
+
+@media (max-width:640px){
+  .petfest .pro-section{padding:40px 0 10px}
+  .petfest .pro-banner{padding:28px 20px;border-radius:26px;box-shadow:6px 7px 0 var(--pf-coral)}
+  .petfest .pro-banner-actions{width:100%;min-width:0}
+  .petfest .pro-tier{padding:24px 20px;border-radius:24px}
+}

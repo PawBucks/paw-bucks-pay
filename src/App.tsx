@@ -122,6 +122,7 @@ const PetFestRsvp = lazyWithRetry(() => import("./pages/PetFestRsvp"),"PetFestRs
 const PetFestRsvpSuccess = lazyWithRetry(() => import("./pages/PetFestRsvpSuccess"),"PetFestRsvpSuccess");
 const PetFestPassport = lazyWithRetry(() => import("./pages/PetFestPassport"),"PetFestPassport");
 const PetFestPassportPrint = lazyWithRetry(() => import("./pages/PetFestPassportPrint"),"PetFestPassportPrint");
+const PetFestVendors = lazyWithRetry(() => import("./pages/PetFestVendors"),"PetFestVendors");
 const MerchantAvailableBalance = lazyWithRetry(() => import("./pages/MerchantAvailableBalance"),"MerchantAvailableBalance");
 const MerchantPendingBalance = lazyWithRetry(() => import("./pages/MerchantPendingBalance"),"MerchantPendingBalance");
 const MerchantTotalEarnings = lazyWithRetry(() => import("./pages/MerchantTotalEarnings"),"MerchantTotalEarnings");
@@ -218,6 +219,7 @@ const AppRoutes = () => {
  <Route path="/petfest/rsvp/success" element={<PageTransition><PetFestRsvpSuccess /></PageTransition>} />
  <Route path="/petfest/passport" element={<PageTransition><PetFestPassport /></PageTransition>} />
  <Route path="/petfest/passport/print" element={<PageTransition><PetFestPassportPrint /></PageTransition>} />
+<Route path="/petfest/vendors" element={<PageTransition><PetFestVendors /></PageTransition>} />
 
   {/* Authenticated pet owner routes */}
   <Route path="/home" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><SimpleHome /></PageTransition></ProtectedRoute>} />

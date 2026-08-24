@@ -10849,6 +10849,63 @@ export type Database = {
         }
         Relationships: []
       }
+      petfest_vendor_applications: {
+        Row: {
+          admin_notes: string | null
+          booth_count: number
+          business_category: string | null
+          business_name: string
+          contact_name: string
+          created_at: string
+          email: string
+          id: string
+          notes: string | null
+          phone: string
+          power_needed: boolean
+          status: string
+          tier: string
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          booth_count?: number
+          business_category?: string | null
+          business_name: string
+          contact_name: string
+          created_at?: string
+          email: string
+          id?: string
+          notes?: string | null
+          phone: string
+          power_needed?: boolean
+          status?: string
+          tier: string
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          booth_count?: number
+          business_category?: string | null
+          business_name?: string
+          contact_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          power_needed?: boolean
+          status?: string
+          tier?: string
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       phone_verifications: {
         Row: {
           attempts: number
