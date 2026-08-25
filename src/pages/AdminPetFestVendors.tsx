@@ -97,7 +97,7 @@ const AdminPetFestVendors = () => {
       <SEO
         title="PetFest Vendor Applications | Admin"
         description="Review and decide on PetFest vendor applications."
-        noindex
+        noIndex
       />
       <div className="mx-auto max-w-7xl px-4 py-8">
         <Link
