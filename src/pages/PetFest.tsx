@@ -4,6 +4,7 @@ import { SEO } from "@/components/SEO";
 import pawMark from "@/assets/pawbucks-logo.png";
 import brandLogo from "@/assets/logo.png";
 import petfestArt from "@/assets/petfest-2027.png";
+import petfest15kAsset from "@/assets/petfest-15k-pawbucks.png.asset.json";
 import { PETFEST_VENDOR_TIERS } from "@/lib/petfestVendorTiers";
 import "./PetFest.css";
 
@@ -289,14 +290,12 @@ const PetFest = () => {
                 </div>
               </div>
 
-              <div className="passport-card">
-                <div className="tiny">PetFest 2027</div>
-                <div className="stamp" aria-hidden="true">
-                  <img src={pawMark} alt="" className="pf-paw pf-paw-lg" />
-                </div>
-                <div className="amount">15K</div>
-                <div className="pb">PAWBUCKS</div>
-                <div className="note">Explore · Earn · Spend · Support</div>
+              <div className="passport-card passport-card-art">
+                <img
+                  src={petfest15kAsset.url}
+                  alt="PetFest 2027 — 15K PawBucks up for grabs: explore, earn, spend and support. Complete your passport, cash in and make an impact. Turn it in by 6pm."
+                  className="passport-card-art-img"
+                />
               </div>
             </div>
           </div>
