@@ -72,13 +72,51 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
  setEmailAddress(emailData?.email_address || null);
  setShortCode(emailData?.short_code ||"");
 
- const { data: docs } = await supabase
+  const [{ data: docs }, { data: emails }] = await Promise.all([
+ supabase
  .from("pet_inbound_documents")
  .select("*")
  .eq("pet_id", petId)
- .order("created_at", { ascending: false });
+ .order("created_at", { ascending: false }),
+ supabase
+ .from("pet_inbound_emails")
+ .select("id, subject, from_email, from_name, body_text, body_html, processing_status, created_at")
+ .eq("pet_id", petId)
+ .order("created_at", { ascending: false }),
+ ]);
 
- setDocuments(docs || []);
+ const docList = docs || [];
+ const emailIdsWithDocs = new Set(docList.map((d: any) => d.email_id).filter(Boolean));
+
+ // Emails that never produced a document row (older messages, failed
+ // attachment processing) are still surfaced using the body fallback
+ // or raw message metadata so nothing silently disappears.
+ const orphanEmails = (emails || [])
+ .filter((e: any) => !emailIdsWithDocs.has(e.id))
+ .map((e: any) => {
+ const preview = e.body_text?.trim() || (e.body_html ? stripHtml(e.body_html) :"");
+ return {
+ id: `email-${e.id}`,
+ email_id: e.id,
+ file_name: e.subject ||"(No Subject)",
+ category:"message",
+ file_url: null,
+ file_type:"message/rfc822",
+ file_size_bytes: null,
+ sender_email: e.from_email,
+ sender_name: e.from_name,
+ created_at: e.created_at,
+ ai_summary: preview ? preview.slice(0, 300) : null,
+ is_email_only: true,
+ processing_status: e.processing_status,
+ };
+ });
+
+ const merged = [...docList, ...orphanEmails].sort(
+ (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+ );
+
+ setDocuments(merged);
  } catch (err) {
  console.error("Error loading pet email data:", err);
  } finally {
