@@ -304,7 +304,13 @@ serve(async (req: Request) => {
       from: "PawBucks PetFest <petfest@pawbucks.app>",
       to: [rsvp.email],
       subject: "You're confirmed for PetFest 2027 🐾",
-      html: emailHtml(rsvp.full_name, rsvp.pet_name, rsvp.pet_count ?? 1, rsvp.pet_breed),
+      html: emailHtml(
+        rsvp.full_name,
+        rsvp.pet_name,
+        rsvp.pet_count ?? 1,
+        rsvp.pet_breed,
+        `PF27-${String(rsvp.id).replace(/[^a-zA-Z0-9]/g, "").slice(-4).toUpperCase()}`,
+      ),
       attachments: [
         {
           filename: "petfest-2027.ics",
