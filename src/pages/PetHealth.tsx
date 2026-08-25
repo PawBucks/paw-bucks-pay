@@ -219,7 +219,7 @@ export default function PetHealth() {
                 variant="ghost"
                 size="icon"
                 title="Pet timeline"
-                onClick={() => navigate(`/pet-timeline/${pet.id}`)}
+                onClick={() => navigate("/pet-timeline")}
               >
                 <PawPrint className="w-4 h-4" />
               </Button>
