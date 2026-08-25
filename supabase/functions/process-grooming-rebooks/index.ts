@@ -27,7 +27,7 @@ serve(async (req) => {
     // Get all enabled rebook settings
     const { data: settings, error: settingsError } = await supabase
       .from("grooming_rebook_settings")
-      .select("*, merchants!inner(id, business_name, user_id, slug)")
+      .select("*, merchants!inner(id, business_name, user_id, storefront_slug)")
       .eq("is_enabled", true);
 
     if (settingsError) throw settingsError;
@@ -153,7 +153,7 @@ serve(async (req) => {
         if (channels.includes("email") && lastBooking.customer_email) {
           // Send email via existing edge function
           try {
-            const bookingUrl = `${supabaseUrl.replace('.supabase.co', '')}/book/${merchant.slug || setting.merchant_id}`;
+            const bookingUrl = `${supabaseUrl.replace('.supabase.co', '')}/book/${merchant.storefront_slug || setting.merchant_id}`;
             await supabase.functions.invoke("send-booking-emails", {
               headers: { "x-internal-secret": Deno.env.get("INTERNAL_TRIGGER_SECRET") ?? "" },
               body: {
