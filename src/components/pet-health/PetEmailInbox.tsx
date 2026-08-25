@@ -357,11 +357,11 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
  <Inbox className="w-8 h-8 text-muted-foreground" />
  </div>
  <div>
- <h3 className="font-semibold">No documents yet</h3>
+  <h3 className="font-semibold">Nothing here yet</h3>
  <p className="text-sm text-muted-foreground mt-1">
  {emailAddress
  ? `Share ${emailAddress} with your vet to start receiving documents automatically.`
- :"Documents sent to your pet's email will appear here."}
+ :"Emails and documents sent to your pet's email will appear here."}
  </p>
  </div>
  </div>
