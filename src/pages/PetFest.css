@@ -224,6 +224,10 @@
   padding:7px 12px;border-radius:8px;font-weight:800;font-size:12px;transform:rotate(-2deg);
 }
 .petfest .passport-card .stamp{font-size:44px;margin-bottom:6px}
+.petfest .passport-card-art{padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.petfest .passport-card-art .passport-card-art-img{
+  width:100%;height:auto;display:block;object-fit:contain;
+}
 
 /* FOMO */
 .petfest .fomo{display:grid;grid-template-columns:.85fr 1.15fr;gap:60px;align-items:center}
