@@ -191,7 +191,7 @@ export const createOrganizationSchema = () => ({
 "sameAs": [
 "https://twitter.com/PawBucks",
 "https://facebook.com/PawBucks",
-"https://instagram.com/PawBucks"
+"https://instagram.com/pawbucks.app"
  ],
 "contactPoint": {
 "@type":"ContactPoint",
