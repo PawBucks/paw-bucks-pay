@@ -113,22 +113,33 @@ const PetFestVendors = () => {
     setSubmitting(true);
     try {
       const v = parsed.data;
-      const { error } = await supabase.from("petfest_vendor_applications").insert({
-        user_id: user.id,
-        business_name: v.businessName,
-        contact_name: v.contactName,
-        email: v.email,
-        phone: v.phone,
-        website: v.website || null,
-        business_category: v.businessCategory || null,
-        tier,
-        booth_count: v.boothCount,
-        power_needed: form.powerNeeded,
-        notes: v.notes || null,
-      });
+      const { data: created, error } = await supabase
+        .from("petfest_vendor_applications")
+        .insert({
+          user_id: user.id,
+          business_name: v.businessName,
+          contact_name: v.contactName,
+          email: v.email,
+          phone: v.phone,
+          website: v.website || null,
+          business_category: v.businessCategory || null,
+          tier,
+          booth_count: v.boothCount,
+          power_needed: form.powerNeeded,
+          notes: v.notes || null,
+        })
+        .select("id")
+        .single();
       if (error) throw error;
       setSubmitted(true);
       toast.success("Application received! We'll be in touch soon.");
+      if (created?.id) {
+        supabase.functions
+          .invoke("petfest-vendor-notify", {
+            body: { applicationId: created.id, event: "received" },
+          })
+          .catch((emailErr) => console.error("Vendor confirmation email failed", emailErr));
+      }
     } catch (err) {
       console.error("Vendor application failed", err);
       toast.error("We couldn't submit your application. Please try again.");

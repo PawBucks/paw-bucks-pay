@@ -404,3 +404,6 @@ verify_jwt = false
 
 [functions.petfest-passport-scan]
 verify_jwt = true
+
+[functions.petfest-vendor-notify]
+verify_jwt = true
