@@ -398,7 +398,8 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
  </span>
  )}
  </div>
- </div>
+  </div>
+ {doc.file_url ? (
  <Button
  variant="ghost"
  size="sm"
@@ -413,6 +414,11 @@ export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
  <ExternalLink className="w-4 h-4" />
  </a>
  </Button>
+ ) : (
+ <span className="text-xs text-muted-foreground flex-shrink-0 whitespace-nowrap">
+ {doc.is_email_only ?"Email only" :"No file"}
+ </span>
+ )}
  </div>
  {doc.ai_summary && (
  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
