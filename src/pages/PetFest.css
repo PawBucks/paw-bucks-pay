@@ -109,7 +109,7 @@
 }
 .petfest .btn-primary{background:var(--pf-coral);color:#fff;box-shadow:4px 5px 0 var(--pf-blue)}
 .petfest .btn-primary:hover{transform:translate(-2px,-2px) rotate(-1deg);box-shadow:6px 7px 0 var(--pf-blue)}
-.petfest .btn-secondary{background:#fff}
+.petfest .btn-secondary{background:#fff;color:var(--pf-blue)}
 .petfest .btn-secondary:hover{background:var(--pf-blue);color:#fff}
 .petfest .hero-details{display:flex;gap:24px;flex-wrap:wrap;margin-top:28px}
 .petfest .hero-detail{font-size:13px;font-weight:700}
