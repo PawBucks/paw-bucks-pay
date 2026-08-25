@@ -222,7 +222,7 @@ serve(async (req: Request) => {
             : status === "waitlisted"
               ? `${app.business_name} is on the PetFest 2027 vendor waitlist. We'll notify you if a booth opens.`
               : `Your PetFest 2027 vendor application for ${app.business_name} was not approved this year.`,
-        type: "petfest_vendor",
+        category: "petfest_vendor",
         link_url: "/petfest/vendors",
       });
     }
