@@ -26,9 +26,19 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string 
  wellness: { label:"Wellness", icon: Heart, color:"bg-success/10 text-success" },
  insurance: { label:"Insurance", icon: Shield, color:"bg-info/10 text-info" },
  invoice: { label:"Invoice", icon: Receipt, color:"bg-warning/10 text-warning" },
- other: { label:"Other", icon: FileText, color:"bg-muted text-muted-foreground" },
+  other: { label:"Other", icon: FileText, color:"bg-muted text-muted-foreground" },
  uncategorized: { label:"Processing...", icon: HelpCircle, color:"bg-muted text-muted-foreground" },
+ message: { label:"Message", icon: Inbox, color:"bg-muted text-muted-foreground" },
 };
+
+const stripHtml = (html: string) =>
+ html
+ .replace(/<style[\s\S]*?<\/style>/gi, " ")
+ .replace(/<script[\s\S]*?<\/script>/gi, " ")
+ .replace(/<[^>]+>/g, " ")
+ .replace(/&nbsp;/g, " ")
+ .replace(/\s+/g, " ")
+ .trim();
 
 export const PetEmailInbox = ({ petId, petName }: PetEmailInboxProps) => {
  const [emailAddress, setEmailAddress] = useState<string | null>(null);
