@@ -268,7 +268,11 @@ const SimpleSuccess = () => {
             nearbyMerchants.map((m) => {
               const emoji = getCategoryEmoji(m.business_type);
               const label = getCategoryLabel(m.business_type);
-              const rate = Math.round((m.cashback_rate || 0) * earnMultiplier) || earnMultiplier;
+              // cashback_rate is the FREE-tier base multiplier (e.g. 10 = 10x PB/$1).
+              // Scale it by the user's tier relative to FREE (Free 10x, PawPass 20x, PawPass+ 30x)
+              // instead of multiplying directly, which double-counted (10 * 10 = "100x PB").
+              const baseRate = Math.round(m.cashback_rate || 0) || POINTS_MULTIPLIER.FREE;
+              const rate = Math.round(baseRate * (earnMultiplier / POINTS_MULTIPLIER.FREE)) || earnMultiplier;
               return (
                 <button
                   key={m.id}
@@ -276,7 +280,16 @@ const SimpleSuccess = () => {
                   className="flex-shrink-0 w-[158px] text-left"
                 >
                   <div className="relative h-[110px] rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-center text-4xl mb-2 overflow-hidden">
-                    <span aria-hidden="true">{emoji}</span>
+                    {m.logo_url ? (
+                      <img
+                        src={m.logo_url}
+                        alt={`${m.business_name} logo`}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span aria-hidden="true">{emoji}</span>
+                    )}
                     {m.distance != null && (
                       <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-foreground/65 text-background text-[10px] font-semibold">
                         {formatDistance(m.distance)}
