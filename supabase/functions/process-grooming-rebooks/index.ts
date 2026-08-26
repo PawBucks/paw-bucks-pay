@@ -60,7 +60,7 @@ serve(async (req) => {
         .from("service_bookings")
         .select(`
           id, user_id, booking_date, customer_name, customer_email,
-          pet_id, pet_name,
+          pet_id, pet_profiles(name),
           merchant_services!inner(category, merchant_id)
         `)
         .eq("merchant_services.merchant_id", setting.merchant_id)
