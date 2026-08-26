@@ -268,7 +268,9 @@ const SimpleSuccess = () => {
             nearbyMerchants.map((m) => {
               const emoji = getCategoryEmoji(m.business_type);
               const label = getCategoryLabel(m.business_type);
-              const rate = Math.round((m.cashback_rate || 0) * earnMultiplier) || earnMultiplier;
+              // cashback_rate already IS the PB-per-$1 multiplier (e.g. 10 = 10x).
+              // Do NOT multiply by the user's earn rate — that double-counts.
+              const rate = Math.round(m.cashback_rate || 0) || earnMultiplier;
               return (
                 <button
                   key={m.id}
@@ -276,7 +278,16 @@ const SimpleSuccess = () => {
                   className="flex-shrink-0 w-[158px] text-left"
                 >
                   <div className="relative h-[110px] rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-center text-4xl mb-2 overflow-hidden">
-                    <span aria-hidden="true">{emoji}</span>
+                    {m.logo_url ? (
+                      <img
+                        src={m.logo_url}
+                        alt={`${m.business_name} logo`}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span aria-hidden="true">{emoji}</span>
+                    )}
                     {m.distance != null && (
                       <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-foreground/65 text-background text-[10px] font-semibold">
                         {formatDistance(m.distance)}
