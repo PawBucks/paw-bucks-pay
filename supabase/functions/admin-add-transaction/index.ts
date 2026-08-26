@@ -301,9 +301,8 @@ serve(async (req) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
-          'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
-        }`,
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          "x-internal-secret": Deno.env.get("INTERNAL_TRIGGER_SECRET") ?? "",
         },
         body: JSON.stringify({
           userId: user_id,
@@ -320,9 +319,8 @@ serve(async (req) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
-          'x-internal-secret': Deno.env.get('INTERNAL_TRIGGER_SECRET') ?? '',
-        }`,
+          "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          "x-internal-secret": Deno.env.get("INTERNAL_TRIGGER_SECRET") ?? "",
         },
         body: JSON.stringify({
           transaction_id: transaction.id,
