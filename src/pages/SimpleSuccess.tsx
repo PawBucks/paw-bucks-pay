@@ -268,9 +268,11 @@ const SimpleSuccess = () => {
             nearbyMerchants.map((m) => {
               const emoji = getCategoryEmoji(m.business_type);
               const label = getCategoryLabel(m.business_type);
-              // cashback_rate already IS the PB-per-$1 multiplier (e.g. 10 = 10x).
-              // Do NOT multiply by the user's earn rate — that double-counts.
-              const rate = Math.round(m.cashback_rate || 0) || earnMultiplier;
+              // cashback_rate is the FREE-tier base multiplier (e.g. 10 = 10x PB/$1).
+              // Scale it by the user's tier relative to FREE (Free 10x, PawPass 20x, PawPass+ 30x)
+              // instead of multiplying directly, which double-counted (10 * 10 = "100x PB").
+              const baseRate = Math.round(m.cashback_rate || 0) || POINTS_MULTIPLIER.FREE;
+              const rate = Math.round(baseRate * (earnMultiplier / POINTS_MULTIPLIER.FREE)) || earnMultiplier;
               return (
                 <button
                   key={m.id}
