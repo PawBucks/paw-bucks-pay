@@ -455,7 +455,7 @@ const MerchantLanding = () => {
  <div className="ml-math-big">$50k</div>
  <div className="ml-math-caption">
  in USD revenue through PawBucks over a year, your total success fee is{""}
- <strong style={{ color:"var(--teal-dark)" }}>$1,500</strong>. Clients who offset
+  <strong style={{ color:"var(--teal-dark)" }}> $1,500</strong>. Clients who offset
  with PawBucks rewards reduce your fee further.
  </div>
  <div className="ml-math-divider" />
