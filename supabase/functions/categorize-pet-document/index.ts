@@ -72,9 +72,41 @@ Document details:
 - Email subject: ${doc.email_subject || "none"}
 - Email body snippet: ${doc.email_body_snippet || "none"}
 
-Classify this document AND extract any medical record information from the email body/subject.`;
+Classify this document AND extract medical record information from the attachment (if provided), email body and subject.
 
-        const response = await fetch(
+If the document is an INVOICE, RECEIPT or BILL (category "invoice"), you MUST also extract:
+- every billed line item into invoice_items (description, quantity, unit_price, amount)
+- subtotal, tax and total amounts, plus the invoice number and visit/service date
+Invoices always count as records worth adding to the pet's medical history, so set is_medical to true for them.`;
+
+        // Attach the file itself when possible so line items can be read
+        // straight off the invoice PDF/image instead of just the email body.
+        let fileDataUrl: string | null = null;
+        const attachableTypes = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp", "image/heic"];
+        if (doc.file_url && doc.file_type && attachableTypes.includes(String(doc.file_type).toLowerCase())) {
+          try {
+            const fileRes = await fetch(doc.file_url);
+            if (fileRes.ok) {
+              const buf = new Uint8Array(await fileRes.arrayBuffer());
+              if (buf.length > 0 && buf.length < 15_000_000) {
+                let binary = "";
+                for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
+                fileDataUrl = `data:${doc.file_type};base64,${btoa(binary)}`;
+              }
+            }
+          } catch (fileErr) {
+            console.warn("Could not attach document for AI extraction:", doc.file_name, fileErr);
+          }
+        }
+
+        const userContent: any = fileDataUrl
+          ? [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: fileDataUrl } },
+            ]
+          : prompt;
+
+        const callAi = (content: any) => fetch(
           "https://ai.gateway.lovable.dev/v1/chat/completions",
           {
             method: "POST",
@@ -89,8 +121,9 @@ Classify this document AND extract any medical record information from the email
                   role: "system",
                   content: "You are a veterinary document classifier and medical data extractor. Always respond using the classify_and_extract tool.",
                 },
-                { role: "user", content: prompt },
+                { role: "user", content },
               ],
+
               tools: [
                 {
                   type: "function",
@@ -161,6 +194,29 @@ Classify this document AND extract any medical record information from the email
                             required: ["title", "record_type"]
                           }
                         },
+                        invoice_items: {
+                          type: "array",
+                          description: "Billed line items when the document is an invoice/receipt/bill (empty otherwise)",
+                          items: {
+                            type: "object",
+                            properties: {
+                              description: { type: "string", description: "Line item description as printed" },
+                              quantity: { type: "number", description: "Quantity billed, default 1" },
+                              unit_price: { type: "number", description: "Price per unit" },
+                              amount: { type: "number", description: "Extended line total (quantity x unit_price)" },
+                              record_type: {
+                                type: "string",
+                                enum: ["vaccination", "checkup", "surgery", "lab_results", "prescription", "dental", "emergency", "other"],
+                                description: "Best-fit medical record type for this line item"
+                              }
+                            },
+                            required: ["description"]
+                          }
+                        },
+                        invoice_number: { type: "string", description: "Invoice or receipt number if printed" },
+                        invoice_subtotal: { type: "number", description: "Invoice subtotal before tax" },
+                        invoice_tax: { type: "number", description: "Tax amount on the invoice" },
+                        invoice_total: { type: "number", description: "Invoice grand total charged" },
                         visit_date: {
                           type: "string",
                           description: "Visit date in YYYY-MM-DD format if found in the document"
@@ -187,6 +243,15 @@ Classify this document AND extract any medical record information from the email
             }),
           }
         );
+
+        let response = await callAi(userContent);
+        // If the multimodal call was rejected, retry with text only so the
+        // document still gets categorized.
+        if (!response.ok && fileDataUrl) {
+          console.warn("Multimodal AI call failed, retrying text-only for", doc.file_name, response.status);
+          response = await callAi(prompt);
+        }
+
 
         if (!response.ok) {
           if (response.status === 429) {
@@ -218,27 +283,92 @@ Classify this document AND extract any medical record information from the email
             })
             .eq("id", doc.id);
 
-          // Auto-create medical records if this is medical content
-          if (classification.is_medical && classification.medical_records?.length > 0 && pet?.user_id) {
+          // Build the list of records to add to the pet's medical history.
+          // Invoices contribute one record per billed line item so the visit,
+          // items and totals all land in the health history automatically.
+          const invoiceItems: any[] = Array.isArray(classification.invoice_items)
+            ? classification.invoice_items.filter((i: any) => i && i.description)
+            : [];
+          const isInvoice = classification.category === "invoice" || invoiceItems.length > 0;
+
+          const toNum = (v: any) => (v === null || v === undefined || v === "" ? null : Number(v));
+          const invoiceTotal = toNum(classification.invoice_total);
+          const invoiceSubtotal = toNum(classification.invoice_subtotal);
+          const invoiceTax = toNum(classification.invoice_tax);
+
+          const baseRecords: any[] = Array.isArray(classification.medical_records)
+            ? classification.medical_records.filter((r: any) => r && r.title)
+            : [];
+
+          const itemRecords = invoiceItems.map((item: any) => {
+            const qty = toNum(item.quantity);
+            const unit = toNum(item.unit_price);
+            const amount = toNum(item.amount) ?? (qty !== null && unit !== null ? qty * unit : null);
+            const parts: string[] = [];
+            if (qty !== null) parts.push(`Qty ${qty}`);
+            if (unit !== null) parts.push(`@ $${unit.toFixed(2)}`);
+            if (amount !== null) parts.push(`= $${amount.toFixed(2)}`);
+            return {
+              title: String(item.description).slice(0, 200),
+              record_type: item.record_type || "other",
+              description: parts.length ? `Invoice line item — ${parts.join(" ")}` : "Invoice line item",
+              quantity: qty !== null && qty > 0 ? Math.round(qty) : 1,
+              price: amount,
+              record_date: null,
+            };
+          });
+
+          const recordsToInsert = [...baseRecords, ...itemRecords];
+
+          if ((classification.is_medical || isInvoice) && recordsToInsert.length > 0 && pet?.user_id) {
             try {
               const visitDate = classification.visit_date || new Date().toISOString().split("T")[0];
+              const docTag = `[doc:${doc.id}]`;
 
-              // Create a medical visit
-              const { data: visit } = await supabase
+              // Idempotency: never create a second visit for the same document.
+              const { data: existingVisit } = await supabase
                 .from("pet_medical_visits")
-                .insert({
-                  pet_id: pet_id,
-                  user_id: pet.user_id,
-                  visit_date: visitDate,
-                  notes: `Auto-created from email: ${doc.email_subject || doc.file_name}`,
-                  vet_name: classification.vet_name || doc.sender_name || null,
-                  doctor_name: classification.doctor_name || null,
-                })
-                .select()
-                .single();
+                .select("id")
+                .eq("pet_id", pet_id)
+                .ilike("notes", `%${docTag}%`)
+                .maybeSingle();
+
+              const totalsLine = isInvoice
+                ? [
+                    classification.invoice_number ? `Invoice #${classification.invoice_number}` : null,
+                    invoiceSubtotal !== null ? `Subtotal $${invoiceSubtotal.toFixed(2)}` : null,
+                    invoiceTax !== null ? `Tax $${invoiceTax.toFixed(2)}` : null,
+                    invoiceTotal !== null ? `Total $${invoiceTotal.toFixed(2)}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")
+                : "";
+
+              let visit = existingVisit;
+              if (!visit) {
+                const { data: newVisit } = await supabase
+                  .from("pet_medical_visits")
+                  .insert({
+                    pet_id: pet_id,
+                    user_id: pet.user_id,
+                    visit_date: visitDate,
+                    notes: [
+                      `Auto-created from email: ${doc.email_subject || doc.file_name}`,
+                      totalsLine,
+                      docTag,
+                    ]
+                      .filter(Boolean)
+                      .join("\n"),
+                    vet_name: classification.vet_name || doc.sender_name || null,
+                    doctor_name: classification.doctor_name || null,
+                  })
+                  .select()
+                  .single();
+                visit = newVisit;
+              }
 
               if (visit) {
-                for (const record of classification.medical_records) {
+                for (const record of recordsToInsert) {
                   await supabase
                     .from("pet_medical_records")
                     .insert({
@@ -249,16 +379,45 @@ Classify this document AND extract any medical record information from the email
                       title: record.title,
                       record_date: record.record_date || visitDate,
                       description: record.description || null,
-                      price: record.price != null ? parseFloat(record.price) : null,
+                      quantity: record.quantity ?? null,
+                      price: record.price != null ? Number(record.price) : null,
                       file_url: doc.file_url || null,
                     });
+                }
+
+                // If the invoice total doesn't match the sum of its items
+                // (fees, discounts, unparsed lines), add a balancing record so
+                // the pet's spending history matches the amount actually paid.
+                if (isInvoice && invoiceTotal !== null) {
+                  const itemsSum = recordsToInsert.reduce(
+                    (sum, r) => sum + (r.price != null ? Number(r.price) : 0),
+                    0
+                  );
+                  const diff = Math.round((invoiceTotal - itemsSum) * 100) / 100;
+                  if (Math.abs(diff) >= 0.01) {
+                    await supabase.from("pet_medical_records").insert({
+                      visit_id: visit.id,
+                      pet_id: pet_id,
+                      user_id: pet.user_id,
+                      record_type: "other",
+                      title: diff > 0 ? "Other charges, tax & fees" : "Discounts & adjustments",
+                      record_date: visitDate,
+                      description: `Balancing entry so this visit matches the invoice total of $${invoiceTotal.toFixed(2)}`,
+                      price: diff,
+                      file_url: doc.file_url || null,
+                    });
+                  }
                 }
 
                 // Notify the pet owner
                 await supabase.from("notifications").insert({
                   user_id: pet.user_id,
-                  title: "📋 Medical Records Auto-Added",
-                  message: `${classification.medical_records.length} record(s) from ${classification.vet_name || doc.sender_name || "your vet"} have been added to ${pet.name}'s health history.`,
+                  title: isInvoice ? "🧾 Invoice Added to Health History" : "📋 Medical Records Auto-Added",
+                  message: isInvoice
+                    ? `A visit with ${recordsToInsert.length} item(s)${
+                        invoiceTotal !== null ? ` totaling $${invoiceTotal.toFixed(2)}` : ""
+                      } from ${classification.vet_name || doc.sender_name || "your vet"} was added to ${pet.name}'s health history.`
+                    : `${recordsToInsert.length} record(s) from ${classification.vet_name || doc.sender_name || "your vet"} have been added to ${pet.name}'s health history.`,
                   category: "transactional",
                   link_url: `/pet-health/${pet_id}?tab=records`,
                 });
@@ -274,8 +433,11 @@ Classify this document AND extract any medical record information from the email
             category: classification.category,
             confidence: classification.confidence,
             summary: classification.summary,
-            medicalRecordsCreated: classification.medical_records?.length || 0,
+            medicalRecordsCreated: recordsToInsert.length,
+            invoiceItemsCaptured: itemRecords.length,
+            invoiceTotal,
           });
+
         }
       } catch (docErr) {
         console.error("Error categorizing document", doc.id, docErr);
