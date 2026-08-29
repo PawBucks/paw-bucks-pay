@@ -194,6 +194,29 @@ Invoices always count as records worth adding to the pet's medical history, so s
                             required: ["title", "record_type"]
                           }
                         },
+                        invoice_items: {
+                          type: "array",
+                          description: "Billed line items when the document is an invoice/receipt/bill (empty otherwise)",
+                          items: {
+                            type: "object",
+                            properties: {
+                              description: { type: "string", description: "Line item description as printed" },
+                              quantity: { type: "number", description: "Quantity billed, default 1" },
+                              unit_price: { type: "number", description: "Price per unit" },
+                              amount: { type: "number", description: "Extended line total (quantity x unit_price)" },
+                              record_type: {
+                                type: "string",
+                                enum: ["vaccination", "checkup", "surgery", "lab_results", "prescription", "dental", "emergency", "other"],
+                                description: "Best-fit medical record type for this line item"
+                              }
+                            },
+                            required: ["description"]
+                          }
+                        },
+                        invoice_number: { type: "string", description: "Invoice or receipt number if printed" },
+                        invoice_subtotal: { type: "number", description: "Invoice subtotal before tax" },
+                        invoice_tax: { type: "number", description: "Tax amount on the invoice" },
+                        invoice_total: { type: "number", description: "Invoice grand total charged" },
                         visit_date: {
                           type: "string",
                           description: "Visit date in YYYY-MM-DD format if found in the document"
@@ -220,6 +243,15 @@ Invoices always count as records worth adding to the pet's medical history, so s
             }),
           }
         );
+
+        let response = await callAi(userContent);
+        // If the multimodal call was rejected, retry with text only so the
+        // document still gets categorized.
+        if (!response.ok && fileDataUrl) {
+          console.warn("Multimodal AI call failed, retrying text-only for", doc.file_name, response.status);
+          response = await callAi(prompt);
+        }
+
 
         if (!response.ok) {
           if (response.status === 429) {
