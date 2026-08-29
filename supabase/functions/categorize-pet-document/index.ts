@@ -72,9 +72,41 @@ Document details:
 - Email subject: ${doc.email_subject || "none"}
 - Email body snippet: ${doc.email_body_snippet || "none"}
 
-Classify this document AND extract any medical record information from the email body/subject.`;
+Classify this document AND extract medical record information from the attachment (if provided), email body and subject.
 
-        const response = await fetch(
+If the document is an INVOICE, RECEIPT or BILL (category "invoice"), you MUST also extract:
+- every billed line item into invoice_items (description, quantity, unit_price, amount)
+- subtotal, tax and total amounts, plus the invoice number and visit/service date
+Invoices always count as records worth adding to the pet's medical history, so set is_medical to true for them.`;
+
+        // Attach the file itself when possible so line items can be read
+        // straight off the invoice PDF/image instead of just the email body.
+        let fileDataUrl: string | null = null;
+        const attachableTypes = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp", "image/heic"];
+        if (doc.file_url && doc.file_type && attachableTypes.includes(String(doc.file_type).toLowerCase())) {
+          try {
+            const fileRes = await fetch(doc.file_url);
+            if (fileRes.ok) {
+              const buf = new Uint8Array(await fileRes.arrayBuffer());
+              if (buf.length > 0 && buf.length < 15_000_000) {
+                let binary = "";
+                for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
+                fileDataUrl = `data:${doc.file_type};base64,${btoa(binary)}`;
+              }
+            }
+          } catch (fileErr) {
+            console.warn("Could not attach document for AI extraction:", doc.file_name, fileErr);
+          }
+        }
+
+        const userContent: any = fileDataUrl
+          ? [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: fileDataUrl } },
+            ]
+          : prompt;
+
+        const callAi = (content: any) => fetch(
           "https://ai.gateway.lovable.dev/v1/chat/completions",
           {
             method: "POST",
@@ -89,8 +121,9 @@ Classify this document AND extract any medical record information from the email
                   role: "system",
                   content: "You are a veterinary document classifier and medical data extractor. Always respond using the classify_and_extract tool.",
                 },
-                { role: "user", content: prompt },
+                { role: "user", content },
               ],
+
               tools: [
                 {
                   type: "function",
