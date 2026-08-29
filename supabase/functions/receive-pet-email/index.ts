@@ -417,11 +417,13 @@ serve(async (req) => {
               id: d.id,
               file_name: d.file_name,
               file_type: d.file_type,
+              file_url: d.file_url,
               sender_email: senderEmail,
               sender_name: senderName,
               email_subject: emailData.subject,
               email_body_snippet: (emailData.text || "").substring(0, 1000),
             })),
+
             pet_id: petEmail.pet_id,
           }),
         });
