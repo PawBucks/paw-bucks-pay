@@ -133,7 +133,7 @@ serve(async (req) => {
 
         // Build personalized message
         const ownerName = lastBooking.customer_name || "there";
-        const petName = lastBooking.pet_name || "your pet";
+        const petName = lastBooking.pet_profiles?.name || "your pet";
         const personalizedMessage = messageTemplate
           .replace(/\{\{owner_name\}\}/g, ownerName)
           .replace(/\{\{pet_name\}\}/g, petName);
