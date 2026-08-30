@@ -207,7 +207,7 @@ export function WorkspaceOverview() {
             .eq("status", "succeeded"),
           supabase
             .from("funding_deals")
-            .select("status, remaining_balance, repayment_rate")
+            .select("status, amount_funded, total_repaid, repayment_rate")
             .eq("merchant_id", merchant.id)
             .order("created_at", { ascending: false })
             .limit(1)
@@ -230,7 +230,7 @@ export function WorkspaceOverview() {
         if (dealRow) {
           setFunding({
             status: dealRow.status ?? null,
-            remaining: Number(dealRow.remaining_balance) || 0,
+            remaining: Math.max((Number(dealRow.amount_funded) || 0) - (Number(dealRow.total_repaid) || 0), 0),
             rate: dealRow.repayment_rate != null ? Number(dealRow.repayment_rate) : null,
           });
         }

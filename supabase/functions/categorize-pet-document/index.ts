@@ -318,7 +318,22 @@ Invoices always count as records worth adding to the pet's medical history, so s
             };
           });
 
-          const recordsToInsert = [...baseRecords, ...itemRecords];
+          // For invoices, the billed line items are the authoritative list —
+          // the AI's generic medical_records often restate the same charges,
+          // which would double-count the visit total. Only keep medical records
+          // whose title doesn't already appear as a line item.
+          const norm = (s: any) => String(s || "").trim().toLowerCase();
+          const itemTitles = new Set(itemRecords.map((r: any) => norm(r.title)));
+          const extraRecords = isInvoice
+            ? baseRecords.filter((r: any) => !itemTitles.has(norm(r.title)) && r.price == null)
+            : baseRecords;
+          const seen = new Set<string>();
+          const recordsToInsert = [...itemRecords, ...extraRecords].filter((r: any) => {
+            const key = `${norm(r.title)}|${r.price ?? ""}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
 
           if ((classification.is_medical || isInvoice) && recordsToInsert.length > 0 && pet?.user_id) {
             try {
@@ -367,7 +382,9 @@ Invoices always count as records worth adding to the pet's medical history, so s
                 visit = newVisit;
               }
 
-              if (visit) {
+              // A pre-existing visit means this document was already processed —
+              // don't re-insert its records on retries.
+              if (visit && !existingVisit) {
                 for (const record of recordsToInsert) {
                   await supabase
                     .from("pet_medical_records")
