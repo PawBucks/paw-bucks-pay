@@ -105,7 +105,7 @@ const PetFriendlyLosAngelesGuide = () => {
         </p>
         <div className="hero-actions">
           <Link to="/discover" className="btn-hero-primary">🐾 Discover LA Pet Merchants</Link>
-          <Link to="/auth" className="btn-hero-outline">Create a free account</Link>
+          {!user && <Link to="/auth" className="btn-hero-outline">Create a free account</Link>}
         </div>
         <div className="section-nav">
           <a href="#parks" className="section-pill">🌳 Dog Parks</a>
