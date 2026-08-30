@@ -1,0 +1,452 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap');
+
+.wpg-page {
+  --teal: #2DB8B0;
+  --teal-dark: #1A8C85;
+  --teal-light: #E0F7F6;
+  --navy: #1B2B3A;
+  --navy-mid: #243647;
+  --gold-light: #F5EDD9;
+  --white: #FFFFFF;
+  --gray-50: #F8FAFB;
+  --gray-100: #EEF2F4;
+  --gray-300: #CBD5DB;
+  --gray-500: #6B7F8E;
+  --gray-700: #3D5166;
+  --text: #1B2B3A;
+  --success: #22C55E;
+
+  font-family: 'Inter', sans-serif;
+  background: var(--white);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.wpg-page * { box-sizing: border-box; }
+.wpg-page img, .wpg-page svg { max-width: 100%; }
+
+/* ── NAV ── */
+.wpg-page .nav {
+  background: var(--navy);
+  padding: 0 16px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.wpg-page .nav-logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 17px; font-weight: 800; color: white;
+  display: flex; align-items: center; gap: 7px; text-decoration: none;
+}
+.wpg-page .nav-logo span { color: var(--teal); }
+.wpg-page .nav-logo-img { height: 34px; width: auto; display: block; }
+.wpg-page .footer-nav .fn-logo-img { height: 56px; width: auto; margin: 0 auto; display: block; }
+.wpg-page .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.wpg-page .nav-link {
+  font-size: 13px; color: rgba(255,255,255,0.6);
+  text-decoration: none; font-weight: 500; white-space: nowrap;
+  display: inline-flex; align-items: center; min-height: 44px;
+}
+.wpg-page .nav-cta {
+  background: var(--teal); color: white; font-size: 12px; font-weight: 600;
+  padding: 9px 14px; border-radius: 8px; text-decoration: none; white-space: nowrap;
+  display: inline-flex; align-items: center; min-height: 40px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ── BREADCRUMB ── */
+.wpg-page .breadcrumb {
+  padding: 12px 16px; font-size: 12px; color: var(--gray-500);
+  border-bottom: 1px solid var(--gray-100); background: var(--gray-50);
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.wpg-page .breadcrumb a { color: var(--teal-dark); text-decoration: none; font-weight: 500; }
+.wpg-page .breadcrumb span { color: var(--gray-300); }
+
+/* ── HERO ── */
+.wpg-page .hero {
+  background: var(--navy); padding: 32px 16px 0; position: relative; overflow: hidden;
+}
+.wpg-page .hero::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 260px; height: 260px; border-radius: 50%;
+  background: rgba(45,184,176,0.08); pointer-events: none;
+}
+.wpg-page .hero::after {
+  content: ''; position: absolute; bottom: 0; left: -40px;
+  width: 180px; height: 180px; border-radius: 50%;
+  background: rgba(45,184,176,0.05); pointer-events: none;
+}
+.wpg-page .hero-eyebrow {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 12px; position: relative;
+}
+.wpg-page .hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(26px, 7.5vw, 34px); font-weight: 800; color: white;
+  line-height: 1.18; margin-bottom: 14px; max-width: 560px; position: relative;
+}
+.wpg-page .hero-sub {
+  font-size: 14.5px; color: rgba(255,255,255,0.65);
+  line-height: 1.6; max-width: 520px; margin-bottom: 22px; position: relative;
+}
+.wpg-page .hero-actions {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; position: relative;
+}
+.wpg-page .btn-hero-primary {
+  background: var(--teal); color: white;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; font-weight: 700;
+  padding: 12px 18px; border-radius: 10px; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  flex: 1 1 auto; text-align: center; min-height: 46px;
+}
+.wpg-page .btn-hero-outline {
+  background: transparent; color: rgba(255,255,255,0.8);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; font-weight: 600;
+  padding: 12px 18px; border-radius: 10px; text-decoration: none;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  flex: 1 1 auto; text-align: center; min-height: 46px;
+}
+
+/* ── SECTION NAV PILLS ── */
+.wpg-page .section-nav {
+  padding: 0 0 16px; display: flex; gap: 8px;
+  overflow-x: auto; scrollbar-width: none;
+  position: relative; -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.wpg-page .section-nav::-webkit-scrollbar { display: none; }
+.wpg-page .section-pill {
+  flex-shrink: 0; background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  font-size: 12px; font-weight: 600;
+  font-family: 'Space Grotesk', sans-serif;
+  padding: 9px 14px; border-radius: 20px; text-decoration: none;
+  display: inline-flex; align-items: center; white-space: nowrap;
+  scroll-snap-align: start; transition: all 0.15s;
+}
+.wpg-page .section-pill:hover {
+  background: var(--teal); border-color: var(--teal); color: white;
+}
+
+/* ── EARN BANNER ── */
+.wpg-page .earn-banner {
+  background: var(--teal-light);
+  border-left: 4px solid var(--teal);
+  padding: 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.wpg-page .earn-banner .eb-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.wpg-page .earn-banner .eb-text { font-size: 13px; color: var(--teal-dark); line-height: 1.5; }
+.wpg-page .earn-banner .eb-text strong { font-weight: 700; color: var(--navy); }
+
+/* ── CONTENT ── */
+.wpg-page .content { padding: 0 16px; width: 100%; }
+
+.wpg-page .guide-section {
+  padding: 32px 0 8px; border-bottom: 1px solid var(--gray-100);
+}
+.wpg-page .guide-section:last-of-type { border-bottom: none; }
+
+.wpg-page .section-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+}
+.wpg-page .section-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--teal-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.wpg-page .section-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1.2; margin: 0;
+}
+
+/* ── PROSE ── */
+.wpg-page .prose {
+  font-size: 15px; color: var(--gray-700); line-height: 1.7; margin-bottom: 20px;
+}
+.wpg-page .prose strong { color: var(--navy); font-weight: 700; }
+.wpg-page .prose-h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px; font-weight: 700; color: var(--navy);
+  margin: 24px 0 10px; line-height: 1.25;
+}
+
+/* ── COMPARISON CARDS ── */
+.wpg-page .comparison-grid {
+  display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;
+}
+.wpg-page .compare-card {
+  background: var(--white);
+  border: 1.5px solid var(--gray-100);
+  border-radius: 14px; padding: 20px 18px;
+  position: relative; overflow: hidden; transition: all 0.18s;
+}
+.wpg-page .compare-card:hover {
+  border-color: var(--teal); box-shadow: 0 4px 16px rgba(45,184,176,0.12);
+}
+.wpg-page .compare-card.featured {
+  border-color: var(--teal); background: var(--teal-light);
+}
+.wpg-page .compare-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--teal); border-radius: 3px 0 0 3px;
+  opacity: 0; transition: opacity 0.18s;
+}
+.wpg-page .compare-card:hover::before { opacity: 1; }
+.wpg-page .compare-card.featured::before { opacity: 1; }
+.wpg-page .compare-card-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.wpg-page .compare-card-header .cc-icon { font-size: 18px; }
+.wpg-page .compare-card-header h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px; font-weight: 700; color: var(--navy); margin: 0;
+}
+.wpg-page .compare-card-header .cc-badge {
+  margin-left: auto; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 6px;
+  background: var(--teal); color: white;
+}
+.wpg-page .feature-list { list-style: none; display: flex; flex-direction: column; gap: 8px; padding: 0; margin: 0; }
+.wpg-page .feature-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--gray-700); line-height: 1.45;
+}
+.wpg-page .feature-list li .fi-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+.wpg-page .feature-list li .fi-icon.yes { color: var(--teal-dark); }
+.wpg-page .feature-list li .fi-icon.no { color: var(--gray-300); }
+
+/* ── WHEN TO PICK ── */
+.wpg-page .pick-grid {
+  display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;
+}
+.wpg-page .pick-card {
+  background: var(--white);
+  border: 1.5px solid var(--gray-100);
+  border-radius: 14px; padding: 16px;
+  display: flex; gap: 14px; align-items: flex-start; transition: all 0.15s;
+}
+.wpg-page .pick-card:hover {
+  border-color: var(--teal); box-shadow: 0 2px 12px rgba(45,184,176,0.1);
+}
+.wpg-page .pick-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--teal-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.wpg-page .pick-info h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700; color: var(--navy); margin: 0 0 4px;
+}
+.wpg-page .pick-info p { font-size: 13px; color: var(--gray-500); line-height: 1.5; margin: 0; }
+
+/* ── SAVINGS CALLOUT ── */
+.wpg-page .savings-callout {
+  background: var(--navy);
+  border-radius: 16px; padding: 24px 20px;
+  margin: 20px 0; position: relative; overflow: hidden;
+}
+.wpg-page .savings-callout::after {
+  content: '🐾'; position: absolute; right: -10px; bottom: -10px;
+  font-size: 80px; opacity: 0.07;
+}
+.wpg-page .savings-callout .sc-eyebrow {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 10px;
+}
+.wpg-page .savings-callout h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700; color: white;
+  margin: 0 0 8px; line-height: 1.3;
+}
+.wpg-page .savings-callout p {
+  font-size: 13px; color: rgba(255,255,255,0.65);
+  line-height: 1.6; margin: 0 0 16px;
+}
+.wpg-page .savings-stat {
+  display: inline-flex; align-items: baseline; gap: 4px;
+  background: rgba(45,184,176,0.15);
+  border: 1px solid rgba(45,184,176,0.3);
+  border-radius: 10px; padding: 10px 16px; margin-bottom: 16px;
+}
+.wpg-page .savings-stat .ss-amount {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px; font-weight: 800; color: var(--teal);
+}
+.wpg-page .savings-stat .ss-label { font-size: 12px; color: rgba(255,255,255,0.6); }
+.wpg-page .savings-callout .sc-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--teal); color: white;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; font-weight: 700;
+  padding: 10px 18px; border-radius: 9px; text-decoration: none;
+}
+
+/* ── HOW PAWBUCKS HELPS (reward steps) ── */
+.wpg-page .rewards-steps {
+  display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;
+}
+.wpg-page .reward-step {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px; background: var(--white);
+  border: 1.5px solid var(--gray-100);
+  border-radius: 14px; transition: all 0.15s;
+}
+.wpg-page .reward-step:hover {
+  border-color: var(--teal); box-shadow: 0 2px 12px rgba(45,184,176,0.1);
+}
+.wpg-page .step-num {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--teal); display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.wpg-page .step-info h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700; color: var(--navy); margin: 0 0 4px;
+}
+.wpg-page .step-info p { font-size: 13px; color: var(--gray-500); line-height: 1.5; margin: 0; }
+.wpg-page .step-info .step-highlight {
+  display: inline-block; background: var(--teal-light); color: var(--teal-dark);
+  font-size: 11px; font-weight: 700; padding: 2px 8px;
+  border-radius: 6px; margin-top: 6px;
+}
+
+/* ── INFO CARD ── */
+.wpg-page .info-card {
+  background: var(--gray-50);
+  border: 1.5px solid var(--gray-100);
+  border-radius: 14px; padding: 18px 16px;
+  margin-bottom: 16px; transition: border-color 0.15s;
+}
+.wpg-page .info-card:hover { border-color: var(--teal); }
+.wpg-page .info-card h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700; color: var(--navy); margin: 0 0 8px;
+}
+.wpg-page .info-card p { font-size: 13px; color: var(--gray-500); line-height: 1.6; margin: 0; }
+.wpg-page .info-card p a { color: var(--teal-dark); font-weight: 600; text-decoration: none; }
+
+/* ── FAQ ── */
+.wpg-page .faq-section { padding: 32px 0; }
+.wpg-page .faq-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700; color: var(--navy); margin: 0 0 20px;
+}
+.wpg-page .faq-list { display: flex; flex-direction: column; gap: 12px; }
+.wpg-page .faq-card {
+  background: var(--gray-50);
+  border: 1.5px solid var(--gray-100);
+  border-radius: 14px; padding: 18px 16px;
+  transition: border-color 0.15s;
+}
+.wpg-page .faq-card:hover { border-color: var(--teal); }
+.wpg-page .faq-card h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700; color: var(--navy);
+  margin: 0 0 8px; line-height: 1.35;
+}
+.wpg-page .faq-card p { font-size: 13px; color: var(--gray-500); line-height: 1.6; margin: 0; }
+.wpg-page .faq-card p a { color: var(--teal-dark); font-weight: 600; text-decoration: none; }
+
+/* ── EARN CTA CARD ── */
+.wpg-page .earn-card {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  border-radius: 16px; padding: 22px 18px; margin: 24px 0;
+  position: relative; overflow: hidden;
+}
+.wpg-page .earn-card::after {
+  content: '🐾'; position: absolute; right: -10px; bottom: -10px;
+  font-size: 80px; opacity: 0.07;
+}
+.wpg-page .earn-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700; color: white;
+  margin: 0 0 8px; line-height: 1.25;
+}
+.wpg-page .earn-card p {
+  font-size: 13px; color: rgba(255,255,255,0.65);
+  line-height: 1.6; margin: 0 0 16px;
+}
+.wpg-page .earn-card .ec-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--teal); color: white;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; font-weight: 700;
+  padding: 12px 18px; border-radius: 9px; text-decoration: none; min-height: 46px;
+}
+
+/* ── FOOTER CTA ── */
+.wpg-page .footer-cta { background: var(--teal); padding: 32px 16px; text-align: center; }
+.wpg-page .footer-cta h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(20px, 6vw, 24px); font-weight: 800; color: white; margin: 0 0 8px; line-height: 1.25;
+}
+.wpg-page .footer-cta p {
+  font-size: 14px; color: rgba(255,255,255,0.8); margin: 0 0 20px; line-height: 1.5;
+}
+.wpg-page .footer-cta .fc-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: white; color: var(--teal-dark);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700;
+  padding: 13px 24px; border-radius: 10px; text-decoration: none;
+  justify-content: center; min-height: 48px; max-width: 100%;
+}
+
+/* ── FOOTER NAV ── */
+.wpg-page .footer-nav {
+  background: var(--navy); padding: 20px 16px; text-align: center;
+  padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 20px));
+}
+.wpg-page .footer-nav .fn-logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px; font-weight: 800; color: white; margin-bottom: 8px;
+}
+.wpg-page .footer-nav .fn-logo span { color: var(--teal); }
+.wpg-page .footer-nav p { font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.5; margin: 0; }
+
+@media (min-width: 768px) {
+  .wpg-page .hero { padding: 64px 40px 0; }
+  .wpg-page .hero h1 { font-size: 48px; }
+  .wpg-page .hero-sub { font-size: 17px; }
+  .wpg-page .content { padding: 0 40px; max-width: 900px; margin: 0 auto; }
+  .wpg-page .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .wpg-page .pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .wpg-page .breadcrumb { padding: 14px 40px; }
+  .wpg-page .earn-banner { padding: 20px 40px; }
+  .wpg-page .section-nav { padding-left: 0; padding-right: 0; margin: 0; }
+  .wpg-page .nav { padding: 0 40px; }
+  .wpg-page .section-header h2 { font-size: 26px; }
+  .wpg-page .btn-hero-primary, .wpg-page .btn-hero-outline { flex: 0 0 auto; }
+  .wpg-page .nav-logo-img { height: 40px; }
+}
+
+@media (max-width: 380px) {
+  .wpg-page .hero-actions { flex-direction: column; }
+  .wpg-page .btn-hero-primary, .wpg-page .btn-hero-outline { width: 100%; }
+  .wpg-page .section-header h2 { font-size: 19px; }
+}
