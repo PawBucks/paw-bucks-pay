@@ -225,7 +225,11 @@ const PetFriendlyLosAngelesGuide = () => {
       <section className="footer-cta">
         <h2>Ready to Earn on Every Pet Outing?</h2>
         <p>Join PawBucks free and start earning rewards at local pet merchants across West LA.</p>
-        <Link to="/auth" className="fc-btn">🐾 Create Your Free Account</Link>
+        {user ? (
+          <Link to="/discover" className="fc-btn">🐾 Discover LA Pet Merchants</Link>
+        ) : (
+          <Link to="/auth" className="fc-btn">🐾 Create Your Free Account</Link>
+        )}
       </section>
 
       <footer className="footer-nav">
