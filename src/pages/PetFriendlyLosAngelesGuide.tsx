@@ -78,7 +78,11 @@ const PetFriendlyLosAngelesGuide = () => {
         </Link>
         <div className="nav-right">
           <Link to="/merchants" className="nav-link">Merchants</Link>
-          <Link to="/auth" className="nav-cta">Join Free</Link>
+          {user ? (
+            <Link to="/dashboard" className="nav-cta">Dashboard</Link>
+          ) : (
+            <Link to="/auth" className="nav-cta">Join Free</Link>
+          )}
         </div>
       </nav>
 
