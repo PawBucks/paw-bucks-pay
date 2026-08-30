@@ -382,7 +382,9 @@ Invoices always count as records worth adding to the pet's medical history, so s
                 visit = newVisit;
               }
 
-              if (visit) {
+              // A pre-existing visit means this document was already processed —
+              // don't re-insert its records on retries.
+              if (visit && !existingVisit) {
                 for (const record of recordsToInsert) {
                   await supabase
                     .from("pet_medical_records")
