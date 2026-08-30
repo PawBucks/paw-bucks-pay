@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import "./PetFriendlyLosAngelesGuide.css";
 import pawbucksLogo from "@/assets/logo.png";
 import { useGuideContent, type GuidePlace } from "@/hooks/useGuideContent";
+import { useAuth } from "@/hooks/useAuth";
 
 const GUIDE_SLUG = "pet-friendly-los-angeles";
 
@@ -46,6 +47,7 @@ const PlaceCard = ({ p }: { p: GuidePlace }) => (
 
 const PetFriendlyLosAngelesGuide = () => {
   const { parks, beaches, cafes, events, faqs, merchants, loading } = useGuideContent(GUIDE_SLUG);
+  const { user } = useAuth();
   return (
     <div className="pfla-page">
       <SEO
@@ -75,8 +77,14 @@ const PetFriendlyLosAngelesGuide = () => {
           <img src={pawbucksLogo} alt="PawBucks" className="nav-logo-img" />
         </Link>
         <div className="nav-right">
-          <Link to="/merchants" className="nav-link">Merchants</Link>
-          <Link to="/auth" className="nav-cta">Join Free</Link>
+          {user ? (
+            <Link to="/dashboard" className="nav-cta">Dashboard</Link>
+          ) : (
+            <>
+              <Link to="/merchants" className="nav-link">Merchants</Link>
+              <Link to="/auth" className="nav-cta">Join Free</Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -97,7 +105,7 @@ const PetFriendlyLosAngelesGuide = () => {
         </p>
         <div className="hero-actions">
           <Link to="/discover" className="btn-hero-primary">🐾 Discover LA Pet Merchants</Link>
-          <Link to="/auth" className="btn-hero-outline">Create a free account</Link>
+          {!user && <Link to="/auth" className="btn-hero-outline">Create a free account</Link>}
         </div>
         <div className="section-nav">
           <a href="#parks" className="section-pill">🌳 Dog Parks</a>
@@ -217,7 +225,11 @@ const PetFriendlyLosAngelesGuide = () => {
       <section className="footer-cta">
         <h2>Ready to Earn on Every Pet Outing?</h2>
         <p>Join PawBucks free and start earning rewards at local pet merchants across West LA.</p>
-        <Link to="/auth" className="fc-btn">🐾 Create Your Free Account</Link>
+        {user ? (
+          <Link to="/discover" className="fc-btn">🐾 Discover LA Pet Merchants</Link>
+        ) : (
+          <Link to="/auth" className="fc-btn">🐾 Create Your Free Account</Link>
+        )}
       </section>
 
       <footer className="footer-nav">
