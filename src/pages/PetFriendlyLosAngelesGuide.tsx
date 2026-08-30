@@ -77,11 +77,13 @@ const PetFriendlyLosAngelesGuide = () => {
           <img src={pawbucksLogo} alt="PawBucks" className="nav-logo-img" />
         </Link>
         <div className="nav-right">
-          <Link to="/merchants" className="nav-link">Merchants</Link>
           {user ? (
             <Link to="/dashboard" className="nav-cta">Dashboard</Link>
           ) : (
-            <Link to="/auth" className="nav-cta">Join Free</Link>
+            <>
+              <Link to="/merchants" className="nav-link">Merchants</Link>
+              <Link to="/auth" className="nav-cta">Join Free</Link>
+            </>
           )}
         </div>
       </nav>
