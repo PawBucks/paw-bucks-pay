@@ -207,7 +207,7 @@ export function WorkspaceOverview() {
             .eq("status", "succeeded"),
           supabase
             .from("funding_deals")
-            .select("status, remaining_balance, repayment_rate")
+            .select("status, amount_funded, total_repaid, repayment_rate")
             .eq("merchant_id", merchant.id)
             .order("created_at", { ascending: false })
             .limit(1)
