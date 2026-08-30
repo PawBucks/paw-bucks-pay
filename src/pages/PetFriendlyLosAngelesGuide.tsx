@@ -47,6 +47,7 @@ const PlaceCard = ({ p }: { p: GuidePlace }) => (
 
 const PetFriendlyLosAngelesGuide = () => {
   const { parks, beaches, cafes, events, faqs, merchants, loading } = useGuideContent(GUIDE_SLUG);
+  const { user } = useAuth();
   return (
     <div className="pfla-page">
       <SEO
