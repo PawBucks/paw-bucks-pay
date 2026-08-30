@@ -230,7 +230,7 @@ export function WorkspaceOverview() {
         if (dealRow) {
           setFunding({
             status: dealRow.status ?? null,
-            remaining: Number(dealRow.remaining_balance) || 0,
+            remaining: Math.max((Number(dealRow.amount_funded) || 0) - (Number(dealRow.total_repaid) || 0), 0),
             rate: dealRow.repayment_rate != null ? Number(dealRow.repayment_rate) : null,
           });
         }
