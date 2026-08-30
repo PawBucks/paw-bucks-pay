@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import "./PetFriendlyLosAngelesGuide.css";
 import pawbucksLogo from "@/assets/logo.png";
 import { useGuideContent, type GuidePlace } from "@/hooks/useGuideContent";
+import { useAuth } from "@/hooks/useAuth";
 
 const GUIDE_SLUG = "pet-friendly-los-angeles";
 
