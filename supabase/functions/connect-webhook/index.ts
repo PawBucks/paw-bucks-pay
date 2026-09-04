@@ -576,7 +576,7 @@ serve(async (req) => {
           }
 
           // Trigger loyalty punch card advancement for invoice payment
-          if (transaction?.id && invoicePayerUserId && merchantId) {
+          if (transaction?.id && resolvedPayerUserId && resolvedMerchantId) {
             const supabaseUrl = Deno.env.get('SUPABASE_URL');
             fetch(`${supabaseUrl}/functions/v1/loyalty-punch-advance`, {
               method: 'POST',
@@ -587,8 +587,8 @@ serve(async (req) => {
               },
               body: JSON.stringify({
                 transaction_id: transaction.id,
-                user_id: invoicePayerUserId,
-                merchant_id: merchantId,
+                user_id: resolvedPayerUserId,
+                merchant_id: resolvedMerchantId,
               }),
             }).catch(err => logStep("Loyalty punch error", { error: String(err) }));
 
@@ -602,8 +602,8 @@ serve(async (req) => {
               },
               body: JSON.stringify({
                 transaction_id: transaction.id,
-                user_id: invoicePayerUserId,
-                merchant_id: merchantId,
+                user_id: resolvedPayerUserId,
+                merchant_id: resolvedMerchantId,
                 cash_amount: paymentIntent.amount / 100,
               }),
             }).catch(err => logStep("Loyalty milestone error", { error: String(err) }));
@@ -748,7 +748,7 @@ serve(async (req) => {
             .from("transactions")
             .insert({
               user_id: userId,
-              merchant_id: merchantId,
+              merchant_id: resolvedMerchantId,
               amount: totalAmount > 0 ? totalAmount : amountInDollars,
               stripe_amount: amountInDollars,
               pawbucks_used: pawbucksAmount,
@@ -836,7 +836,7 @@ serve(async (req) => {
               if (hasSrp) {
                 const { data: issueResult, error: issueErr } = await supabaseAdmin
                   .rpc('issue_store_locked_pawbucks', {
-                    p_merchant_id: merchantId,
+                    p_merchant_id: resolvedMerchantId,
                     p_user_id: userId,
                     p_amount_pb: pawbucksEarned,
                     p_transaction_id: transaction?.id ?? null,
@@ -915,14 +915,14 @@ serve(async (req) => {
                 .eq('merchant_id', merchantId);
             } else {
               await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
-                merchant_id: merchantId,
+                merchant_id: resolvedMerchantId,
                 balance: pawbucksAmount,
               });
             }
 
             // Log merchant activity for receiving PawBucks
             await supabaseAdmin.from('merchant_pawbucks_activity').insert({
-              merchant_id: merchantId,
+              merchant_id: resolvedMerchantId,
               type: 'earn',
               amount: pawbucksAmount,
               source: 'Customer Payment',
@@ -968,7 +968,7 @@ serve(async (req) => {
             // PawBucks Success Fee (3%)
             if (platformFee > 0) {
               expenseRows.push({
-                merchant_id: merchantId,
+                merchant_id: resolvedMerchantId,
                 category: "platform_fees" as const,
                 amount: platformFee,
                 description: `PawBucks Success Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
@@ -983,7 +983,7 @@ serve(async (req) => {
             // Stripe Processing Fee
             if (stripeProcessingFee > 0) {
               expenseRows.push({
-                merchant_id: merchantId,
+                merchant_id: resolvedMerchantId,
                 category: "processing_fees" as const,
                 amount: stripeProcessingFee,
                 description: `Stripe Processing Fee on $${amountInDollars.toFixed(2)} sale`,
@@ -1101,7 +1101,7 @@ serve(async (req) => {
               body: JSON.stringify({
                 transaction_id: transaction.id,
                 user_id: userId,
-                merchant_id: merchantId,
+                merchant_id: resolvedMerchantId,
               }),
             }).catch(err => logStep("Loyalty punch error", { error: String(err) }));
 
@@ -1116,7 +1116,7 @@ serve(async (req) => {
               body: JSON.stringify({
                 transaction_id: transaction.id,
                 user_id: userId,
-                merchant_id: merchantId,
+                merchant_id: resolvedMerchantId,
                 cash_amount: paymentIntent.amount / 100,
               }),
             }).catch(err => logStep("Loyalty milestone error", { error: String(err) }));
