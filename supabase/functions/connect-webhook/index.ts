@@ -683,6 +683,9 @@ serve(async (req) => {
 
         const userId = metadata.user_id;
         const merchantId = metadata.merchant_id;
+        // Direct-payment path merchant id (mirrors the invoice path's variable name,
+        // which is scoped to the invoice branch above).
+        const resolvedMerchantId: string | null = merchantId || null;
         const businessName = metadata.business_name || "Merchant";
         const description = metadata.description || `Payment to ${businessName}`;
         const chargeType = metadata.charge_type || "direct";
