@@ -300,18 +300,46 @@ serve(async (req) => {
               },
             });
 
+          // Resolve payer + merchant BEFORE any downstream work. Public invoice links
+          // carry no logged-in user in metadata, so fall back to the invoice's
+          // client_email. Merchant id also falls back to the invoice record so a
+          // missing metadata field can never drop the transaction or notifications.
+          const { data: invoiceForResolve } = await supabaseAdmin
+            .from('invoices')
+            .select('invoice_number, client_name, client_email, merchant_id')
+            .eq('id', invoiceId)
+            .maybeSingle();
+
+          const resolvedMerchantId: string | null = merchantId || invoiceForResolve?.merchant_id || null;
+
+          let resolvedPayerUserId: string | null = invoicePayerUserId || null;
+          if (!resolvedPayerUserId && invoiceForResolve?.client_email) {
+            const email = invoiceForResolve.client_email;
+            const { data: payerProfile } = await supabaseAdmin
+              .from('profiles')
+              .select('id')
+              .or(`email.eq.${email},normalized_email.eq.${email.toLowerCase()}`)
+              .maybeSingle();
+            if (payerProfile?.id) {
+              resolvedPayerUserId = payerProfile.id;
+              logStep("Resolved payer user_id from client_email", { resolvedPayerUserId });
+            } else {
+              logStep("No profile matched client_email — PawBucks cannot be credited", { email });
+            }
+          }
+
           // Award PawBucks to invoice payer
           let pawbucksEarned = 0;
           let tierName = 'Free';
           let pawbucksMultiplier = 10;
 
-          if (invoicePayerUserId && stripeAmountForRewards > 0) {
+          if (resolvedPayerUserId && stripeAmountForRewards > 0) {
 
             try {
               const { data: platformSub } = await supabaseAdmin
                 .from('subscriptions')
                 .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
-                .eq('user_id', invoicePayerUserId)
+                .eq('user_id', resolvedPayerUserId)
                 .in('status', ['active', 'trialing'])
                 .maybeSingle();
 
@@ -337,13 +365,13 @@ serve(async (req) => {
               let { data: wallet } = await supabaseAdmin
                 .from('pawbucks_wallet')
                 .select('balance')
-                .eq('user_id', invoicePayerUserId)
+                .eq('user_id', resolvedPayerUserId)
                 .single();
 
               if (!wallet) {
                 const { data: newWallet } = await supabaseAdmin
                   .from('pawbucks_wallet')
-                  .insert({ user_id: invoicePayerUserId, balance: 0 })
+                  .insert({ user_id: resolvedPayerUserId, balance: 0 })
                   .select()
                   .single();
                 wallet = newWallet;
@@ -353,7 +381,7 @@ serve(async (req) => {
                 await supabaseAdmin
                   .from('pawbucks_wallet')
                   .update({ balance: wallet.balance + pawbucksEarned })
-                  .eq('user_id', invoicePayerUserId);
+                  .eq('user_id', resolvedPayerUserId);
 
                 // Get invoice number for proper description
                 const { data: invoiceForActivity } = await supabaseAdmin
@@ -364,11 +392,11 @@ serve(async (req) => {
                 const invoiceNumber = invoiceForActivity?.invoice_number || 'Invoice';
 
                 await supabaseAdmin.from('pawbucks_activity').insert({
-                  user_id: invoicePayerUserId,
+                  user_id: resolvedPayerUserId,
                   amount: pawbucksEarned,
                   type: 'earn',
                   source: 'Invoice Payment',
-                  partner_id: merchantId || null,
+                  partner_id: resolvedMerchantId || null,
                   description: `Earned ${pawbucksEarned} PawBucks (${tierName} ${pawbucksMultiplier}x) from $${stripeAmountForRewards.toFixed(2)} payment on Invoice #${invoiceNumber}`,
                   pawbucks_status: 'available',
                   stripe_payment_intent_id: paymentIntent.id,
@@ -381,18 +409,8 @@ serve(async (req) => {
 
           // Create transaction record
           let transaction: { id: string } | null = null;
-          if (invoicePayerUserId && merchantId) {
-            const { data: invoiceForTx } = await supabaseAdmin
-              .from('invoices')
-              .select('invoice_number')
-              .eq('id', invoiceId)
-              .single();
-
-            const { data: merchantForTx } = await supabaseAdmin
-              .from('merchants')
-              .select('business_name')
-              .eq('id', merchantId)
-              .single();
+          if (resolvedMerchantId) {
+            const invoiceForTx = invoiceForResolve;
 
             const totalTransactionAmount = cardPaymentAmount + pawbucksPaymentAmount;
             const platformFee = cardPaymentAmount * 0.03; // 3% fee on Stripe portion only
@@ -400,8 +418,8 @@ serve(async (req) => {
             const { data: txData, error: transactionError } = await supabaseAdmin
               .from('transactions')
               .insert({
-                user_id: invoicePayerUserId,
-                merchant_id: merchantId,
+                user_id: resolvedPayerUserId,
+                merchant_id: resolvedMerchantId,
                 amount: totalTransactionAmount,
                 stripe_amount: cardPaymentAmount,
                 pawbucks_used: pawbucksUsed,
@@ -425,46 +443,46 @@ serve(async (req) => {
             // ========================================
             // CREDIT PAWBUCKS TO MERCHANT (when customer uses PawBucks for invoice)
             // ========================================
-            if (pawbucksUsed > 0 && merchantId) {
+            if (pawbucksUsed > 0 && resolvedMerchantId) {
               const { data: merchantWallet } = await supabaseAdmin
                 .from('merchant_pawbucks_wallet')
                 .select('balance')
-                .eq('merchant_id', merchantId)
+                .eq('merchant_id', resolvedMerchantId)
                 .single();
 
               if (merchantWallet) {
                 await supabaseAdmin
                   .from('merchant_pawbucks_wallet')
                   .update({ balance: merchantWallet.balance + pawbucksUsed })
-                  .eq('merchant_id', merchantId);
+                  .eq('merchant_id', resolvedMerchantId);
               } else {
                 await supabaseAdmin.from('merchant_pawbucks_wallet').insert({
-                  merchant_id: merchantId,
+                  merchant_id: resolvedMerchantId,
                   balance: pawbucksUsed,
                 });
               }
 
               await supabaseAdmin.from('merchant_pawbucks_activity').insert({
-                merchant_id: merchantId,
+                merchant_id: resolvedMerchantId,
                 type: 'earn',
                 amount: pawbucksUsed,
                 source: 'Invoice Payment',
-                customer_user_id: invoicePayerUserId,
+                customer_user_id: resolvedPayerUserId,
                 description: `Received ${pawbucksUsed} PawBucks from invoice payment`,
               });
 
-              logStep("PawBucks credited to merchant from invoice payment", { merchantId, pawbucksUsed });
+              logStep("PawBucks credited to merchant from invoice payment", { merchantId: resolvedMerchantId, pawbucksUsed });
             }
 
             // ========================================
             // DEDUCT PAWBUCKS FROM USER WALLET (when customer uses PawBucks for invoice)
             // ========================================
-            if (pawbucksUsed > 0 && invoicePayerUserId) {
+            if (pawbucksUsed > 0 && resolvedPayerUserId) {
               try {
-                const sources = await getSpendableSources(supabaseAdmin, invoicePayerUserId);
+                const sources = await getSpendableSources(supabaseAdmin, resolvedPayerUserId);
                 const debitPlan = planPawBucksDebit(sources, pawbucksUsed, totalPaymentAmount);
-                await applyPawBucksDebit(supabaseAdmin, invoicePayerUserId, debitPlan, {
-                  merchantId,
+                await applyPawBucksDebit(supabaseAdmin, resolvedPayerUserId, debitPlan, {
+                  merchantId: resolvedMerchantId,
                   transactionId: transaction?.id || null,
                   transactionTotalCents: Math.round(totalPaymentAmount * 100),
                 });
@@ -478,12 +496,12 @@ serve(async (req) => {
                   .single();
 
                 await supabaseAdmin.from('pawbucks_activity').insert({
-                  user_id: invoicePayerUserId,
+                  user_id: resolvedPayerUserId,
                   type: 'redeem',
                   amount: pawbucksUsed,
                   source: 'invoice_payment',
                   description: `Used ${pawbucksUsed} PawBucks on Invoice #${invoiceForDebit?.invoice_number || 'Payment'}`,
-                  partner_id: merchantId || null,
+                  partner_id: resolvedMerchantId || null,
                   pawbucks_status: 'available',
                 });
 
@@ -510,8 +528,8 @@ serve(async (req) => {
               const { data: merchantForNotif } = await supabaseAdmin
                 .from('merchants')
                 .select('business_name, user_id')
-                .eq('id', merchantId)
-                .single();
+                .eq('id', resolvedMerchantId)
+                .maybeSingle();
 
               if (merchantForNotif?.user_id) {
                 const { data: merchantProfile } = await supabaseAdmin
