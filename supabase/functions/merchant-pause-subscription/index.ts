@@ -95,9 +95,38 @@ serve(async (req) => {
       logStep("Subscription paused", { subscriptionId });
     } else {
       if (subscription.status !== "paused") throw new Error("Subscription is not paused");
+
+      // If the scheduled billing date elapsed while paused, roll it forward so the
+      // customer is not immediately charged for the paused period (and is not charged
+      // twice — once on resume and again on the stale date).
+      const interval = subscription.billing_interval || "month";
+      const intervalCount = Number(subscription.billing_interval_count || 1) || 1;
+      const advance = (from: Date) => {
+        const d = new Date(from);
+        if (interval === "year") d.setUTCFullYear(d.getUTCFullYear() + intervalCount);
+        else if (interval === "week") d.setUTCDate(d.getUTCDate() + 7 * intervalCount);
+        else if (interval === "day") d.setUTCDate(d.getUTCDate() + intervalCount);
+        else d.setUTCMonth(d.getUTCMonth() + intervalCount);
+        return d;
+      };
+
+      const now = new Date();
+      const update: Record<string, unknown> = { status: "active" };
+      let due = subscription.next_billing_date ? new Date(subscription.next_billing_date) : null;
+      if (due && due.getTime() <= now.getTime()) {
+        let periodStart = due;
+        while (due.getTime() <= now.getTime()) {
+          periodStart = due;
+          due = advance(due);
+        }
+        update.current_period_start = periodStart.toISOString();
+        update.current_period_end = due.toISOString();
+        update.next_billing_date = due.toISOString();
+      }
+
       await supabaseAdmin
         .from("merchant_subscriptions")
-        .update({ status: "active" })
+        .update(update)
         .eq("id", subscriptionId);
 
       await supabaseAdmin.from("merchant_subscription_events").insert({
