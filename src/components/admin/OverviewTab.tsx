@@ -30,7 +30,8 @@ export function OverviewTab() {
   merchantServicesRevenue: 0,
   merchantServicesActive: 0,
    brandedCampaignRevenue: 0,
-   brandedCampaignDelivered: 0,
+    brandedCampaignDelivered: 0,
+    brandedCampaignCommitted: 0,
    marketplaceRevenue: 0,
    marketplaceOrders: 0,
   });
