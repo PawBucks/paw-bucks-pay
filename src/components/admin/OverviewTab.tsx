@@ -71,7 +71,8 @@ export function OverviewTab() {
   merchantServicesRevenue: Number(data[0].merchant_services_revenue || 0),
   merchantServicesActive: Number(data[0].merchant_services_active || 0),
    brandedCampaignRevenue: Number(data[0].branded_campaign_revenue || 0),
-   brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+    brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+   brandedCampaignCommitted: Number((data[0] as { branded_campaign_committed_usd?: number }).branded_campaign_committed_usd || 0),
    marketplaceRevenue: Number(data[0].marketplace_revenue || 0),
    marketplaceOrders: Number(data[0].marketplace_orders || 0),
   });
