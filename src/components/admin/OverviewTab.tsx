@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from'react';
 import { supabase } from'@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from'@/components/ui/card';
-import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle, CreditCard, Briefcase, Megaphone } from "lucide-react";
+import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle, CreditCard, Briefcase, Megaphone, ShoppingBag } from "lucide-react";
 import { Progress } from'@/components/ui/progress';
 import { cn } from'@/lib/utils';
 
@@ -266,6 +266,18 @@ export function OverviewTab() {
             </div>
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                <ShoppingBag className="w-3.5 h-3.5 text-primary" /> PawBucks Marketplace Sales
+              </p>
+              <p className="text-3xl font-bold">
+                ${stats.marketplaceRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground">All-time marketplace order value</p>
+              <p className="text-xs text-muted-foreground">
+                {stats.marketplaceOrders.toLocaleString()} completed {stats.marketplaceOrders === 1 ? 'order' : 'orders'}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
                 <Briefcase className="w-3.5 h-3.5 text-warning" /> Merchant Services Revenue
               </p>
               <p className="text-3xl font-bold">
@@ -292,10 +304,10 @@ export function OverviewTab() {
           <div className="mt-6 pt-4 border-t">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Platform Revenue</p>
             <p className="text-3xl font-bold text-success">
-              ${(stats.platformRevenue + stats.subscriptionMrr + stats.merchantServicesRevenue + stats.brandedCampaignRevenue)
+              ${(stats.platformRevenue + stats.subscriptionMrr + stats.marketplaceRevenue + stats.merchantServicesRevenue + stats.brandedCampaignRevenue)
                 .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-muted-foreground">Success fees + subscriptions + merchant services + branded campaigns</p>
+            <p className="text-xs text-muted-foreground">Success fees + subscriptions + marketplace sales + merchant services + branded campaigns</p>
           </div>
         </CardContent>
       </Card>
