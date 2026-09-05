@@ -125,11 +125,16 @@ export function OverviewTab() {
   loadStats();
   }
   )
-  .on(
+   .on(
 'postgres_changes',
-  { event:'*', schema:'public', table:'subscriptions' },
-  () => { loadStats(); }
-  )
+   { event:'*', schema:'public', table:'subscriptions' },
+   () => { loadStats(); }
+   )
+   .on(
+'postgres_changes',
+   { event:'*', schema:'public', table:'pet_store_orders' },
+   () => { loadStats(); }
+   )
   .on(
 'postgres_changes',
   { event:'*', schema:'public', table:'merchant_service_purchases' },
