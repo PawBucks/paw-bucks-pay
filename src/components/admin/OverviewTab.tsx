@@ -110,18 +110,33 @@ export function OverviewTab() {
  loadStats();
  }
  )
- .on(
+  .on(
 'postgres_changes',
- {
- event:'*',
- schema:'public',
- table:'merchant_pawbucks_activity',
- },
- () => {
- loadStats();
- }
- )
- .subscribe();
+  {
+  event:'*',
+  schema:'public',
+  table:'merchant_pawbucks_activity',
+  },
+  () => {
+  loadStats();
+  }
+  )
+  .on(
+'postgres_changes',
+  { event:'*', schema:'public', table:'subscriptions' },
+  () => { loadStats(); }
+  )
+  .on(
+'postgres_changes',
+  { event:'*', schema:'public', table:'merchant_service_purchases' },
+  () => { loadStats(); }
+  )
+  .on(
+'postgres_changes',
+  { event:'*', schema:'public', table:'brand_campaigns' },
+  () => { loadStats(); }
+  )
+  .subscribe();
 
  return () => {
  supabase.removeChannel(channel);
