@@ -337,6 +337,7 @@ export function OverviewTab() {
           </div>
         </CardContent>
       </Card>
+      )}
 
   {/* PawBucks Spend Rate Card */}
  <Card className="border-2">
