@@ -250,7 +250,7 @@ export function OverviewTab() {
             Revenue Streams
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Subscriptions, PawBucks Marketplace sales, merchant services, and Branded PawBucks campaigns
+            Money actually processed: subscriptions, PawBucks Marketplace sales, merchant services, and Branded PawBucks campaigns
           </p>
         </CardHeader>
         <CardContent>
