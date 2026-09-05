@@ -29,8 +29,10 @@ export function OverviewTab() {
   subscriptionMrr: 0,
   merchantServicesRevenue: 0,
   merchantServicesActive: 0,
-  brandedCampaignRevenue: 0,
-  brandedCampaignDelivered: 0,
+   brandedCampaignRevenue: 0,
+   brandedCampaignDelivered: 0,
+   marketplaceRevenue: 0,
+   marketplaceOrders: 0,
   });
  const [loading, setLoading] = useState(true);
  const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -67,8 +69,10 @@ export function OverviewTab() {
   subscriptionMrr: Number(data[0].subscription_mrr || 0),
   merchantServicesRevenue: Number(data[0].merchant_services_revenue || 0),
   merchantServicesActive: Number(data[0].merchant_services_active || 0),
-  brandedCampaignRevenue: Number(data[0].branded_campaign_revenue || 0),
-  brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+   brandedCampaignRevenue: Number(data[0].branded_campaign_revenue || 0),
+   brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+   marketplaceRevenue: Number(data[0].marketplace_revenue || 0),
+   marketplaceOrders: Number(data[0].marketplace_orders || 0),
   });
  }
  } catch (error) {
