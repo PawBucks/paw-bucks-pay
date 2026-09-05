@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from'react';
 import { supabase } from'@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from'@/components/ui/card';
-import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle } from "lucide-react";
+import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle, CreditCard, Briefcase, Megaphone } from "lucide-react";
 import { Progress } from'@/components/ui/progress';
 import { cn } from'@/lib/utils';
 
@@ -22,9 +22,16 @@ export function OverviewTab() {
  repeatRedeemers: 0,
  totalRedeemers: 0,
  crossMerchantRate: 0,
- crossMerchantPb: 0,
- attributedPb: 0,
- });
+  crossMerchantPb: 0,
+  attributedPb: 0,
+  pawpassSubscribers: 0,
+  pawpassPlusSubscribers: 0,
+  subscriptionMrr: 0,
+  merchantServicesRevenue: 0,
+  merchantServicesActive: 0,
+  brandedCampaignRevenue: 0,
+  brandedCampaignDelivered: 0,
+  });
  const [loading, setLoading] = useState(true);
  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
