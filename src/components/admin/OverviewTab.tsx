@@ -245,11 +245,11 @@ export function OverviewTab() {
             Revenue Streams
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Subscription, merchant services, and Branded PawBucks campaign revenue
+            Subscriptions, PawBucks Marketplace sales, merchant services, and Branded PawBucks campaigns
           </p>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
                 <CreditCard className="w-3.5 h-3.5 text-info" /> PawPass Subscription MRR
