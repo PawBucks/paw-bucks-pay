@@ -61,8 +61,15 @@ export function OverviewTab() {
  totalRedeemers: data[0].total_redeemers || 0,
  crossMerchantRate: Number(data[0].cross_merchant_redemption_rate || 0),
  crossMerchantPb: Number(data[0].cross_merchant_redeemed_pb || 0),
- attributedPb: Number(data[0].attributed_redeemed_pb || 0),
- });
+  attributedPb: Number(data[0].attributed_redeemed_pb || 0),
+  pawpassSubscribers: Number(data[0].pawpass_subscribers || 0),
+  pawpassPlusSubscribers: Number(data[0].pawpass_plus_subscribers || 0),
+  subscriptionMrr: Number(data[0].subscription_mrr || 0),
+  merchantServicesRevenue: Number(data[0].merchant_services_revenue || 0),
+  merchantServicesActive: Number(data[0].merchant_services_active || 0),
+  brandedCampaignRevenue: Number(data[0].branded_campaign_revenue || 0),
+  brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+  });
  }
  } catch (error) {
  console.error('Error loading stats:', error);
