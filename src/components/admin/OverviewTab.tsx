@@ -241,26 +241,29 @@ export function OverviewTab() {
  <p className="text-muted-foreground">Real-time statistics and key metrics</p>
  </div>
 
+ {isSuperAdmin && (
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
- {statCards.map((stat) => {
- const Icon = stat.icon;
- return (
- <Card key={stat.title}>
- <CardHeader className="flex flex-row items-center justify-between pb-2">
- <CardTitle className="text-sm font-medium text-muted-foreground">
- {stat.title}
- </CardTitle>
- <Icon className={`w-5 h-5 ${stat.color}`} />
- </CardHeader>
- <CardContent>
- <div className="text-3xl font-bold">{stat.value}</div>
- </CardContent>
- </Card>
- );
-  })}
-  </div>
+  {statCards.map((stat) => {
+  const Icon = stat.icon;
+  return (
+  <Card key={stat.title}>
+  <CardHeader className="flex flex-row items-center justify-between pb-2">
+  <CardTitle className="text-sm font-medium text-muted-foreground">
+  {stat.title}
+  </CardTitle>
+  <Icon className={`w-5 h-5 ${stat.color}`} />
+  </CardHeader>
+  <CardContent>
+  <div className="text-3xl font-bold">{stat.value}</div>
+  </CardContent>
+  </Card>
+  );
+   })}
+   </div>
+ )}
 
-      {/* Revenue Streams */}
+      {/* Revenue Streams (SuperAdmin only) */}
+      {isSuperAdmin && (
       <Card className="border-2">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-bold flex items-center gap-2">
