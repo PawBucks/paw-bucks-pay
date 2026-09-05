@@ -612,7 +612,7 @@ serve(async (req) => {
             ? itemsToReceiptItems(lineItems)
             : [{ name: description || 'PawBucks Payment', price: totalAmount }],
           subtotal: totalAmount,
-          pawbucksApplied: pawbucksUsdValue,
+          pawbucksApplied: pawbucksAmount,
           cardAmount: 0,
           totalPaid: totalAmount,
           pawbucksEarned: 0,

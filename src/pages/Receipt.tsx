@@ -52,8 +52,6 @@ type ReceiptData = {
   items: ItemRow[];
 };
 
-const PB_TO_USD = 0.001;
-
 export default function Receipt() {
   const { txId } = useParams<{ txId: string }>();
   const navigate = useNavigate();
@@ -155,7 +153,6 @@ export default function Receipt() {
 
   const m = data.merchant;
   const dateObj = new Date(data.created_at);
-  const pbAppliedUsd = data.pawbucks_used * PB_TO_USD;
   const itemsTotal = data.items.reduce((s, it) => s + (it.total || it.unit_price * it.quantity), 0);
   const feesAndTip = Math.max(0, data.amount - itemsTotal - (data.application_fee ?? 0));
   // Only show fees/tip when we have a real itemized subtotal to subtract from —
@@ -231,7 +228,7 @@ export default function Receipt() {
           <div style={{ background: C.dark, borderRadius: 14, padding: "2px 18px", marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 0" }}>
               <span style={{ fontSize: 14, color: "#6ab8c0" }}>🐾 PawBucks Applied</span>
-              <span style={{ fontSize: 15, fontWeight: 700, color: C.teal }}>−${pbAppliedUsd.toFixed(2)}</span>
+              <span style={{ fontSize: 15, fontWeight: 700, color: C.teal }}>−{Math.floor(data.pawbucks_used).toLocaleString("en-US")} PB</span>
             </div>
           </div>
         )}

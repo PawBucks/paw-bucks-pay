@@ -971,8 +971,6 @@ serve(async (req) => {
 
     const customerEmail = userProfile?.email || user.email;
     const amountInDollars = amount / 100;
-    const pawbucksAppliedDollars = pawbucksDiscountCents / 100;
-
     if (customerEmail) {
       const { multiplier: tierMultiplier, tierName: userTierName } = await getUserTierMultiplier(supabaseAdmin, stripe, user.id);
       
@@ -985,7 +983,7 @@ serve(async (req) => {
         merchantLocation: merchant.address || undefined,
         items: [{ name: `${productName} Subscription`, price: amountInDollars }],
         subtotal: amountInDollars,
-        pawbucksApplied: pawbucksAppliedDollars,
+        pawbucksApplied: actualPawbucksUsed,
         cardAmount: stripeChargeAmount / 100,
         totalPaid: amountInDollars,
         pawbucksEarned,

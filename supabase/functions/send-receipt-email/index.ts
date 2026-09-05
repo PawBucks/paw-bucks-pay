@@ -123,7 +123,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
   if (pawbucksApplied > 0) {
     summaryRowsHtml += `
     <tr><td style="padding:6px 0;font-size:14px;color:#16a34a;font-weight:500;">🐾 PawBucks Applied</td>
-        <td align="right" style="padding:6px 0;font-size:14px;color:#16a34a;font-weight:600;">-$${pawbucksApplied.toFixed(2)}</td></tr>`;
+        <td align="right" style="padding:6px 0;font-size:14px;color:#16a34a;font-weight:600;">−${Math.floor(pawbucksApplied).toLocaleString('en-US')} PB</td></tr>`;
   }
   if (surcharge && surcharge > 0) {
     summaryRowsHtml += `

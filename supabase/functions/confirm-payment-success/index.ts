@@ -655,7 +655,7 @@ serve(async (req) => {
           ? itemsToReceiptItems(lineItems)
           : [{ name: description, price: totalAmount > 0 ? totalAmount : amountInDollars }],
         subtotal: totalAmount > 0 ? totalAmount : amountInDollars,
-        pawbucksApplied: pawbucksUsdValue,
+        pawbucksApplied: pawbucksAmount,
         cardAmount: amountInDollars,
         totalPaid: totalAmount > 0 ? totalAmount : amountInDollars,
         cardBrand,
