@@ -276,7 +276,7 @@ export function OverviewTab() {
               <p className="text-3xl font-bold">
                 ${stats.marketplaceRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs text-muted-foreground">All-time marketplace order value</p>
+              <p className="text-xs text-muted-foreground">Card-processed marketplace sales (PawBucks-only orders excluded)</p>
               <p className="text-xs text-muted-foreground">
                 {stats.marketplaceOrders.toLocaleString()} completed {stats.marketplaceOrders === 1 ? 'order' : 'orders'}
               </p>
