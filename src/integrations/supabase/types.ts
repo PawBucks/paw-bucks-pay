@@ -10256,6 +10256,8 @@ export type Database = {
           created_at: string
           id: string
           status: string
+          stripe_amount_usd: number
+          stripe_payment_intent_id: string | null
           subtotal_amount: number | null
           tax_amount: number
           tax_calculation_id: string | null
@@ -10267,6 +10269,8 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string
+          stripe_amount_usd?: number
+          stripe_payment_intent_id?: string | null
           subtotal_amount?: number | null
           tax_amount?: number
           tax_calculation_id?: string | null
@@ -10278,6 +10282,8 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string
+          stripe_amount_usd?: number
+          stripe_payment_intent_id?: string | null
           subtotal_amount?: number | null
           tax_amount?: number
           tax_calculation_id?: string | null
@@ -16972,6 +16978,7 @@ export type Database = {
         Args: never
         Returns: {
           attributed_redeemed_pb: number
+          branded_campaign_committed_usd: number
           branded_campaign_delivered_usd: number
           branded_campaign_revenue: number
           cross_merchant_redeemed_pb: number

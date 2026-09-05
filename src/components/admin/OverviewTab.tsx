@@ -30,7 +30,8 @@ export function OverviewTab() {
   merchantServicesRevenue: 0,
   merchantServicesActive: 0,
    brandedCampaignRevenue: 0,
-   brandedCampaignDelivered: 0,
+    brandedCampaignDelivered: 0,
+    brandedCampaignCommitted: 0,
    marketplaceRevenue: 0,
    marketplaceOrders: 0,
   });
@@ -70,7 +71,8 @@ export function OverviewTab() {
   merchantServicesRevenue: Number(data[0].merchant_services_revenue || 0),
   merchantServicesActive: Number(data[0].merchant_services_active || 0),
    brandedCampaignRevenue: Number(data[0].branded_campaign_revenue || 0),
-   brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+    brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+   brandedCampaignCommitted: Number((data[0] as { branded_campaign_committed_usd?: number }).branded_campaign_committed_usd || 0),
    marketplaceRevenue: Number(data[0].marketplace_revenue || 0),
    marketplaceOrders: Number(data[0].marketplace_orders || 0),
   });
@@ -250,7 +252,7 @@ export function OverviewTab() {
             Revenue Streams
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Subscriptions, PawBucks Marketplace sales, merchant services, and Branded PawBucks campaigns
+            Money actually processed: subscriptions, PawBucks Marketplace sales, merchant services, and Branded PawBucks campaigns
           </p>
         </CardHeader>
         <CardContent>
@@ -276,7 +278,7 @@ export function OverviewTab() {
               <p className="text-3xl font-bold">
                 ${stats.marketplaceRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs text-muted-foreground">All-time marketplace order value</p>
+              <p className="text-xs text-muted-foreground">Card-processed marketplace sales (PawBucks-only orders excluded)</p>
               <p className="text-xs text-muted-foreground">
                 {stats.marketplaceOrders.toLocaleString()} completed {stats.marketplaceOrders === 1 ? 'order' : 'orders'}
               </p>
@@ -288,7 +290,7 @@ export function OverviewTab() {
               <p className="text-3xl font-bold">
                 ${stats.merchantServicesRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs text-muted-foreground">All-time premium service purchases</p>
+              <p className="text-xs text-muted-foreground">Card-processed premium service purchases</p>
               <p className="text-xs text-muted-foreground">
                 {stats.merchantServicesActive.toLocaleString()} active service {stats.merchantServicesActive === 1 ? 'plan' : 'plans'}
               </p>
@@ -300,9 +302,9 @@ export function OverviewTab() {
               <p className="text-3xl font-bold">
                 ${stats.brandedCampaignRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs text-muted-foreground">Committed campaign budgets (live &amp; completed)</p>
+              <p className="text-xs text-muted-foreground">Campaign funds actually collected</p>
               <p className="text-xs text-muted-foreground">
-                Delivered to date ≈ ${stats.brandedCampaignDelivered.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                Committed budgets ${stats.brandedCampaignCommitted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · delivered ≈ ${stats.brandedCampaignDelivered.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           </div>

@@ -1905,6 +1905,8 @@ serve(async (req) => {
           .insert([{
             user_id: user_id,
             total_amount: Math.round(totalAmount),
+            stripe_payment_intent_id: paymentIntent.id,
+            stripe_amount_usd: totalAmount,
             status: 'completed',
           }])
           .select()
