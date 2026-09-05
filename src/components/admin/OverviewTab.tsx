@@ -288,7 +288,7 @@ export function OverviewTab() {
               <p className="text-3xl font-bold">
                 ${stats.merchantServicesRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs text-muted-foreground">All-time premium service purchases</p>
+              <p className="text-xs text-muted-foreground">Card-processed premium service purchases</p>
               <p className="text-xs text-muted-foreground">
                 {stats.merchantServicesActive.toLocaleString()} active service {stats.merchantServicesActive === 1 ? 'plan' : 'plans'}
               </p>
