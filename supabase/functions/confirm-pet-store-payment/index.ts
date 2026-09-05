@@ -369,7 +369,7 @@ serve(async (req) => {
                 price: (li.priceCents * li.qty) / 100,
               })),
               subtotal: orderTotalDollars,
-              pawbucksApplied: pawbucksUsedInSplit * 0.001,
+              pawbucksApplied: pawbucksUsedInSplit,
               cardAmount: cardAmountDollars,
               totalPaid: orderTotalDollars,
               cardBrand,

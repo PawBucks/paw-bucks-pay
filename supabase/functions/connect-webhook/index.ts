@@ -1020,7 +1020,7 @@ serve(async (req) => {
               merchantName: businessName,
               items: [{ name: `Payment to ${businessName}`, price: totalAmount > 0 ? totalAmount : amountInDollars }],
               subtotal: totalAmount > 0 ? totalAmount : amountInDollars,
-              pawbucksApplied: pawbucksAmount * 0.001,
+              pawbucksApplied: pawbucksAmount,
               cardAmount: amountInDollars,
               totalPaid: totalAmount > 0 ? totalAmount : amountInDollars,
               pawbucksEarned,

@@ -2201,9 +2201,10 @@ serve(async (req) => {
           }
         }
 
-        // Calculate PawBucks applied (from metadata if available)
-        const pawbucksApplied = parseFloat(paymentIntent.metadata?.pawbucks_usd_value || '0');
-        const subtotal = amount + pawbucksApplied;
+        // Receipt displays the raw PawBucks count; USD value is used only for totals.
+        const pawbucksApplied = parseInt(paymentIntent.metadata?.pawbucks_used || '0', 10);
+        const pawbucksAppliedUsd = parseFloat(paymentIntent.metadata?.pawbucks_usd_value || '0');
+        const subtotal = amount + pawbucksAppliedUsd;
 
         // Build item name from description or metadata
         const itemName = paymentIntent.metadata?.item_name || 
@@ -2242,8 +2243,9 @@ serve(async (req) => {
             .eq('id', merchant_id)
             .single();
 
-          const pawbucksApplied = parseFloat(paymentIntent.metadata?.pawbucks_usd_value || '0');
-          const subtotal = amount + pawbucksApplied;
+          const pawbucksApplied = parseInt(paymentIntent.metadata?.pawbucks_used || '0', 10);
+          const pawbucksAppliedUsd = parseFloat(paymentIntent.metadata?.pawbucks_usd_value || '0');
+          const subtotal = amount + pawbucksAppliedUsd;
           const itemName = paymentIntent.metadata?.item_name || description || 'Purchase';
 
           await sendReceiptEmail({
