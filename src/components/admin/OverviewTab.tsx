@@ -37,6 +37,22 @@ export function OverviewTab() {
   });
  const [loading, setLoading] = useState(true);
  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+ const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+
+ useEffect(() => {
+  let cancelled = false;
+  (async () => {
+   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'superadmin' });
+    if (!cancelled) setIsSuperAdmin(!!data);
+   } catch (err) {
+    console.error('SuperAdmin check failed:', err);
+   }
+  })();
+  return () => { cancelled = true; };
+ }, []);
 
  const loadStats = useCallback(async () => {
  try {
