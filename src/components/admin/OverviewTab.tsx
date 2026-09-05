@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from'react';
 import { supabase } from'@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from'@/components/ui/card';
-import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle, CreditCard, Briefcase, Megaphone } from "lucide-react";
+import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle, CreditCard, Briefcase, Megaphone, ShoppingBag } from "lucide-react";
 import { Progress } from'@/components/ui/progress';
 import { cn } from'@/lib/utils';
 
@@ -29,8 +29,10 @@ export function OverviewTab() {
   subscriptionMrr: 0,
   merchantServicesRevenue: 0,
   merchantServicesActive: 0,
-  brandedCampaignRevenue: 0,
-  brandedCampaignDelivered: 0,
+   brandedCampaignRevenue: 0,
+   brandedCampaignDelivered: 0,
+   marketplaceRevenue: 0,
+   marketplaceOrders: 0,
   });
  const [loading, setLoading] = useState(true);
  const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -67,8 +69,10 @@ export function OverviewTab() {
   subscriptionMrr: Number(data[0].subscription_mrr || 0),
   merchantServicesRevenue: Number(data[0].merchant_services_revenue || 0),
   merchantServicesActive: Number(data[0].merchant_services_active || 0),
-  brandedCampaignRevenue: Number(data[0].branded_campaign_revenue || 0),
-  brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+   brandedCampaignRevenue: Number(data[0].branded_campaign_revenue || 0),
+   brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+   marketplaceRevenue: Number(data[0].marketplace_revenue || 0),
+   marketplaceOrders: Number(data[0].marketplace_orders || 0),
   });
  }
  } catch (error) {
@@ -121,11 +125,16 @@ export function OverviewTab() {
   loadStats();
   }
   )
-  .on(
+   .on(
 'postgres_changes',
-  { event:'*', schema:'public', table:'subscriptions' },
-  () => { loadStats(); }
-  )
+   { event:'*', schema:'public', table:'subscriptions' },
+   () => { loadStats(); }
+   )
+   .on(
+'postgres_changes',
+   { event:'*', schema:'public', table:'pet_store_orders' },
+   () => { loadStats(); }
+   )
   .on(
 'postgres_changes',
   { event:'*', schema:'public', table:'merchant_service_purchases' },
@@ -241,11 +250,11 @@ export function OverviewTab() {
             Revenue Streams
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Subscription, merchant services, and Branded PawBucks campaign revenue
+            Subscriptions, PawBucks Marketplace sales, merchant services, and Branded PawBucks campaigns
           </p>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
                 <CreditCard className="w-3.5 h-3.5 text-info" /> PawPass Subscription MRR
@@ -258,6 +267,18 @@ export function OverviewTab() {
               </p>
               <p className="text-xs text-muted-foreground">
                 Annualized ≈ ${(stats.subscriptionMrr * 12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                <ShoppingBag className="w-3.5 h-3.5 text-primary" /> PawBucks Marketplace Sales
+              </p>
+              <p className="text-3xl font-bold">
+                ${stats.marketplaceRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground">All-time marketplace order value</p>
+              <p className="text-xs text-muted-foreground">
+                {stats.marketplaceOrders.toLocaleString()} completed {stats.marketplaceOrders === 1 ? 'order' : 'orders'}
               </p>
             </div>
             <div className="space-y-1">
@@ -288,10 +309,10 @@ export function OverviewTab() {
           <div className="mt-6 pt-4 border-t">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Platform Revenue</p>
             <p className="text-3xl font-bold text-success">
-              ${(stats.platformRevenue + stats.subscriptionMrr + stats.merchantServicesRevenue + stats.brandedCampaignRevenue)
+              ${(stats.platformRevenue + stats.subscriptionMrr + stats.marketplaceRevenue + stats.merchantServicesRevenue + stats.brandedCampaignRevenue)
                 .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-muted-foreground">Success fees + subscriptions + merchant services + branded campaigns</p>
+            <p className="text-xs text-muted-foreground">Success fees + subscriptions + marketplace sales + merchant services + branded campaigns</p>
           </div>
         </CardContent>
       </Card>

@@ -16976,6 +16976,8 @@ export type Database = {
           branded_campaign_revenue: number
           cross_merchant_redeemed_pb: number
           cross_merchant_redemption_rate: number
+          marketplace_orders: number
+          marketplace_revenue: number
           merchant_services_active: number
           merchant_services_revenue: number
           pawbucks_spend_rate: number
