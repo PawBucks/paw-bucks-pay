@@ -300,9 +300,9 @@ export function OverviewTab() {
               <p className="text-3xl font-bold">
                 ${stats.brandedCampaignRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-xs text-muted-foreground">Committed campaign budgets (live &amp; completed)</p>
+              <p className="text-xs text-muted-foreground">Campaign funds actually collected</p>
               <p className="text-xs text-muted-foreground">
-                Delivered to date ≈ ${stats.brandedCampaignDelivered.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                Committed budgets ${stats.brandedCampaignCommitted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · delivered ≈ ${stats.brandedCampaignDelivered.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
             </div>
           </div>
