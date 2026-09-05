@@ -16972,12 +16972,19 @@ export type Database = {
         Args: never
         Returns: {
           attributed_redeemed_pb: number
+          branded_campaign_delivered_usd: number
+          branded_campaign_revenue: number
           cross_merchant_redeemed_pb: number
           cross_merchant_redemption_rate: number
+          merchant_services_active: number
+          merchant_services_revenue: number
           pawbucks_spend_rate: number
+          pawpass_plus_subscribers: number
+          pawpass_subscribers: number
           platform_revenue: number
           repeat_redeemers: number
           repeat_redemption_rate: number
+          subscription_mrr: number
           total_gmv: number
           total_merchants: number
           total_pawbucks_earned: number

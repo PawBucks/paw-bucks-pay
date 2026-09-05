@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from'react';
 import { supabase } from'@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from'@/components/ui/card';
-import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle } from "lucide-react";
+import { Users, Store, DollarSign, Award, TrendingUp, Activity, RotateCcw, Gauge, Repeat, Shuffle, CreditCard, Briefcase, Megaphone } from "lucide-react";
 import { Progress } from'@/components/ui/progress';
 import { cn } from'@/lib/utils';
 
@@ -22,9 +22,16 @@ export function OverviewTab() {
  repeatRedeemers: 0,
  totalRedeemers: 0,
  crossMerchantRate: 0,
- crossMerchantPb: 0,
- attributedPb: 0,
- });
+  crossMerchantPb: 0,
+  attributedPb: 0,
+  pawpassSubscribers: 0,
+  pawpassPlusSubscribers: 0,
+  subscriptionMrr: 0,
+  merchantServicesRevenue: 0,
+  merchantServicesActive: 0,
+  brandedCampaignRevenue: 0,
+  brandedCampaignDelivered: 0,
+  });
  const [loading, setLoading] = useState(true);
  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -54,8 +61,15 @@ export function OverviewTab() {
  totalRedeemers: data[0].total_redeemers || 0,
  crossMerchantRate: Number(data[0].cross_merchant_redemption_rate || 0),
  crossMerchantPb: Number(data[0].cross_merchant_redeemed_pb || 0),
- attributedPb: Number(data[0].attributed_redeemed_pb || 0),
- });
+  attributedPb: Number(data[0].attributed_redeemed_pb || 0),
+  pawpassSubscribers: Number(data[0].pawpass_subscribers || 0),
+  pawpassPlusSubscribers: Number(data[0].pawpass_plus_subscribers || 0),
+  subscriptionMrr: Number(data[0].subscription_mrr || 0),
+  merchantServicesRevenue: Number(data[0].merchant_services_revenue || 0),
+  merchantServicesActive: Number(data[0].merchant_services_active || 0),
+  brandedCampaignRevenue: Number(data[0].branded_campaign_revenue || 0),
+  brandedCampaignDelivered: Number(data[0].branded_campaign_delivered_usd || 0),
+  });
  }
  } catch (error) {
  console.error('Error loading stats:', error);
@@ -201,10 +215,73 @@ export function OverviewTab() {
  </CardContent>
  </Card>
  );
- })}
- </div>
+  })}
+  </div>
 
- {/* PawBucks Spend Rate Card */}
+      {/* Revenue Streams */}
+      <Card className="border-2">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-bold flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-primary" />
+            Revenue Streams
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Subscription, merchant services, and Branded PawBucks campaign revenue
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                <CreditCard className="w-3.5 h-3.5 text-info" /> PawPass Subscription MRR
+              </p>
+              <p className="text-3xl font-bold">
+                ${stats.subscriptionMrr.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {stats.pawpassSubscribers.toLocaleString()} PawPass ($10/mo) · {stats.pawpassPlusSubscribers.toLocaleString()} PawPass+ ($20/mo)
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Annualized ≈ ${(stats.subscriptionMrr * 12).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                <Briefcase className="w-3.5 h-3.5 text-warning" /> Merchant Services Revenue
+              </p>
+              <p className="text-3xl font-bold">
+                ${stats.merchantServicesRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground">All-time premium service purchases</p>
+              <p className="text-xs text-muted-foreground">
+                {stats.merchantServicesActive.toLocaleString()} active service {stats.merchantServicesActive === 1 ? 'plan' : 'plans'}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                <Megaphone className="w-3.5 h-3.5 text-accent" /> Branded PawBucks Revenue
+              </p>
+              <p className="text-3xl font-bold">
+                ${stats.brandedCampaignRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground">Committed campaign budgets (live &amp; completed)</p>
+              <p className="text-xs text-muted-foreground">
+                Delivered to date ≈ ${stats.brandedCampaignDelivered.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 pt-4 border-t">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Platform Revenue</p>
+            <p className="text-3xl font-bold text-success">
+              ${(stats.platformRevenue + stats.subscriptionMrr + stats.merchantServicesRevenue + stats.brandedCampaignRevenue)
+                .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-xs text-muted-foreground">Success fees + subscriptions + merchant services + branded campaigns</p>
+          </div>
+        </CardContent>
+      </Card>
+
+  {/* PawBucks Spend Rate Card */}
  <Card className="border-2">
  <CardHeader className="flex flex-row items-center justify-between pb-2">
  <div>
