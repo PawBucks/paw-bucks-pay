@@ -32,7 +32,9 @@ import {
   Pencil,
   Crown,
   PawPrint,
+  Check,
 } from "lucide-react";
+import { MEMBERSHIP_PERKS } from "@/lib/constants";
 import {
   Dialog,
   DialogContent,
