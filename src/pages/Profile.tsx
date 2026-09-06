@@ -32,7 +32,9 @@ import {
   Pencil,
   Crown,
   PawPrint,
+  Check,
 } from "lucide-react";
+import { MEMBERSHIP_PERKS } from "@/lib/constants";
 import {
   Dialog,
   DialogContent,
@@ -372,6 +374,43 @@ const Profile = () => {
                       </div>
                     );
                   })}
+                </div>
+
+                {/* Plan benefits */}
+                <div className="rounded-lg border border-border bg-background/40 p-3 mb-4">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">
+                    {currentTier === "Free" ? "PawPass includes" : `${currentTier} includes`}
+                  </div>
+                  <ul className="space-y-1.5">
+                    {(currentTier === "PawPass+"
+                      ? MEMBERSHIP_PERKS.pawpass_plus
+                      : currentTier === "PawPass"
+                        ? MEMBERSHIP_PERKS.pawpass
+                        : MEMBERSHIP_PERKS.pawpass
+                    ).map((perk) => (
+                      <li key={perk} className="flex gap-2 text-xs text-muted-foreground">
+                        <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                        <span>{perk}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {currentTier !== "PawPass+" && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">
+                        PawPass+ adds
+                      </div>
+                      <ul className="space-y-1.5">
+                        {MEMBERSHIP_PERKS.pawpass_plus
+                          .filter((p) => !MEMBERSHIP_PERKS.pawpass.some((q) => q === p))
+                          .map((perk) => (
+                            <li key={perk} className="flex gap-2 text-xs text-muted-foreground">
+                              <Crown className="w-3.5 h-3.5 text-accent shrink-0 mt-0.5" />
+                              <span>{perk}</span>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2">

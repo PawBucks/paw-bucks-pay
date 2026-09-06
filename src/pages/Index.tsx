@@ -163,6 +163,7 @@ const styles = `
  .pl-tier-name { font-size: 1.15rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
  .pl-tier-price { font-size: 0.95rem; color: var(--muted-light); margin-top: 0.35rem; line-height: 1.3; }
  .pl-tier-price.free-tag { color: var(--teal-dark); font-weight: 500; }
+ .pl-tier-perks { font-size: 0.8rem; color: var(--muted-light); margin-top: 0.5rem; line-height: 1.4; max-width: 22rem; }
  .pl-tier-earn {
  font-family:'Playfair Display', serif;
  color: var(--teal-dark);
@@ -560,6 +561,7 @@ const Index = () => {
  <div>
  <div className="pl-tier-name">PawPass</div>
  <div className="pl-tier-price free-tag">$10 / month</div>
+ <div className="pl-tier-perks">+ Free deliveries on $30+ orders at partner merchants &amp; PawBucks Marketplace</div>
  </div>
  <div className="pl-tier-earn">
  <b>20</b>
@@ -571,6 +573,7 @@ const Index = () => {
  <div>
  <div className="pl-tier-name">PawPass+</div>
  <div className="pl-tier-price free-tag">$20 / month</div>
+ <div className="pl-tier-perks">+ Free deliveries on $30+ orders at partner merchants &amp; PawBucks Marketplace, plus 1 round trip Pet Transport (10 miles total) to &amp; from partner merchants</div>
  </div>
  <div className="pl-tier-earn">
  <b>30</b>
