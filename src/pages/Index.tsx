@@ -560,6 +560,7 @@ const Index = () => {
  <div>
  <div className="pl-tier-name">PawPass</div>
  <div className="pl-tier-price free-tag">$10 / month</div>
+ <div className="pl-tier-perks">+ Free deliveries on $30+ orders at partner merchants &amp; PawBucks Marketplace</div>
  </div>
  <div className="pl-tier-earn">
  <b>20</b>
@@ -571,6 +572,7 @@ const Index = () => {
  <div>
  <div className="pl-tier-name">PawPass+</div>
  <div className="pl-tier-price free-tag">$20 / month</div>
+ <div className="pl-tier-perks">+ Free deliveries on $30+ orders at partner merchants &amp; PawBucks Marketplace, plus 1 round trip Pet Transport (10 miles total) to &amp; from partner merchants</div>
  </div>
  <div className="pl-tier-earn">
  <b>30</b>
