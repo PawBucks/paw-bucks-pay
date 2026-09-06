@@ -163,6 +163,7 @@ const styles = `
  .pl-tier-name { font-size: 1.15rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
  .pl-tier-price { font-size: 0.95rem; color: var(--muted-light); margin-top: 0.35rem; line-height: 1.3; }
  .pl-tier-price.free-tag { color: var(--teal-dark); font-weight: 500; }
+ .pl-tier-perks { font-size: 0.8rem; color: var(--muted-light); margin-top: 0.5rem; line-height: 1.4; max-width: 22rem; }
  .pl-tier-earn {
  font-family:'Playfair Display', serif;
  color: var(--teal-dark);
