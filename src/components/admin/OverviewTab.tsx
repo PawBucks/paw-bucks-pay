@@ -328,12 +328,15 @@ export function OverviewTab() {
             </div>
           </div>
           <div className="mt-6 pt-4 border-t">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Platform Revenue</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Total Platform Revenue (processed to date)</p>
             <p className="text-3xl font-bold text-success">
-              ${(stats.platformRevenue + stats.subscriptionMrr + stats.marketplaceRevenue + stats.merchantServicesRevenue + stats.brandedCampaignRevenue)
+              ${(stats.platformRevenue + stats.marketplaceRevenue + stats.merchantServicesRevenue + stats.brandedCampaignRevenue)
                 .toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-muted-foreground">Success fees + subscriptions + marketplace sales + merchant services + branded campaigns</p>
+            <p className="text-xs text-muted-foreground">Success fees + marketplace sales + merchant services + branded campaigns — all-time money processed</p>
+            <p className="text-xs text-muted-foreground">
+              Memberships excluded: ${stats.subscriptionMrr.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} is a current monthly run-rate, not an all-time total
+            </p>
           </div>
         </CardContent>
       </Card>
