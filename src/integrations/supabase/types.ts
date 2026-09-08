@@ -2645,7 +2645,7 @@ export type Database = {
           },
         ]
       }
-      email_send_log: {
+      email_send_claims: {
         Row: {
           created_at: string
           id: string

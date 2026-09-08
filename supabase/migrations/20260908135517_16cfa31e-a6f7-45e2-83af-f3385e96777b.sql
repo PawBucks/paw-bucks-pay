@@ -1,0 +1,1 @@
+ALTER TABLE public.email_send_log RENAME TO email_send_claims;
