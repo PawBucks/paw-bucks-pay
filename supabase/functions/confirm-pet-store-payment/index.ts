@@ -330,7 +330,7 @@ serve(async (req) => {
     let canSendCustomerEmail = false;
     if (customerEmail) {
       const { error: claimErr } = await supabaseAdmin
-        .from('email_send_log')
+        .from('email_send_claims')
         .insert({
           idempotency_key: `pet_store_receipt:${paymentIntentId}`,
           source: 'confirm-pet-store-payment',
@@ -388,7 +388,7 @@ serve(async (req) => {
 
     // 6. Send notification to support@pawbucks.app
     const { error: adminClaimErr } = await supabaseAdmin
-      .from('email_send_log')
+      .from('email_send_claims')
       .insert({
         idempotency_key: `pet_store_admin:${paymentIntentId}`,
         source: 'confirm-pet-store-payment',
