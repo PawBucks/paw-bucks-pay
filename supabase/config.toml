@@ -1,409 +1,277 @@
 project_id = "yxpnkipcoxksmnsvpvwi"
 
-[functions.merchant-dashboard]
-verify_jwt = true
-
-[functions.merchant-transactions]
-verify_jwt = true
-
-[functions.create-payment-intent]
-verify_jwt = true
-
-[functions.stripe-webhook]
-verify_jwt = false
-
-[functions.notify-vet-onboarding]
-verify_jwt = false
-
-[functions.notify-merchant-onboarding]
-verify_jwt = false
-
-[functions.bootstrap-trigger-secret]
-verify_jwt = false
-
-[functions.create-stripe-connect-account]
-verify_jwt = true
-
-[functions.create-subscription-checkout]
-verify_jwt = true
-
-[functions.check-subscription]
-verify_jwt = true
-
-[functions.customer-portal]
-verify_jwt = true
-
-[functions.get-wallet]
-verify_jwt = true
-
-[functions.redeem-wallet]
-verify_jwt = true
-
-[functions.get-wallet-history]
-verify_jwt = true
-
-[functions.admin-update-merchant]
-verify_jwt = true
-
-[functions.admin-update-funding-request]
-verify_jwt = true
-
-[functions.admin-issue-refund]
-verify_jwt = true
-
-[functions.admin-update-user-role]
-verify_jwt = true
-
-[functions.admin-credit-pawbucks]
-verify_jwt = true
-
-[functions.admin-add-transaction]
-verify_jwt = true
-
-[functions.apply-vet-loan]
-verify_jwt = true
-
-[functions.get-connect-account-status]
-verify_jwt = true
-
-[functions.create-connect-product]
-verify_jwt = true
-
-[functions.list-connect-products]
-verify_jwt = true
-
-[functions.create-connect-checkout]
-verify_jwt = true
-
-[functions.merchant-create-offer]
-verify_jwt = true
-
-[functions.merchant-list-offers]
-verify_jwt = true
-
-[functions.merchant-get-offer]
-verify_jwt = true
-
-[functions.merchant-update-offer]
-verify_jwt = true
-
-[functions.merchant-manage-offer-status]
-verify_jwt = true
-
-[functions.merchant-generate-codes]
-verify_jwt = true
-
-[functions.merchant-confirm-redemption]
-verify_jwt = true
-
-[functions.merchant-offer-redemptions]
-verify_jwt = true
-
-[functions.merchant-offer-analytics]
-verify_jwt = true
-
-[functions.verify-redemption]
-verify_jwt = true
-
-[functions.merchant-purchase-analytics]
-verify_jwt = true
-
-[functions.merchant-get-premium-analytics]
-verify_jwt = true
-
-[functions.merchant-generate-cohort-report]
-verify_jwt = true
-
-[functions.merchant-generate-demand-forecast]
-verify_jwt = true
-
-[functions.create-combined-payment]
-verify_jwt = true
-
-[functions.create-pet-store-payment]
-verify_jwt = true
-
-[functions.geocode-address]
-verify_jwt = false
-
-[functions.get-mapbox-token]
-verify_jwt = false
-
-[functions.get-partner-offers]
-verify_jwt = false
-
-[functions.redeem-pawbucks]
-verify_jwt = true
-
-[functions.admin-reset-password]
-verify_jwt = false
-
-[functions.log-auth-event]
-verify_jwt = false
-
-[functions.check-budget-notify]
-verify_jwt = false
-
-[functions.purchase-market-service]
-verify_jwt = true
-
-[functions.send-consultation-confirmation]
-verify_jwt = true
-
-[functions.send-feedback]
-verify_jwt = false
-
-[functions.merchant-generate-keyword-insights]
-verify_jwt = true
-
-[functions.sponsored-placement-analytics]
-verify_jwt = true
-
-[functions.search-ranking-analytics]
-verify_jwt = true
-
-[functions.merchant-profile-optimization]
-verify_jwt = true
-
-[functions.featured-partner-dashboard]
-verify_jwt = true
-
-[functions.review-campaign-dashboard]
-verify_jwt = true
-
-[functions.priority-support-dashboard]
-verify_jwt = true
-
-[functions.merchant-spotlight-dashboard]
-verify_jwt = true
-
-[functions.track-analytics]
-verify_jwt = false
-
-[functions.vest-pending-pawbucks]
-verify_jwt = false
-
-[functions.pos-generate-api-key]
-verify_jwt = true
-
-[functions.pos-submit-transaction]
-verify_jwt = false
-
-[functions.admin-debit-pawbucks]
-verify_jwt = true
-
-[functions.create-standard-connect-account]
-verify_jwt = true
-
-[functions.create-express-connect-account]
-verify_jwt = true
-
-[functions.verify-connect-status]
-verify_jwt = true
-
-[functions.create-direct-charge]
-verify_jwt = true
-
-[functions.create-destination-charge]
-verify_jwt = true
-
-[functions.connect-webhook]
-verify_jwt = false
-
-[functions.get-merchant-earnings]
-verify_jwt = true
-
-[functions.send-share-invitation]
-verify_jwt = true
-
-[functions.email-hook]
-verify_jwt = false
-
-[functions.admin-create-user]
-verify_jwt = true
-
-[functions.admin-delete-user]
-verify_jwt = true
-
-[functions.create-superadmin]
-verify_jwt = false
-
-[functions.send-password-reset]
-verify_jwt = false
-
-[functions.send-signup-confirmation]
-verify_jwt = false
-
-[functions.send-pet-owner-welcome]
-verify_jwt = false
-
-[functions.admin-send-email]
-verify_jwt = true
-
-[functions.cleanup-resolved-lost-pets]
-verify_jwt = false
-
-[functions.send-lost-pet-deletion-warning]
-verify_jwt = false
-
-[functions.expire-merchant-services]
-verify_jwt = false
-
-[functions.list-user-subscriptions]
-verify_jwt = true
-
-[functions.cancel-subscription]
-verify_jwt = true
-
-[functions.training-course-dashboard]
-verify_jwt = true
-
-[functions.training-course-progress]
-verify_jwt = true
-
-[functions.send-receipt-email]
-verify_jwt = false
-
-[functions.process-receipt-ocr]
-verify_jwt = true
-
-[functions.admin-send-text-campaign]
-verify_jwt = true
-
-[functions.send-quarterly-tax-reminder]
-verify_jwt = false
-
-[functions.send-accountant-invitation]
-verify_jwt = true
-
-[functions.send-invoice-email]
-verify_jwt = true
-
-[functions.send-invoice-modified-email]
-verify_jwt = true
-
-[functions.create-invoice-payment]
-verify_jwt = false
-
-[functions.generate-invoice-pdf]
-verify_jwt = false
-
-[functions.verify-invoice-payment]
-verify_jwt = false
-
-[functions.process-invoice-pawbucks-payment]
-verify_jwt = false
-
-[functions.generate-recurring-invoices]
-verify_jwt = false
-
-[functions.get-public-invoice]
-verify_jwt = false
-
-[functions.accountant-portal-access]
-verify_jwt = false
-
-[functions.send-invoice-reminders]
-verify_jwt = false
-
-[functions.send-invoice-paid-notification]
-verify_jwt = false
-
-[functions.send-compliance-reminder]
-verify_jwt = false
-
-[functions.pms-sync-webhook]
-verify_jwt = false
-
-[functions.fetch-external-labs]
-verify_jwt = true
-
-[functions.ai-transcribe-soap]
-verify_jwt = true
-
-[functions.ai-symptom-triage]
-verify_jwt = true
-
-[functions.ai-diagnostic-overlay]
-verify_jwt = true
-
-[functions.create-wellness-plan-subscription]
-verify_jwt = true
-
-[functions.process-insurance-claim]
-verify_jwt = true
-
-[functions.send-invoice-receipt]
-verify_jwt = true
-
-[functions.record-manual-invoice-payment]
-verify_jwt = true
-
-[functions.admin-upgrade-subscription]
-verify_jwt = false
-
-[functions.check-subscription-expirations]
-verify_jwt = false
-
-[functions.confirm-payment-success]
-verify_jwt = true
-
-[functions.create-merchant-subscription]
-verify_jwt = true
-
-[functions.process-merchant-subscriptions]
-verify_jwt = false
-
-[functions.cancel-merchant-subscription]
-verify_jwt = true
-
-[functions.publish-subscription-plan]
-verify_jwt = true
-
-[functions.generate-timeline-moment]
-verify_jwt = false
-
-[functions.send-flash-sale-notification]
-verify_jwt = true
-
-[functions.check-guilt-badges]
-verify_jwt = false
-
-[functions.receive-pet-email]
-verify_jwt = false
-
-[functions.categorize-pet-document]
-verify_jwt = false
-
-[functions.maximus-chat]
-verify_jwt = false
-
-[functions.clover-pos-webhook]
-verify_jwt = false
-
-[functions.auto-detect-no-shows]
-verify_jwt = false
-
-[functions.send-phone-otp]
-verify_jwt = false
-
-[functions.verify-phone-otp]
-verify_jwt = false
-
-[functions.clover-oauth-callback]
-verify_jwt = false
-
-[functions.merchant-customers]
-verify_jwt = true
-
-[functions.send-petfest-rsvp-confirmation]
-verify_jwt = false
-
-[functions.submit-petfest-rsvp]
-verify_jwt = false
-
-[functions.petfest-passport-scan]
-verify_jwt = true
-
-[functions.petfest-vendor-notify]
-verify_jwt = true
+[functions]
+  [functions.accountant-portal-access]
+    verify_jwt = false
+  [functions.admin-add-transaction]
+    verify_jwt = true
+  [functions.admin-create-user]
+    verify_jwt = true
+  [functions.admin-credit-pawbucks]
+    verify_jwt = true
+  [functions.admin-debit-pawbucks]
+    verify_jwt = true
+  [functions.admin-delete-user]
+    verify_jwt = true
+  [functions.admin-issue-refund]
+    verify_jwt = true
+  [functions.admin-reset-password]
+    verify_jwt = false
+  [functions.admin-send-email]
+    verify_jwt = true
+  [functions.admin-send-text-campaign]
+    verify_jwt = true
+  [functions.admin-update-funding-request]
+    verify_jwt = true
+  [functions.admin-update-merchant]
+    verify_jwt = true
+  [functions.admin-update-user-role]
+    verify_jwt = true
+  [functions.admin-upgrade-subscription]
+    verify_jwt = false
+  [functions.ai-diagnostic-overlay]
+    verify_jwt = true
+  [functions.ai-symptom-triage]
+    verify_jwt = true
+  [functions.ai-transcribe-soap]
+    verify_jwt = true
+  [functions.apply-vet-loan]
+    verify_jwt = true
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.auto-detect-no-shows]
+    verify_jwt = false
+  [functions.bootstrap-trigger-secret]
+    verify_jwt = false
+  [functions.cancel-merchant-subscription]
+    verify_jwt = true
+  [functions.cancel-subscription]
+    verify_jwt = true
+  [functions.categorize-pet-document]
+    verify_jwt = false
+  [functions.check-budget-notify]
+    verify_jwt = false
+  [functions.check-guilt-badges]
+    verify_jwt = false
+  [functions.check-subscription]
+    verify_jwt = true
+  [functions.check-subscription-expirations]
+    verify_jwt = false
+  [functions.cleanup-resolved-lost-pets]
+    verify_jwt = false
+  [functions.clover-oauth-callback]
+    verify_jwt = false
+  [functions.clover-pos-webhook]
+    verify_jwt = false
+  [functions.confirm-payment-success]
+    verify_jwt = true
+  [functions.connect-webhook]
+    verify_jwt = false
+  [functions.create-combined-payment]
+    verify_jwt = true
+  [functions.create-connect-checkout]
+    verify_jwt = true
+  [functions.create-connect-product]
+    verify_jwt = true
+  [functions.create-destination-charge]
+    verify_jwt = true
+  [functions.create-direct-charge]
+    verify_jwt = true
+  [functions.create-express-connect-account]
+    verify_jwt = true
+  [functions.create-invoice-payment]
+    verify_jwt = false
+  [functions.create-merchant-subscription]
+    verify_jwt = true
+  [functions.create-payment-intent]
+    verify_jwt = true
+  [functions.create-pet-store-payment]
+    verify_jwt = true
+  [functions.create-standard-connect-account]
+    verify_jwt = true
+  [functions.create-stripe-connect-account]
+    verify_jwt = true
+  [functions.create-subscription-checkout]
+    verify_jwt = true
+  [functions.create-superadmin]
+    verify_jwt = false
+  [functions.create-wellness-plan-subscription]
+    verify_jwt = true
+  [functions.customer-portal]
+    verify_jwt = true
+  [functions.email-hook]
+    verify_jwt = false
+  [functions.expire-merchant-services]
+    verify_jwt = false
+  [functions.featured-partner-dashboard]
+    verify_jwt = true
+  [functions.fetch-external-labs]
+    verify_jwt = true
+  [functions.generate-invoice-pdf]
+    verify_jwt = false
+  [functions.generate-recurring-invoices]
+    verify_jwt = false
+  [functions.generate-timeline-moment]
+    verify_jwt = false
+  [functions.geocode-address]
+    verify_jwt = false
+  [functions.get-connect-account-status]
+    verify_jwt = true
+  [functions.get-mapbox-token]
+    verify_jwt = false
+  [functions.get-merchant-earnings]
+    verify_jwt = true
+  [functions.get-partner-offers]
+    verify_jwt = false
+  [functions.get-public-invoice]
+    verify_jwt = false
+  [functions.get-wallet]
+    verify_jwt = true
+  [functions.get-wallet-history]
+    verify_jwt = true
+  [functions.list-connect-products]
+    verify_jwt = true
+  [functions.list-user-subscriptions]
+    verify_jwt = true
+  [functions.log-auth-event]
+    verify_jwt = false
+  [functions.maximus-chat]
+    verify_jwt = false
+  [functions.merchant-confirm-redemption]
+    verify_jwt = true
+  [functions.merchant-create-offer]
+    verify_jwt = true
+  [functions.merchant-customers]
+    verify_jwt = true
+  [functions.merchant-dashboard]
+    verify_jwt = true
+  [functions.merchant-generate-codes]
+    verify_jwt = true
+  [functions.merchant-generate-cohort-report]
+    verify_jwt = true
+  [functions.merchant-generate-demand-forecast]
+    verify_jwt = true
+  [functions.merchant-generate-keyword-insights]
+    verify_jwt = true
+  [functions.merchant-get-offer]
+    verify_jwt = true
+  [functions.merchant-get-premium-analytics]
+    verify_jwt = true
+  [functions.merchant-list-offers]
+    verify_jwt = true
+  [functions.merchant-manage-offer-status]
+    verify_jwt = true
+  [functions.merchant-offer-analytics]
+    verify_jwt = true
+  [functions.merchant-offer-redemptions]
+    verify_jwt = true
+  [functions.merchant-profile-optimization]
+    verify_jwt = true
+  [functions.merchant-purchase-analytics]
+    verify_jwt = true
+  [functions.merchant-spotlight-dashboard]
+    verify_jwt = true
+  [functions.merchant-transactions]
+    verify_jwt = true
+  [functions.merchant-update-offer]
+    verify_jwt = true
+  [functions.notify-merchant-onboarding]
+    verify_jwt = false
+  [functions.notify-vet-onboarding]
+    verify_jwt = false
+  [functions.petfest-passport-scan]
+    verify_jwt = true
+  [functions.petfest-vendor-notify]
+    verify_jwt = true
+  [functions.pms-sync-webhook]
+    verify_jwt = false
+  [functions.pos-generate-api-key]
+    verify_jwt = true
+  [functions.pos-submit-transaction]
+    verify_jwt = false
+  [functions.priority-support-dashboard]
+    verify_jwt = true
+  [functions.process-insurance-claim]
+    verify_jwt = true
+  [functions.process-invoice-pawbucks-payment]
+    verify_jwt = false
+  [functions.process-merchant-subscriptions]
+    verify_jwt = false
+  [functions.process-receipt-ocr]
+    verify_jwt = true
+  [functions.publish-subscription-plan]
+    verify_jwt = true
+  [functions.purchase-market-service]
+    verify_jwt = true
+  [functions.receive-pet-email]
+    verify_jwt = false
+  [functions.record-manual-invoice-payment]
+    verify_jwt = true
+  [functions.redeem-pawbucks]
+    verify_jwt = true
+  [functions.redeem-wallet]
+    verify_jwt = true
+  [functions.review-campaign-dashboard]
+    verify_jwt = true
+  [functions.search-ranking-analytics]
+    verify_jwt = true
+  [functions.send-accountant-invitation]
+    verify_jwt = true
+  [functions.send-compliance-reminder]
+    verify_jwt = false
+  [functions.send-consultation-confirmation]
+    verify_jwt = true
+  [functions.send-feedback]
+    verify_jwt = false
+  [functions.send-flash-sale-notification]
+    verify_jwt = true
+  [functions.send-invoice-email]
+    verify_jwt = true
+  [functions.send-invoice-modified-email]
+    verify_jwt = true
+  [functions.send-invoice-paid-notification]
+    verify_jwt = false
+  [functions.send-invoice-receipt]
+    verify_jwt = true
+  [functions.send-invoice-reminders]
+    verify_jwt = false
+  [functions.send-lost-pet-deletion-warning]
+    verify_jwt = false
+  [functions.send-password-reset]
+    verify_jwt = false
+  [functions.send-pet-owner-welcome]
+    verify_jwt = false
+  [functions.send-petfest-rsvp-confirmation]
+    verify_jwt = false
+  [functions.send-phone-otp]
+    verify_jwt = false
+  [functions.send-quarterly-tax-reminder]
+    verify_jwt = false
+  [functions.send-receipt-email]
+    verify_jwt = false
+  [functions.send-share-invitation]
+    verify_jwt = true
+  [functions.send-signup-confirmation]
+    verify_jwt = false
+  [functions.sponsored-placement-analytics]
+    verify_jwt = true
+  [functions.stripe-webhook]
+    verify_jwt = false
+  [functions.submit-petfest-rsvp]
+    verify_jwt = false
+  [functions.track-analytics]
+    verify_jwt = false
+  [functions.training-course-dashboard]
+    verify_jwt = true
+  [functions.training-course-progress]
+    verify_jwt = true
+  [functions.verify-connect-status]
+    verify_jwt = true
+  [functions.verify-invoice-payment]
+    verify_jwt = false
+  [functions.verify-phone-otp]
+    verify_jwt = false
+  [functions.verify-redemption]
+    verify_jwt = true
+  [functions.vest-pending-pawbucks]
+    verify_jwt = false
