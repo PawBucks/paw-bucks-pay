@@ -348,6 +348,16 @@ const Referrals = () => {
                 </div>
               ))}
             </div>
+            {isPro && (
+              <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-start gap-2">
+                <Zap className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <p className="text-sm">
+                  Referral rewards build a fee credit that is applied
+                  automatically to the <strong>Success Fee</strong> on your next payments — nothing
+                  to claim, and the credit reduces what you pay until it runs out.
+                </p>
+              </div>
+            )}
             {!isPro && (
               <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/20 flex items-start gap-2">
                 <Zap className="w-4 h-4 text-accent mt-0.5 shrink-0" />
