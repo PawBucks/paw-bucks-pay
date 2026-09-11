@@ -1255,6 +1255,34 @@ serve(async (req) => {
             event_type: 'invoice.payment_succeeded',
           });
 
+        // Referral Program: reward the referrer once a membership payment clears.
+        try {
+          const { data: subRow } = await supabaseAdmin
+            .from('subscriptions')
+            .select('user_id, subscription_tier')
+            .eq('stripe_subscription_id', subscriptionId)
+            .maybeSingle();
+
+          const tier = renewalTierKey || subRow?.subscription_tier;
+          if (subRow?.user_id && (tier === 'pawpass' || tier === 'pawpass_plus')) {
+            const { data: refResult, error: refErr } = await supabaseAdmin.rpc(
+              'process_referral_subscription_reward',
+              {
+                p_referee_id: subRow.user_id,
+                p_tier: tier,
+                p_period_start: new Date(
+                  (invoice.period_start || subscription.current_period_start) * 1000,
+                ).toISOString(),
+              },
+            );
+            if (refErr) console.error('Referral reward error:', refErr);
+            else console.log('Referral reward result:', refResult);
+          }
+        } catch (refCatch) {
+          console.error('Referral reward exception:', refCatch);
+        }
+
+
         // Award PawBucks for recurring payments
         if (isRenewal) {
           console.log('Processing PawBucks for recurring subscription payment');
