@@ -873,23 +873,24 @@ const Auth = () => {
  </p>
  </div>
  )}
- {userType ==="pet_owner" && (
- <div className="space-y-2 animate-fade-in">
- <Label htmlFor="referralCode">Referral Code (Optional)</Label>
- <Input 
- id="referralCode" 
- name="referralCode" 
- placeholder="Enter code to get $10 bonus"
- value={referralCode}
- onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
- maxLength={8}
- aria-describedby="referral-help"
- />
- <p id="referral-help" className="text-xs text-muted-foreground">
- Both you and your referrer get $10 after your first transaction!
- </p>
- </div>
- )}
+          <div className="space-y-2 animate-fade-in">
+            <Label htmlFor="referralCode">Referral Code (Optional)</Label>
+            <Input 
+              id="referralCode" 
+              name="referralCode" 
+              placeholder="Enter a referral code"
+              value={referralCode}
+              onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+              maxLength={8}
+              aria-describedby="referral-help"
+            />
+            <p id="referral-help" className="text-xs text-muted-foreground">
+              {userType === "pet_owner"
+                ? "Join with a code and get 10,000 PawBucks added to your wallet."
+                : "Joining with a code rewards the member who referred you."}
+            </p>
+          </div>
+
  <Button 
  type="submit" 
  className="w-full" 
