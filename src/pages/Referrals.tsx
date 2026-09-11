@@ -61,6 +61,7 @@ const Referrals = () => {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [creditCents, setCreditCents] = useState(0);
+  const [appliedCents, setAppliedCents] = useState(0);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -89,7 +90,7 @@ const Referrals = () => {
           .limit(50),
         supabase
           .from("pet_pro_referral_credits")
-          .select("balance_cents")
+          .select("balance_cents, lifetime_applied_cents")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
@@ -98,6 +99,7 @@ const Referrals = () => {
       setIsPro(!!proRes.data);
       setRewards(rewardsRes.data || []);
       setCreditCents(creditRes.data?.balance_cents || 0);
+      setAppliedCents(creditRes.data?.lifetime_applied_cents || 0);
 
       const rows = referralsRes.data || [];
       if (rows.length) {
