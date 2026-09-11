@@ -12,6 +12,7 @@ import {
   linkTaxCalculation,
   reverseTaxForRefund,
 } from "../_shared/tax.ts";
+import { applyReferralCreditToCollectedFee } from "../_shared/referral-credit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
