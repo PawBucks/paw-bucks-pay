@@ -141,31 +141,31 @@ const ReferralCardComponent = () => {
  {referrals.length > 0 && (
  <div className="space-y-2">
  <div className="flex items-center gap-2">
- <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">👥</span>
- <p className="text-sm font-medium">
- Your Referrals ({referrals.length})
- </p>
- </div>
- <div className="space-y-2">
- {referrals.map((referral) => (
- <div
- key={referral.id}
- className="flex items-center justify-between p-3 bg-muted rounded-lg"
- >
- <span className="text-sm">
- {referral.profiles?.full_name ||"User"}
- </span>
- {referral.referrer_bonus_awarded ? (
- <span className="text-xs text-accent font-medium">
- ✓ $10 Awarded
- </span>
- ) : (
- <span className="text-xs text-muted-foreground">
- Pending first transaction
- </span>
- )}
- </div>
- ))}
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <p className="text-sm font-medium">
+                Your Referrals ({referrals.length})
+              </p>
+            </div>
+            <div className="space-y-2">
+              {referrals.map((referral) => (
+                <div
+                  key={referral.id}
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                >
+                  <span className="text-sm">
+                    {referral.profiles?.full_name || "User"}
+                  </span>
+                  {referral.referrer_bonus_awarded ? (
+                    <span className="text-xs text-accent font-medium">
+                      Reward earned
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      Pending membership
+                    </span>
+                  )}
+                </div>
+              ))}
  </div>
  </div>
  )}
