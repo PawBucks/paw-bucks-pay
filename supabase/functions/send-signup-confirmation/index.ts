@@ -125,19 +125,22 @@ serve(async (req: Request) => {
       }, { onConflict: "id" });
     } catch (e) { console.warn("profile upsert", e); }
 
-    if (body.referralCode && body.userType === "pet_owner") {
+    // Referral capture — every account type can be referred (pet parents & Pet Pros).
+    if (body.referralCode) {
       try {
         const { data: referrer } = await admin
           .from("profiles").select("id").eq("referral_code", body.referralCode).single();
-        if (referrer) {
+        if (referrer && referrer.id !== userId) {
           await admin.from("referrals").insert({
             referrer_id: referrer.id,
             referee_id: userId,
             referral_code: body.referralCode,
+            referee_user_type: body.signupIntent === "vet" ? "vet" : body.userType,
           });
         }
       } catch (e) { console.warn("referral", e); }
     }
+
 
     // 4) Send the branded confirmation email via Resend.
     const { error: sendErr } = await resend.emails.send({

@@ -9900,6 +9900,27 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_pro_referral_credits: {
+        Row: {
+          balance_cents: number
+          lifetime_earned_cents: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance_cents?: number
+          lifetime_earned_cents?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance_cents?: number
+          lifetime_earned_cents?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pet_profiles: {
         Row: {
           age_estimate: string | null
@@ -11593,39 +11614,101 @@ export type Database = {
           },
         ]
       }
+      referral_rewards: {
+        Row: {
+          amount_cents: number
+          amount_pb: number
+          beneficiary_id: string
+          created_at: string
+          description: string | null
+          id: string
+          period_month: string
+          referral_id: string
+          reward_type: string
+        }
+        Insert: {
+          amount_cents?: number
+          amount_pb?: number
+          beneficiary_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          period_month?: string
+          referral_id: string
+          reward_type: string
+        }
+        Update: {
+          amount_cents?: number
+          amount_pb?: number
+          beneficiary_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          period_month?: string
+          referral_id?: string
+          reward_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_rewards_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referrals: {
         Row: {
           created_at: string | null
           id: string
+          pro_sales_bonus_awarded: boolean
+          pro_sales_total: number
           referee_bonus_amount: number | null
           referee_bonus_awarded: boolean | null
           referee_id: string
+          referee_subscription_tier: string | null
+          referee_user_type: string | null
           referral_code: string
           referrer_bonus_amount: number | null
           referrer_bonus_awarded: boolean | null
           referrer_id: string
+          referrer_is_pro: boolean
+          signup_bonus_awarded: boolean
         }
         Insert: {
           created_at?: string | null
           id?: string
+          pro_sales_bonus_awarded?: boolean
+          pro_sales_total?: number
           referee_bonus_amount?: number | null
           referee_bonus_awarded?: boolean | null
           referee_id: string
+          referee_subscription_tier?: string | null
+          referee_user_type?: string | null
           referral_code: string
           referrer_bonus_amount?: number | null
           referrer_bonus_awarded?: boolean | null
           referrer_id: string
+          referrer_is_pro?: boolean
+          signup_bonus_awarded?: boolean
         }
         Update: {
           created_at?: string | null
           id?: string
+          pro_sales_bonus_awarded?: boolean
+          pro_sales_total?: number
           referee_bonus_amount?: number | null
           referee_bonus_awarded?: boolean | null
           referee_id?: string
+          referee_subscription_tier?: string | null
+          referee_user_type?: string | null
           referral_code?: string
           referrer_bonus_amount?: number | null
           referrer_bonus_awarded?: boolean | null
           referrer_id?: string
+          referrer_is_pro?: boolean
+          signup_bonus_awarded?: boolean
         }
         Relationships: [
           {
@@ -16928,6 +17011,14 @@ export type Database = {
         }
         Returns: Json
       }
+      credit_pet_pro_referral_usd: {
+        Args: { _amount_cents: number; _user_id: string }
+        Returns: undefined
+      }
+      credit_referral_pawbucks: {
+        Args: { _amount_pb: number; _description: string; _user_id: string }
+        Returns: undefined
+      }
       current_user_email_confirmed: { Args: never; Returns: boolean }
       default_pawbucks_cap_pct: {
         Args: { p_business_type: string }
@@ -17259,6 +17350,7 @@ export type Database = {
       }
       is_admin_or_service: { Args: never; Returns: boolean }
       is_offer_valid: { Args: { offer_uuid: string }; Returns: boolean }
+      is_pet_pro: { Args: { _user_id: string }; Returns: boolean }
       is_returning_customer: {
         Args: { p_merchant_id: string; p_user_id: string }
         Returns: boolean
@@ -17335,6 +17427,10 @@ export type Database = {
           message: string
           success: boolean
         }[]
+      }
+      process_referral_subscription_reward: {
+        Args: { p_period_start?: string; p_referee_id: string; p_tier: string }
+        Returns: Json
       }
       recompute_pawbucks_wallet: {
         Args: { p_user_id: string }

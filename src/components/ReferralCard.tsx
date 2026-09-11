@@ -3,7 +3,7 @@ import { supabase } from"@/integrations/supabase/client";
 import { GradientCard } from"@/components/ui/gradient-card";
 import { Button } from"@/components/ui/button";
 import { Input } from"@/components/ui/input";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Gift, Users } from "lucide-react";
 import { toast } from"sonner";
 import { buildAppUrl } from"@/lib/url";
 
@@ -93,11 +93,11 @@ const ReferralCardComponent = () => {
  const handleShare = useCallback(async () => {
  if (navigator.share) {
  try {
- await navigator.share({
- title:"Join PawBucks",
- text: `Use my referral code ${referralCode} and we both get $10!`,
- url: shareUrl,
- });
+        await navigator.share({
+          title: "Join PawBucks",
+          text: `Use my referral code ${referralCode} and get 10,000 PawBucks when you join!`,
+          url: shareUrl,
+        });
  } catch (error) {
  // User cancelled share
  }
@@ -111,18 +111,19 @@ const ReferralCardComponent = () => {
  }
 
  return (
- <GradientCard className="md:col-span-3">
- <div className="flex items-center gap-2 mb-4">
- <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
- <span className="w-5 h-5 text-accent" aria-hidden="true">🎁</span>
- </div>
- <div>
- <h3 className="text-xl font-semibold">Referral Program</h3>
- <p className="text-sm text-muted-foreground">
- Share your code and both get $10 after the first transaction
- </p>
- </div>
- </div>
+    <GradientCard className="md:col-span-3">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+          <Gift className="w-5 h-5 text-accent" />
+        </div>
+        <div>
+          <h3 className="text-xl font-semibold">Referral Program</h3>
+          <p className="text-sm text-muted-foreground">
+            Friends get 10,000 PawBucks when they join — you earn up to 25,000 PawBucks per referral
+          </p>
+        </div>
+      </div>
+
 
  <div className="space-y-4">
  <div className="flex gap-2">
@@ -140,31 +141,31 @@ const ReferralCardComponent = () => {
  {referrals.length > 0 && (
  <div className="space-y-2">
  <div className="flex items-center gap-2">
- <span className="w-4 h-4 text-muted-foreground" aria-hidden="true">👥</span>
- <p className="text-sm font-medium">
- Your Referrals ({referrals.length})
- </p>
- </div>
- <div className="space-y-2">
- {referrals.map((referral) => (
- <div
- key={referral.id}
- className="flex items-center justify-between p-3 bg-muted rounded-lg"
- >
- <span className="text-sm">
- {referral.profiles?.full_name ||"User"}
- </span>
- {referral.referrer_bonus_awarded ? (
- <span className="text-xs text-accent font-medium">
- ✓ $10 Awarded
- </span>
- ) : (
- <span className="text-xs text-muted-foreground">
- Pending first transaction
- </span>
- )}
- </div>
- ))}
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <p className="text-sm font-medium">
+                Your Referrals ({referrals.length})
+              </p>
+            </div>
+            <div className="space-y-2">
+              {referrals.map((referral) => (
+                <div
+                  key={referral.id}
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                >
+                  <span className="text-sm">
+                    {referral.profiles?.full_name || "User"}
+                  </span>
+                  {referral.referrer_bonus_awarded ? (
+                    <span className="text-xs text-accent font-medium">
+                      Reward earned
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      Pending membership
+                    </span>
+                  )}
+                </div>
+              ))}
  </div>
  </div>
  )}
