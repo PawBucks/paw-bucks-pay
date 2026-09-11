@@ -61,6 +61,7 @@ const Referrals = () => {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [creditCents, setCreditCents] = useState(0);
+  const [appliedCents, setAppliedCents] = useState(0);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -89,7 +90,7 @@ const Referrals = () => {
           .limit(50),
         supabase
           .from("pet_pro_referral_credits")
-          .select("balance_cents")
+          .select("balance_cents, lifetime_applied_cents")
           .eq("user_id", user.id)
           .maybeSingle(),
       ]);
@@ -98,6 +99,7 @@ const Referrals = () => {
       setIsPro(!!proRes.data);
       setRewards(rewardsRes.data || []);
       setCreditCents(creditRes.data?.balance_cents || 0);
+      setAppliedCents(creditRes.data?.lifetime_applied_cents || 0);
 
       const rows = referralsRes.data || [];
       if (rows.length) {
@@ -275,9 +277,14 @@ const Referrals = () => {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">
-                    {isPro ? "Referral credit" : "Cash rewards"}
+                    {isPro ? "Fee credit available" : "Cash rewards"}
                   </p>
                   <p className="text-2xl font-bold">{USD(isPro ? creditCents : totalUsdEarned)}</p>
+                  {isPro && appliedCents > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {USD(appliedCents)} applied to fees
+                    </p>
+                  )}
                 </div>
               </div>
             </GradientCard>
@@ -341,6 +348,16 @@ const Referrals = () => {
                 </div>
               ))}
             </div>
+            {isPro && (
+              <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/20 flex items-start gap-2">
+                <Zap className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <p className="text-sm">
+                  Referral rewards build a fee credit that is applied
+                  automatically to the <strong>Success Fee</strong> on your next payments — nothing
+                  to claim, and the credit reduces what you pay until it runs out.
+                </p>
+              </div>
+            )}
             {!isPro && (
               <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/20 flex items-start gap-2">
                 <Zap className="w-4 h-4 text-accent mt-0.5 shrink-0" />

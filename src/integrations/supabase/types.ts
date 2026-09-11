@@ -9900,21 +9900,54 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_pro_referral_credit_usage: {
+        Row: {
+          amount_cents: number
+          context: string | null
+          created_at: string
+          fee_cents_before: number
+          id: string
+          reference: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          context?: string | null
+          created_at?: string
+          fee_cents_before?: number
+          id?: string
+          reference?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          context?: string | null
+          created_at?: string
+          fee_cents_before?: number
+          id?: string
+          reference?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       pet_pro_referral_credits: {
         Row: {
           balance_cents: number
+          lifetime_applied_cents: number
           lifetime_earned_cents: number
           updated_at: string
           user_id: string
         }
         Insert: {
           balance_cents?: number
+          lifetime_applied_cents?: number
           lifetime_earned_cents?: number
           updated_at?: string
           user_id: string
         }
         Update: {
           balance_cents?: number
+          lifetime_applied_cents?: number
           lifetime_earned_cents?: number
           updated_at?: string
           user_id?: string
@@ -16998,6 +17031,15 @@ export type Database = {
       compute_brand_redeemable_cents: {
         Args: { p_line_items: Json; p_merchant_id: string; p_user_id: string }
         Returns: Json
+      }
+      consume_pet_pro_referral_credit: {
+        Args: {
+          _context?: string
+          _fee_cents: number
+          _reference?: string
+          _user_id: string
+        }
+        Returns: number
       }
       credit_branded_pawbucks: {
         Args: {

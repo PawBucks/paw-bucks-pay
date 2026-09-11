@@ -12,6 +12,7 @@ import {
   linkTaxCalculation,
   reverseTaxForRefund,
 } from "../_shared/tax.ts";
+import { applyReferralCreditToCollectedFee } from "../_shared/referral-credit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -440,6 +441,15 @@ serve(async (req) => {
               logStep("Transaction created", { transactionId: transaction?.id });
             }
 
+            // Pet Pro referral credit offsets the Success Fee on this payment.
+            await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
+              merchantId: resolvedMerchantId,
+              paymentIntent,
+              feeCents: Math.round(platformFee * 100),
+              context: 'invoice_payment_success_fee',
+            });
+
+
             // ========================================
             // CREDIT PAWBUCKS TO MERCHANT (when customer uses PawBucks for invoice)
             // ========================================
@@ -772,6 +782,15 @@ serve(async (req) => {
           } else {
             logStep("Transaction created", { transactionId: transaction?.id, pawbucksEarned });
           }
+
+          // Pet Pro referral credit offsets the Success Fee on this payment.
+          await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
+            merchantId: resolvedMerchantId,
+            paymentIntent,
+            feeCents: Math.round(platformFee * 100),
+            context: 'direct_payment_success_fee',
+          });
+
 
           // Commit the Stripe Tax calculation into a permanent tax transaction
           // now that the payment succeeded, and link it to this transaction row.
