@@ -783,6 +783,15 @@ serve(async (req) => {
             logStep("Transaction created", { transactionId: transaction?.id, pawbucksEarned });
           }
 
+          // Pet Pro referral credit offsets the Success Fee on this payment.
+          await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
+            merchantId: resolvedMerchantId,
+            paymentIntent,
+            feeCents: Math.round(platformFee * 100),
+            context: 'direct_payment_success_fee',
+          });
+
+
           // Commit the Stripe Tax calculation into a permanent tax transaction
           // now that the payment succeeded, and link it to this transaction row.
           const taxCalculationId = paymentIntent.metadata?.tax_calculation_id || null;
