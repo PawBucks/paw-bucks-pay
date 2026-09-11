@@ -277,9 +277,14 @@ const Referrals = () => {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">
-                    {isPro ? "Referral credit" : "Cash rewards"}
+                    {isPro ? "Fee credit available" : "Cash rewards"}
                   </p>
                   <p className="text-2xl font-bold">{USD(isPro ? creditCents : totalUsdEarned)}</p>
+                  {isPro && appliedCents > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {USD(appliedCents)} applied to fees
+                    </p>
+                  )}
                 </div>
               </div>
             </GradientCard>
