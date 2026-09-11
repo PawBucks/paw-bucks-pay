@@ -441,6 +441,15 @@ serve(async (req) => {
               logStep("Transaction created", { transactionId: transaction?.id });
             }
 
+            // Pet Pro referral credit offsets the Success Fee on this payment.
+            await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
+              merchantId: resolvedMerchantId,
+              paymentIntent,
+              feeCents: Math.round(platformFee * 100),
+              context: 'invoice_payment_success_fee',
+            });
+
+
             // ========================================
             // CREDIT PAWBUCKS TO MERCHANT (when customer uses PawBucks for invoice)
             // ========================================
