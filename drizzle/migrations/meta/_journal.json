@@ -8,6 +8,13 @@
       "when": 1789141535149,
       "tag": "0000_referral_program_v2",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789141941960,
+      "tag": "0001_pet_pro_referral_credit_usage",
+      "breakpoints": true
     }
   ]
 }
