@@ -1,6 +1,7 @@
 import { useState, useEffect } from"react";
 import { useAuth } from"@/hooks/useAuth";
 import { merchantSubscriptionsService } from"@/services/api/merchantSubscriptions.service";
+import { petsService } from"@/services/api/pets.service";
 import { getStripeForConnectedAccount } from"@/lib/stripe";
 import { supabase } from"@/integrations/supabase/client";
 import { useQuery } from"@tanstack/react-query";
@@ -82,6 +83,40 @@ const CheckoutForm = ({
  const [error, setError] = useState<string | null>(null);
  const [pawbucksToUse, setPawbucksToUse] = useState(0);
  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
+ const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+
+ // Pets on the account — a household with several pets may hold one
+ // subscription per pet on the same plan.
+ const { data: pets } = useQuery({
+  queryKey: ["pet-profiles", user?.id],
+  queryFn: async () => {
+   const result = await petsService.getByUserId(user!.id);
+   if (result.error) throw result.error;
+   return result.data;
+  },
+  enabled: !!user?.id,
+  staleTime: 1000 * 60 * 5,
+ });
+
+ // Pets that already have this plan — they can't be picked again.
+ const { data: subscribedPets } = useQuery({
+  queryKey: ["subscribed-pets", merchantId, plan.stripe_price_id, user?.id],
+  queryFn: () => merchantSubscriptionsService.getSubscribedPetIds(merchantId, plan.stripe_price_id),
+  enabled: !!user?.id,
+  staleTime: 0,
+ });
+
+ const takenPetIds = subscribedPets?.petIds ?? [];
+ const availablePets = (pets || []).filter((p: any) => !takenPetIds.includes(p.id));
+ const petSelectionRequired = (pets || []).length > 0;
+
+ // Default to the first pet that isn't already subscribed.
+ useEffect(() => {
+  if (!petSelectionRequired) return;
+  if (selectedPetId && !takenPetIds.includes(selectedPetId)) return;
+  setSelectedPetId(availablePets[0]?.id ?? null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [petSelectionRequired, availablePets.length]);
 
  // Use the spendable PawBucks hook to get available balance + welcome credit
  const { 
