@@ -7434,6 +7434,8 @@ export type Database = {
           merchant_id: string
           metadata: Json | null
           next_billing_date: string
+          pet_id: string | null
+          pet_name: string | null
           product_name: string
           status: string
           stripe_customer_id_on_connected: string
@@ -7461,6 +7463,8 @@ export type Database = {
           merchant_id: string
           metadata?: Json | null
           next_billing_date: string
+          pet_id?: string | null
+          pet_name?: string | null
           product_name: string
           status?: string
           stripe_customer_id_on_connected: string
@@ -7488,6 +7492,8 @@ export type Database = {
           merchant_id?: string
           metadata?: Json | null
           next_billing_date?: string
+          pet_id?: string | null
+          pet_name?: string | null
           product_name?: string
           status?: string
           stripe_customer_id_on_connected?: string
@@ -7508,6 +7514,13 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_subscriptions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
           {

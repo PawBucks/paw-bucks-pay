@@ -15,6 +15,13 @@
       "when": 1789141941960,
       "tag": "0001_pet_pro_referral_credit_usage",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789665668771,
+      "tag": "0002_merchant_subscriptions_pet_link",
+      "breakpoints": true
     }
   ]
 }
