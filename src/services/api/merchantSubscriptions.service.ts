@@ -5,13 +5,15 @@ type MerchantSubscription = Tables<"merchant_subscriptions">;
 type MerchantSubscriptionEvent = Tables<"merchant_subscription_events">;
 
 export interface CreateMerchantSubscriptionParams {
- merchantId: string;
- priceId: string;
- productName: string;
- paymentMethodId: string;
- pawbucksToUse?: number;
- autoRedeem?: boolean;
- metadata?: Record<string, string>;
+  merchantId: string;
+  priceId: string;
+  productName: string;
+  paymentMethodId: string;
+  pawbucksToUse?: number;
+  autoRedeem?: boolean;
+  /** Which pet this subscription is for — one subscription per pet is allowed. */
+  petId?: string;
+  metadata?: Record<string, string>;
 }
 
 export interface CreateSubscriptionResult {
@@ -142,27 +144,51 @@ export const merchantSubscriptionsService = {
  return data;
  },
 
- /**
- * Check if user has an active subscription to a specific merchant/product
- */
- async hasActiveSubscription(merchantId: string, priceId?: string): Promise<boolean> {
- let query = supabase
- .from("merchant_subscriptions")
- .select("id")
- .eq("merchant_id", merchantId)
- .in("status", ["active","past_due"]);
+  /**
+   * Check if user has an active subscription to a specific merchant/product
+   */
+  async hasActiveSubscription(merchantId: string, priceId?: string): Promise<boolean> {
+    let query = supabase
+      .from("merchant_subscriptions")
+      .select("id")
+      .eq("merchant_id", merchantId)
+      .in("status", ["active","past_due"]);
 
- if (priceId) {
- query = query.eq("stripe_price_id", priceId);
- }
+    if (priceId) {
+      query = query.eq("stripe_price_id", priceId);
+    }
 
- const { data, error } = await query.limit(1);
- 
- if (error) {
- console.error("Error checking subscription:", error);
- return false;
- }
+    const { data, error } = await query.limit(1);
+    
+    if (error) {
+      console.error("Error checking subscription:", error);
+      return false;
+    }
 
- return (data?.length || 0) > 0;
- },
+    return (data?.length || 0) > 0;
+  },
+
+  /**
+   * Which of the user's pets already hold an active subscription to this plan.
+   * Multi-pet households may subscribe once per pet, so we only block the pets
+   * that are already covered.
+   */
+  async getSubscribedPetIds(merchantId: string, priceId: string): Promise<{ petIds: string[]; hasUnassigned: boolean }> {
+    const { data, error } = await supabase
+      .from("merchant_subscriptions")
+      .select("pet_id")
+      .eq("merchant_id", merchantId)
+      .eq("stripe_price_id", priceId)
+      .in("status", ["active","trialing","past_due"]);
+
+    if (error) {
+      console.error("Error checking subscribed pets:", error);
+      return { petIds: [], hasUnassigned: false };
+    }
+
+    return {
+      petIds: (data || []).map((r: any) => r.pet_id).filter(Boolean),
+      hasUnassigned: (data || []).some((r: any) => !r.pet_id),
+    };
+  },
 };

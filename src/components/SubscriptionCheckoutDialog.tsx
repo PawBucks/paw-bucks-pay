@@ -1,6 +1,7 @@
 import { useState, useEffect } from"react";
 import { useAuth } from"@/hooks/useAuth";
 import { merchantSubscriptionsService } from"@/services/api/merchantSubscriptions.service";
+import { petsService } from"@/services/api/pets.service";
 import { getStripeForConnectedAccount } from"@/lib/stripe";
 import { supabase } from"@/integrations/supabase/client";
 import { useQuery } from"@tanstack/react-query";
@@ -82,6 +83,40 @@ const CheckoutForm = ({
  const [error, setError] = useState<string | null>(null);
  const [pawbucksToUse, setPawbucksToUse] = useState(0);
  const [pawbucksSource, setPawbucksSource] = useState<PawBucksSource>("none");
+ const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+
+ // Pets on the account — a household with several pets may hold one
+ // subscription per pet on the same plan.
+ const { data: pets } = useQuery({
+  queryKey: ["pet-profiles", user?.id],
+  queryFn: async () => {
+   const result = await petsService.getByUserId(user!.id);
+   if (result.error) throw result.error;
+   return result.data;
+  },
+  enabled: !!user?.id,
+  staleTime: 1000 * 60 * 5,
+ });
+
+ // Pets that already have this plan — they can't be picked again.
+ const { data: subscribedPets } = useQuery({
+  queryKey: ["subscribed-pets", merchantId, plan.stripe_price_id, user?.id],
+  queryFn: () => merchantSubscriptionsService.getSubscribedPetIds(merchantId, plan.stripe_price_id),
+  enabled: !!user?.id,
+  staleTime: 0,
+ });
+
+ const takenPetIds = subscribedPets?.petIds ?? [];
+ const availablePets = (pets || []).filter((p: any) => !takenPetIds.includes(p.id));
+ const petSelectionRequired = (pets || []).length > 0;
+
+ // Default to the first pet that isn't already subscribed.
+ useEffect(() => {
+  if (!petSelectionRequired) return;
+  if (selectedPetId && !takenPetIds.includes(selectedPetId)) return;
+  setSelectedPetId(availablePets[0]?.id ?? null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [petSelectionRequired, availablePets.length]);
 
  // Use the spendable PawBucks hook to get available balance + welcome credit
  const { 
@@ -206,8 +241,13 @@ const CheckoutForm = ({
  return;
  }
 
- if (!stripe || !elements) {
+  if (!stripe || !elements) {
  setError("Payment system is still loading. Please wait a moment and try again.");
+ return;
+ }
+
+ if (petSelectionRequired && !selectedPetId) {
+ setError("Please choose which pet this subscription is for.");
  return;
  }
 
@@ -237,13 +277,14 @@ const CheckoutForm = ({
  }
 
  // Call our edge function to create the subscription with PawBucks
- const result = await merchantSubscriptionsService.create({
+  const result = await merchantSubscriptionsService.create({
  merchantId,
  priceId: plan.stripe_price_id,
  productName: plan.name,
  paymentMethodId: paymentMethod.id,
  pawbucksToUse: pawbucksToUse > 0 ? pawbucksToUse : undefined,
     autoRedeem: autoRedeemEnabled,
+ petId: selectedPetId ?? undefined,
  });
 
  if (!result.success) {
@@ -333,6 +374,42 @@ const CheckoutForm = ({
  </ul>
  )}
  </div>
+
+ {/* Pet selection — one subscription per pet is allowed */}
+ {petSelectionRequired && (
+ <div className="space-y-2">
+ <p className="text-sm font-medium">Who is this subscription for?</p>
+ <div className="grid grid-cols-2 gap-2">
+ {(pets || []).map((pet: any) => {
+ const taken = takenPetIds.includes(pet.id);
+ return (
+ <button
+ key={pet.id}
+ type="button"
+ disabled={taken}
+ onClick={() => setSelectedPetId(pet.id)}
+ className={`rounded-lg border p-3 text-left transition-colors ${
+ selectedPetId === pet.id
+ ? "border-primary bg-primary/5"
+ : "border-border hover:bg-muted/50"
+ } ${taken ? "opacity-50 cursor-not-allowed" : ""}`}
+ >
+ <p className="text-sm font-medium">{pet.name}</p>
+ <p className="text-xs text-muted-foreground">
+ {taken ? "Already subscribed" : pet.breed || pet.type}
+ </p>
+ </button>
+ );
+ })}
+ </div>
+ {availablePets.length === 0 && (
+ <p className="text-xs text-muted-foreground">
+ All of your pets already have this plan. Add another pet to subscribe again.
+ </p>
+ )}
+ </div>
+ )}
+
 
  {/* Source Selector - when both earned and promotional are available */}
  {hasBothSources && (
@@ -562,7 +639,7 @@ const CheckoutForm = ({
  <Button type="button" variant="outline" onClick={onClose} disabled={isProcessing}>
  Cancel
  </Button>
- <Button type="submit" disabled={!stripe || !user || isProcessing || loadingBalance}>
+ <Button type="submit" disabled={!stripe || !user || isProcessing || loadingBalance || (petSelectionRequired && !selectedPetId)}>
  {isProcessing ? (
  <>
  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
