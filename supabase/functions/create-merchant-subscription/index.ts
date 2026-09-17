@@ -377,25 +377,53 @@ serve(async (req) => {
     if (!parseResult.success) {
       throw new Error(`Invalid request: ${parseResult.error.message}`);
     }
-    const { merchantId, priceId, productName, paymentMethodId, pawbucksToUse: rawPawbucksToUse, autoRedeem, metadata } = parseResult.data;
+    const { merchantId, priceId, productName, paymentMethodId, pawbucksToUse: rawPawbucksToUse, autoRedeem, petId, metadata } = parseResult.data;
     let pawbucksToUse = rawPawbucksToUse;
-    logStep("Request validated", { merchantId, priceId, productName, pawbucksToUse, autoRedeem });
+    logStep("Request validated", { merchantId, priceId, productName, pawbucksToUse, autoRedeem, petId });
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-12-18.acacia" });
 
-    // === DUPLICATE PREVENTION: Block identical subscription purchases within 60 seconds ===
+    // Resolve + verify pet ownership. A subscription may be attached to one of
+    // the user's own pets so multi-pet households can hold several
+    // subscriptions to the same plan (one per pet).
+    let petName: string | null = null;
+    if (petId) {
+      const { data: pet } = await supabaseAdmin
+        .from("pet_profiles")
+        .select("id, name, user_id")
+        .eq("id", petId)
+        .maybeSingle();
+
+      if (!pet || pet.user_id !== user.id) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Selected pet was not found on your account.",
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        });
+      }
+      petName = pet.name;
+    }
+
+    // === DUPLICATE PREVENTION ===
+    // Scoped per pet: one active subscription per plan PER PET. A second pet on
+    // the same plan is a legitimate additional purchase, not a duplicate.
     const oneMinuteAgo = new Date(Date.now() - 60_000).toISOString();
 
-    // Check 1: Already has an active subscription to this exact plan
-    const { data: existingActiveSub } = await supabaseAdmin
-      .from("merchant_subscriptions")
-      .select("id, created_at")
-      .eq("user_id", user.id)
-      .eq("merchant_id", merchantId)
-      .eq("stripe_price_id", priceId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
+    const scopeToPet = (q: any) => (petId ? q.eq("pet_id", petId) : q.is("pet_id", null));
+
+    // Check 1: Already has an active subscription to this exact plan for this pet
+    const { data: existingActiveSub } = await scopeToPet(
+      supabaseAdmin
+        .from("merchant_subscriptions")
+        .select("id, created_at")
+        .eq("user_id", user.id)
+        .eq("merchant_id", merchantId)
+        .eq("stripe_price_id", priceId)
+        .in("status", ["active", "trialing"])
+    ).maybeSingle();
 
     if (existingActiveSub) {
       logStep("DUPLICATE BLOCKED: User already has active subscription to this plan", {
@@ -403,10 +431,13 @@ serve(async (req) => {
         userId: user.id,
         merchantId,
         priceId,
+        petId,
       });
       return new Response(JSON.stringify({
         success: false,
-        error: "You already have an active subscription to this plan.",
+        error: petName
+          ? `${petName} already has an active subscription to this plan. Choose another pet to add one.`
+          : "You already have an active subscription to this plan.",
         duplicatePrevention: true,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -415,14 +446,15 @@ serve(async (req) => {
     }
 
     // Check 2: A subscription was just created in the last 60 seconds (race condition guard)
-    const { data: recentSub } = await supabaseAdmin
-      .from("merchant_subscriptions")
-      .select("id, created_at")
-      .eq("user_id", user.id)
-      .eq("merchant_id", merchantId)
-      .eq("stripe_price_id", priceId)
-      .gte("created_at", oneMinuteAgo)
-      .maybeSingle();
+    const { data: recentSub } = await scopeToPet(
+      supabaseAdmin
+        .from("merchant_subscriptions")
+        .select("id, created_at")
+        .eq("user_id", user.id)
+        .eq("merchant_id", merchantId)
+        .eq("stripe_price_id", priceId)
+        .gte("created_at", oneMinuteAgo)
+    ).maybeSingle();
 
     if (recentSub) {
       logStep("DUPLICATE BLOCKED: Subscription created within last 60 seconds", {
