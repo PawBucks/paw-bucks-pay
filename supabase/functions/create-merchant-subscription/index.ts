@@ -767,7 +767,9 @@ serve(async (req) => {
           platform: "pawbucks",
           pawbucks_used: actualPawbucksUsed.toString(),
           original_amount: amount.toString(),
-          description: `${productName} subscription to ${merchant.business_name}`,
+          ...(petId ? { pet_id: petId } : {}),
+          ...(petName ? { pet_name: petName } : {}),
+          description: `${productName} subscription to ${merchant.business_name}${petName ? ` (${petName})` : ""}`,
           ...metadata,
         },
       },
@@ -819,7 +821,9 @@ serve(async (req) => {
         last_payment_intent_id: paymentIntent.id,
         last_payment_status: "succeeded",
         application_fee_percent: PLATFORM_FEE_PERCENT * 100,
-        metadata: metadata || {},
+        pet_id: petId || null,
+        pet_name: petName,
+        metadata: { ...(metadata || {}), ...(petName ? { pet_name: petName } : {}) },
       })
       .select()
       .single();
@@ -851,7 +855,7 @@ serve(async (req) => {
         rewards_earned: 0, // filled in below once tier is resolved
         cashback_earned: 0,
         stripe_payment_intent_id: paymentIntent.id,
-        description: `${productName} subscription to ${merchant.business_name}`,
+        description: `${productName} subscription to ${merchant.business_name}${petName ? ` (${petName})` : ""}`,
       });
     if (txInsertErr && (txInsertErr as any).code !== "23505") {
       logStep("WARN: failed to insert transactions row for subscription", { error: txInsertErr.message });
@@ -869,6 +873,7 @@ serve(async (req) => {
         product_name: productName,
         billing_interval: interval,
         merchant_name: merchant.business_name,
+        ...(petName ? { pet_name: petName } : {}),
       },
     });
 
