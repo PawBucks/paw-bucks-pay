@@ -241,8 +241,13 @@ const CheckoutForm = ({
  return;
  }
 
- if (!stripe || !elements) {
+  if (!stripe || !elements) {
  setError("Payment system is still loading. Please wait a moment and try again.");
+ return;
+ }
+
+ if (petSelectionRequired && !selectedPetId) {
+ setError("Please choose which pet this subscription is for.");
  return;
  }
 
