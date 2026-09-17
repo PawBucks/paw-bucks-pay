@@ -125,6 +125,9 @@ const subscriptionSchema = z.object({
   paymentMethodId: z.string().min(1), // Card payment method from Stripe Elements
   pawbucksToUse: z.number().int().min(0).optional(), // PawBucks to redeem
   autoRedeem: z.boolean().optional().default(false), // Honor user's auto_redeem_mode preference
+  // Which pet this subscription is for. Multi-pet households may hold one
+  // subscription per pet on the same plan — that is NOT a duplicate purchase.
+  petId: z.string().uuid().optional(),
   metadata: z.record(z.string()).optional(),
 });
 
