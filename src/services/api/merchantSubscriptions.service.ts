@@ -5,13 +5,15 @@ type MerchantSubscription = Tables<"merchant_subscriptions">;
 type MerchantSubscriptionEvent = Tables<"merchant_subscription_events">;
 
 export interface CreateMerchantSubscriptionParams {
- merchantId: string;
- priceId: string;
- productName: string;
- paymentMethodId: string;
- pawbucksToUse?: number;
- autoRedeem?: boolean;
- metadata?: Record<string, string>;
+  merchantId: string;
+  priceId: string;
+  productName: string;
+  paymentMethodId: string;
+  pawbucksToUse?: number;
+  autoRedeem?: boolean;
+  /** Which pet this subscription is for — one subscription per pet is allowed. */
+  petId?: string;
+  metadata?: Record<string, string>;
 }
 
 export interface CreateSubscriptionResult {
