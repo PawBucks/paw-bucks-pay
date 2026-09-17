@@ -38,6 +38,7 @@ type Subscriber = {
  id: string;
  user_id: string;
  product_name: string;
+ pet_name?: string | null;
  amount: number;
  currency: string;
  status: string;
@@ -329,6 +330,9 @@ export function MerchantSubscribersTab({ merchantId }: MerchantSubscribersTabPro
  </TableCell>
  <TableCell>
  <span className="font-medium">{sub.product_name}</span>
+ {sub.pet_name && (
+ <p className="text-xs text-muted-foreground">For {sub.pet_name}</p>
+ )}
  </TableCell>
  <TableCell>
  {Formatters.currency((sub.amount / 100))}
