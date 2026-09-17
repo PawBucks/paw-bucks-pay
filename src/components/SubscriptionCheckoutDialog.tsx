@@ -272,13 +272,14 @@ const CheckoutForm = ({
  }
 
  // Call our edge function to create the subscription with PawBucks
- const result = await merchantSubscriptionsService.create({
+  const result = await merchantSubscriptionsService.create({
  merchantId,
  priceId: plan.stripe_price_id,
  productName: plan.name,
  paymentMethodId: paymentMethod.id,
  pawbucksToUse: pawbucksToUse > 0 ? pawbucksToUse : undefined,
     autoRedeem: autoRedeemEnabled,
+ petId: selectedPetId ?? undefined,
  });
 
  if (!result.success) {
@@ -368,6 +369,42 @@ const CheckoutForm = ({
  </ul>
  )}
  </div>
+
+ {/* Pet selection — one subscription per pet is allowed */}
+ {petSelectionRequired && (
+ <div className="space-y-2">
+ <p className="text-sm font-medium">Who is this subscription for?</p>
+ <div className="grid grid-cols-2 gap-2">
+ {(pets || []).map((pet: any) => {
+ const taken = takenPetIds.includes(pet.id);
+ return (
+ <button
+ key={pet.id}
+ type="button"
+ disabled={taken}
+ onClick={() => setSelectedPetId(pet.id)}
+ className={`rounded-lg border p-3 text-left transition-colors ${
+ selectedPetId === pet.id
+ ? "border-primary bg-primary/5"
+ : "border-border hover:bg-muted/50"
+ } ${taken ? "opacity-50 cursor-not-allowed" : ""}`}
+ >
+ <p className="text-sm font-medium">{pet.name}</p>
+ <p className="text-xs text-muted-foreground">
+ {taken ? "Already subscribed" : pet.breed || pet.type}
+ </p>
+ </button>
+ );
+ })}
+ </div>
+ {availablePets.length === 0 && (
+ <p className="text-xs text-muted-foreground">
+ All of your pets already have this plan. Add another pet to subscribe again.
+ </p>
+ )}
+ </div>
+ )}
+
 
  {/* Source Selector - when both earned and promotional are available */}
  {hasBothSources && (
