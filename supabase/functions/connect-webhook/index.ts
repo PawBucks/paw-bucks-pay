@@ -442,12 +442,26 @@ serve(async (req) => {
             }
 
             // Pet Pro referral credit offsets the Success Fee on this payment.
-            await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
+            const invoiceCreditApplied = await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
               merchantId: resolvedMerchantId,
               paymentIntent,
               feeCents: Math.round(platformFee * 100),
               context: 'invoice_payment_success_fee',
             });
+
+            // Record the fee Stripe actually kept, not the pre-credit amount.
+            if (invoiceCreditApplied > 0 && transaction?.id) {
+              const netFee = Math.max(0, Math.round((platformFee - invoiceCreditApplied / 100) * 100) / 100);
+              const { error: feeUpdateError } = await supabaseAdmin
+                .from('transactions')
+                .update({ application_fee: netFee })
+                .eq('id', transaction.id);
+              if (feeUpdateError) {
+                logStep("Error updating transaction fee after referral credit", { error: feeUpdateError.message });
+              } else {
+                logStep("Transaction fee reduced by referral credit", { netFee, creditApplied: invoiceCreditApplied });
+              }
+            }
 
 
             // ========================================

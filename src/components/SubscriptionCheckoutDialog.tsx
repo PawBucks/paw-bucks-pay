@@ -107,8 +107,14 @@ const CheckoutForm = ({
  });
 
  const takenPetIds = subscribedPets?.petIds ?? [];
+ // Subscriptions made before the pet picker existed aren't linked to a pet, so
+ // they still take up a slot. Count them so nobody is billed twice.
+ const unassignedCount = subscribedPets?.unassignedCount ?? 0;
  const availablePets = (pets || []).filter((p: any) => !takenPetIds.includes(p.id));
  const petSelectionRequired = (pets || []).length > 0;
+ const allSlotsTaken =
+  petSelectionRequired &&
+  takenPetIds.length + unassignedCount >= (pets || []).length;
 
  // Default to the first pet that isn't already subscribed.
  useEffect(() => {
@@ -243,6 +249,11 @@ const CheckoutForm = ({
 
   if (!stripe || !elements) {
  setError("Payment system is still loading. Please wait a moment and try again.");
+ return;
+ }
+
+ if (allSlotsTaken) {
+ setError("You already have an active subscription to this plan for every pet on your account.");
  return;
  }
 
@@ -402,7 +413,7 @@ const CheckoutForm = ({
  );
  })}
  </div>
- {availablePets.length === 0 && (
+ {(availablePets.length === 0 || allSlotsTaken) && (
  <p className="text-xs text-muted-foreground">
  All of your pets already have this plan. Add another pet to subscribe again.
  </p>
@@ -639,7 +650,7 @@ const CheckoutForm = ({
  <Button type="button" variant="outline" onClick={onClose} disabled={isProcessing}>
  Cancel
  </Button>
- <Button type="submit" disabled={!stripe || !user || isProcessing || loadingBalance || (petSelectionRequired && !selectedPetId)}>
+ <Button type="submit" disabled={!stripe || !user || isProcessing || loadingBalance || allSlotsTaken || (petSelectionRequired && !selectedPetId)}>
  {isProcessing ? (
  <>
  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
