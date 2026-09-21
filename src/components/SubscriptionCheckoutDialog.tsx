@@ -107,8 +107,14 @@ const CheckoutForm = ({
  });
 
  const takenPetIds = subscribedPets?.petIds ?? [];
+ // Subscriptions made before the pet picker existed aren't linked to a pet, so
+ // they still take up a slot. Count them so nobody is billed twice.
+ const unassignedCount = subscribedPets?.unassignedCount ?? 0;
  const availablePets = (pets || []).filter((p: any) => !takenPetIds.includes(p.id));
  const petSelectionRequired = (pets || []).length > 0;
+ const allSlotsTaken =
+  petSelectionRequired &&
+  takenPetIds.length + unassignedCount >= (pets || []).length;
 
  // Default to the first pet that isn't already subscribed.
  useEffect(() => {

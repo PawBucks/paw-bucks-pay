@@ -173,7 +173,10 @@ export const merchantSubscriptionsService = {
    * Multi-pet households may subscribe once per pet, so we only block the pets
    * that are already covered.
    */
-  async getSubscribedPetIds(merchantId: string, priceId: string): Promise<{ petIds: string[]; hasUnassigned: boolean }> {
+  async getSubscribedPetIds(
+    merchantId: string,
+    priceId: string,
+  ): Promise<{ petIds: string[]; hasUnassigned: boolean; unassignedCount: number }> {
     const { data, error } = await supabase
       .from("merchant_subscriptions")
       .select("pet_id")
@@ -183,12 +186,15 @@ export const merchantSubscriptionsService = {
 
     if (error) {
       console.error("Error checking subscribed pets:", error);
-      return { petIds: [], hasUnassigned: false };
+      return { petIds: [], hasUnassigned: false, unassignedCount: 0 };
     }
+
+    const unassignedCount = (data || []).filter((r: any) => !r.pet_id).length;
 
     return {
       petIds: (data || []).map((r: any) => r.pet_id).filter(Boolean),
-      hasUnassigned: (data || []).some((r: any) => !r.pet_id),
+      hasUnassigned: unassignedCount > 0,
+      unassignedCount,
     };
   },
 };

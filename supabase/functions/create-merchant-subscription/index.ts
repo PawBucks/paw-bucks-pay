@@ -472,6 +472,45 @@ serve(async (req) => {
       });
     }
 
+    // Check 3: Legacy subscriptions created before the pet picker have pet_id
+    // NULL, so the per-pet checks above cannot see them. Enforce the household
+    // invariant instead: never hold more subscriptions to one plan than pets.
+    if (petId) {
+      const { data: planSubs } = await supabaseAdmin
+        .from("merchant_subscriptions")
+        .select("id, pet_id")
+        .eq("user_id", user.id)
+        .eq("merchant_id", merchantId)
+        .eq("stripe_price_id", priceId)
+        .in("status", ["active", "trialing"]);
+
+      const { count: petCount } = await supabaseAdmin
+        .from("pet_profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      const existingCount = planSubs?.length ?? 0;
+      const totalPets = petCount ?? 0;
+
+      if (existingCount > 0 && existingCount >= totalPets) {
+        logStep("DUPLICATE BLOCKED: plan subscriptions already cover every pet", {
+          userId: user.id,
+          merchantId,
+          priceId,
+          existingCount,
+          totalPets,
+        });
+        return new Response(JSON.stringify({
+          success: false,
+          error: "You already have an active subscription to this plan for every pet on your account.",
+          duplicatePrevention: true,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 409,
+        });
+      }
+    }
+
     logStep("Duplicate check passed");
 
     // Get merchant details including Stripe Connect account
