@@ -252,6 +252,11 @@ const CheckoutForm = ({
  return;
  }
 
+ if (allSlotsTaken) {
+ setError("You already have an active subscription to this plan for every pet on your account.");
+ return;
+ }
+
  if (petSelectionRequired && !selectedPetId) {
  setError("Please choose which pet this subscription is for.");
  return;
@@ -408,7 +413,7 @@ const CheckoutForm = ({
  );
  })}
  </div>
- {availablePets.length === 0 && (
+ {(availablePets.length === 0 || allSlotsTaken) && (
  <p className="text-xs text-muted-foreground">
  All of your pets already have this plan. Add another pet to subscribe again.
  </p>
