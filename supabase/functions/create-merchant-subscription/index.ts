@@ -755,13 +755,19 @@ serve(async (req) => {
         throw new Error("This merchant does not accept PawBucks.");
       }
 
-      // Calculate discount (ensure minimum Stripe charge)
+      // Calculate discount (ensure minimum Stripe charge).
+      // Always round the discount DOWN to whole cents so the PawBucks we later
+      // debit can never exceed what the customer actually holds.
       const maxPawbucksDiscountCents = amount - MINIMUM_STRIPE_CENTS;
-      const requestedDiscountCents = Math.round(pawbucksToUse * PAWBUCKS_TO_USD * 100);
-      pawbucksDiscountCents = Math.min(requestedDiscountCents, maxPawbucksDiscountCents);
-      
-      // Recalculate actual PawBucks used based on capped discount
-      actualPawbucksUsed = Math.floor(pawbucksDiscountCents / PAWBUCKS_TO_USD / 100);
+      const requestedDiscountCents = Math.floor(pawbucksToUse * PAWBUCKS_TO_USD * 100);
+      pawbucksDiscountCents = Math.max(0, Math.min(requestedDiscountCents, maxPawbucksDiscountCents));
+
+      // Recalculate actual PawBucks used based on capped discount, never above
+      // the requested (and already validated) amount.
+      actualPawbucksUsed = Math.min(
+        pawbucksToUse,
+        Math.floor(pawbucksDiscountCents / PAWBUCKS_TO_USD / 100),
+      );
       stripeChargeAmount = amount - pawbucksDiscountCents;
 
       logStep("PawBucks redemption calculated", {
