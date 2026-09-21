@@ -84,7 +84,7 @@ async function computeAutoRedeem(
 
     // Stripe still needs a minimum charge (Stripe minimum is $0.50 = 50¢).
     // Reserve at least 50¢ in cents for the card if any cents remain after redemption.
-    const pawbucksValueCents = Math.round(pawbucksToUse * PAWBUCKS_TO_USD * 100);
+    const pawbucksValueCents = Math.floor(pawbucksToUse * PAWBUCKS_TO_USD * 100);
     const remainingCents = amountCents - pawbucksValueCents;
     if (remainingCents > 0 && remainingCents < 50) {
       // Pull back PawBucks to leave at least $0.50 on the card
@@ -563,7 +563,7 @@ serve(async (req) => {
           subscription.amount,
         );
         const pawbucksToUse = autoRedeem.pawbucksToUse;
-        const pawbucksValueCents = Math.round(pawbucksToUse * PAWBUCKS_TO_USD * 100);
+        const pawbucksValueCents = Math.floor(pawbucksToUse * PAWBUCKS_TO_USD * 100);
         const stripeChargeAmount = subscription.amount - pawbucksValueCents;
 
         logStep("Auto-redeem decision", {
@@ -720,7 +720,7 @@ async function handlePaymentSuccess(
   // Use the actual Stripe-charged portion for fee logging and rewards calculation;
   // fall back to the full subscription amount for legacy callers.
   const chargedCents = typeof stripeChargeAmount === "number" ? stripeChargeAmount : subscription.amount;
-  const pawbucksValueCents = Math.round(pawbucksUsed * PAWBUCKS_TO_USD * 100);
+  const pawbucksValueCents = Math.floor(pawbucksUsed * PAWBUCKS_TO_USD * 100);
   const fullAmountDollars = subscription.amount / 100;
   const chargedDollars = chargedCents / 100;
   const pawbucksUsdValue = pawbucksValueCents / 100;

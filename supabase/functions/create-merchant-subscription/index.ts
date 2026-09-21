@@ -755,13 +755,19 @@ serve(async (req) => {
         throw new Error("This merchant does not accept PawBucks.");
       }
 
-      // Calculate discount (ensure minimum Stripe charge)
+      // Calculate discount (ensure minimum Stripe charge).
+      // Always round the discount DOWN to whole cents so the PawBucks we later
+      // debit can never exceed what the customer actually holds.
       const maxPawbucksDiscountCents = amount - MINIMUM_STRIPE_CENTS;
-      const requestedDiscountCents = Math.round(pawbucksToUse * PAWBUCKS_TO_USD * 100);
-      pawbucksDiscountCents = Math.min(requestedDiscountCents, maxPawbucksDiscountCents);
-      
-      // Recalculate actual PawBucks used based on capped discount
-      actualPawbucksUsed = Math.floor(pawbucksDiscountCents / PAWBUCKS_TO_USD / 100);
+      const requestedDiscountCents = Math.floor(pawbucksToUse * PAWBUCKS_TO_USD * 100);
+      pawbucksDiscountCents = Math.max(0, Math.min(requestedDiscountCents, maxPawbucksDiscountCents));
+
+      // Recalculate actual PawBucks used based on capped discount, never above
+      // the requested (and already validated) amount.
+      actualPawbucksUsed = Math.min(
+        pawbucksToUse,
+        Math.floor(pawbucksDiscountCents / PAWBUCKS_TO_USD / 100),
+      );
       stripeChargeAmount = amount - pawbucksDiscountCents;
 
       logStep("PawBucks redemption calculated", {
@@ -916,7 +922,13 @@ serve(async (req) => {
       },
     });
 
+    // NOTE: the card has already been charged successfully at this point.
+    // Nothing below may throw out of the handler — a bookkeeping failure must
+    // never suppress the customer receipt or the merchant notification.
+    let pawbucksEarned = 0;
+
     // === PAWBUCKS REDEMPTION - DEDUCT FROM USER & CREDIT TO MERCHANT ===
+    try {
     if (actualPawbucksUsed > 0) {
       // Debit across wallet → Pet Fund welcome credit → legacy welcome credit
       const debitSources = await getSpendableSources(supabaseAdmin, user.id);
@@ -982,15 +994,19 @@ serve(async (req) => {
         newBalance: merchantNewBalance 
       });
     }
+    } catch (redemptionError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] PawBucks redemption bookkeeping failed after successful charge", redemptionError);
+    }
 
     // === PAWBUCKS REWARDS PROCESSING (based on Stripe amount only) ===
     const stripeAmountInDollars = stripeChargeAmount / 100;
 
+    try {
     // Get user's subscription tier for multiplier
     const { multiplier, tierName } = await getUserTierMultiplier(supabaseAdmin, stripe, user.id);
 
     // Credit PawBucks to user (rewards based on Stripe portion only)
-    const pawbucksEarned = await creditPawBucksToUser(
+    pawbucksEarned = await creditPawBucksToUser(
       supabaseAdmin,
       user.id,
       merchantId,
@@ -1100,6 +1116,11 @@ serve(async (req) => {
         paymentDate: new Date().toISOString(),
       });
     }
+    } catch (postPaymentError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Post-payment rewards/receipt step failed", postPaymentError);
+    }
+
+
 
     return new Response(JSON.stringify({
       success: true,
