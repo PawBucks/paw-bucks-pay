@@ -994,15 +994,19 @@ serve(async (req) => {
         newBalance: merchantNewBalance 
       });
     }
+    } catch (redemptionError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] PawBucks redemption bookkeeping failed after successful charge", redemptionError);
+    }
 
     // === PAWBUCKS REWARDS PROCESSING (based on Stripe amount only) ===
     const stripeAmountInDollars = stripeChargeAmount / 100;
 
+    try {
     // Get user's subscription tier for multiplier
     const { multiplier, tierName } = await getUserTierMultiplier(supabaseAdmin, stripe, user.id);
 
     // Credit PawBucks to user (rewards based on Stripe portion only)
-    const pawbucksEarned = await creditPawBucksToUser(
+    pawbucksEarned = await creditPawBucksToUser(
       supabaseAdmin,
       user.id,
       merchantId,
