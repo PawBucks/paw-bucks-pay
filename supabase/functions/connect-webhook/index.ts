@@ -734,6 +734,8 @@ serve(async (req) => {
         // Calculate amounts
         const amountInDollars = paymentIntent.amount / 100;
         const platformFee = amountInDollars * 0.03; // 3% platform fee
+        // Referral credit refunded back out of the collected Success Fee, in cents.
+        let referralCreditApplied = 0;
 
         // Determine PawBucks multiplier based on subscription tier
         let pawbucksMultiplier = 10;
@@ -798,12 +800,26 @@ serve(async (req) => {
           }
 
           // Pet Pro referral credit offsets the Success Fee on this payment.
-          await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
+          referralCreditApplied = await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
             merchantId: resolvedMerchantId,
             paymentIntent,
             feeCents: Math.round(platformFee * 100),
             context: 'direct_payment_success_fee',
           });
+
+          // Record the fee Stripe actually kept, not the pre-credit amount.
+          if (referralCreditApplied > 0 && transaction?.id) {
+            const netFee = Math.max(0, Math.round((platformFee - referralCreditApplied / 100) * 100) / 100);
+            const { error: feeUpdateError } = await supabaseAdmin
+              .from('transactions')
+              .update({ application_fee: netFee })
+              .eq('id', transaction.id);
+            if (feeUpdateError) {
+              logStep("Error updating transaction fee after referral credit", { error: feeUpdateError.message });
+            } else {
+              logStep("Transaction fee reduced by referral credit", { netFee, creditApplied: referralCreditApplied });
+            }
+          }
 
 
           // Commit the Stripe Tax calculation into a permanent tax transaction
@@ -1001,13 +1017,20 @@ serve(async (req) => {
 
             const expenseRows = [];
 
-            // PawBucks Success Fee (3%)
-            if (platformFee > 0) {
+            // PawBucks Success Fee (3%), less any Pet Pro referral credit that
+            // was refunded back out of the collected fee.
+            const netPlatformFee = Math.max(
+              0,
+              Math.round((platformFee - referralCreditApplied / 100) * 100) / 100,
+            );
+            if (netPlatformFee > 0) {
               expenseRows.push({
                 merchant_id: resolvedMerchantId,
                 category: "platform_fees" as const,
-                amount: platformFee,
-                description: `PawBucks Success Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
+                amount: netPlatformFee,
+                description: referralCreditApplied > 0
+                  ? `PawBucks Success Fee (3%) on $${amountInDollars.toFixed(2)} sale (less $${(referralCreditApplied / 100).toFixed(2)} referral credit)`
+                  : `PawBucks Success Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
                 vendor_name: "PawBucks Network",
                 expense_date: expenseDate,
                 tax_year: taxYear,
