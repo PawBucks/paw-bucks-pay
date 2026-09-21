@@ -1116,6 +1116,11 @@ serve(async (req) => {
         paymentDate: new Date().toISOString(),
       });
     }
+    } catch (postPaymentError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Post-payment rewards/receipt step failed", postPaymentError);
+    }
+
+
 
     return new Response(JSON.stringify({
       success: true,
