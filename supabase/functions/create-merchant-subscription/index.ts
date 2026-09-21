@@ -922,7 +922,13 @@ serve(async (req) => {
       },
     });
 
+    // NOTE: the card has already been charged successfully at this point.
+    // Nothing below may throw out of the handler — a bookkeeping failure must
+    // never suppress the customer receipt or the merchant notification.
+    let pawbucksEarned = 0;
+
     // === PAWBUCKS REDEMPTION - DEDUCT FROM USER & CREDIT TO MERCHANT ===
+    try {
     if (actualPawbucksUsed > 0) {
       // Debit across wallet → Pet Fund welcome credit → legacy welcome credit
       const debitSources = await getSpendableSources(supabaseAdmin, user.id);
