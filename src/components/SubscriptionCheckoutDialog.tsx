@@ -650,7 +650,7 @@ const CheckoutForm = ({
  <Button type="button" variant="outline" onClick={onClose} disabled={isProcessing}>
  Cancel
  </Button>
- <Button type="submit" disabled={!stripe || !user || isProcessing || loadingBalance || (petSelectionRequired && !selectedPetId)}>
+ <Button type="submit" disabled={!stripe || !user || isProcessing || loadingBalance || allSlotsTaken || (petSelectionRequired && !selectedPetId)}>
  {isProcessing ? (
  <>
  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
