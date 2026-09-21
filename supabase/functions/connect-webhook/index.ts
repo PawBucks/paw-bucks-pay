@@ -1017,13 +1017,20 @@ serve(async (req) => {
 
             const expenseRows = [];
 
-            // PawBucks Success Fee (3%)
-            if (platformFee > 0) {
+            // PawBucks Success Fee (3%), less any Pet Pro referral credit that
+            // was refunded back out of the collected fee.
+            const netPlatformFee = Math.max(
+              0,
+              Math.round((platformFee - referralCreditApplied / 100) * 100) / 100,
+            );
+            if (netPlatformFee > 0) {
               expenseRows.push({
                 merchant_id: resolvedMerchantId,
                 category: "platform_fees" as const,
-                amount: platformFee,
-                description: `PawBucks Success Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
+                amount: netPlatformFee,
+                description: referralCreditApplied > 0
+                  ? `PawBucks Success Fee (3%) on $${amountInDollars.toFixed(2)} sale (less $${(referralCreditApplied / 100).toFixed(2)} referral credit)`
+                  : `PawBucks Success Fee (3%) on $${amountInDollars.toFixed(2)} sale`,
                 vendor_name: "PawBucks Network",
                 expense_date: expenseDate,
                 tax_year: taxYear,
