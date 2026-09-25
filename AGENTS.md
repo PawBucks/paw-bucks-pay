@@ -1,0 +1,1 @@
+- Push alerts: AFTER INSERT trigger on notifications calls notify-push via pg_net, which relays to the push server with PUSH_WEBHOOK_SECRET — keeps the secret out of the database.
