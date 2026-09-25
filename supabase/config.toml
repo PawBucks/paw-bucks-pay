@@ -275,3 +275,6 @@ project_id = "yxpnkipcoxksmnsvpvwi"
     verify_jwt = true
   [functions.vest-pending-pawbucks]
     verify_jwt = false
+
+[functions.notify-push]
+verify_jwt = false
