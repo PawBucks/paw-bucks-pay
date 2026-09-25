@@ -1000,124 +1000,177 @@ serve(async (req) => {
 
     // === PAWBUCKS REWARDS PROCESSING (based on Stripe amount only) ===
     const stripeAmountInDollars = stripeChargeAmount / 100;
+    const amountInDollars = amount / 100;
+    let multiplier = 10;
+    let tierName = "Free";
 
     try {
-    // Get user's subscription tier for multiplier
-    const { multiplier, tierName } = await getUserTierMultiplier(supabaseAdmin, stripe, user.id);
-
-    // Credit PawBucks to user (rewards based on Stripe portion only)
-    pawbucksEarned = await creditPawBucksToUser(
-      supabaseAdmin,
-      user.id,
-      merchantId,
-      stripeAmountInDollars,
-      multiplier,
-      tierName,
-      productName,
-      merchant.business_name,
-      paymentIntent.id
-    );
-
-    // Update transactions row with rewards_earned (best-effort)
-    if (pawbucksEarned > 0) {
-      await supabaseAdmin
-        .from("transactions")
-        .update({ rewards_earned: pawbucksEarned, cashback_earned: pawbucksEarned })
-        .eq("stripe_payment_intent_id", paymentIntent.id);
+      const tier = await getUserTierMultiplier(supabaseAdmin, stripe, user.id);
+      multiplier = tier.multiplier;
+      tierName = tier.tierName;
+    } catch (tierError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Tier lookup failed after successful charge", tierError);
     }
 
-    // Auto-log success fee as Tax Vault expense
-    if (applicationFee > 0) {
-      const expenseDate = new Date().toISOString().split('T')[0];
-      const taxYear = new Date().getFullYear();
-
-      await supabaseAdmin
-        .from("merchant_tax_expenses")
-        .insert({
-          merchant_id: merchantId,
-          category: "platform_fees",
-          amount: applicationFee / 100, // Convert to dollars
-          description: `PawBucks Success Fee (3%) on $${stripeAmountInDollars.toFixed(2)} subscription payment`,
-          vendor_name: "PawBucks Network",
-          expense_date: expenseDate,
-          tax_year: taxYear,
-          is_auto_logged: true,
-          source_purchase_id: paymentIntent.id,
-        });
-
-      logStep("Success fee auto-logged to Tax Vault");
+    try {
+      // Credit PawBucks to user (rewards based on Stripe portion only)
+      pawbucksEarned = await creditPawBucksToUser(
+        supabaseAdmin,
+        user.id,
+        merchantId,
+        stripeAmountInDollars,
+        multiplier,
+        tierName,
+        productName,
+        merchant.business_name,
+        paymentIntent.id
+      );
+    } catch (rewardsError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] PawBucks reward credit failed after successful charge", rewardsError);
     }
 
-    // Send notification to user
-    const pawbucksUsedMsg = actualPawbucksUsed > 0 ? ` Used ${actualPawbucksUsed} PawBucks for $${(pawbucksDiscountCents / 100).toFixed(2)} off.` : '';
-    await supabaseAdmin.from("notifications").insert({
-      user_id: user.id,
-      title: "Subscription Started",
-      message: `Your subscription to ${productName} from ${merchant.business_name} is now active.${pawbucksUsedMsg} You earned ${pawbucksEarned} PawBucks!`,
-      category: "transactional",
-    });
+    try {
+      // Update transactions row with rewards_earned (best-effort)
+      if (pawbucksEarned > 0) {
+        await supabaseAdmin
+          .from("transactions")
+          .update({ rewards_earned: pawbucksEarned, cashback_earned: pawbucksEarned })
+          .eq("stripe_payment_intent_id", paymentIntent.id);
+      }
+    } catch (transactionRewardError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Transaction reward update failed after successful charge", transactionRewardError);
+    }
 
-    // Send receipt email to customer
-    const { data: userProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('email, full_name')
-      .eq('id', user.id)
-      .single();
+    try {
+      // Auto-log success fee as Tax Vault expense
+      if (applicationFee > 0) {
+        const expenseDate = new Date().toISOString().split('T')[0];
+        const taxYear = new Date().getFullYear();
+
+        await supabaseAdmin
+          .from("merchant_tax_expenses")
+          .insert({
+            merchant_id: merchantId,
+            category: "platform_fees",
+            amount: applicationFee / 100, // Convert to dollars
+            description: `PawBucks Success Fee (3%) on $${stripeAmountInDollars.toFixed(2)} subscription payment`,
+            vendor_name: "PawBucks Network",
+            expense_date: expenseDate,
+            tax_year: taxYear,
+            is_auto_logged: true,
+            source_purchase_id: paymentIntent.id,
+          });
+
+        logStep("Success fee auto-logged to Tax Vault");
+      }
+    } catch (taxExpenseError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Success fee Tax Vault logging failed after successful charge", taxExpenseError);
+    }
+
+    let userProfile: { email?: string | null; full_name?: string | null } | null = null;
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error("[CREATE-MERCHANT-SUBSCRIPTION] Customer profile lookup failed after successful charge", error);
+      } else {
+        userProfile = data;
+      }
+    } catch (profileError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Customer profile lookup threw after successful charge", profileError);
+    }
 
     const customerEmail = userProfile?.email || user.email;
-    const amountInDollars = amount / 100;
-    if (customerEmail) {
-      const { multiplier: tierMultiplier, tierName: userTierName } = await getUserTierMultiplier(supabaseAdmin, stripe, user.id);
-      
-      await sendReceiptEmail({
-        email: customerEmail,
-        customerName: userProfile?.full_name || undefined,
-        transactionDate: new Date().toISOString(),
-        receiptId: subscription.id,
-        merchantName: merchant.business_name,
-        merchantLocation: merchant.address || undefined,
-        items: [{ name: `${productName} Subscription`, price: amountInDollars }],
-        subtotal: amountInDollars,
-        pawbucksApplied: actualPawbucksUsed,
-        cardAmount: stripeChargeAmount / 100,
-        totalPaid: amountInDollars,
-        pawbucksEarned,
-        tierInfo: {
-          tierName: userTierName,
-          multiplier: tierMultiplier,
-        },
+    const customerName = userProfile?.full_name || 'Customer';
+
+    try {
+      // Send notification to user
+      const pawbucksUsedMsg = actualPawbucksUsed > 0 ? ` Used ${actualPawbucksUsed} PawBucks for $${(pawbucksDiscountCents / 100).toFixed(2)} off.` : '';
+      await supabaseAdmin.from("notifications").insert({
+        user_id: user.id,
+        title: "Subscription Started",
+        message: `Your subscription to ${productName} from ${merchant.business_name} is now active.${pawbucksUsedMsg} You earned ${pawbucksEarned} PawBucks!`,
+        category: "transactional",
       });
+    } catch (customerNotificationError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Customer in-app notification failed after successful charge", customerNotificationError);
     }
 
-    // Send in-app notification to merchant
-    await supabaseAdmin.from("notifications").insert({
-      user_id: merchant.user_id,
-      title: "💰 New Payment Received",
-      message: `${userProfile?.full_name || 'A customer'} subscribed to ${productName} for $${amountInDollars.toFixed(2)}.`,
-      category: "transactional",
-    });
-
-    // Send payment received email notification to merchant
-    const { data: merchantProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('email, full_name')
-      .eq('id', merchant.user_id)
-      .single();
-
-    if (merchantProfile?.email) {
-      await sendMerchantPaymentNotification({
-        merchantEmail: merchantProfile.email,
-        merchantName: merchant.business_name || merchantProfile.full_name || 'Merchant',
-        customerName: userProfile?.full_name || 'Customer',
-        customerEmail: customerEmail || '',
-        productName,
-        amountPaid: amountInDollars,
-        pawbucksUsed: actualPawbucksUsed,
-        paymentDate: new Date().toISOString(),
-      });
+    try {
+      // Send receipt email to customer independently from all bookkeeping steps.
+      if (customerEmail) {
+        await sendReceiptEmail({
+          email: customerEmail,
+          customerName: userProfile?.full_name || undefined,
+          transactionDate: new Date().toISOString(),
+          receiptId: subscription.id,
+          merchantName: merchant.business_name,
+          merchantLocation: merchant.address || undefined,
+          items: [{ name: `${productName} Subscription`, price: amountInDollars }],
+          subtotal: amountInDollars,
+          pawbucksApplied: actualPawbucksUsed,
+          cardAmount: stripeChargeAmount / 100,
+          totalPaid: amountInDollars,
+          pawbucksEarned,
+          tierInfo: {
+            tierName,
+            multiplier,
+          },
+        });
+      }
+    } catch (receiptEmailError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Customer receipt email failed after successful charge", receiptEmailError);
     }
-    } catch (postPaymentError) {
-      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Post-payment rewards/receipt step failed", postPaymentError);
+
+    try {
+      // Send in-app notification to merchant
+      await supabaseAdmin.from("notifications").insert({
+        user_id: merchant.user_id,
+        title: "New Payment Received",
+        message: `${customerName} subscribed to ${productName} for $${amountInDollars.toFixed(2)}.`,
+        category: "transactional",
+      });
+    } catch (merchantNotificationError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Merchant in-app notification failed after successful charge", merchantNotificationError);
+    }
+
+    let merchantProfile: { email?: string | null; full_name?: string | null } | null = null;
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', merchant.user_id)
+        .single();
+
+      if (error) {
+        console.error("[CREATE-MERCHANT-SUBSCRIPTION] Merchant profile lookup failed after successful charge", error);
+      } else {
+        merchantProfile = data;
+      }
+    } catch (merchantProfileError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Merchant profile lookup threw after successful charge", merchantProfileError);
+    }
+
+    try {
+      // Send payment received email notification to merchant independently from all bookkeeping steps.
+      if (merchantProfile?.email) {
+        await sendMerchantPaymentNotification({
+          merchantEmail: merchantProfile.email,
+          merchantName: merchant.business_name || merchantProfile.full_name || 'Merchant',
+          customerName,
+          customerEmail: customerEmail || '',
+          productName,
+          amountPaid: amountInDollars,
+          pawbucksUsed: actualPawbucksUsed,
+          paymentDate: new Date().toISOString(),
+        });
+      }
+    } catch (merchantEmailError) {
+      console.error("[CREATE-MERCHANT-SUBSCRIPTION] Merchant payment email failed after successful charge", merchantEmailError);
     }
 
 
