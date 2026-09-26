@@ -508,7 +508,7 @@ serve(async (req: Request) => {
           message: `${customerLabel} · ${summary}`,
           category: "transactional",
           is_read: false,
-          link_url: linkUrl,
+          link_url: merchantLinkUrl,
         });
       }
       if (rows.length) {
