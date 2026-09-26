@@ -36,6 +36,13 @@
       "when": 1790358621611,
       "tag": "0004_notifications_push_relay",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790383982648,
+      "tag": "0005_fix_merchant_twilio_settings_read",
+      "breakpoints": true
     }
   ]
 }
