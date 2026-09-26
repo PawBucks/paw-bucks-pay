@@ -194,6 +194,7 @@ serve(async (req: Request) => {
     let customerUserId: string | null = null;
     let merchantId: string | null = null;
     let serviceId: string | null = null;
+    let petName: string | null = null;
 
     if (body.bookingId) {
       const { data: booking, error } = await supabase
@@ -230,6 +231,15 @@ serve(async (req: Request) => {
       merchantId = (booking as any).merchants?.id || null;
       customerUserId = booking.user_id || null;
       serviceId = booking.service_id || null;
+
+      if (booking.pet_id) {
+        const { data: pet } = await supabase
+          .from("pet_profiles")
+          .select("name")
+          .eq("id", booking.pet_id)
+          .maybeSingle();
+        petName = pet?.name || null;
+      }
 
       // Ownership check: non-internal callers must be the customer, the
       // merchant owner, or a platform admin/superadmin.
