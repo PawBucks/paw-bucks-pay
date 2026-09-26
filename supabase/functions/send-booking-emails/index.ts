@@ -473,6 +473,7 @@ serve(async (req: Request) => {
 
     const summary = `${serviceName} · ${dateFormatted} · ${timeFormatted}${endTimeFormatted ? ` – ${endTimeFormatted}` : ""}`;
     const customerLabel = customerName || "A customer";
+    const petLabel = petName ? ` for ${petName}` : "";
 
     // Insert in-app notifications for both parties (skip silent reminder types for merchant)
     try {
@@ -489,10 +490,10 @@ serve(async (req: Request) => {
         rows.push({
           user_id: customerUserId,
           title: titles[type].customer,
-          message: `${summary} at ${merchantName}`,
+          message: `${serviceName}${petLabel} at ${merchantName} · ${dateFormatted} · ${timeFormatted}${endTimeFormatted ? ` – ${endTimeFormatted}` : ""}`,
           category: "transactional",
           is_read: false,
-          link_url: linkUrl,
+          link_url: customerLinkUrl,
         });
       }
       if (
