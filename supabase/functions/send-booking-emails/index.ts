@@ -266,7 +266,12 @@ serve(async (req: Request) => {
     const dateFormatted = formatDateReadable(bookingDate!);
     const timeFormatted = formatTime12(startTime!);
     const endTimeFormatted = endTime ? formatTime12(endTime) : "";
-    const priceFormatted = totalPrice != null ? `$${(totalPrice / 100).toFixed(2)}` : "";
+    // service_bookings.total_price and merchant_services.price are stored in
+    // USD, not cents. Dividing here turned an $80 booking into $0.80.
+    const numericTotalPrice = totalPrice == null ? null : Number(totalPrice);
+    const priceFormatted = numericTotalPrice != null && Number.isFinite(numericTotalPrice)
+      ? `$${numericTotalPrice.toFixed(2)}`
+      : "";
 
     let subject = "";
     let htmlContent = "";
