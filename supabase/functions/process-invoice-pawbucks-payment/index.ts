@@ -60,7 +60,7 @@ serve(async (req) => {
 
     logStep("Request validated", { invoiceId, totalAmountCents, pawbucksAmountCents });
     // Shared-account members spend from the owner wallet; the member stays the payer.
-    const walletUserId = userId ? await resolveWalletUserId(supabase, userId) : null;
+    const walletUserId = (userId ? await resolveWalletUserId(supabase, userId) : null) as string;
 
     // Fetch the invoice with access token validation
     const { data: invoice, error: invoiceError } = await supabase

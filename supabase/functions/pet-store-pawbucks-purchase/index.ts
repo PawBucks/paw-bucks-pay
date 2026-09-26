@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import {
   getSpendableSources,
@@ -49,14 +50,7 @@ serve(async (req) => {
     );
 
     // Resolve effective wallet user (shared accounts)
-    const { data: sharedMembership } = await supabaseAdmin
-      .from('shared_account_members')
-      .select('account_id, shared_accounts!inner(owner_id)')
-      .eq('member_id', user.id)
-      .eq('status', 'active')
-      .maybeSingle();
-
-    const effectiveUserId = (sharedMembership as any)?.shared_accounts?.owner_id || user.id;
+    const effectiveUserId = (await resolveWalletUserId(supabaseAdmin, user.id)) || user.id;
     logStep("Effective user", { effectiveUserId });
 
     // Load all spendable sources (wallet + Pet Fund + legacy welcome credit)
