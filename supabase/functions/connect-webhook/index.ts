@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import {
@@ -328,6 +329,8 @@ serve(async (req) => {
               logStep("No profile matched client_email — PawBucks cannot be credited", { email });
             }
           }
+          // Shared-account members spend from / earn into the owner wallet.
+          const walletPayerUserId = await resolveWalletUserId(supabaseAdmin, resolvedPayerUserId);
 
           // Award PawBucks to invoice payer
           let pawbucksEarned = 0;
@@ -366,13 +369,13 @@ serve(async (req) => {
               let { data: wallet } = await supabaseAdmin
                 .from('pawbucks_wallet')
                 .select('balance')
-                .eq('user_id', resolvedPayerUserId)
+                .eq('user_id', walletPayerUserId)
                 .single();
 
               if (!wallet) {
                 const { data: newWallet } = await supabaseAdmin
                   .from('pawbucks_wallet')
-                  .insert({ user_id: resolvedPayerUserId, balance: 0 })
+                  .insert({ user_id: walletPayerUserId, balance: 0 })
                   .select()
                   .single();
                 wallet = newWallet;
@@ -382,7 +385,7 @@ serve(async (req) => {
                 await supabaseAdmin
                   .from('pawbucks_wallet')
                   .update({ balance: wallet.balance + pawbucksEarned })
-                  .eq('user_id', resolvedPayerUserId);
+                  .eq('user_id', walletPayerUserId);
 
                 // Get invoice number for proper description
                 const { data: invoiceForActivity } = await supabaseAdmin
@@ -393,7 +396,7 @@ serve(async (req) => {
                 const invoiceNumber = invoiceForActivity?.invoice_number || 'Invoice';
 
                 await supabaseAdmin.from('pawbucks_activity').insert({
-                  user_id: resolvedPayerUserId,
+                  user_id: walletPayerUserId,
                   amount: pawbucksEarned,
                   type: 'earn',
                   source: 'Invoice Payment',
@@ -503,9 +506,9 @@ serve(async (req) => {
             // ========================================
             if (pawbucksUsed > 0 && resolvedPayerUserId) {
               try {
-                const sources = await getSpendableSources(supabaseAdmin, resolvedPayerUserId);
+                const sources = await getSpendableSources(supabaseAdmin, walletPayerUserId);
                 const debitPlan = planPawBucksDebit(sources, pawbucksUsed, totalPaymentAmount);
-                await applyPawBucksDebit(supabaseAdmin, resolvedPayerUserId, debitPlan, {
+                await applyPawBucksDebit(supabaseAdmin, walletPayerUserId, debitPlan, {
                   merchantId: resolvedMerchantId,
                   transactionId: transaction?.id || null,
                   transactionTotalCents: Math.round(totalPaymentAmount * 100),
@@ -520,7 +523,7 @@ serve(async (req) => {
                   .single();
 
                 await supabaseAdmin.from('pawbucks_activity').insert({
-                  user_id: resolvedPayerUserId,
+                  user_id: walletPayerUserId,
                   type: 'redeem',
                   amount: pawbucksUsed,
                   source: 'invoice_payment',
@@ -706,6 +709,7 @@ serve(async (req) => {
         }
 
         const userId = metadata.user_id;
+        const walletUserId = (metadata.effective_user_id as string) || (await resolveWalletUserId(supabaseAdmin, userId)) || userId;
         const merchantId = metadata.merchant_id;
         // Direct-payment path merchant id (mirrors the invoice path's variable name,
         // which is scoped to the invoice branch above).
@@ -844,9 +848,9 @@ serve(async (req) => {
           // Never reserve/debit during Checkout Session creation: abandoned sessions must not consume PB.
           if (pawbucksAmount > 0 && transaction?.id) {
             try {
-              const debitSources = await getSpendableSources(supabaseAdmin, userId);
+              const debitSources = await getSpendableSources(supabaseAdmin, walletUserId);
               const debitPlan = planPawBucksDebit(debitSources, pawbucksAmount, totalAmount > 0 ? totalAmount : amountInDollars);
-              await applyPawBucksDebit(supabaseAdmin, userId, debitPlan, {
+              await applyPawBucksDebit(supabaseAdmin, walletUserId, debitPlan, {
                 merchantId,
                 transactionId: transaction.id,
                 transactionTotalCents: Math.round((totalAmount > 0 ? totalAmount : amountInDollars) * 100),
@@ -854,7 +858,7 @@ serve(async (req) => {
 
               if (debitPlan.walletDeduction > 0) {
                 await supabaseAdmin.from("pawbucks_activity").insert({
-                  user_id: userId,
+                  user_id: walletUserId,
                   amount: debitPlan.walletDeduction,
                   type: "redeem",
                   source: "merchant_payment",
@@ -889,7 +893,7 @@ serve(async (req) => {
                 const { data: issueResult, error: issueErr } = await supabaseAdmin
                   .rpc('issue_store_locked_pawbucks', {
                     p_merchant_id: resolvedMerchantId,
-                    p_user_id: userId,
+                    p_user_id: walletUserId,
                     p_amount_pb: pawbucksEarned,
                     p_transaction_id: transaction?.id ?? null,
                     p_description: `Earned ${pawbucksEarned} in-store PawBucks (${tierName} ${pawbucksMultiplier}x) from $${amountInDollars.toFixed(2)} payment to ${businessName}`,
@@ -910,7 +914,7 @@ serve(async (req) => {
             if (!issuedAsStoreLocked) {
               // Log activity - MUST be 'earn' type for wallet display
               await supabaseAdmin.from("pawbucks_activity").insert({
-                user_id: userId,
+                user_id: walletUserId,
                 amount: pawbucksEarned,
                 type: "earn",
                 source: "direct_payment",
@@ -925,14 +929,14 @@ serve(async (req) => {
               const { data: wallet } = await supabaseAdmin
                 .from('pawbucks_wallet')
                 .select('balance')
-                .eq('user_id', userId)
+                .eq('user_id', walletUserId)
                 .single();
 
               if (wallet) {
                 await supabaseAdmin
                   .from('pawbucks_wallet')
                   .update({ balance: wallet.balance + pawbucksEarned })
-                  .eq('user_id', userId);
+                  .eq('user_id', walletUserId);
                 
                 logStep("PawBucks wallet updated", { 
                   previousBalance: wallet.balance, 
@@ -941,7 +945,7 @@ serve(async (req) => {
               } else {
                 // Create wallet if doesn't exist
                 await supabaseAdmin.from('pawbucks_wallet').insert({
-                  user_id: userId,
+                  user_id: walletUserId,
                   balance: pawbucksEarned,
                 });
                 logStep("PawBucks wallet created with initial balance");
