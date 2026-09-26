@@ -588,6 +588,7 @@ serve(async (req) => {
         cardAmount: amountInCents / 100,
         orderSummary: allItemNames,
         totalQuantity,
+        pawbucksUsed, pawbucksAmount: pawbucksUsed,
         pawbucksApplied: pawbucksUsed > 0 ? {
           amount: pawbucksUsed,
           usdValue: pawbucksUsdValue,
