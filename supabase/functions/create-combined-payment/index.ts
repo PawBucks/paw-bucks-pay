@@ -437,7 +437,7 @@ serve(async (req) => {
           'redeem_store_locked_pawbucks',
           {
             p_merchant_id: merchantId,
-            p_user_id: user.id,
+            p_user_id: effectiveUserId,
             p_amount_pb: storeLockedPawbucks,
             p_transaction_id: null,
             p_description: `In-store PawBucks redemption at ${merchant.business_name}`,
@@ -570,7 +570,7 @@ serve(async (req) => {
           const { error: brandedRedeemErr } = await supabaseAdmin.rpc(
             "redeem_branded_pawbucks_v2",
             {
-              p_user_id: user.id,
+              p_user_id: effectiveUserId,
               p_merchant_id: merchantId,
               p_amount: actualWalletPawbucks,
               p_line_items: [],

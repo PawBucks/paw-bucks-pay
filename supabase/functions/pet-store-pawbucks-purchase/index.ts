@@ -357,7 +357,7 @@ serve(async (req) => {
     logStep("Purchase completed successfully", { totalPawbucksCost });
 
     return new Response(
-      JSON.stringify({ success: true, totalPawbucksCost, totalUsdEquivalent }),
+      JSON.stringify({ success: true, totalPawbucksCost, totalUsdEquivalent, pawbucksUsed: totalPawbucksCost, pawbucksAmount: totalPawbucksCost }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
