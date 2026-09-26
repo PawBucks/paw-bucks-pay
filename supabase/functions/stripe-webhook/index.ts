@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
@@ -441,6 +442,7 @@ serve(async (req) => {
       const pawbucksUsed = parseInt(metadata.pawbucks_used || '0');
       const pawbucksUsdValue = parseFloat(metadata.pawbucks_usd_value || '0');
       const userId = metadata.user_id;
+      const walletUserId = (metadata.effective_user_id as string) || (await resolveWalletUserId(supabaseAdmin, userId)) || userId;
       const merchantId = metadata.merchant_id;
       const merchantName = metadata.product_name || 'Merchant';
 
@@ -486,7 +488,7 @@ serve(async (req) => {
         const { data: pawbucksWallet, error: walletError } = await supabaseAdmin
           .from('pawbucks_wallet')
           .select('balance')
-          .eq('user_id', userId)
+          .eq('user_id', walletUserId)
           .single();
 
         if (!walletError && pawbucksWallet) {
@@ -502,14 +504,14 @@ serve(async (req) => {
             const { error: updateError } = await supabaseAdmin
               .from('pawbucks_wallet')
               .update({ balance: newBalance })
-              .eq('user_id', userId);
+              .eq('user_id', walletUserId);
 
             if (!updateError) {
               // Log PawBucks activity for user (deduction)
               await supabaseAdmin
                 .from('pawbucks_activity')
                 .insert({
-                  user_id: userId,
+                  user_id: walletUserId,
                   type: 'redeem',
                   amount: actualDeduction,
                   source: 'Auto-Redemption',
@@ -730,13 +732,13 @@ serve(async (req) => {
                 let { data: userWallet } = await supabaseAdmin
                   .from('pawbucks_wallet')
                   .select('*')
-                  .eq('user_id', userId)
+                  .eq('user_id', walletUserId)
                   .single();
 
                 if (!userWallet) {
                   const { data: newWallet } = await supabaseAdmin
                     .from('pawbucks_wallet')
-                    .insert({ user_id: userId, balance: 0 })
+                    .insert({ user_id: walletUserId, balance: 0 })
                     .select()
                     .single();
                   userWallet = newWallet;
@@ -746,7 +748,7 @@ serve(async (req) => {
                   const { error: walletUpdateError } = await supabaseAdmin
                     .from('pawbucks_wallet')
                     .update({ balance: userWallet.balance + pawbucksEarned })
-                    .eq('user_id', userId);
+                    .eq('user_id', walletUserId);
 
                   if (walletUpdateError) {
                     console.error('[SUBSCRIPTION] Error updating PawBucks wallet:', walletUpdateError);
@@ -756,7 +758,7 @@ serve(async (req) => {
                     await supabaseAdmin
                       .from('pawbucks_activity')
                       .insert({
-                        user_id: userId,
+                        user_id: walletUserId,
                         type: 'earn',
                         amount: pawbucksEarned,
                         source: 'Subscription Purchase',
@@ -805,6 +807,7 @@ serve(async (req) => {
         const pawbucksUsedStr = metadata.pawbucks_used || '0';
         const pawbucksUsed = parseInt(pawbucksUsedStr);
         const invoicePayerUserId = metadata.user_id;
+        const invoiceWalletUserId = await resolveWalletUserId(supabaseAdmin, invoicePayerUserId);
         
         console.log('[INVOICE_PAYMENT] Processing invoice payment:', {
           sessionId: session.id,
@@ -894,11 +897,11 @@ serve(async (req) => {
           // happens here, only after Stripe confirms the checkout session completed.
           if (invoicePayerUserId && pawbucksUsed > 0) {
             try {
-              const sources = await getSpendableSources(supabaseAdmin, invoicePayerUserId);
+              const sources = await getSpendableSources(supabaseAdmin, invoiceWalletUserId);
               const pawbucksAmountCents = parseInt(metadata.pawbucks_amount_cents || '0', 10);
               const totalPaymentAmount = paymentAmount + (pawbucksAmountCents / 100);
               const debitPlan = planPawBucksDebit(sources, pawbucksUsed, totalPaymentAmount);
-              await applyPawBucksDebit(supabaseAdmin, invoicePayerUserId, debitPlan, {
+              await applyPawBucksDebit(supabaseAdmin, invoiceWalletUserId, debitPlan, {
                 merchantId,
                 transactionTotalCents: Math.round(totalPaymentAmount * 100),
               });
@@ -906,7 +909,7 @@ serve(async (req) => {
 
               if (debitAmount > 0) {
                 await supabaseAdmin.from('pawbucks_activity').insert({
-                  user_id: invoicePayerUserId,
+                  user_id: invoiceWalletUserId,
                   type: 'redeem',
                   amount: debitAmount,
                   source: 'invoice_payment',
@@ -954,7 +957,7 @@ serve(async (req) => {
                       ? await buildInvoiceLineItems(supabaseAdmin, invoiceId)
                       : [];
                     await supabaseAdmin.rpc('redeem_branded_pawbucks_v2', {
-                      p_user_id: invoicePayerUserId,
+                      p_user_id: invoiceWalletUserId,
                       p_merchant_id: merchantId,
                       p_amount: debitAmount,
                       p_line_items: brandedLineItems,
@@ -1018,6 +1021,7 @@ serve(async (req) => {
             }
           }
 
+          const walletPayerUserId = await resolveWalletUserId(supabaseAdmin, resolvedPayerUserId);
           if (resolvedPayerUserId && stripeAmountForRewards > 0) {
             // Determine PawBucks multiplier via shared resolver (recognizes new product IDs by name).
             let pawbucksMultiplier = 10;
@@ -1054,13 +1058,13 @@ serve(async (req) => {
               let { data: wallet } = await supabaseAdmin
                 .from('pawbucks_wallet')
                 .select('*')
-                .eq('user_id', resolvedPayerUserId)
+                .eq('user_id', walletPayerUserId)
                 .single();
 
               if (!wallet) {
                 const { data: newWallet } = await supabaseAdmin
                   .from('pawbucks_wallet')
-                  .insert({ user_id: resolvedPayerUserId, balance: 0 })
+                  .insert({ user_id: walletPayerUserId, balance: 0 })
                   .select()
                   .single();
                 wallet = newWallet;
@@ -1071,7 +1075,7 @@ serve(async (req) => {
                 const { error: walletUpdateError } = await supabaseAdmin
                   .from('pawbucks_wallet')
                   .update({ balance: wallet.balance + pawbucksEarned })
-                  .eq('user_id', resolvedPayerUserId);
+                  .eq('user_id', walletPayerUserId);
 
                 if (walletUpdateError) {
                   console.error('[INVOICE_PAYMENT] Error updating PawBucks wallet:', walletUpdateError);
@@ -1083,7 +1087,7 @@ serve(async (req) => {
                 await supabaseAdmin
                   .from('pawbucks_activity')
                   .insert({
-                    user_id: resolvedPayerUserId,
+                    user_id: walletPayerUserId,
                     type: 'earn',
                     amount: pawbucksEarned,
                     source: 'Invoice Payment',
