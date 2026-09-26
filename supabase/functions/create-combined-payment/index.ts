@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { z } from "https://esm.sh/zod@3.22.4";
@@ -175,13 +176,7 @@ serve(async (req) => {
     // and Welcome Credits all live on the primary owner's record — if the
     // paying user is a shared-account member we must read/debit from the
     // owner, otherwise we falsely report "Insufficient PawBucks balance".
-    const { data: sharedMembership } = await supabaseAdmin
-      .from('shared_account_members')
-      .select('account_id, shared_accounts!inner(owner_id)')
-      .eq('member_id', user.id)
-      .eq('status', 'active')
-      .maybeSingle();
-    const effectiveUserId = (sharedMembership as any)?.shared_accounts?.owner_id || user.id;
+    const effectiveUserId = (await resolveWalletUserId(supabaseAdmin, user.id)) || user.id;
     logStep('Effective wallet user resolved', { paying: user.id, effective: effectiveUserId });
 
     // Get merchant details
@@ -442,7 +437,7 @@ serve(async (req) => {
           'redeem_store_locked_pawbucks',
           {
             p_merchant_id: merchantId,
-            p_user_id: user.id,
+            p_user_id: effectiveUserId,
             p_amount_pb: storeLockedPawbucks,
             p_transaction_id: null,
             p_description: `In-store PawBucks redemption at ${merchant.business_name}`,
@@ -575,7 +570,7 @@ serve(async (req) => {
           const { error: brandedRedeemErr } = await supabaseAdmin.rpc(
             "redeem_branded_pawbucks_v2",
             {
-              p_user_id: user.id,
+              p_user_id: effectiveUserId,
               p_merchant_id: merchantId,
               p_amount: actualWalletPawbucks,
               p_line_items: [],
@@ -866,7 +861,7 @@ serve(async (req) => {
         connectedAccountId: merchant.stripe_account_id, // Frontend needs this for Stripe.js
         stripeAmount,
         tipAmount,
-        pawbucksAmount,
+        pawbucksAmount, pawbucksUsed: pawbucksAmount,
         pawbucksUsdValue,
         pawbucksEarned,
         cashbackRate,

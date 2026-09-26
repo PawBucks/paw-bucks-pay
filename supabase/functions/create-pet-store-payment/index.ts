@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
@@ -329,7 +330,8 @@ serve(async (req) => {
     let pawbucksUsdValue = 0;
 
     // Get all eligible PawBucks sources: earned wallet + Pet Fund + legacy welcome credit.
-    const spendableSources = await getSpendableSources(supabaseAdmin, user.id);
+    const walletUserId = (await resolveWalletUserId(supabaseAdmin, user.id)) || user.id;
+    const spendableSources = await getSpendableSources(supabaseAdmin, walletUserId);
     const petFundEligible =
       spendableSources.petFundAvailable > 0 &&
       (!spendableSources.petFundMinUsd || totalAmount >= spendableSources.petFundMinUsd);
@@ -407,14 +409,14 @@ serve(async (req) => {
     if (pawbucksUsed > 0 && finalAmountCents <= 0) {
       // Deduct PawBucks from the canonical source order: wallet → Pet Fund → legacy welcome credit.
       const debitPlan = planPawBucksDebit(spendableSources, pawbucksUsed, totalAmount);
-      await applyPawBucksDebit(supabaseAdmin, user.id, debitPlan, {
+      await applyPawBucksDebit(supabaseAdmin, walletUserId, debitPlan, {
         merchantId: dbItems[0]?.merchant_id || null,
         transactionTotalCents: totalAmountCents,
       });
       
       // Record activity
       await supabaseAdmin.from('pawbucks_activity').insert({
-        user_id: user.id,
+        user_id: walletUserId,
         type: 'redeem',
         amount: pawbucksUsed,
         source: 'pet_store',
@@ -491,7 +493,7 @@ serve(async (req) => {
     const { data: subscription } = await supabaseAdmin
       .from('subscriptions')
       .select('stripe_subscription_id, subscription_tier, is_manual_upgrade, expires_at, status')
-      .eq('user_id', user.id)
+      .eq('user_id', walletUserId)
       .in('status', ['active', 'trialing'])
       .maybeSingle();
     const _resolvedTier = await resolveUserEarnTier(stripe, subscription);
@@ -528,6 +530,7 @@ serve(async (req) => {
       payment_method_types: ['card'],
       metadata: {
         user_id: user.id,
+        effective_user_id: walletUserId,
         item_id: firstItemId,
         item_name: allItemNames,
         quantity: totalQuantity.toString(),
@@ -585,6 +588,7 @@ serve(async (req) => {
         cardAmount: amountInCents / 100,
         orderSummary: allItemNames,
         totalQuantity,
+        pawbucksUsed, pawbucksAmount: pawbucksUsed,
         pawbucksApplied: pawbucksUsed > 0 ? {
           amount: pawbucksUsed,
           usdValue: pawbucksUsdValue,

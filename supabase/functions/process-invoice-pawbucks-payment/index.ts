@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import {
@@ -58,6 +59,8 @@ serve(async (req) => {
     }
 
     logStep("Request validated", { invoiceId, totalAmountCents, pawbucksAmountCents });
+    // Shared-account members spend from the owner wallet; the member stays the payer.
+    const walletUserId = (userId ? await resolveWalletUserId(supabase, userId) : null) as string;
 
     // Fetch the invoice with access token validation
     const { data: invoice, error: invoiceError } = await supabase
@@ -130,7 +133,7 @@ serve(async (req) => {
     // any line items, so a small client/server rounding mismatch can never
     // silently fail the entire payment.
     if (pawbucksUsed > 0 && userId) {
-      const sources = await getSpendableSources(supabase, userId);
+      const sources = await getSpendableSources(supabase, walletUserId);
       const txnTotalUsd = totalAmountCents / 100;
       const petFundEligible =
         sources.petFundAvailable > 0 &&
@@ -193,10 +196,10 @@ serve(async (req) => {
 
       // Plan debit across wallet → Pet Fund → legacy welcome credit.
       // Throws if combined eligible balance is insufficient or Pet Fund min spend not met.
-      const sources = await getSpendableSources(supabase, userId);
+      const sources = await getSpendableSources(supabase, walletUserId);
       const invoiceTotalUsd = totalAmountCents / 100;
       const debitPlan = planPawBucksDebit(sources, pawbucksUsed, invoiceTotalUsd);
-      await applyPawBucksDebit(supabase, userId, debitPlan, {
+      await applyPawBucksDebit(supabase, walletUserId, debitPlan, {
         merchantId: merchant.id,
         transactionTotalCents: totalAmountCents,
       });
@@ -204,7 +207,7 @@ serve(async (req) => {
 
       // Log user PawBucks activity
       await supabase.from("pawbucks_activity").insert({
-        user_id: userId,
+        user_id: walletUserId,
         type: "redeem",
         amount: pawbucksUsed,
         description: `Payment for Invoice #${invoice.invoice_number}`,
@@ -326,7 +329,7 @@ serve(async (req) => {
           const { buildInvoiceLineItems } = await import("../_shared/branded-line-items.ts");
           const brandedLineItems = await buildInvoiceLineItems(supabase, invoiceId);
           const { error: brandedRedeemErr } = await supabase.rpc("redeem_branded_pawbucks_v2", {
-            p_user_id: userId,
+            p_user_id: walletUserId,
             p_merchant_id: merchant.id,
             p_amount: pawbucksUsed,
             p_line_items: brandedLineItems,
@@ -557,7 +560,7 @@ serve(async (req) => {
     // Stripe if they don't have enough PawBucks.
     if (pawbucksCents > 0 && userId) {
       // Include wallet + Pet Fund + legacy welcome credit, and enforce Pet Fund minimum spend.
-      const sources = await getSpendableSources(supabase, userId);
+      const sources = await getSpendableSources(supabase, walletUserId);
       const txnTotalUsd = totalAmountCents / 100;
       try {
         planPawBucksDebit(sources, pawbucksUsed, txnTotalUsd);
