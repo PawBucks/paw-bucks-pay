@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import {
@@ -84,6 +85,7 @@ serve(async (req) => {
 
     const userId = metadata.user_id;
     if (userId !== user.id) throw new Error('User ID mismatch');
+    const walletUserId = metadata.effective_user_id || (await resolveWalletUserId(supabaseAdmin, userId)) || userId;
 
     const itemId = metadata.item_id;
     const itemName = metadata.item_name || 'Pet Store Item';
@@ -223,9 +225,9 @@ serve(async (req) => {
       const pawbucksUsdValue = pawbucksUsedInSplit * 0.001;
 
       // Plan + apply debit across wallet → Pet Fund → legacy welcome credit
-      const sources = await getSpendableSources(supabaseAdmin, userId);
+      const sources = await getSpendableSources(supabaseAdmin, walletUserId);
       const plan = planPawBucksDebit(sources, pawbucksUsedInSplit, orderTotalDollars);
-      await applyPawBucksDebit(supabaseAdmin, userId, plan, {
+      await applyPawBucksDebit(supabaseAdmin, walletUserId, plan, {
         merchantId: item?.merchant_id || null,
         transactionId: transaction.id,
         transactionTotalCents: orderTotalCents,
@@ -233,7 +235,7 @@ serve(async (req) => {
       logStep("Split PawBucks debit applied", plan);
 
       await supabaseAdmin.from('pawbucks_activity').insert({
-        user_id: userId,
+        user_id: walletUserId,
         amount: pawbucksUsedInSplit,
         type: 'redeem',
         source: 'pet_store',
@@ -259,7 +261,7 @@ serve(async (req) => {
             lineItems.map((li) => ({ id: li.id, total_cents: li.priceCents * li.qty })),
           );
           const { error: brandedRedeemErr } = await supabaseAdmin.rpc("redeem_branded_pawbucks_v2", {
-            p_user_id: userId,
+            p_user_id: walletUserId,
             p_merchant_id: item.merchant_id,
             p_amount: pawbucksUsedInSplit,
             p_line_items: brandedLineItems,
@@ -286,7 +288,7 @@ serve(async (req) => {
     // 3. Award PawBucks
     if (pawbucksEarned > 0) {
       await supabaseAdmin.from('pawbucks_activity').insert({
-        user_id: userId,
+        user_id: walletUserId,
         amount: pawbucksEarned,
         type: 'earn',
         source: 'pet_store_purchase',
@@ -298,17 +300,17 @@ serve(async (req) => {
       const { data: wallet } = await supabaseAdmin
         .from('pawbucks_wallet')
         .select('balance')
-        .eq('user_id', userId)
+        .eq('user_id', walletUserId)
         .single();
 
       if (wallet) {
         await supabaseAdmin
           .from('pawbucks_wallet')
           .update({ balance: wallet.balance + pawbucksEarned })
-          .eq('user_id', userId);
+          .eq('user_id', walletUserId);
       } else {
         await supabaseAdmin.from('pawbucks_wallet').insert({
-          user_id: userId,
+          user_id: walletUserId,
           balance: pawbucksEarned,
         });
       }
@@ -320,7 +322,7 @@ serve(async (req) => {
     const { data: updatedWallet } = await supabaseAdmin
       .from('pawbucks_wallet')
       .select('balance')
-      .eq('user_id', userId)
+      .eq('user_id', walletUserId)
       .single();
 
     // 5. Send customer receipt email (matching existing receipt format)
