@@ -194,6 +194,7 @@ serve(async (req: Request) => {
     let customerUserId: string | null = null;
     let merchantId: string | null = null;
     let serviceId: string | null = null;
+    let petName: string | null = null;
 
     if (body.bookingId) {
       const { data: booking, error } = await supabase
@@ -230,6 +231,15 @@ serve(async (req: Request) => {
       merchantId = (booking as any).merchants?.id || null;
       customerUserId = booking.user_id || null;
       serviceId = booking.service_id || null;
+
+      if (booking.pet_id) {
+        const { data: pet } = await supabase
+          .from("pet_profiles")
+          .select("name")
+          .eq("id", booking.pet_id)
+          .maybeSingle();
+        petName = pet?.name || null;
+      }
 
       // Ownership check: non-internal callers must be the customer, the
       // merchant owner, or a platform admin/superadmin.
@@ -422,11 +432,24 @@ serve(async (req: Request) => {
     console.log(`Booking ${type} email sent to ${customerEmail}`);
 
     // ----- Merchant-facing notifications + in-app notifications (best-effort) -----
-    const linkUrl = body.bookingId ? `/bookings/${body.bookingId}` : "/my-bookings";
+    // Customer links: a new request (initiator customer) routes to the booking
+    // detail page; a merchant approval routes to My Bookings focused on it.
+    // Cancellations intentionally carry no link_url.
+    const customerLinkUrl =
+      type === "confirmation"
+        ? initiator === "merchant"
+          ? `/my-bookings?booking=${body.bookingId}`
+          : `/bookings/${body.bookingId}`
+        : type === "cancellation"
+          ? null
+          : body.bookingId
+            ? `/bookings/${body.bookingId}`
+            : "/my-bookings";
+    const merchantLinkUrl = body.bookingId ? `/bookings/${body.bookingId}` : "/my-bookings";
 
     const titles: Record<typeof type, { customer: string; merchant: string }> = {
       confirmation: {
-        customer: "✅ Booking confirmed",
+        customer: initiator === "merchant" ? "✅ Booking confirmed" : "📩 Booking requested",
         merchant: "📋 New booking request",
       },
       cancellation: {
@@ -450,6 +473,7 @@ serve(async (req: Request) => {
 
     const summary = `${serviceName} · ${dateFormatted} · ${timeFormatted}${endTimeFormatted ? ` – ${endTimeFormatted}` : ""}`;
     const customerLabel = customerName || "A customer";
+    const petLabel = petName ? ` for ${petName}` : "";
 
     // Insert in-app notifications for both parties (skip silent reminder types for merchant)
     try {
@@ -466,10 +490,10 @@ serve(async (req: Request) => {
         rows.push({
           user_id: customerUserId,
           title: titles[type].customer,
-          message: `${summary} at ${merchantName}`,
+          message: `${serviceName}${petLabel} at ${merchantName} · ${dateFormatted} · ${timeFormatted}${endTimeFormatted ? ` – ${endTimeFormatted}` : ""}`,
           category: "transactional",
           is_read: false,
-          link_url: linkUrl,
+          link_url: customerLinkUrl,
         });
       }
       if (
@@ -484,7 +508,7 @@ serve(async (req: Request) => {
           message: `${customerLabel} · ${summary}`,
           category: "transactional",
           is_read: false,
-          link_url: linkUrl,
+          link_url: merchantLinkUrl,
         });
       }
       if (rows.length) {
