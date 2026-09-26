@@ -432,11 +432,24 @@ serve(async (req: Request) => {
     console.log(`Booking ${type} email sent to ${customerEmail}`);
 
     // ----- Merchant-facing notifications + in-app notifications (best-effort) -----
-    const linkUrl = body.bookingId ? `/bookings/${body.bookingId}` : "/my-bookings";
+    // Customer links: a new request (initiator customer) routes to the booking
+    // detail page; a merchant approval routes to My Bookings focused on it.
+    // Cancellations intentionally carry no link_url.
+    const customerLinkUrl =
+      type === "confirmation"
+        ? initiator === "merchant"
+          ? `/my-bookings?booking=${body.bookingId}`
+          : `/bookings/${body.bookingId}`
+        : type === "cancellation"
+          ? null
+          : body.bookingId
+            ? `/bookings/${body.bookingId}`
+            : "/my-bookings";
+    const merchantLinkUrl = body.bookingId ? `/bookings/${body.bookingId}` : "/my-bookings";
 
     const titles: Record<typeof type, { customer: string; merchant: string }> = {
       confirmation: {
-        customer: "✅ Booking confirmed",
+        customer: initiator === "merchant" ? "✅ Booking confirmed" : "📩 Booking requested",
         merchant: "📋 New booking request",
       },
       cancellation: {
