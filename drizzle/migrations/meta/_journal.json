@@ -43,6 +43,13 @@
       "when": 1790383982648,
       "tag": "0005_fix_merchant_twilio_settings_read",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790516752828,
+      "tag": "0006_merchant_booking_pet_profiles",
+      "breakpoints": true
     }
   ]
 }
