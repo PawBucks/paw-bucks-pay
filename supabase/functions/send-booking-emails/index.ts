@@ -287,7 +287,31 @@ serve(async (req: Request) => {
     let htmlContent = "";
     let attachments: Array<{ filename: string; content: string }> = [];
 
-    if (type === "confirmation") {
+    if (type === "confirmation" && initiator === "customer") {
+      // Customer just requested the booking — not confirmed yet.
+      subject = `Booking Request Received – ${serviceName} at ${merchantName}`;
+      htmlContent = `
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="display:inline-block;background:#eff6ff;border-radius:50%;padding:16px;margin-bottom:12px;">
+            <span style="font-size:32px;">📩</span>
+          </div>
+          <h1 style="margin:0;font-size:24px;color:#1e40af;">Booking Request Received!</h1>
+        </div>
+        <p style="color:#374151;line-height:1.6;">Hi ${customerName},</p>
+        <p style="color:#374151;line-height:1.6;">We've sent your booking request to <strong>${merchantName}</strong>. You'll get a confirmation email as soon as they accept it. Here are your requested details:</p>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:20px;margin:24px 0;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Service</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${serviceName}</td></tr>
+            <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Business</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${merchantName}</td></tr>
+            <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Date</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${dateFormatted}</td></tr>
+            <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Time</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${timeFormatted}${endTimeFormatted ? ` – ${endTimeFormatted}` : ""} PT</td></tr>
+            ${priceFormatted ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Price</td><td style="padding:6px 0;font-weight:600;color:#111827;text-align:right;">${priceFormatted}</td></tr>` : ""}
+            ${notes ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Notes</td><td style="padding:6px 0;color:#111827;text-align:right;">${notes}</td></tr>` : ""}
+          </table>
+        </div>
+        <p style="color:#6b7280;font-size:14px;">You can track the status of your request from <strong>My Bookings</strong> in your PawBucks dashboard.</p>`;
+
+    } else if (type === "confirmation") {
       subject = `Booking Confirmed – ${serviceName} at ${merchantName}`;
       htmlContent = `
         <div style="text-align:center;margin-bottom:24px;">
