@@ -50,6 +50,13 @@
       "when": 1790516752828,
       "tag": "0006_merchant_booking_pet_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790516795758,
+      "tag": "0007_merchant_booking_pet_profiles_readonly",
+      "breakpoints": true
     }
   ]
 }
