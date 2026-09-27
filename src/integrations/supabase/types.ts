@@ -477,6 +477,13 @@ export type Database = {
             foreignKeyName: "ai_soap_drafts_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_soap_drafts_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -2186,6 +2193,13 @@ export type Database = {
             foreignKeyName: "compliance_reminders_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_reminders_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -2537,6 +2551,13 @@ export type Database = {
             foreignKeyName: "diagnostic_ai_analyses_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostic_ai_analyses_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -2773,6 +2794,13 @@ export type Database = {
             foreignKeyName: "external_imaging_results_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_imaging_results_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -2904,6 +2932,13 @@ export type Database = {
             columns: ["lab_integration_id"]
             isOneToOne: false
             referencedRelation: "vet_lab_integrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_lab_results_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3639,6 +3674,13 @@ export type Database = {
             foreignKeyName: "grooming_pet_details_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_pet_details_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -3704,6 +3746,13 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_rebook_log_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3845,6 +3894,13 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_report_cards_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -7520,6 +7576,13 @@ export type Database = {
             foreignKeyName: "merchant_subscriptions_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_subscriptions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -8946,6 +9009,13 @@ export type Database = {
             foreignKeyName: "pet_allergies_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_allergies_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -9066,6 +9136,13 @@ export type Database = {
             foreignKeyName: "pet_consent_requests_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_consent_requests_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -9121,6 +9198,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pet_email_addresses_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: true
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pet_email_addresses_pet_id_fkey"
             columns: ["pet_id"]
@@ -9327,6 +9411,13 @@ export type Database = {
             foreignKeyName: "pet_health_access_codes_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_health_access_codes_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -9394,6 +9485,13 @@ export type Database = {
           views?: string[] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pet_imaging_records_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pet_imaging_records_pet_id_fkey"
             columns: ["pet_id"]
@@ -9488,6 +9586,13 @@ export type Database = {
             foreignKeyName: "pet_inbound_documents_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_inbound_documents_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -9539,6 +9644,13 @@ export type Database = {
             columns: ["pet_email_id"]
             isOneToOne: false
             referencedRelation: "pet_email_addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_inbound_emails_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -9622,6 +9734,13 @@ export type Database = {
             foreignKeyName: "pet_insurance_policies_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_insurance_policies_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -9699,6 +9818,13 @@ export type Database = {
           vet_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pet_lab_results_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pet_lab_results_pet_id_fkey"
             columns: ["pet_id"]
@@ -9793,6 +9919,13 @@ export type Database = {
           visit_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pet_medical_records_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pet_medical_records_pet_id_fkey"
             columns: ["pet_id"]
@@ -10153,6 +10286,13 @@ export type Database = {
             foreignKeyName: "pet_soap_notes_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_soap_notes_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -10470,6 +10610,13 @@ export type Database = {
             foreignKeyName: "pet_surgical_notes_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_surgical_notes_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -10555,6 +10702,13 @@ export type Database = {
             foreignKeyName: "pet_timeline_moments_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pet_timeline_moments_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -10632,6 +10786,13 @@ export type Database = {
           vet_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pet_vaccinations_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pet_vaccinations_pet_id_fkey"
             columns: ["pet_id"]
@@ -11432,6 +11593,13 @@ export type Database = {
           vet_notes?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "prescription_refill_requests_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "prescription_refill_requests_pet_id_fkey"
             columns: ["pet_id"]
@@ -12320,6 +12488,13 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -13325,6 +13500,13 @@ export type Database = {
             foreignKeyName: "symptom_triage_assessments_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symptom_triage_assessments_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -14244,6 +14426,13 @@ export type Database = {
             foreignKeyName: "user_personality_badges_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: true
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_personality_badges_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: true
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -14286,6 +14475,13 @@ export type Database = {
             columns: ["evolution_id"]
             isOneToOne: false
             referencedRelation: "personality_evolutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_personality_evolutions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -14346,6 +14542,13 @@ export type Database = {
             columns: ["perk_id"]
             isOneToOne: false
             referencedRelation: "personality_perks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_personality_perks_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -14743,6 +14946,13 @@ export type Database = {
             foreignKeyName: "vet_bonus_offers_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_bonus_offers_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -14877,6 +15087,13 @@ export type Database = {
             columns: ["merchant_id"]
             isOneToOne: false
             referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_care_shares_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -15180,6 +15397,13 @@ export type Database = {
             foreignKeyName: "vet_lost_pet_alerts_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vet_lost_pet_alerts_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -15272,6 +15496,13 @@ export type Database = {
           vet_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vet_messages_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vet_messages_pet_id_fkey"
             columns: ["pet_id"]
@@ -15441,6 +15672,13 @@ export type Database = {
           vet_margin_percent?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "vet_prescription_fulfillments_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vet_prescription_fulfillments_pet_id_fkey"
             columns: ["pet_id"]
@@ -16072,6 +16310,13 @@ export type Database = {
             foreignKeyName: "wellness_plan_purchases_pet_id_fkey"
             columns: ["pet_id"]
             isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wellness_plan_purchases_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
             referencedRelation: "pet_profiles"
             referencedColumns: ["id"]
           },
@@ -16177,6 +16422,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "wellness_plan_subscriptions_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "wellness_plan_subscriptions_pet_id_fkey"
             columns: ["pet_id"]
@@ -16426,6 +16678,15 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      merchant_booking_pet_profiles: {
+        Row: {
+          breed: string | null
+          id: string | null
+          name: string | null
+          type: Database["public"]["Enums"]["pet_type"] | null
+        }
+        Relationships: []
       }
       merchant_pos_integrations_safe: {
         Row: {
