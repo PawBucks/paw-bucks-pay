@@ -337,7 +337,7 @@ serve(async (req: Request) => {
 
       if (endTime) {
         const ics = generateICS(bookingDate!, startTime!, endTime, `${serviceName} at ${merchantName}`, merchantName!, customerEmail);
-        attachments.push({ filename: "appointment.ics", content: btoa(ics) });
+        attachments.push({ filename: "appointment.ics", content: utf8ToBase64(ics) });
       }
 
     } else if (type === "reminder_24h") {
@@ -430,7 +430,7 @@ serve(async (req: Request) => {
 
       if (endTime) {
         const ics = generateICS(bookingDate!, startTime!, endTime, `${serviceName} at ${merchantName}`, merchantName!, customerEmail);
-        attachments.push({ filename: "appointment.ics", content: btoa(ics) });
+        attachments.push({ filename: "appointment.ics", content: utf8ToBase64(ics) });
       }
     }
 
@@ -581,7 +581,7 @@ serve(async (req: Request) => {
           </table>
         </div>
         <p style="color:#6b7280;font-size:14px;">
-          <a href="https://pawbucks.app${linkUrl}" style="color:#0d9488;text-decoration:none;font-weight:600;">View in dashboard →</a>
+          <a href="https://pawbucks.app${merchantLinkUrl}" style="color:#0d9488;text-decoration:none;font-weight:600;">View in dashboard →</a>
         </p>`;
 
       try {
@@ -610,3 +610,10 @@ serve(async (req: Request) => {
     });
   }
 });
+
+function utf8ToBase64(s: string): string {
+  const bytes = new TextEncoder().encode(s);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
