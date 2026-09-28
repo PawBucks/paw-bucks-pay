@@ -1,3 +1,4 @@
+import { createAppNotification } from "@/lib/createAppNotification";
 import { useState, useEffect } from"react";
 import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
@@ -234,7 +235,7 @@ export function PrescriptionFulfillmentEngine({ vetId }: PrescriptionFulfillment
  if (updateError) throw updateError;
 
  // Notify the pet owner
- await supabase.from("notifications").insert({
+ await createAppNotification({
  user_id: selectedRefill.ownerId,
  title:"Prescription Approved!",
  message: `Your prescription refill for ${selectedRefill.medicationName} has been approved and will ship from the PawBucks Store.`,

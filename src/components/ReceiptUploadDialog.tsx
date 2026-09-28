@@ -1,3 +1,4 @@
+import { createAppNotification } from "@/lib/createAppNotification";
 import { useState, useEffect } from"react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from"@/components/ui/dialog";
 import { Button } from"@/components/ui/button";
@@ -218,7 +219,7 @@ export const ReceiptUploadDialog = ({ open, onOpenChange, userId }: ReceiptUploa
 
  if (insertError) throw insertError;
 
- await supabase.from("notifications").insert({
+ await createAppNotification({
  user_id: userId,
  title:"Receipt Submitted Successfully",
  message: `We've received your receipt from ${finalMerchantName} for ${Formatters.currency(amount)}. You'll earn approximately ${estimatedPawBucks.toLocaleString()} PawBucks (${creditRate}% ${tierLabel} rate). Review takes 24-72 hours.`,

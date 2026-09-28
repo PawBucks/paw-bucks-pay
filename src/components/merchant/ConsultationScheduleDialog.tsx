@@ -1,3 +1,4 @@
+import { createAppNotification } from "@/lib/createAppNotification";
 import { useState, useEffect } from"react";
 import { format, addDays, startOfDay, getDay } from"date-fns";
 import { Calendar } from"@/components/ui/calendar";
@@ -137,7 +138,7 @@ export function ConsultationScheduleDialog({
 
  // Create in-app notification for admin
  try {
- await supabase.from("notifications").insert({
+ await createAppNotification({
  user_id: null, // Admin notification (null = broadcast to admins)
  title:"New Consultation Request",
  message: `${user?.email ||"A user"} requested a consultation for ${format(selectedDate,"EEEE, MMMM d")} at ${selectedTimeLabel} PT.${merchantName ? ` Business: ${merchantName}` :""}`,

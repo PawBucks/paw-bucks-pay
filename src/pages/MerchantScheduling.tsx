@@ -1,3 +1,4 @@
+import { createAppNotification } from "@/lib/createAppNotification";
 import { useState, useEffect, useCallback } from"react";
 import { useNavigate } from"react-router-dom";
 import { useAuth } from"@/hooks/useAuth";
@@ -168,7 +169,7 @@ const MerchantScheduling = () => {
  ? `Your ${serviceName} appointment on ${bookingDate} has been confirmed!`
  : `Your ${serviceName} appointment request for ${bookingDate} was declined. Please try a different time or contact the business.`;
 
- await supabase.from("notifications").insert({
+ await createAppNotification({
  user_id: booking.user_id,
  title,
  message,

@@ -1,3 +1,4 @@
+import { createAppNotification } from "@/lib/createAppNotification";
 import { useState, useEffect } from"react";
 import { format, addDays, startOfDay, getDay } from"date-fns";
 import { Button } from"@/components/ui/button";
@@ -310,7 +311,7 @@ export const ServicePurchaseDialog = ({
  }
 
  // Create in-app notification for admin
- await supabase.from("notifications").insert({
+ await createAppNotification({
  user_id: null,
  title:"Strategy Consultation Purchased",
  message: `${user?.email ||"A merchant"} purchased a Dedicated Strategy Consultation for ${format(selectedDate,"EEEE, MMMM d")} at ${selectedTimeLabel} PT.`,
