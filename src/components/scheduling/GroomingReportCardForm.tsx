@@ -1,3 +1,4 @@
+import { createAppNotification } from "@/lib/createAppNotification";
 import { useState, useRef } from"react";
 import { useQuery, useMutation, useQueryClient } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
@@ -171,7 +172,7 @@ export function GroomingReportCardForm({
 
  // Send notification to customer if sending
  if (sendToCustomer) {
- await supabase.from("notifications").insert({
+ await createAppNotification({
  user_id: customerUserId,
  title: `Grooming Report Card for ${petName ||"your pet"}`,
  message: `Your grooming report from ${serviceName ||"today's service"} is ready! Check out the photos and notes.`,

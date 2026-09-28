@@ -17315,6 +17315,16 @@ export type Database = {
         }
         Returns: number
       }
+      create_app_notification: {
+        Args: {
+          _category?: string
+          _link_url?: string
+          _message: string
+          _target_user_id: string
+          _title: string
+        }
+        Returns: string
+      }
       credit_branded_pawbucks: {
         Args: {
           p_amount: number

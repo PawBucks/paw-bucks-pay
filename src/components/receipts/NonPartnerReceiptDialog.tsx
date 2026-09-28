@@ -1,3 +1,4 @@
+import { createAppNotification } from "@/lib/createAppNotification";
 import { useState, useEffect } from"react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from"@/components/ui/dialog";
 import { Button } from"@/components/ui/button";
@@ -145,7 +146,7 @@ export const NonPartnerReceiptDialog = ({ open, onOpenChange, userId }: NonPartn
  });
  if (insertError) throw insertError;
 
- await supabase.from("notifications").insert({
+ await createAppNotification({
  user_id: userId,
  title:"Non-Partner Receipt Submitted",
  message: `Receipt from ${merchantName.trim()} for ${Formatters.currency(amount)} received. You'll earn ~${estimatedPB.toLocaleString()} PawBucks (${PB_PER_DOLLAR} PB/$1). These vest after 30 days. Review takes 24-72 hours.`,

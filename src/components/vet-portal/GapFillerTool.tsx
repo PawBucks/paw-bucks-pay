@@ -1,3 +1,4 @@
+import { createAppNotification } from "@/lib/createAppNotification";
 import { useState, useEffect } from"react";
 import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from"@/components/ui/card";
@@ -177,7 +178,7 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
 
  // Create notifications for pet owners
  for (const patient of selectedList) {
- await supabase.from("notifications").insert({
+ await createAppNotification({
  user_id: patient.ownerId,
  title:"Bonus PawBucks Offer!",
  message: offerMessage || `${patient.petName} is overdue for ${patient.serviceType}. Book now and receive ${bonusAmount} bonus PawBucks!`,
