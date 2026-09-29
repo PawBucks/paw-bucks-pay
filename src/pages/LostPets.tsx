@@ -41,6 +41,7 @@ import { seoMeta } from"@/lib/seoMeta";
 import { Search, Bird, Rabbit, Upload, AlertTriangle, CheckCircle2, PartyPopper, X, Images, ArrowLeft } from "lucide-react";
 import { Sparkles } from "@/components/ui/sparkles-emoji";
 import { PetProfileSelector } from"@/components/PetProfileSelector";
+import { useGeocoding } from"@/hooks/useGeocoding";
 import { format, differenceInCalendarDays } from"date-fns";
 import { Tables } from"@/integrations/supabase/types";
 
