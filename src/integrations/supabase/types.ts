@@ -5348,6 +5348,8 @@ export type Database = {
           last_seen_date: string
           last_seen_location: string
           last_seen_time: string | null
+          latitude: number | null
+          longitude: number | null
           microchip_number: string | null
           pet_name: string
           pet_type: string
@@ -5378,6 +5380,8 @@ export type Database = {
           last_seen_date: string
           last_seen_location: string
           last_seen_time?: string | null
+          latitude?: number | null
+          longitude?: number | null
           microchip_number?: string | null
           pet_name: string
           pet_type: string
@@ -5408,6 +5412,8 @@ export type Database = {
           last_seen_date?: string
           last_seen_location?: string
           last_seen_time?: string | null
+          latitude?: number | null
+          longitude?: number | null
           microchip_number?: string | null
           pet_name?: string
           pet_type?: string
@@ -11638,6 +11644,9 @@ export type Database = {
           full_name: string
           id: string
           is_banned: boolean
+          last_known_latitude: number | null
+          last_known_longitude: number | null
+          last_location_updated_at: string | null
           normalized_email: string | null
           phone: string | null
           phone_verified: boolean
@@ -11662,6 +11671,9 @@ export type Database = {
           full_name: string
           id: string
           is_banned?: boolean
+          last_known_latitude?: number | null
+          last_known_longitude?: number | null
+          last_location_updated_at?: string | null
           normalized_email?: string | null
           phone?: string | null
           phone_verified?: boolean
@@ -11686,6 +11698,9 @@ export type Database = {
           full_name?: string
           id?: string
           is_banned?: boolean
+          last_known_latitude?: number | null
+          last_known_longitude?: number | null
+          last_location_updated_at?: string | null
           normalized_email?: string | null
           phone?: string | null
           phone_verified?: boolean

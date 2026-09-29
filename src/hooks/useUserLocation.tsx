@@ -1,5 +1,25 @@
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+/** Persist coords on the signed-in user's profile so local alerts (e.g. lost pets) can reach them. */
+async function persistLastKnownLocation(latitude: number, longitude: number) {
+  try {
+    const { data } = await supabase.auth.getUser();
+    const uid = data?.user?.id;
+    if (!uid) return;
+    await supabase
+      .from("profiles")
+      .update({
+        last_known_latitude: latitude,
+        last_known_longitude: longitude,
+        last_location_updated_at: new Date().toISOString(),
+      })
+      .eq("id", uid);
+  } catch {
+    // Non-critical: location personalisation still works in-session.
+  }
+}
 
 export type UserLocation = { latitude: number; longitude: number } | null;
 
@@ -29,6 +49,7 @@ export function useUserLocation() {
         longitude: position.coords.longitude,
       });
       setLocationLoading(false);
+      void persistLastKnownLocation(position.coords.latitude, position.coords.longitude);
       toast.success("Location found! Showing nearby merchants.");
     };
 
