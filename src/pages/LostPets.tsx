@@ -99,6 +99,7 @@ const LostPets = () => {
   const { user, signOut } = useAuth();
  const { toast } = useToast();
  const queryClient = useQueryClient();
+ const { geocodeAddress } = useGeocoding();
  const navigate = useNavigate();
  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
  const [searchTerm, setSearchTerm] = useState("");
