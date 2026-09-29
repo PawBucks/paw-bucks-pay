@@ -83,16 +83,18 @@ export const POINTS_MULTIPLIER = {
 
 // Membership plan benefits (user-facing copy)
 export const MEMBERSHIP_PERKS = {
- free: [
-  '10x PawBucks rewards on purchases at partner merchants',
- ],
- pawpass: [
-  '20x PawBucks rewards on all purchases at partner merchants',
-  'Free deliveries on orders of $50+ at partner merchants and the PawBucks Marketplace',
-  ...
-  'Free deliveries on orders of $50+ at partner merchants and the PawBucks Marketplace',
-  '1 round trip Pet Transport (10 miles total) to & from partner merchants',
- ],
+  free: [
+    '10x PawBucks rewards on purchases at partner merchants',
+  ],
+  pawpass: [
+    '20x PawBucks rewards on all purchases at partner merchants',
+    'Free deliveries on orders of $50+ at partner merchants and the PawBucks Marketplace',
+  ],
+  pawpass_plus: [
+    '30x PawBucks rewards on all purchases at partner merchants',
+    'Free deliveries on orders of $50+ at partner merchants and the PawBucks Marketplace',
+    '1 round trip Pet Transport (10 miles total) to & from partner merchants',
+  ],
 } as const;
 
 // Backwards compatibility alias
