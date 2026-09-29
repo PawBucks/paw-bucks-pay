@@ -155,10 +155,25 @@ const LostPets = () => {
 
  // Create new post mutation
  const createPostMutation = useMutation({
- mutationFn: async (data: typeof formData) => {
+  mutationFn: async (data: typeof formData) => {
  if (!user) throw new Error("Must be logged in to create a post");
- 
+
+ // Resolve coordinates so the alert can reach everyone within 10 miles
+ let latitude: number | null = null;
+ let longitude: number | null = null;
+ try {
+ const geo = await geocodeAddress(
+ [data.last_seen_location, data.last_seen_area_description].filter(Boolean).join(", "),
+ );
+ latitude = geo.latitude;
+ longitude = geo.longitude;
+ } catch {
+ // Backend geocodes as a fallback when this fails.
+ }
+
  const { error } = await supabase.from("lost_pet_posts").insert({
+ latitude,
+ longitude,
  user_id: user.id,
  pet_name: data.pet_name,
  pet_type: data.pet_type,
