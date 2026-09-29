@@ -278,3 +278,6 @@ project_id = "yxpnkipcoxksmnsvpvwi"
 
 [functions.notify-push]
 verify_jwt = false
+
+[functions.broadcast-lost-pet-alert]
+verify_jwt = false
