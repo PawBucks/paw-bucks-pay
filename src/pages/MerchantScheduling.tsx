@@ -1,3 +1,4 @@
+import { sendBookingEmail } from "@/lib/sendBookingEmail";
 import { createAppNotification } from "@/lib/createAppNotification";
 import { useState, useEffect, useCallback } from"react";
 import { useNavigate } from"react-router-dom";
@@ -181,8 +182,7 @@ const MerchantScheduling = () => {
 
  // Send email notification to customer
  if (booking.customer_email) {
- supabase.functions.invoke("send-booking-emails", {
- body: {
+ sendBookingEmail({
  type: status ==='confirmed' ?'confirmation' :'cancellation',
  bookingId: booking.id,
  initiator:'merchant',
@@ -195,8 +195,7 @@ const MerchantScheduling = () => {
  endTime: booking.end_time,
  totalPrice: booking.total_price,
  ...(status ==='cancelled' ? { cancellationReason:'Declined by business' } : {}),
- },
- }).catch((err) => console.error("Failed to send status email:", err));
+ });
  }
  }
 

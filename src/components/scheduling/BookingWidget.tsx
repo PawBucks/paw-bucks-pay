@@ -1,3 +1,4 @@
+import { sendBookingEmail } from "@/lib/sendBookingEmail";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { GroomingPetSelector, createDefaultGroomingData, type GroomingPetData } from "./GroomingPetSelector";
 import { DepositCardForm } from "./DepositCardForm";
@@ -443,9 +444,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
       if (user?.email && selectedDate && selectedSlot && selectedServiceData) {
         const slotEndMin = parseInt(selectedSlot.split(":")[0]) * 60 + parseInt(selectedSlot.split(":")[1]) + selectedServiceData.duration_minutes;
         const endTime = `${Math.floor(slotEndMin / 60).toString().padStart(2, "0")}:${(slotEndMin % 60).toString().padStart(2, "0")}:00`;
-        supabase.functions
-          .invoke("send-booking-emails", {
-            body: {
+        sendBookingEmail({
               type: "confirmation",
               bookingId: booking?.id,
               initiator: "customer",
@@ -458,9 +457,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
               endTime,
               totalPrice: selectedServiceData.price,
               notes: notes || undefined,
-            },
-          })
-          .catch((err) => console.error("Failed to send confirmation email:", err));
+          });
       }
       setDone(true);
     },

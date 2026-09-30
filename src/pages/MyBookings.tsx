@@ -1,3 +1,4 @@
+import { sendBookingEmail } from "@/lib/sendBookingEmail";
 import { useState } from"react";
 import { useAuth } from"@/hooks/useAuth";
 import { useSharedAccount, getEffectiveWalletUserId } from"@/hooks/useSharedAccount";
@@ -142,14 +143,12 @@ export default function MyBookings() {
 
  // Send cancellation email (fire-and-forget)
  if (selectedBooking) {
- supabase.functions.invoke("send-booking-emails", {
- body: {
+ sendBookingEmail({
  type:"cancellation",
  bookingId: selectedBooking.id,
  initiator:"customer",
  cancellationReason: variables.reason,
- },
- }).catch((err) => console.error("Failed to send cancellation email:", err));
+ });
  }
 
  setCancelDialogOpen(false);
