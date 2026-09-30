@@ -128,7 +128,6 @@ export function RescheduleBookingDialog({ open, onOpenChange, booking, initiator
             type: "reschedule",
             bookingId: booking.id,
             initiator,
-          },
         });
       } catch (err) {
         console.error("reschedule email failed", err);

@@ -148,7 +148,6 @@ export default function MyBookings() {
  bookingId: selectedBooking.id,
  initiator:"customer",
  cancellationReason: variables.reason,
- },
  });
  }
 

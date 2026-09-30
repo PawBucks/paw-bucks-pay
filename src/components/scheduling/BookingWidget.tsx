@@ -457,7 +457,6 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
               endTime,
               totalPrice: selectedServiceData.price,
               notes: notes || undefined,
-            },
           });
       }
       setDone(true);

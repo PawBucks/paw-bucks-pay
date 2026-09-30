@@ -195,7 +195,6 @@ const MerchantScheduling = () => {
  endTime: booking.end_time,
  totalPrice: booking.total_price,
  ...(status ==='cancelled' ? { cancellationReason:'Declined by business' } : {}),
- },
  });
  }
  }
