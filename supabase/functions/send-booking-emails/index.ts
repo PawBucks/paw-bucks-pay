@@ -444,16 +444,26 @@ serve(async (req: Request) => {
       emailPayload.attachments = attachments;
     }
 
-    const emailResponse = await resend.emails.send(emailPayload);
-
+    const failures: string[] = [];
+    let emailResponse: any = { data: null, error: null };
+    try {
+      emailResponse = await resend.emails.send(emailPayload);
+    } catch (e) {
+      emailResponse = { data: null, error: { message: e instanceof Error ? e.message : String(e) } };
+    }
     if (emailResponse.error) {
       console.error(`Failed to send ${type} booking email:`, emailResponse.error);
-      return new Response(JSON.stringify({ success: false, error: emailResponse.error.message }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      failures.push(`Customer email failed: ${emailResponse.error.message}`);
+    } else {
+      console.log(`Booking ${type} email sent to ${customerEmail}`);
     }
 
-    console.log(`Booking ${type} email sent to ${customerEmail}`);
+    // Fall back to the business owner's account email when no business email is saved.
+    if (!merchantEmail && merchantOwnerUserId) {
+      const { data: owner } = await supabase
+        .from("profiles").select("email").eq("id", merchantOwnerUserId).maybeSingle();
+      merchantEmail = (owner as any)?.email || null;
+    }
 
     // ----- Merchant-facing notifications + in-app notifications (best-effort) -----
     // Customer links: a new request (initiator customer) routes to the booking
@@ -542,10 +552,12 @@ serve(async (req: Request) => {
     }
 
     // Send merchant email (only for booking lifecycle events, not reminders)
-    if (
-      merchantEmail &&
-      (type === "confirmation" || type === "cancellation" || type === "rescheduled")
-    ) {
+    const merchantEmailRequired =
+      type === "confirmation" || type === "cancellation" || type === "rescheduled";
+    if (merchantEmailRequired && !merchantEmail && body.bookingId) {
+      failures.push("Business email failed: no email address on file for this business");
+    }
+    if (merchantEmail && merchantEmailRequired) {
       const merchantTitle =
         type === "confirmation"
           ? "📋 New Booking Request"
@@ -593,10 +605,20 @@ serve(async (req: Request) => {
         });
         if (merchantResponse.error) {
           console.error("Failed to send merchant email:", merchantResponse.error);
+          failures.push(`Business email failed: ${merchantResponse.error.message}`);
+        } else {
+          console.log(`Merchant ${type} email sent to ${merchantEmail}`);
         }
       } catch (e) {
         console.error("Merchant email send threw:", e);
+        failures.push(`Business email failed: ${e instanceof Error ? e.message : String(e)}`);
       }
+    }
+
+    if (failures.length > 0) {
+      return new Response(JSON.stringify({ success: false, error: failures.join("; "), failures }), {
+        status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(JSON.stringify({ success: true, data: emailResponse.data }), {
