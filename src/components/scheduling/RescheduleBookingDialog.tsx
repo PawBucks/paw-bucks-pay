@@ -1,3 +1,4 @@
+import { sendBookingEmail } from "@/lib/sendBookingEmail";
 import { useState, useMemo, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
@@ -123,8 +124,7 @@ export function RescheduleBookingDialog({ open, onOpenChange, booking, initiator
 
       // Best-effort notification email
       try {
-        await supabase.functions.invoke("send-booking-emails", {
-          body: {
+        await sendBookingEmail({
             type: "reschedule",
             bookingId: booking.id,
             initiator,
