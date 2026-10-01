@@ -615,13 +615,16 @@ serve(async (req: Request) => {
       }
     }
 
-    if (failures.length > 0) {
+    // Only a failed customer email fails the request; business-email problems are logged as warnings
+    const customerFailed = !!emailResponse.error;
+    if (customerFailed) {
       return new Response(JSON.stringify({ success: false, error: failures.join("; "), failures }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    if (failures.length > 0) console.warn("Booking email warnings:", failures.join("; "));
 
-    return new Response(JSON.stringify({ success: true, data: emailResponse.data }), {
+    return new Response(JSON.stringify({ success: true, data: emailResponse.data, warnings: failures }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: unknown) {

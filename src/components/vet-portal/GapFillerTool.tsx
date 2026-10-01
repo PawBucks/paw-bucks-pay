@@ -177,16 +177,22 @@ export function GapFillerTool({ vetId }: GapFillerToolProps) {
  if (error) throw error;
 
  // Create notifications for pet owners
+ let notifyFailed = 0;
  for (const patient of selectedList) {
- await createAppNotification({
+ const { error: notifyError } = await createAppNotification({
  user_id: patient.ownerId,
  title:"Bonus PawBucks Offer!",
  message: offerMessage || `${patient.petName} is overdue for ${patient.serviceType}. Book now and receive ${bonusAmount} bonus PawBucks!`,
  category:"promotional",
  });
+ if (notifyError) notifyFailed++;
  }
 
+ if (notifyFailed > 0) {
+ toast.warning(`Saved ${selectedList.length} offers, but ${notifyFailed} owner alert${notifyFailed === 1 ? "" : "s"} couldn't be sent`);
+ } else {
  toast.success(`Sent ${selectedList.length} bonus offers successfully!`);
+ }
  setSelectedPatients(new Set());
  setShowOfferDialog(false);
  setOfferMessage("");
