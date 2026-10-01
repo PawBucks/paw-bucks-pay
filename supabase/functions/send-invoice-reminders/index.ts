@@ -64,8 +64,6 @@ interface InvoiceSettings {
   accent_color?: string | null;
 }
 
-import { pawBucksLogoBase64 } from "./logo.ts";
-
 function generateEmailHtml(
   type: "reminder" | "overdue",
   invoice: Invoice,
