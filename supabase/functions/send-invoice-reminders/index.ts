@@ -64,8 +64,6 @@ interface InvoiceSettings {
   accent_color?: string | null;
 }
 
-import { pawBucksLogoBase64 } from "./logo.ts";
-
 function generateEmailHtml(
   type: "reminder" | "overdue",
   invoice: Invoice,
@@ -77,235 +75,132 @@ function generateEmailHtml(
 ): string {
   const isOverdue = type === "overdue";
   const daysOverdue = Math.abs(daysUntilDue);
-  
-  // Extract merchant initials
   const initials = (merchant.business_name || "")
     .split(/\s+/)
-    .map(w => w[0])
+    .map((word) => word[0])
     .join("")
     .slice(0, 2)
     .toUpperCase() || "M";
 
-  // Escalation tiers
-  let headerGradient = "linear-gradient(135deg, #12a8b3 0%, #0a8f9a 100%)";
-  let headerText = "PAYMENT REMINDER";
-  let statusText = daysUntilDue === 0 
-    ? "This invoice is due today."
-    : `This invoice is due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}.`;
-  let escalationText = "A friendly reminder that your payment is due. Please settle this invoice when you have a moment.";
-  let calloutBg = "#ecfeff";
-  let calloutBorder = "#cffafe";
-  let calloutColor = "#0891b2";
+  let headerText = "Payment reminder";
+  let badgeText = daysUntilDue === 0
+    ? "Due today"
+    : `Due in ${daysUntilDue} day${daysUntilDue !== 1 ? "s" : ""}`;
+  let badgeBackground = "#e6f5f3";
+  let badgeColor = "#2E9E8F";
+  let noticeBackground = "#f7fbfa";
+  let noticeBorder = "#d7eeeb";
+  let noticeColor = "#247d72";
+  let noticeText = "A friendly reminder that your payment is due. Please settle this invoice when you have a moment.";
 
   if (isOverdue) {
-    headerText = "PAYMENT OVERDUE";
-    if (daysOverdue <= 3) {
-      headerGradient = "linear-gradient(135deg, #f97316 0%, #ea580c 100%)";
-      statusText = `This invoice is ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''} overdue.`;
-      escalationText = "A friendly reminder — this happens! Please settle this invoice when you have a moment.";
-      calloutBg = "#fff7ed";
-      calloutBorder = "#fed7aa";
-      calloutColor = "#ea580c";
-    } else if (daysOverdue <= 14) {
-      headerGradient = "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)";
-      statusText = `This invoice is ${daysOverdue} days overdue.`;
-      escalationText = "Payment is now urgently required. Please settle this outstanding balance immediately.";
-      calloutBg = "#fef2f2";
-      calloutBorder = "#fecaca";
-      calloutColor = "#dc2626";
-    } else {
-      headerGradient = "linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%)";
-      headerText = "FINAL NOTICE";
-      statusText = `This invoice is ${daysOverdue} days overdue.`;
-      escalationText = "This is a final notice. Unpaid invoices may be referred to collections. Please pay now to avoid service interruption.";
-      calloutBg = "#fef2f2";
-      calloutBorder = "#fecaca";
-      calloutColor = "#991b1b";
-    }
+    headerText = daysOverdue > 14 ? "Final payment notice" : "Payment overdue";
+    badgeText = `${daysOverdue} day${daysOverdue !== 1 ? "s" : ""} overdue`;
+    badgeBackground = daysOverdue <= 3 ? "#fff7ed" : "#fef2f2";
+    badgeColor = daysOverdue <= 3 ? "#c2410c" : "#b91c1c";
+    noticeBackground = daysOverdue <= 3 ? "#fffaf5" : "#fff7f7";
+    noticeBorder = daysOverdue <= 3 ? "#fed7aa" : "#fecaca";
+    noticeColor = daysOverdue <= 3 ? "#9a3412" : "#991b1b";
+    noticeText = daysOverdue <= 3
+      ? "A friendly reminder — this happens. Please settle this invoice when you have a moment."
+      : daysOverdue <= 14
+        ? "Payment is now urgently required. Please settle this outstanding balance immediately."
+        : "This is a final notice. Unpaid invoices may be referred to collections. Please pay now to avoid service interruption.";
   }
 
-  // Brand colors (Teal fallback)
-  const brandColor = accentColor || "#12a8b3";
-  const brandDark = accentColor ? `${accentColor}cc` : "#0a8f9a"; // slight opacity or fallback dark
-
-  // Display logo or initial circle
-  const logoHtml = logoUrl 
-    ? `<img src="${logoUrl}" alt="${escapeHtml(merchant.business_name)}" style="max-height:44px;max-width:150px;border-radius:6px;vertical-align:middle;" />`
-    : `<table role="presentation" cellspacing="0" cellpadding="0">
-        <tr><td style="width:44px;height:44px;border-radius:10px;background:${brandColor};text-align:center;vertical-align:middle;font-size:15px;font-weight:800;color:#ffffff;font-family:-apple-system,sans-serif;">
-          ${initials}
-        </td></tr>
-      </table>`;
-
-  const serviceName = invoice.title || `Invoice #${invoice.invoice_number}`;
+  const savedAccent = accentColor?.trim();
+  const brandColor = savedAccent && /^#[0-9a-f]{6}$/i.test(savedAccent) ? savedAccent : "#2E9E8F";
+  const merchantName = escapeHtml(merchant.business_name);
+  const clientName = escapeHtml(invoice.client_name);
+  const serviceName = escapeHtml(invoice.title || `Invoice #${invoice.invoice_number}`);
+  const invoiceNumber = escapeHtml(invoice.invoice_number);
+  const merchantEmail = merchant.email ? escapeHtml(merchant.email) : "";
+  const merchantPhone = merchant.phone ? escapeHtml(merchant.phone) : "";
   const formattedDueDate = formatLocalDateOnly(invoice.due_date);
   const formattedAmount = `$${Number(invoice.amount_due).toFixed(2)}`;
+  const invoiceUrl = paymentUrl.replace("/pay", "");
+  const merchantIdentity = logoUrl
+    ? `<img src="${encodeURI(logoUrl)}" alt="${merchantName}" style="height:64px;width:64px;border-radius:50%;background:#ffffff;padding:4px;margin-bottom:14px;object-fit:cover;" />`
+    : `<div style="height:64px;width:64px;line-height:64px;border-radius:50%;background:rgba(255,255,255,0.18);color:#ffffff;font-weight:800;font-size:22px;margin:0 auto 14px;">${escapeHtml(initials)}</div>`;
 
   return `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${escapeHtml(headerText)} — ${escapeHtml(merchant.business_name)}</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(headerText)} — ${merchantName}</title>
 </head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f4f4f5;">
-
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f4f5;">
-<tr>
-<td align="center" style="padding:40px 20px;">
-<table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(10,31,38,0.1);max-width:600px;">
-
-  <!-- PAWBUCKS LOGO STRIP -->
-  <tr>
-    <td style="padding:18px 40px;text-align:center;border-bottom:1px solid #f1f5f9;">
-      <img src="data:image/png;base64,${pawBucksLogoBase64}" alt="PawBucks" style="height:24px;display:inline-block;" />
-    </td>
-  </tr>
-
-  <!-- HEADER — color escalates by tier or uses friendly brand theme -->
-  <tr>
-    <td style="background:${headerGradient};padding:28px 40px;text-align:center;">
-      <h1 style="color:#ffffff;margin:0;font-size:21px;font-weight:800;letter-spacing:0.05em;">
-        ${headerText}
-      </h1>
-    </td>
-  </tr>
-
-  <!-- MERCHANT STRIP -->
-  <tr>
-    <td style="padding:20px 40px 0;">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-        <tr>
-          <td width="44" style="vertical-align:middle;">
-            ${logoHtml}
-          </td>
-          <td style="padding-left:12px;vertical-align:middle;">
-            <div style="font-size:15px;font-weight:700;color:#0f172a;">${escapeHtml(merchant.business_name)}</div>
-            <div style="font-size:12px;color:#94a3b8;">
-              ${merchant.email || ''} ${merchant.phone ? `· ${merchant.phone}` : ''}
-            </div>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-
-  <!-- CONTENT -->
-  <tr>
-    <td style="padding:24px 40px 40px;">
-      <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 18px;">Hi ${escapeHtml(invoice.client_name)},</p>
-
-      <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 18px;">
-        This is a reminder that your invoice from <strong>${escapeHtml(merchant.business_name)}</strong> is ${isOverdue ? "now overdue" : "due soon"}.
-      </p>
-
-      <!-- Invoice Details Box -->
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;border-radius:10px;margin:20px 0;border:1px solid #f1f5f9;">
-        <tr>
-          <td style="padding:20px 22px;">
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-              <tr>
-                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
-                  <span style="color:#6b7280;font-size:13px;">Service</span>
-                </td>
-                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-                  <strong style="color:#111827;font-size:13px;">${escapeHtml(serviceName)}</strong>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
-                  <span style="color:#6b7280;font-size:13px;">Invoice Number</span>
-                </td>
-                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-                  <strong style="color:#111827;font-size:13px;font-family:monospace;">${escapeHtml(invoice.invoice_number)}</strong>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;">
-                  <span style="color:#6b7280;font-size:13px;">Due Date</span>
-                </td>
-                <td style="padding:7px 0;border-bottom:1px solid #e5e7eb;text-align:right;">
-                  <strong style="color:${isOverdue ? '#ea580c' : '#111827'};font-size:13px;">${formattedDueDate}</strong>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:10px 0 0;">
-                  <span style="color:#6b7280;font-size:13px;">Amount Due</span>
-                </td>
-                <td style="padding:10px 0 0;text-align:right;">
-                  <strong style="color:#111827;font-size:22px;">${formattedAmount}</strong>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-
-      <!-- Status callout — escalates by tier -->
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
-        <tr>
-          <td style="background-color:${calloutBg};border:1px solid ${calloutBorder};border-radius:8px;padding:12px 16px;text-align:center;">
-            <p style="color:${calloutColor};font-size:13px;margin:0;font-weight:700;">
-              ${statusText}
-            </p>
-            <p style="color:${calloutColor};font-size:12px;margin:6px 0 0;opacity:0.85;">
-              ${escalationText}
-            </p>
-          </td>
-        </tr>
-      </table>
-
-      <!-- CTA Button — always brand color, never the alert color -->
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-        <tr>
-          <td align="center">
-            <a href="${paymentUrl}"
-              style="display:inline-block;background:linear-gradient(135deg,${brandColor} 0%,${brandDark} 100%);color:#ffffff;text-decoration:none;padding:15px 44px;border-radius:10px;font-size:15px;font-weight:700;">
-              Pay Now — ${formattedAmount}
-            </a>
-          </td>
-        </tr>
-      </table>
-
-      <!-- Secondary actions -->
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:14px;">
-        <tr>
-          <td align="center">
-            <a href="${paymentUrl.replace('/pay', '')}"
-              style="display:inline-block;color:#64748b;text-decoration:none;font-size:13px;padding:8px 14px;border:1px solid #e2e8f0;border-radius:8px;margin:0 4px;">
-              View Full Invoice
-            </a>
-            ${merchant.email ? `
-            <a href="mailto:${merchant.email}"
-              style="display:inline-block;color:#64748b;text-decoration:none;font-size:13px;padding:8px 14px;border:1px solid #e2e8f0;border-radius:8px;margin:0 4px;">
-              Message ${escapeHtml(merchant.business_name)}
-            </a>` : ''}
-          </td>
-        </tr>
-      </table>
-
-      ${merchant.email ? `
-      <p style="color:#9ca3af;font-size:12px;line-height:1.6;margin:24px 0 0;text-align:center;">
-        Questions about this invoice? Contact ${escapeHtml(merchant.business_name)} directly at<br />
-        <a href="mailto:${merchant.email}" style="color:${brandColor};">${merchant.email}</a>
-      </p>` : ''}
-    </td>
-  </tr>
-
-  <!-- FOOTER -->
-  <tr>
-    <td style="background-color:#f9fafb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
-      <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.6;">
-        This is an automated reminder from ${escapeHtml(merchant.business_name)} via PawBucks.<br/>
-        PawBucks, Inc. · <a href="mailto:support@pawbucks.app" style="color:#9ca3af;">support@pawbucks.app</a>
-      </p>
-    </td>
-  </tr>
-
-</table>
-</td>
-</tr>
-</table>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background-color:#f5f7f7;color:#1a1a1a;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f5f7f7;">
+    <tr>
+      <td align="center" style="padding:20px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(46,158,143,0.08);">
+          <tr>
+            <td style="background:${brandColor};padding:32px 24px;text-align:center;">
+              ${merchantIdentity}
+              <h1 style="color:#ffffff;margin:0;font-size:22px;font-weight:700;">${merchantName}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 24px 8px;text-align:center;">
+              <p style="margin:0;font-size:12px;letter-spacing:0.12em;color:${brandColor};text-transform:uppercase;font-weight:600;">${escapeHtml(headerText)}</p>
+              <h2 style="margin:6px 0 4px;color:#1a1a1a;font-size:24px;font-weight:700;">Invoice #${invoiceNumber}</h2>
+              <p style="margin:0 0 12px;color:#6b7280;font-size:14px;">${serviceName}</p>
+              <span style="display:inline-block;background:${badgeBackground};color:${badgeColor};font-weight:600;font-size:13px;padding:6px 14px;border-radius:999px;">${escapeHtml(badgeText)}</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 24px 0;">
+              <p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 8px;">Hi ${clientName},</p>
+              <p style="color:#374151;font-size:15px;line-height:1.6;margin:0;">This is a reminder that your invoice from <strong>${merchantName}</strong> is ${isOverdue ? "overdue" : "due soon"}.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 24px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7fbfa;border-radius:12px;">
+                <tr>
+                  <td style="padding:16px;vertical-align:top;">
+                    <p style="margin:0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;">Due date</p>
+                    <p style="margin:4px 0 0;font-weight:600;color:${isOverdue ? badgeColor : "#1a1a1a"};font-size:14px;">${formattedDueDate}</p>
+                  </td>
+                  <td style="padding:16px;vertical-align:top;text-align:right;">
+                    <p style="margin:0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.08em;">Amount due</p>
+                    <p style="margin:4px 0 0;font-weight:800;color:${brandColor};font-size:22px;">${formattedAmount}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 24px 24px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="background:${noticeBackground};border:1px solid ${noticeBorder};border-radius:10px;padding:14px 16px;text-align:center;">
+                    <p style="color:${noticeColor};font-size:13px;line-height:1.55;margin:0;font-weight:600;">${escapeHtml(noticeText)}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 24px 28px;text-align:center;">
+              <a href="${paymentUrl}" style="display:inline-block;background:${brandColor};color:#ffffff;text-decoration:none;padding:16px 44px;border-radius:12px;font-weight:700;font-size:16px;">Pay now — ${formattedAmount}</a>
+              <p style="margin:14px 0 0;color:#6b7280;font-size:12px;">Secure payment via pawbucks.app</p>
+              <p style="margin:10px 0 0;"><a href="${invoiceUrl}" style="color:${brandColor};font-size:13px;text-decoration:none;font-weight:600;">View full invoice</a></p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#f7fbfa;padding:22px 24px;text-align:center;border-top:1px solid #e6f5f3;">
+              <p style="margin:0;color:#1a1a1a;font-size:13px;font-weight:600;">Questions about this invoice?</p>
+              ${merchantPhone ? `<p style="margin:6px 0 0;"><a href="tel:${encodeURIComponent(merchant.phone)}" style="color:${brandColor};text-decoration:none;font-weight:600;font-size:14px;">${merchantPhone}</a></p>` : ""}
+              ${merchantEmail ? `<p style="margin:4px 0 0;"><a href="mailto:${encodeURIComponent(merchant.email)}" style="color:${brandColor};text-decoration:none;font-size:13px;">${merchantEmail}</a></p>` : ""}
+              <p style="margin:14px 0 0;color:#9ca3af;font-size:12px;">Powered by <a href="https://pawbucks.app" style="color:${brandColor};text-decoration:none;font-weight:600;">pawbucks.app</a></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`;
 }
