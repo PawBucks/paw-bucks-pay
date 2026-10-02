@@ -597,6 +597,29 @@ serve(async (req) => {
                   }
                 }
               }
+              // In-app notification for merchant (drives bell, history, and push relay)
+              if (merchantForNotif?.user_id) {
+                const { error: merchantNotifErr } = await supabaseAdmin.from('notifications').insert({
+                  user_id: merchantForNotif.user_id,
+                  title: 'New Payment Received',
+                  message: `${invoiceForNotif?.client_name || 'A customer'} paid $${totalPaymentAmount.toFixed(2)} for Invoice #${invoiceForNotif?.invoice_number || 'N/A'}.`,
+                  category: 'transactional',
+                  link_url: '/merchant/invoicing',
+                });
+                if (merchantNotifErr) logStep("Merchant in-app notification insert failed", { error: merchantNotifErr.message });
+              }
+
+              // In-app confirmation for the customer, if they have an account
+              if (resolvedPayerUserId) {
+                const { error: customerNotifErr } = await supabaseAdmin.from('notifications').insert({
+                  user_id: resolvedPayerUserId,
+                  title: 'Payment confirmed',
+                  message: `Your payment of $${totalPaymentAmount.toFixed(2)} for Invoice #${invoiceForNotif?.invoice_number || 'N/A'} was successful.`,
+                  category: 'transactional',
+                  link_url: '/wallet',
+                });
+                if (customerNotifErr) logStep("Customer in-app notification insert failed", { error: customerNotifErr.message });
+              }
             } catch (notifError) {
               logStep("Error sending merchant notification", { error: String(notifError) });
             }
