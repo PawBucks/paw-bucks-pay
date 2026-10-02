@@ -1160,6 +1160,38 @@ serve(async (req) => {
               .eq('id', merchantId)
               .single();
             
+            // In-app notifications (bell, history, push relay)
+            try {
+              const invNum = invoiceForNotif?.invoice_number || 'N/A';
+              const payerName = invoiceForNotif?.client_name || session.customer_details?.name || 'A customer';
+              const amt = `$${Number(paymentAmount).toFixed(2)}`;
+              const rows: any[] = [];
+              if (merchantForNotif?.user_id) {
+                rows.push({
+                  user_id: merchantForNotif.user_id,
+                  title: 'New Payment Received',
+                  message: `${payerName} paid ${amt} for Invoice #${invNum}.`,
+                  category: 'transactional',
+                  link_url: '/merchant/invoicing',
+                });
+              }
+              if (resolvedPayerUserId && resolvedPayerUserId !== merchantForNotif?.user_id) {
+                rows.push({
+                  user_id: resolvedPayerUserId,
+                  title: 'Payment confirmed',
+                  message: `Your ${amt} payment for Invoice #${invNum} to ${merchantForNotif?.business_name || 'the business'} went through.`,
+                  category: 'transactional',
+                  link_url: '/wallet',
+                });
+              }
+              if (rows.length) {
+                const { error: nErr } = await supabaseAdmin.from('notifications').insert(rows);
+                if (nErr) console.error('[INVOICE_PAYMENT] In-app notification insert failed:', nErr);
+              }
+            } catch (e) {
+              console.error('[INVOICE_PAYMENT] In-app notification error:', e);
+            }
+
             if (merchantForNotif?.user_id) {
               // Get merchant user email
               const { data: merchantProfile } = await supabaseAdmin
