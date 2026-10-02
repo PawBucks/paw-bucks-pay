@@ -368,6 +368,36 @@ serve(async (req) => {
         console.error("Error sending receipt email:", emailError);
       }
 
+      // In-app notifications (bell, history, push relay)
+      try {
+        const amt = `$${Number(paymentAmountUSD).toFixed(2)}`;
+        const rows: any[] = [];
+        if (merchant.user_id) {
+          rows.push({
+            user_id: merchant.user_id,
+            title: "New Payment Received",
+            message: `${invoice.client_name || "A customer"} paid ${amt} in PawBucks for Invoice #${invoice.invoice_number}.`,
+            category: "transactional",
+            link_url: "/merchant/invoicing",
+          });
+        }
+        if (userId && userId !== merchant.user_id) {
+          rows.push({
+            user_id: userId,
+            title: "Payment confirmed",
+            message: `Your ${amt} PawBucks payment for Invoice #${invoice.invoice_number} to ${merchant.business_name || "the business"} went through.`,
+            category: "transactional",
+            link_url: "/wallet",
+          });
+        }
+        if (rows.length) {
+          const { error: nErr } = await supabase.from("notifications").insert(rows);
+          if (nErr) console.error("In-app notification insert failed:", nErr);
+        }
+      } catch (e) {
+        console.error("In-app notification error:", e);
+      }
+
       // Send merchant notification
       try {
         const { data: merchantProfile } = await supabase
