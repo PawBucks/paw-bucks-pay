@@ -173,6 +173,36 @@ Deno.serve(async (req) => {
         .eq("id", merchant.user_id)
         .single();
 
+      // In-app notification for merchant (drives bell, history, and push relay)
+      try {
+        const { error: merchantNotifErr } = await supabase.from("notifications").insert({
+          user_id: merchant.user_id,
+          title: "New Payment Received",
+          message: `${invoice.client_name || "A customer"} paid $${amount.toFixed(2)} for Invoice #${invoice.invoice_number} (${payment_method.replace(/_/g, " ")}).`,
+          category: "transactional",
+          link_url: "/merchant/invoicing",
+        });
+        if (merchantNotifErr) console.error("[record-manual-invoice-payment] Merchant in-app notification insert failed:", merchantNotifErr.message);
+      } catch (e) {
+        console.error("[record-manual-invoice-payment] Merchant in-app notification error:", e);
+      }
+
+      // In-app confirmation for the customer, if they have an account
+      if (matchedUserId) {
+        try {
+          const { error: customerNotifErr } = await supabase.from("notifications").insert({
+            user_id: matchedUserId,
+            title: "Payment confirmed",
+            message: `Your payment of $${amount.toFixed(2)} for Invoice #${invoice.invoice_number} was recorded.`,
+            category: "transactional",
+            link_url: "/wallet",
+          });
+          if (customerNotifErr) console.error("[record-manual-invoice-payment] Customer in-app notification insert failed:", customerNotifErr.message);
+        } catch (e) {
+          console.error("[record-manual-invoice-payment] Customer in-app notification error:", e);
+        }
+      }
+
       if (merchantProfile?.email) {
         // Format payment method for display
         const formattedPaymentMethod = payment_method.replace(/_/g, ' ');
