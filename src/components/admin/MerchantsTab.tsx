@@ -213,6 +213,25 @@ export function MerchantsTab() {
  }
  };
 
+ const handlePrintQrFlyer = () => {
+ if (!qrMerchant || !qrRef.current) return;
+ const svg = qrRef.current.querySelector("svg");
+ if (!svg) return;
+ const svgData = new XMLSerializer().serializeToString(svg);
+ const qrDataUrl = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+ const opened = printMerchantQRFlyer({
+ merchantName: qrMerchant.business_name,
+ qrImageDataUrl: qrDataUrl,
+ badgeLabel: "PawBucks Partner",
+ headline: "Scan to\nCheck In",
+ subline: "Open your camera. Tap the link.",
+ instruction: "Point your phone camera at the code. Tap the link. You'll automatically check in and unlock today's offer.",
+ earnLeft: "Earn PawBucks on every visit",
+ earnRight: "Up to 30x",
+ });
+ if (!opened) toast.error("Please allow popups to print the flyer");
+ };
+
  return (
  <div className="space-y-6">
  <div className="flex justify-between items-center">
@@ -301,6 +320,14 @@ export function MerchantsTab() {
  )}
  </TableCell>
  <TableCell className="text-right flex items-center justify-end gap-1">
+ <Button
+ variant="ghost"
+ size="sm"
+ onClick={() => setQrMerchant(merchant)}
+ title="View / print check-in QR code"
+ >
+ <QrCode className="w-4 h-4" />
+ </Button>
  <Button
  variant="ghost"
  size="sm"
