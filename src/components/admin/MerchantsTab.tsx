@@ -8,7 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from'@/
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from'@/components/ui/dialog';
 import { Label } from'@/components/ui/label';
 import { Badge } from'@/components/ui/badge';
-import { Search, Edit, RefreshCw, PauseCircle, PlayCircle } from "lucide-react";
+import { Search, Edit, RefreshCw, PauseCircle, PlayCircle, QrCode, Printer } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { useRef } from "react";
+import { printMerchantQRFlyer } from "@/components/checkin/MerchantQRFlyer";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from'@/components/ui/alert-dialog';
 import { Textarea } from'@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
