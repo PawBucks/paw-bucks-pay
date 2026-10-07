@@ -442,6 +442,38 @@ export function MerchantsTab() {
  </DialogContent>
  </Dialog>
 
+ <Dialog open={!!qrMerchant} onOpenChange={(open) => { if (!open) setQrMerchant(null); }}>
+ <DialogContent className="max-w-sm">
+ <DialogHeader>
+ <DialogTitle>Check-In QR Code</DialogTitle>
+ <DialogDescription>{qrMerchant?.business_name}</DialogDescription>
+ </DialogHeader>
+ {qrMerchant?.checkin_qr_token ? (
+ <div className="flex flex-col items-center gap-4">
+ <div ref={qrRef} className="bg-white p-4 rounded-md shadow-inner border">
+ <QRCodeSVG
+ value={`https://pawbucks.app/checkin?token=${qrMerchant.checkin_qr_token}`}
+ size={220}
+ level="H"
+ includeMargin
+ />
+ </div>
+ <p className="text-xs text-muted-foreground text-center">
+ Customers scan this code to check in at {qrMerchant.business_name}.
+ </p>
+ <Button onClick={handlePrintQrFlyer} className="w-full">
+ <Printer className="w-4 h-4 mr-2" />
+ Print Flyer
+ </Button>
+ </div>
+ ) : (
+ <p className="text-sm text-muted-foreground text-center py-6">
+ This merchant does not have a check-in QR code yet.
+ </p>
+ )}
+ </DialogContent>
+ </Dialog>
+
  <AlertDialog open={pauseDialogOpen} onOpenChange={setPauseDialogOpen}>
  <AlertDialogContent>
  <AlertDialogHeader>
