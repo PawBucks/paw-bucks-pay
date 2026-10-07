@@ -8,7 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from'@/
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from'@/components/ui/dialog';
 import { Label } from'@/components/ui/label';
 import { Badge } from'@/components/ui/badge';
-import { Search, Edit, RefreshCw, PauseCircle, PlayCircle } from "lucide-react";
+import { Search, Edit, RefreshCw, PauseCircle, PlayCircle, QrCode, Printer } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { useRef } from "react";
+import { printMerchantQRFlyer } from "@/components/checkin/MerchantQRFlyer";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from'@/components/ui/alert-dialog';
 import { Textarea } from'@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from'@/components/ui/select';
@@ -31,6 +34,7 @@ type Merchant = {
  approval_status?:'pending' |'approved' |'denied' | null;
  fee_model?:'full_ecosystem' |'acquisition_only';
  acquisition_fee_rate?: number;
+ checkin_qr_token?: string | null;
 };
 
 // Fetch merchants with their PawBucks balances
@@ -66,6 +70,8 @@ export function MerchantsTab() {
  const [pauseDialogOpen, setPauseDialogOpen] = useState(false);
  const [merchantToPause, setMerchantToPause] = useState<Merchant | null>(null);
  const [pauseReason, setPauseReason] = useState('');
+ const [qrMerchant, setQrMerchant] = useState<Merchant | null>(null);
+ const qrRef = useRef<HTMLDivElement>(null);
 
  // Use React Query for merchant data
  const { data: merchants = [], refetch, isLoading } = useQuery({
@@ -207,6 +213,25 @@ export function MerchantsTab() {
  }
  };
 
+ const handlePrintQrFlyer = () => {
+ if (!qrMerchant || !qrRef.current) return;
+ const svg = qrRef.current.querySelector("svg");
+ if (!svg) return;
+ const svgData = new XMLSerializer().serializeToString(svg);
+ const qrDataUrl = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+ const opened = printMerchantQRFlyer({
+ merchantName: qrMerchant.business_name,
+ qrImageDataUrl: qrDataUrl,
+ badgeLabel: "PawBucks Partner",
+ headline: "Scan to\nCheck In",
+ subline: "Open your camera. Tap the link.",
+ instruction: "Point your phone camera at the code. Tap the link. You'll automatically check in and unlock today's offer.",
+ earnLeft: "Earn PawBucks on every visit",
+ earnRight: "Up to 30x",
+ });
+ if (!opened) toast.error("Please allow popups to print the flyer");
+ };
+
  return (
  <div className="space-y-6">
  <div className="flex justify-between items-center">
@@ -295,6 +320,14 @@ export function MerchantsTab() {
  )}
  </TableCell>
  <TableCell className="text-right flex items-center justify-end gap-1">
+ <Button
+ variant="ghost"
+ size="sm"
+ onClick={() => setQrMerchant(merchant)}
+ title="View / print check-in QR code"
+ >
+ <QrCode className="w-4 h-4" />
+ </Button>
  <Button
  variant="ghost"
  size="sm"
@@ -405,6 +438,38 @@ export function MerchantsTab() {
  {loading ?'Updating...' :'Update Merchant'}
  </Button>
  </form>
+ )}
+ </DialogContent>
+ </Dialog>
+
+ <Dialog open={!!qrMerchant} onOpenChange={(open) => { if (!open) setQrMerchant(null); }}>
+ <DialogContent className="max-w-sm">
+ <DialogHeader>
+ <DialogTitle>Check-In QR Code</DialogTitle>
+ <DialogDescription>{qrMerchant?.business_name}</DialogDescription>
+ </DialogHeader>
+ {qrMerchant?.checkin_qr_token ? (
+ <div className="flex flex-col items-center gap-4">
+ <div ref={qrRef} className="bg-white p-4 rounded-md shadow-inner border">
+ <QRCodeSVG
+ value={`https://pawbucks.app/checkin?token=${qrMerchant.checkin_qr_token}`}
+ size={220}
+ level="H"
+ includeMargin
+ />
+ </div>
+ <p className="text-xs text-muted-foreground text-center">
+ Customers scan this code to check in at {qrMerchant.business_name}.
+ </p>
+ <Button onClick={handlePrintQrFlyer} className="w-full">
+ <Printer className="w-4 h-4 mr-2" />
+ Print Flyer
+ </Button>
+ </div>
+ ) : (
+ <p className="text-sm text-muted-foreground text-center py-6">
+ This merchant does not have a check-in QR code yet.
+ </p>
  )}
  </DialogContent>
  </Dialog>
