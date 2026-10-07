@@ -34,6 +34,7 @@ type Merchant = {
  approval_status?:'pending' |'approved' |'denied' | null;
  fee_model?:'full_ecosystem' |'acquisition_only';
  acquisition_fee_rate?: number;
+ checkin_qr_token?: string | null;
 };
 
 // Fetch merchants with their PawBucks balances
@@ -69,6 +70,8 @@ export function MerchantsTab() {
  const [pauseDialogOpen, setPauseDialogOpen] = useState(false);
  const [merchantToPause, setMerchantToPause] = useState<Merchant | null>(null);
  const [pauseReason, setPauseReason] = useState('');
+ const [qrMerchant, setQrMerchant] = useState<Merchant | null>(null);
+ const qrRef = useRef<HTMLDivElement>(null);
 
  // Use React Query for merchant data
  const { data: merchants = [], refetch, isLoading } = useQuery({
