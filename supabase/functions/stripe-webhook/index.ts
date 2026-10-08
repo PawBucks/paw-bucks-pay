@@ -1166,13 +1166,18 @@ serve(async (req) => {
               const payerName = invoiceForNotif?.client_name || session.customer_details?.name || 'A customer';
               const amt = `$${Number(paymentAmount).toFixed(2)}`;
               const rows: any[] = [];
+              const notifPi = (session.payment_intent as string) || `invoice_${invoiceId}`;
+              const { data: notifTx } = await supabaseAdmin
+                .from('transactions').select('id')
+                .eq('stripe_payment_intent_id', notifPi).maybeSingle();
+              const notifRef = notifTx?.id || notifPi;
               if (merchantForNotif?.user_id) {
                 rows.push({
                   user_id: merchantForNotif.user_id,
                   title: 'New Payment Received',
                   message: `${payerName} paid ${amt} for Invoice #${invNum}.`,
                   category: 'transactional',
-                  link_url: '/merchant/invoicing',
+                  link_url: `/merchant/transactions?transaction=${encodeURIComponent(notifRef)}`,
                 });
               }
               if (resolvedPayerUserId && resolvedPayerUserId !== merchantForNotif?.user_id) {

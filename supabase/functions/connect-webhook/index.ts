@@ -604,7 +604,7 @@ serve(async (req) => {
                   title: 'New Payment Received',
                   message: `${invoiceForNotif?.client_name || 'A customer'} paid $${totalPaymentAmount.toFixed(2)} for Invoice #${invoiceForNotif?.invoice_number || 'N/A'}.`,
                   category: 'transactional',
-                  link_url: '/merchant/invoicing',
+                  link_url: `/merchant/transactions?transaction=${encodeURIComponent(transaction?.id || paymentIntent.id)}`,
                 });
                 if (merchantNotifErr) logStep("Merchant in-app notification insert failed", { error: merchantNotifErr.message });
               }
@@ -1130,7 +1130,7 @@ serve(async (req) => {
                   title: "New Payment Received",
                   message: `${userProfile?.full_name || 'A customer'} paid $${(totalAmount > 0 ? totalAmount : amountInDollars).toFixed(2)} for ${description}.`,
                   category: "transactional",
-                  link_url: "/merchant/invoicing",
+                  link_url: `/merchant/transactions?transaction=${encodeURIComponent(transaction?.id || paymentIntent.id)}`,
                 });
 
                 // Email notification
