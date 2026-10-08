@@ -677,9 +677,10 @@ serve(async (req) => {
           // In-app notification
           await supabaseAdmin.from("notifications").insert({
             user_id: merchantForNotif.user_id,
-            title: "💰 New Payment Received",
+            title: "New Payment Received",
             message: `${userProfile?.full_name || 'A customer'} paid $${(totalAmount > 0 ? totalAmount : amountInDollars).toFixed(2)} for ${description}.`,
             category: "transactional",
+            link_url: `/merchant/transactions?transaction=${encodeURIComponent(transaction?.id || paymentIntentId)}`,
           });
 
           // Email notification

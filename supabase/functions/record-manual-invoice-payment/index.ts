@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
           title: "New Payment Received",
           message: `${invoice.client_name || "A customer"} paid $${amount.toFixed(2)} for Invoice #${invoice.invoice_number} (${payment_method.replace(/_/g, " ")}).`,
           category: "transactional",
-          link_url: "/merchant/invoicing",
+          link_url: transactionId ? `/merchant/transactions?transaction=${encodeURIComponent(transactionId)}` : "/merchant/invoicing",
         });
         if (merchantNotifErr) console.error("[record-manual-invoice-payment] Merchant in-app notification insert failed:", merchantNotifErr.message);
       } catch (e) {
