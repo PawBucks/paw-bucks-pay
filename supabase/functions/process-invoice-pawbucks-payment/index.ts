@@ -378,7 +378,7 @@ serve(async (req) => {
             title: "New Payment Received",
             message: `${invoice.client_name || "A customer"} paid ${amt} in PawBucks for Invoice #${invoice.invoice_number}.`,
             category: "transactional",
-            link_url: "/merchant/invoicing",
+            link_url: transaction?.id ? `/merchant/transactions?transaction=${encodeURIComponent(transaction.id)}` : "/merchant/invoicing",
           });
         }
         if (userId && userId !== merchant.user_id) {
