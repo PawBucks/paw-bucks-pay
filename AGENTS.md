@@ -1,1 +1,2 @@
 - Push alerts: AFTER INSERT trigger on notifications calls notify-push via pg_net, which relays to the push server with PUSH_WEBHOOK_SECRET — keeps the secret out of the database.
+- POS sales are finalized only via the complete_pos_sale DB function (prices/stock/totals computed server-side); clients never insert merchant_pos_sales directly — why: prevents tampered totals.
