@@ -222,7 +222,7 @@ export default function MerchantPOSTerminal() {
                 <Card key={s.id} className="p-3 flex justify-between">
                   <div>
                     <p className="font-medium">{s.customer_name || "Walk-in customer"}</p>
-                    <p className="text-xs text-muted-foreground">{Formatters.dateTime ? Formatters.dateTime(s.created_at) : new Date(s.created_at).toLocaleString("en-US", { timeZone: "America/New_York" })} · {s.payment_method === "card_external" ? "Card" : s.payment_method === "cash" ? "Cash" : "Other"}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleString("en-US", { timeZone: "America/New_York" })} · {s.payment_method === "card_external" ? "Card" : s.payment_method === "cash" ? "Cash" : "Other"}</p>
                   </div>
                   <span className="font-semibold">{money(s.total)}</span>
                 </Card>
