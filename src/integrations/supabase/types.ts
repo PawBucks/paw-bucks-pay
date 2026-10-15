@@ -6944,6 +6944,7 @@ export type Database = {
           subtotal: number
           tax: number
           tax_rate: number
+          tip: number
           total: number
           transaction_id: string | null
         }
@@ -6961,6 +6962,7 @@ export type Database = {
           subtotal: number
           tax?: number
           tax_rate?: number
+          tip?: number
           total: number
           transaction_id?: string | null
         }
@@ -6978,6 +6980,7 @@ export type Database = {
           subtotal?: number
           tax?: number
           tax_rate?: number
+          tip?: number
           total?: number
           transaction_id?: string | null
         }
@@ -17499,6 +17502,7 @@ export type Database = {
           _note?: string
           _payment_method: string
           _tax_rate?: number
+          _tip?: number
         }
         Returns: string
       }
