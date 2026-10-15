@@ -6827,6 +6827,168 @@ export type Database = {
           },
         ]
       }
+      merchant_pos_items: {
+        Row: {
+          barcode: string | null
+          category: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          merchant_id: string
+          name: string
+          price: number
+          sku: string | null
+          stock_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          barcode?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          merchant_id: string
+          name: string
+          price?: number
+          sku?: string | null
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          barcode?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          merchant_id?: string
+          name?: string
+          price?: number
+          sku?: string | null
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_pos_items_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_pos_items_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_pos_sale_items: {
+        Row: {
+          id: string
+          item_id: string | null
+          line_total: number
+          name: string
+          quantity: number
+          sale_id: string
+          unit_price: number
+        }
+        Insert: {
+          id?: string
+          item_id?: string | null
+          line_total: number
+          name: string
+          quantity: number
+          sale_id: string
+          unit_price: number
+        }
+        Update: {
+          id?: string
+          item_id?: string | null
+          line_total?: number
+          name?: string
+          quantity?: number
+          sale_id?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_pos_sale_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_pos_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_pos_sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_pos_sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_pos_sales: {
+        Row: {
+          created_at: string
+          created_by: string
+          customer_name: string | null
+          discount: number
+          id: string
+          merchant_id: string
+          note: string | null
+          payment_method: string
+          subtotal: number
+          tax: number
+          tax_rate: number
+          total: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          customer_name?: string | null
+          discount?: number
+          id?: string
+          merchant_id: string
+          note?: string | null
+          payment_method: string
+          subtotal: number
+          tax?: number
+          tax_rate?: number
+          total: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          customer_name?: string | null
+          discount?: number
+          id?: string
+          merchant_id?: string
+          note?: string | null
+          payment_method?: string
+          subtotal?: number
+          tax?: number
+          tax_rate?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_pos_sales_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_pos_sales_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_reviews: {
         Row: {
           created_at: string
@@ -17316,6 +17478,18 @@ export type Database = {
       complete_brand_setup: {
         Args: { p_brand_id: string; p_payload: Json }
         Returns: Json
+      }
+      complete_pos_sale: {
+        Args: {
+          _customer_name?: string
+          _discount?: number
+          _items: Json
+          _merchant_id: string
+          _note?: string
+          _payment_method: string
+          _tax_rate?: number
+        }
+        Returns: string
       }
       compute_brand_redeemable_cents: {
         Args: { p_line_items: Json; p_merchant_id: string; p_user_id: string }

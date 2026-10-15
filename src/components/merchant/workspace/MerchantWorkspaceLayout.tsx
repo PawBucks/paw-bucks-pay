@@ -42,6 +42,7 @@ import {
   Sparkles,
   Stamp,
   History,
+  ScanLine,
 } from "lucide-react";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useAuth } from "@/hooks/useAuth";
@@ -92,6 +93,7 @@ const NAV: NavSection[] = [
       { id: "invoicing", label: "Invoicing", icon: FileText, to: "/merchant/invoicing" },
       { id: "subscription-plans", label: "Subscription Plans", icon: Users, to: "/merchant/subscription-plans" },
       { id: "marketplace", label: "Services Marketplace", icon: Star, to: "/merchant/market" },
+      { id: "pos-terminal", label: "POS Terminal", icon: ScanLine, to: "/merchant/pos" },
       { id: "pos", label: "POS Integration", icon: Store, to: "/merchant/pos-integration" },
       { id: "loyalty", label: "Loyalty Program", icon: Stamp, to: "/merchant/loyalty" },
       { id: "premium-services", label: "Premium Services", icon: Sparkles, to: "/merchant/premium-services" },

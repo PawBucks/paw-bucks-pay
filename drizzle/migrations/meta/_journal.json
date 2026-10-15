@@ -85,6 +85,13 @@
       "when": 1790855307872,
       "tag": "0011_notify_allow_vet_compliance",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792075116883,
+      "tag": "0012_merchant_pos_terminal",
+      "breakpoints": true
     }
   ]
 }
