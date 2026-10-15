@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Minus, Plus, Trash2, ScanLine, Search, Pencil, Loader2, Package } from "lucide-react";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
-import { addToTicket, computeTicketTotals, type TicketLine } from "@/lib/posTicket";
+import { addToTicket, computeTicketTotals, tipFromPercent, POS_TIP_PRESETS, type TicketLine } from "@/lib/posTicket";
 import { Formatters } from "@/utils/formatters";
 
 type PosItem = {
@@ -39,6 +39,8 @@ export default function MerchantPOSTerminal() {
   const [taxRate, setTaxRate] = useState(0);
   const [customer, setCustomer] = useState("");
   const [payMethod, setPayMethod] = useState("cash");
+  const [tipMode, setTipMode] = useState<"none" | "custom" | number>("none");
+  const [customTip, setCustomTip] = useState("");
 
   useEffect(() => {
     if (!pending) return;
@@ -47,7 +49,7 @@ export default function MerchantPOSTerminal() {
       if (data === "completed") {
         toast.success(`Card payment received — ${money(pending.total)}`);
         if (navigator.vibrate) navigator.vibrate(60);
-        setPending(null); setTicket([]); setDiscount(0); setCustomer(""); load();
+        setPending(null); resetTicket(); load();
       }
     }, 3000);
     return () => clearInterval(t);
@@ -92,7 +94,10 @@ export default function MerchantPOSTerminal() {
     return hit.name;
   }, [items]);
 
-  const totals = computeTicketTotals(ticket, discount, taxRate);
+  const base = computeTicketTotals(ticket, discount, taxRate);
+  const tip = tipMode === "none" ? 0 : tipMode === "custom" ? Math.max(parseFloat(customTip) || 0, 0) : tipFromPercent(base.subtotal, base.discount, tipMode);
+  const totals = computeTicketTotals(ticket, discount, taxRate, tip);
+  const resetTicket = () => { setTicket([]); setDiscount(0); setCustomer(""); setTipMode("none"); setCustomTip(""); };
 
   const checkout = async () => {
     if (!merchantId || ticket.length === 0) return;
@@ -101,13 +106,14 @@ export default function MerchantPOSTerminal() {
       _merchant_id: merchantId,
       _items: ticket.map((l) => ({ item_id: l.item_id, quantity: l.quantity })),
       _payment_method: payMethod, _discount: discount, _tax_rate: taxRate,
-      _customer_name: customer || null,
+      _customer_name: customer || null, _tip: totals.tip,
     });
     setCheckingOut(false);
     if (error) return toast.error(`Sale not saved: ${error.message}`);
     if (payMethod === "pawbucks_card") { setPending({ id: saleId as string, total: totals.total }); return; }
     toast.success(`Sale completed — ${money(totals.total)}`);
-    setTicket([]); setDiscount(0); setCustomer("");
+    if (navigator.vibrate) navigator.vibrate(60);
+    resetTicket();
     load();
   };
 
@@ -209,10 +215,24 @@ export default function MerchantPOSTerminal() {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Tip (USD only, never PawBucks)</Label>
+                  <div className="grid grid-cols-5 gap-1">
+                    <Button type="button" size="sm" variant={tipMode === "none" ? "default" : "outline"} onClick={() => setTipMode("none")}>None</Button>
+                    {POS_TIP_PRESETS.map((p) => (
+                      <Button key={p} type="button" size="sm" variant={tipMode === p ? "default" : "outline"} onClick={() => setTipMode(p)} disabled={totals.subtotal <= 0}>{p}%</Button>
+                    ))}
+                    <Button type="button" size="sm" variant={tipMode === "custom" ? "default" : "outline"} onClick={() => setTipMode("custom")}>Custom</Button>
+                  </div>
+                  {tipMode === "custom" && (
+                    <Input type="number" min={0} step="0.01" placeholder="Tip amount ($)" value={customTip} onChange={(e) => setCustomTip(e.target.value)} />
+                  )}
+                </div>
                 <div className="text-sm space-y-1 border-t pt-2">
                   <div className="flex justify-between"><span>Subtotal</span><span>{money(totals.subtotal)}</span></div>
                   {totals.discount > 0 && <div className="flex justify-between"><span>Discount</span><span>-{money(totals.discount)}</span></div>}
                   {totals.tax > 0 && <div className="flex justify-between"><span>Tax</span><span>{money(totals.tax)}</span></div>}
+                  {totals.tip > 0 && <div className="flex justify-between"><span>Tip</span><span>{money(totals.tip)}</span></div>}
                   <div className="flex justify-between font-bold text-lg"><span>Total</span><span>{money(totals.total)}</span></div>
                 </div>
                 <Button className="w-full" size="lg" disabled={ticket.length === 0 || checkingOut} onClick={checkout}>
