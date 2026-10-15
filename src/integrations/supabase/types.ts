@@ -6938,11 +6938,14 @@ export type Database = {
           id: string
           merchant_id: string
           note: string | null
+          paid_at: string | null
           payment_method: string
+          status: string
           subtotal: number
           tax: number
           tax_rate: number
           total: number
+          transaction_id: string | null
         }
         Insert: {
           created_at?: string
@@ -6952,11 +6955,14 @@ export type Database = {
           id?: string
           merchant_id: string
           note?: string | null
+          paid_at?: string | null
           payment_method: string
+          status?: string
           subtotal: number
           tax?: number
           tax_rate?: number
           total: number
+          transaction_id?: string | null
         }
         Update: {
           created_at?: string
@@ -6966,11 +6972,14 @@ export type Database = {
           id?: string
           merchant_id?: string
           note?: string | null
+          paid_at?: string | null
           payment_method?: string
+          status?: string
           subtotal?: number
           tax?: number
           tax_rate?: number
           total?: number
+          transaction_id?: string | null
         }
         Relationships: [
           {
@@ -17456,6 +17465,8 @@ export type Database = {
           skipped: number
         }[]
       }
+      cancel_pos_sale: { Args: { _sale_id: string }; Returns: undefined }
+      check_pos_sale_payment: { Args: { _sale_id: string }; Returns: string }
       check_welcome_credit_abuse: {
         Args: { p_email: string; p_ip?: string; p_phone?: string }
         Returns: {

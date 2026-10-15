@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Minus, Plus, Trash2, ScanLine, Search, Pencil, Loader2, Package } from "lucide-react";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 import { addToTicket, computeTicketTotals, type TicketLine } from "@/lib/posTicket";
 import { Formatters } from "@/utils/formatters";
 
@@ -27,7 +28,8 @@ const money = (n: number) => Formatters.currency(n);
 const emptyItem = { id: "", name: "", sku: "", barcode: "", category: "", price: 0, stock_quantity: null, is_active: true } as unknown as PosItem;
 
 export default function MerchantPOSTerminal() {
-  const { merchantId, loading: ctxLoading } = useMerchantContext();
+  const { merchantId, hasStripeAccount, loading: ctxLoading } = useMerchantContext();
+  const [pending, setPending] = useState<{ id: string; total: number } | null>(null);
   const [items, setItems] = useState<PosItem[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [ticket, setTicket] = useState<TicketLine[]>([]);
@@ -37,6 +39,26 @@ export default function MerchantPOSTerminal() {
   const [taxRate, setTaxRate] = useState(0);
   const [customer, setCustomer] = useState("");
   const [payMethod, setPayMethod] = useState("cash");
+
+  useEffect(() => {
+    if (!pending) return;
+    const t = setInterval(async () => {
+      const { data } = await supabase.rpc("check_pos_sale_payment", { _sale_id: pending.id });
+      if (data === "completed") {
+        toast.success(`Card payment received — ${money(pending.total)}`);
+        if (navigator.vibrate) navigator.vibrate(60);
+        setPending(null); setTicket([]); setDiscount(0); setCustomer(""); load();
+      }
+    }, 3000);
+    return () => clearInterval(t);
+  }, [pending]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const cancelPending = async () => {
+    if (!pending) return;
+    const { error } = await supabase.rpc("cancel_pos_sale", { _sale_id: pending.id });
+    if (error) return toast.error(error.message);
+    setPending(null); load();
+  };
   const [checkingOut, setCheckingOut] = useState(false);
   const [editing, setEditing] = useState<PosItem | null>(null);
   const [saving, setSaving] = useState(false);
@@ -45,7 +67,7 @@ export default function MerchantPOSTerminal() {
     if (!merchantId) return;
     const [{ data: it }, { data: sl }] = await Promise.all([
       supabase.from("merchant_pos_items").select("*").eq("merchant_id", merchantId).order("name"),
-      supabase.from("merchant_pos_sales").select("id,total,payment_method,customer_name,created_at").eq("merchant_id", merchantId).order("created_at", { ascending: false }).limit(50),
+      supabase.from("merchant_pos_sales").select("id,total,payment_method,customer_name,created_at,status").eq("merchant_id", merchantId).order("created_at", { ascending: false }).limit(50),
     ]);
     setItems((it || []).map((i: any) => ({ ...i, price: Number(i.price) })));
     setSales((sl || []).map((s: any) => ({ ...s, total: Number(s.total) })));
@@ -75,7 +97,7 @@ export default function MerchantPOSTerminal() {
   const checkout = async () => {
     if (!merchantId || ticket.length === 0) return;
     setCheckingOut(true);
-    const { error } = await supabase.rpc("complete_pos_sale", {
+    const { data: saleId, error } = await supabase.rpc("complete_pos_sale", {
       _merchant_id: merchantId,
       _items: ticket.map((l) => ({ item_id: l.item_id, quantity: l.quantity })),
       _payment_method: payMethod, _discount: discount, _tax_rate: taxRate,
@@ -83,6 +105,7 @@ export default function MerchantPOSTerminal() {
     });
     setCheckingOut(false);
     if (error) return toast.error(`Sale not saved: ${error.message}`);
+    if (payMethod === "pawbucks_card") { setPending({ id: saleId as string, total: totals.total }); return; }
     toast.success(`Sale completed — ${money(totals.total)}`);
     setTicket([]); setDiscount(0); setCustomer("");
     load();
@@ -180,6 +203,7 @@ export default function MerchantPOSTerminal() {
                 <Select value={payMethod} onValueChange={setPayMethod}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="pawbucks_card" disabled={!hasStripeAccount}>Card via PawBucks (earns PawBucks)</SelectItem>
                     <SelectItem value="cash">Cash</SelectItem>
                     <SelectItem value="card_external">Card (external reader)</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
@@ -222,7 +246,7 @@ export default function MerchantPOSTerminal() {
                 <Card key={s.id} className="p-3 flex justify-between">
                   <div>
                     <p className="font-medium">{s.customer_name || "Walk-in customer"}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleString("en-US", { timeZone: "America/New_York" })} · {s.payment_method === "card_external" ? "Card" : s.payment_method === "cash" ? "Cash" : "Other"}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleString("en-US", { timeZone: "America/New_York" })} · {s.payment_method === "pawbucks_card" ? `PawBucks card${(s as any).status === "awaiting_payment" ? " (unpaid)" : (s as any).status === "cancelled" ? " (cancelled)" : ""}` : s.payment_method === "card_external" ? "Card" : s.payment_method === "cash" ? "Cash" : "Other"}</p>
                   </div>
                   <span className="font-semibold">{money(s.total)}</span>
                 </Card>
@@ -234,6 +258,22 @@ export default function MerchantPOSTerminal() {
       </MerchantWorkspaceLayout>
 
       <BarcodeScannerModal open={scanOpen} onClose={() => setScanOpen(false)} onScan={handleScan} />
+
+      <Dialog open={!!pending} onOpenChange={() => {}}>
+        <DialogContent className="max-w-sm text-center">
+          <DialogHeader><DialogTitle>Customer scans to pay {pending && money(pending.total)}</DialogTitle></DialogHeader>
+          {pending && merchantId && (
+            <div className="flex flex-col items-center gap-3">
+              <div className="bg-card p-3 rounded-lg border">
+                <QRCodeSVG value={`https://pawbucks.app/pay/${merchantId}?amount=${pending.total.toFixed(2)}`} size={220} />
+              </div>
+              <p className="text-sm text-muted-foreground">The customer pays by card in the PawBucks app. Their PawBucks are applied automatically and they earn PawBucks on the purchase.</p>
+              <p className="text-sm flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Waiting for payment…</p>
+            </div>
+          )}
+          <DialogFooter><Button variant="outline" className="w-full" onClick={cancelPending}>Cancel sale</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent>

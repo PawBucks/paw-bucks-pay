@@ -92,6 +92,13 @@
       "when": 1792075116883,
       "tag": "0012_merchant_pos_terminal",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792075431255,
+      "tag": "0013_pos_card_payments",
+      "breakpoints": true
     }
   ]
 }
