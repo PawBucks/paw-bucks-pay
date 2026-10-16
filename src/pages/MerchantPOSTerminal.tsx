@@ -193,10 +193,10 @@ export default function MerchantPOSTerminal() {
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2">
                     {filtered.map((i) => (
-                      <button key={i.id} onClick={() => add(i)} className="text-left rounded-lg border bg-card p-3 hover:border-primary transition-colors">
+                      <button key={i.id} onClick={() => add(i)} disabled={i.stock_quantity === 0} className="text-left rounded-lg border bg-card p-3 hover:border-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-border">
                         <p className="font-medium line-clamp-2">{i.name}</p>
                         <p className="text-primary font-semibold mt-1">{money(i.price)}</p>
-                        {i.stock_quantity !== null && <p className="text-xs text-muted-foreground">{i.stock_quantity} in stock</p>}
+                        {i.stock_quantity === 0 ? <Badge variant="destructive" className="mt-1">Out of stock</Badge> : i.stock_quantity !== null && <p className="text-xs text-muted-foreground">{i.stock_quantity} in stock</p>}
                       </button>
                     ))}
                   </div>
@@ -218,7 +218,7 @@ export default function MerchantPOSTerminal() {
                         </div>
                         <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setQty(l.item_id, l.quantity - 1)} aria-label="Decrease"><Minus className="h-3 w-3" /></Button>
                         <span className="w-6 text-center text-sm">{l.quantity}</span>
-                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setQty(l.item_id, l.quantity + 1)} aria-label="Increase"><Plus className="h-3 w-3" /></Button>
+                        <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => setQty(l.item_id, l.quantity + 1)} disabled={stockOf(l.item_id) !== null && l.quantity >= (stockOf(l.item_id) as number)} aria-label="Increase"><Plus className="h-3 w-3" /></Button>
                         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setQty(l.item_id, 0)} aria-label="Remove"><Trash2 className="h-3 w-3 text-destructive" /></Button>
                       </div>
                     ))}
