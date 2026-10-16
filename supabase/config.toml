@@ -283,3 +283,12 @@ verify_jwt = false
 verify_jwt = false
 [functions.send-pos-receipt]
 verify_jwt = true
+
+[functions.create-terminal-connection-token]
+verify_jwt = true
+
+[functions.create-terminal-payment-intent]
+verify_jwt = true
+
+[functions.confirm-terminal-payment]
+verify_jwt = true
