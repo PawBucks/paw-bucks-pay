@@ -38,6 +38,8 @@ export default function MerchantPOSTerminal() {
   const [discount, setDiscount] = useState(0);
   const [taxRate, setTaxRate] = useState(0);
   const [customer, setCustomer] = useState("");
+  const [receiptEmail, setReceiptEmail] = useState("");
+  const receiptEmailInvalid = receiptEmail.trim() !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(receiptEmail.trim());
   const [payMethod, setPayMethod] = useState("cash");
   const [tipMode, setTipMode] = useState<"none" | "custom" | number>("none");
   const [customTip, setCustomTip] = useState("");
@@ -97,10 +99,10 @@ export default function MerchantPOSTerminal() {
   const base = computeTicketTotals(ticket, discount, taxRate);
   const tip = tipMode === "none" ? 0 : tipMode === "custom" ? Math.max(parseFloat(customTip) || 0, 0) : tipFromPercent(base.subtotal, base.discount, tipMode);
   const totals = computeTicketTotals(ticket, discount, taxRate, tip);
-  const resetTicket = () => { setTicket([]); setDiscount(0); setCustomer(""); setTipMode("none"); setCustomTip(""); };
+  const resetTicket = () => { setTicket([]); setDiscount(0); setCustomer(""); setReceiptEmail(""); setTipMode("none"); setCustomTip(""); };
 
   const checkout = async () => {
-    if (!merchantId || ticket.length === 0) return;
+    if (!merchantId || ticket.length === 0 || receiptEmailInvalid) return;
     setCheckingOut(true);
     const { data: saleId, error } = await supabase.rpc("complete_pos_sale", {
       _merchant_id: merchantId,
@@ -108,10 +110,17 @@ export default function MerchantPOSTerminal() {
       _payment_method: payMethod, _discount: discount, _tax_rate: taxRate,
       _customer_name: customer || null, _tip: totals.tip,
     });
+    if (error) { setCheckingOut(false); return toast.error(`Sale not saved: ${error.message}`); }
+    if (payMethod === "pawbucks_card") { setCheckingOut(false); setPending({ id: saleId as string, total: totals.total, tip: totals.tip }); return; }
+    const email = receiptEmail.trim();
+    let receiptNote = "";
+    if (email) {
+      const { data: r, error: re } = await supabase.functions.invoke("send-pos-receipt", { body: { saleId, email } });
+      if (re || (r as any)?.error) toast.error(`Sale saved, but the receipt email didn't send to ${email}.`);
+      else receiptNote = ` · receipt sent to ${email}`;
+    }
     setCheckingOut(false);
-    if (error) return toast.error(`Sale not saved: ${error.message}`);
-    if (payMethod === "pawbucks_card") { setPending({ id: saleId as string, total: totals.total, tip: totals.tip }); return; }
-    toast.success(`Sale completed — ${money(totals.total)}`);
+    toast.success(`Sale completed — ${money(totals.total)}${receiptNote}`);
     if (navigator.vibrate) navigator.vibrate(60);
     resetTicket();
     load();
@@ -215,6 +224,12 @@ export default function MerchantPOSTerminal() {
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
+                {payMethod !== "pawbucks_card" && (
+                  <div className="space-y-1">
+                    <Input type="email" inputMode="email" autoComplete="off" placeholder="Customer email for receipt (optional)" value={receiptEmail} onChange={(e) => setReceiptEmail(e.target.value)} maxLength={255} />
+                    {receiptEmailInvalid && <p className="text-xs text-destructive">Enter a valid email or leave it blank.</p>}
+                  </div>
+                )}
                 <div className="space-y-1.5">
                   <Label className="text-xs">Tip (USD only, never PawBucks)</Label>
                   <div className="grid grid-cols-5 gap-1">
@@ -235,7 +250,7 @@ export default function MerchantPOSTerminal() {
                   {totals.tip > 0 && <div className="flex justify-between"><span>Tip</span><span>{money(totals.tip)}</span></div>}
                   <div className="flex justify-between font-bold text-lg"><span>Total</span><span>{money(totals.total)}</span></div>
                 </div>
-                <Button className="w-full" size="lg" disabled={ticket.length === 0 || checkingOut} onClick={checkout}>
+                <Button className="w-full" size="lg" disabled={ticket.length === 0 || checkingOut || receiptEmailInvalid} onClick={checkout}>
                   {checkingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : `Complete sale · ${money(totals.total)}`}
                 </Button>
               </Card>
