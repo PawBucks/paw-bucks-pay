@@ -295,6 +295,7 @@ type PaymentDialogWithPawBucksProps = {
  initialAmount?: number;
  /** Optional prefilled tip (USD). */
  initialTip?: number;
+ posSale?: PosSaleSummary;
 };
 
 export interface PosSaleSummary {
