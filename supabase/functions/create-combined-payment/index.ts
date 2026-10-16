@@ -886,10 +886,18 @@ serve(async (req) => {
           total_amount: totalAmount,
           tax_amount: taxUsd,
           items: lineItems,
+          pos_sale_id: posSaleId ?? null,
         },
       });
 
     logStep("Payment record created");
+
+    if (posSaleId) {
+      const { error: piLinkErr } = await supabaseAdmin.from('merchant_pos_sales')
+        .update({ stripe_payment_intent_id: paymentIntent.id })
+        .eq('id', posSaleId).eq('status', 'awaiting_payment');
+      if (piLinkErr) logStep('POS sale PI link failed (non-fatal)', { error: piLinkErr.message });
+    }
 
     return new Response(
       JSON.stringify({
