@@ -55,6 +55,7 @@ const combinedPaymentSchema = z.object({
   description: z.string().max(500).optional(),
   autoRedeem: z.boolean().optional().default(false),
   items: z.array(itemSchema).max(100).optional(),
+  posSaleId: z.string().uuid().optional(),
   // Optional per-checkout tax location. When omitted we fall back to the
   // customer's saved default address in `customer_tax_addresses`.
   taxAddress: z
@@ -165,7 +166,8 @@ serve(async (req) => {
 
     const { totalAmount, pawbucksAmount: manualPawbucksAmount, storeLockedPawbucks: initialStoreLockedPawbucks, tipAmount, merchantId, description, autoRedeem: requestAutoRedeem, items } = validation.data;
     let storeLockedPawbucks = initialStoreLockedPawbucks;
-    const lineItems: IncomingTransactionItem[] = items ?? [];
+    let lineItems: IncomingTransactionItem[] = items ?? [];
+    const posSaleId = validation.data.posSaleId;
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -202,6 +204,37 @@ serve(async (req) => {
     // --- Auto-Redeem Logic ---
     let pawbucksAmount = manualPawbucksAmount;
     const baseAmount = totalAmount - tipAmount; // Base amount excluding tip
+
+    // --- POS sale link: build itemized lines server-side from the register ticket ---
+    if (posSaleId) {
+      const { data: sale } = await supabaseAdmin
+        .from('merchant_pos_sales')
+        .select('id, merchant_id, status, subtotal, discount, tax, tip, total')
+        .eq('id', posSaleId)
+        .maybeSingle();
+      if (!sale || sale.merchant_id !== merchantId || sale.status !== 'awaiting_payment') {
+        throw new Error('This sale is no longer awaiting payment');
+      }
+      const saleBase = Number(sale.total) - Number(sale.tip || 0);
+      if (Math.abs(saleBase - baseAmount) > 0.01) {
+        throw new Error('Payment amount does not match the sale total');
+      }
+      const { data: saleItems } = await supabaseAdmin
+        .from('merchant_pos_sale_items')
+        .select('item_id, name, quantity, unit_price')
+        .eq('sale_id', posSaleId);
+      const built: IncomingTransactionItem[] = (saleItems ?? []).map((li: any) => ({
+        source_type: 'custom', source_id: null, name: li.name,
+        quantity: Number(li.quantity), unit_price: Number(li.unit_price), sku: 'POS',
+      }));
+      if (Number(sale.discount) > 0) {
+        built.push({ source_type: 'custom', name: `Discount (-$${Number(sale.discount).toFixed(2)})`, quantity: 1, unit_price: 0, sku: 'POS-DISCOUNT' });
+      }
+      if (Number(sale.tax) > 0) {
+        built.push({ source_type: 'custom', name: 'Sales tax', quantity: 1, unit_price: Number(sale.tax), sku: 'POS-TAX' });
+      }
+      lineItems = built;
+    }
     const spendableSources = await getSpendableSources(supabaseAdmin, effectiveUserId);
     const petFundEligibleForBase =
       spendableSources.petFundAvailable > 0 &&
@@ -321,7 +354,7 @@ serve(async (req) => {
       const taxConfig = await getTaxConfig(supabaseAdmin);
       if (taxConfig.enabled && baseAmount > 0) {
         const taxItems: TaxLineInput[] = lineItems.length > 0
-          ? lineItems.map((li) => ({
+          ? lineItems.filter((li) => li.sku !== 'POS-TAX' && li.sku !== 'POS-DISCOUNT').map((li) => ({
               source_type: li.source_type,
               source_id: li.source_id ?? null,
               name: li.name,
@@ -554,6 +587,12 @@ serve(async (req) => {
         transaction_id: transaction?.id || null,
       });
 
+      if (posSaleId && transaction?.id) {
+        const { error: linkErr } = await supabaseAdmin.from('merchant_pos_sales')
+          .update({ status: 'completed', transaction_id: transaction.id, paid_at: new Date().toISOString() })
+          .eq('id', posSaleId).eq('status', 'awaiting_payment');
+        if (linkErr) logStep('POS sale link failed (non-fatal)', { error: linkErr.message });
+      }
       // Persist line items (best-effort; non-fatal)
       if (transaction?.id && lineItems.length > 0) {
         await insertTransactionItems(supabaseAdmin, {
