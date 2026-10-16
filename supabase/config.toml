@@ -281,3 +281,5 @@ verify_jwt = false
 
 [functions.broadcast-lost-pet-alert]
 verify_jwt = false
+  [functions.send-pos-receipt]
+    verify_jwt = true
