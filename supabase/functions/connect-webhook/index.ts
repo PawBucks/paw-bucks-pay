@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
+import { insertTransactionItems } from "../_shared/transaction-items.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import {
@@ -824,6 +825,21 @@ serve(async (req) => {
             logStep("Error creating transaction", { error: txError.message });
           } else {
             logStep("Transaction created", { transactionId: transaction?.id, pawbucksEarned });
+          }
+
+          if (transaction?.id) {
+            try {
+              const { data: dpItems } = await supabaseAdmin.from('direct_payments').select('metadata')
+                .eq('stripe_payment_intent_id', paymentIntent.id).maybeSingle();
+              const raw = (dpItems as any)?.metadata?.items;
+              if (Array.isArray(raw) && raw.length > 0) {
+                const { count } = await supabaseAdmin.from('transaction_items')
+                  .select('id', { count: 'exact', head: true }).eq('transaction_id', transaction.id);
+                if (!count) {
+                  await insertTransactionItems(supabaseAdmin, { transactionId: transaction.id, merchantId: resolvedMerchantId, items: raw });
+                }
+              }
+            } catch (e) { logStep("Line item save failed (non-fatal)", { error: String(e) }); }
           }
 
           // Pet Pro referral credit offsets the Success Fee on this payment.
