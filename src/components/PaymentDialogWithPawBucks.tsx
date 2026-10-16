@@ -295,7 +295,18 @@ type PaymentDialogWithPawBucksProps = {
  initialAmount?: number;
  /** Optional prefilled tip (USD). */
  initialTip?: number;
+ posSale?: PosSaleSummary;
 };
+
+export interface PosSaleSummary {
+  id: string;
+  subtotal: number;
+  discount: number;
+  tax: number;
+  tip: number;
+  total: number;
+  items: { name: string; quantity: number; unit_price: number }[];
+}
 
 export const PaymentDialogWithPawBucks = ({
  open,
@@ -308,6 +319,7 @@ export const PaymentDialogWithPawBucks = ({
  onSuccess,
  initialAmount,
  initialTip,
+ posSale,
 }: PaymentDialogWithPawBucksProps) => {
   const [amount, setAmount] = useState(
     initialAmount && initialAmount > 0 ? initialAmount.toFixed(2) : ""
@@ -577,7 +589,8 @@ export const PaymentDialogWithPawBucks = ({
 				// If the user explicitly moved the slider (including to 0), respect that
 				// choice absolutely — never let the backend override it with auto-apply.
 				autoRedeem: !userAdjustedPawbucksRef.current && (autoRedeemPref?.enabled ?? false),
- items: itemsToPayload(lineItems),
+ items: posSale ? undefined : itemsToPayload(lineItems),
+ posSaleId: posSale?.id,
  },
  });
 
@@ -769,11 +782,27 @@ export const PaymentDialogWithPawBucks = ({
     <div className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground -mb-1">
       Order Details
     </div>
+ {posSale ? (
+   <div className="space-y-1.5 text-sm">
+     {posSale.items.map((it, idx) => (
+       <div key={idx} className="flex justify-between gap-2">
+         <span className="truncate">{it.quantity} × {it.name}</span>
+         <span className="tabular-nums">${(Number(it.quantity) * Number(it.unit_price)).toFixed(2)}</span>
+       </div>
+     ))}
+     <div className="border-t pt-1.5 space-y-1 text-muted-foreground">
+       <div className="flex justify-between"><span>Subtotal</span><span className="tabular-nums">${Number(posSale.subtotal).toFixed(2)}</span></div>
+       {Number(posSale.discount) > 0 && <div className="flex justify-between"><span>Discount</span><span className="tabular-nums">-${Number(posSale.discount).toFixed(2)}</span></div>}
+       {Number(posSale.tax) > 0 && <div className="flex justify-between"><span>Tax</span><span className="tabular-nums">${Number(posSale.tax).toFixed(2)}</span></div>}
+     </div>
+   </div>
+ ) : (
  <ManualChargeItemsEditor
    merchantId={merchantId}
    items={lineItems}
    onChange={setLineItems}
  />
+ )}
  <div className="space-y-2">
  <Label htmlFor="amount">Amount ($)</Label>
  <Input
@@ -790,7 +819,7 @@ export const PaymentDialogWithPawBucks = ({
  }}
  required
  autoFocus
- readOnly={lineItems.length > 0}
+ readOnly={lineItems.length > 0 || !!posSale}
  className={lineItems.length > 0 ? "bg-muted/40 cursor-not-allowed" : ""}
  />
  {lineItems.length > 0 && (

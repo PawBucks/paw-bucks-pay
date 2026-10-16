@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
+import { insertTransactionItems } from "../_shared/transaction-items.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import {
@@ -826,6 +827,21 @@ serve(async (req) => {
             logStep("Transaction created", { transactionId: transaction?.id, pawbucksEarned });
           }
 
+          if (transaction?.id) {
+            try {
+              const { data: dpItems } = await supabaseAdmin.from('direct_payments').select('metadata')
+                .eq('stripe_payment_intent_id', paymentIntent.id).maybeSingle();
+              const raw = (dpItems as any)?.metadata?.items;
+              if (Array.isArray(raw) && raw.length > 0) {
+                const { count } = await supabaseAdmin.from('transaction_items')
+                  .select('id', { count: 'exact', head: true }).eq('transaction_id', transaction.id);
+                if (!count) {
+                  await insertTransactionItems(supabaseAdmin, { transactionId: transaction.id, merchantId: resolvedMerchantId, items: raw });
+                }
+              }
+            } catch (e) { logStep("Line item save failed (non-fatal)", { error: String(e) }); }
+          }
+
           // Pet Pro referral credit offsets the Success Fee on this payment.
           referralCreditApplied = await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
             merchantId: resolvedMerchantId,
@@ -1094,6 +1110,19 @@ serve(async (req) => {
             .eq('id', userId)
             .single();
 
+          let receiptItems: { name: string; price: number }[] | null = null;
+          try {
+            const { data: dpRow } = await supabaseAdmin.from('direct_payments').select('metadata')
+              .eq('stripe_payment_intent_id', paymentIntent.id).maybeSingle();
+            const raw = (dpRow as any)?.metadata?.items;
+            if (Array.isArray(raw) && raw.length > 0) {
+              receiptItems = raw.map((i: any) => ({
+                name: Number(i.quantity) > 1 ? `${i.quantity} × ${i.name}` : String(i.name),
+                price: Math.round(Number(i.quantity) * Number(i.unit_price) * 100) / 100,
+              }));
+            }
+          } catch (_) { /* fall back to generic line */ }
+
           if (userProfile?.email) {
             await sendReceiptEmail({
               email: userProfile.email,
@@ -1101,7 +1130,7 @@ serve(async (req) => {
               transactionDate: new Date().toISOString(),
               receiptId: transaction?.id || paymentIntent.id,
               merchantName: businessName,
-              items: [{ name: `Payment to ${businessName}`, price: totalAmount > 0 ? totalAmount : amountInDollars }],
+              items: receiptItems ?? [{ name: `Payment to ${businessName}`, price: totalAmount > 0 ? totalAmount : amountInDollars }],
               subtotal: totalAmount > 0 ? totalAmount : amountInDollars,
               pawbucksApplied: pawbucksAmount,
               cardAmount: amountInDollars,

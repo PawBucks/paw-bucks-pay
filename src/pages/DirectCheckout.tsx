@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
 import { useAuth } from "@/hooks/useAuth";
-import { PaymentDialogWithPawBucks } from "@/components/PaymentDialogWithPawBucks";
+import { PaymentDialogWithPawBucks, type PosSaleSummary } from "@/components/PaymentDialogWithPawBucks";
 
 interface Merchant {
   id: string;
@@ -46,6 +46,15 @@ export default function DirectCheckout() {
     const v = parseFloat(searchParams.get("tip") || "");
     return Number.isFinite(v) && v > 0 ? v : undefined;
   })();
+
+  const posSaleId = searchParams.get("pos_sale");
+  const [posSale, setPosSale] = useState<PosSaleSummary | null>(null);
+  useEffect(() => {
+    if (!posSaleId || !user) return;
+    supabase.rpc("get_pos_sale_for_checkout", { _sale_id: posSaleId }).then(({ data }) => {
+      if (data) setPosSale(data as unknown as PosSaleSummary);
+    });
+  }, [posSaleId, user]);
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -238,8 +247,9 @@ export default function DirectCheckout() {
           cashbackRate={merchant.cashback_rate}
           acceptsPawbucks={merchant.accepts_pawbucks}
           userId={user.id}
-          initialAmount={prefilledAmount}
-          initialTip={prefilledTip}
+          initialAmount={posSale ? Number(posSale.total) - Number(posSale.tip || 0) : prefilledAmount}
+          initialTip={posSale ? Number(posSale.tip || 0) : prefilledTip}
+          posSale={posSale ?? undefined}
           onSuccess={(details) => {
             setDialogOpen(false);
             const params = new URLSearchParams();

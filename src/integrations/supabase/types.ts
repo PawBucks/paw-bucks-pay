@@ -6941,6 +6941,7 @@ export type Database = {
           paid_at: string | null
           payment_method: string
           status: string
+          stripe_payment_intent_id: string | null
           subtotal: number
           tax: number
           tax_rate: number
@@ -6959,6 +6960,7 @@ export type Database = {
           paid_at?: string | null
           payment_method: string
           status?: string
+          stripe_payment_intent_id?: string | null
           subtotal: number
           tax?: number
           tax_rate?: number
@@ -6977,6 +6979,7 @@ export type Database = {
           paid_at?: string | null
           payment_method?: string
           status?: string
+          stripe_payment_intent_id?: string | null
           subtotal?: number
           tax?: number
           tax_rate?: number
@@ -17826,6 +17829,7 @@ export type Database = {
           stamp_count: number
         }[]
       }
+      get_pos_sale_for_checkout: { Args: { _sale_id: string }; Returns: Json }
       get_reviewer_display_name: {
         Args: { reviewer_id: string }
         Returns: string
