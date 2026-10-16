@@ -63,7 +63,6 @@ serve(async (req) => {
         merchantLocation: merchant.address || undefined,
         merchantPhone: merchant.phone || undefined,
         merchantEmail: merchant.email || undefined,
-        merchantProfileUrl: `https://pawbucks.app/merchant/${merchant.id}`,
         items,
         subtotal: total,
         pawbucksApplied: 0,
