@@ -29,7 +29,7 @@ const emptyItem = { id: "", name: "", sku: "", barcode: "", category: "", price:
 
 export default function MerchantPOSTerminal() {
   const { merchantId, hasStripeAccount, loading: ctxLoading } = useMerchantContext();
-  const [pending, setPending] = useState<{ id: string; total: number } | null>(null);
+  const [pending, setPending] = useState<{ id: string; total: number; tip: number } | null>(null);
   const [items, setItems] = useState<PosItem[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [ticket, setTicket] = useState<TicketLine[]>([]);
@@ -110,7 +110,7 @@ export default function MerchantPOSTerminal() {
     });
     setCheckingOut(false);
     if (error) return toast.error(`Sale not saved: ${error.message}`);
-    if (payMethod === "pawbucks_card") { setPending({ id: saleId as string, total: totals.total }); return; }
+    if (payMethod === "pawbucks_card") { setPending({ id: saleId as string, total: totals.total, tip: totals.tip }); return; }
     toast.success(`Sale completed — ${money(totals.total)}`);
     if (navigator.vibrate) navigator.vibrate(60);
     resetTicket();
@@ -285,7 +285,7 @@ export default function MerchantPOSTerminal() {
           {pending && merchantId && (
             <div className="flex flex-col items-center gap-3">
               <div className="bg-card p-3 rounded-lg border">
-                <QRCodeSVG value={`https://pawbucks.app/pay/${merchantId}?amount=${pending.total.toFixed(2)}`} size={220} />
+                <QRCodeSVG value={`https://pawbucks.app/pay/${merchantId}?pos_sale=${pending.id}&amount=${(pending.total - pending.tip).toFixed(2)}&tip=${pending.tip.toFixed(2)}`} size={220} />
               </div>
               <p className="text-sm text-muted-foreground">The customer pays by card in the PawBucks app. Their PawBucks are applied automatically and they earn PawBucks on the purchase.</p>
               <p className="text-sm flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Waiting for payment…</p>
