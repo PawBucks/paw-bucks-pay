@@ -1094,6 +1094,19 @@ serve(async (req) => {
             .eq('id', userId)
             .single();
 
+          let receiptItems: { name: string; price: number }[] | null = null;
+          try {
+            const { data: dpRow } = await supabaseAdmin.from('direct_payments').select('metadata')
+              .eq('stripe_payment_intent_id', paymentIntent.id).maybeSingle();
+            const raw = (dpRow as any)?.metadata?.items;
+            if (Array.isArray(raw) && raw.length > 0) {
+              receiptItems = raw.map((i: any) => ({
+                name: Number(i.quantity) > 1 ? `${i.quantity} × ${i.name}` : String(i.name),
+                price: Math.round(Number(i.quantity) * Number(i.unit_price) * 100) / 100,
+              }));
+            }
+          } catch (_) { /* fall back to generic line */ }
+
           if (userProfile?.email) {
             await sendReceiptEmail({
               email: userProfile.email,
@@ -1101,7 +1114,7 @@ serve(async (req) => {
               transactionDate: new Date().toISOString(),
               receiptId: transaction?.id || paymentIntent.id,
               merchantName: businessName,
-              items: [{ name: `Payment to ${businessName}`, price: totalAmount > 0 ? totalAmount : amountInDollars }],
+              items: receiptItems ?? [{ name: `Payment to ${businessName}`, price: totalAmount > 0 ? totalAmount : amountInDollars }],
               subtotal: totalAmount > 0 ? totalAmount : amountInDollars,
               pawbucksApplied: pawbucksAmount,
               cardAmount: amountInDollars,
