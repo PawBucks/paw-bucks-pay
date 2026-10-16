@@ -85,16 +85,30 @@ export default function MerchantPOSTerminal() {
     return active.filter((i) => [i.name, i.sku, i.barcode, i.category].some((v) => v?.toLowerCase().includes(q)));
   }, [active, search]);
 
-  const add = (i: PosItem) => setTicket((t) => addToTicket(t, { item_id: i.id, name: i.name, price: i.price }));
-  const setQty = (id: string, q: number) =>
+  const stockOf = (id: string) => items.find((i) => i.id === id)?.stock_quantity ?? null;
+  const inTicket = (id: string) => ticket.find((l) => l.item_id === id)?.quantity ?? 0;
+  const canAdd = (i: PosItem) => i.stock_quantity === null || inTicket(i.id) < i.stock_quantity;
+  const add = (i: PosItem) => {
+    if (!canAdd(i)) return toast.error(i.stock_quantity === 0 ? `${i.name} is out of stock` : `Only ${i.stock_quantity} of ${i.name} in stock`);
+    setTicket((t) => addToTicket(t, { item_id: i.id, name: i.name, price: i.price }));
+  };
+  const setQty = (id: string, q: number) => {
+    const max = stockOf(id);
+    if (max !== null && q > max) { toast.error(`Only ${max} in stock`); return; }
     setTicket((t) => (q <= 0 ? t.filter((l) => l.item_id !== id) : t.map((l) => (l.item_id === id ? { ...l, quantity: q } : l))));
+  };
 
   const handleScan = useCallback((code: string) => {
     const hit = items.find((i) => i.is_active && (i.barcode === code || i.sku === code));
     if (!hit) return null;
+    const have = ticket.find((l) => l.item_id === hit.id)?.quantity ?? 0;
+    if (hit.stock_quantity !== null && have >= hit.stock_quantity) {
+      toast.error(hit.stock_quantity === 0 ? `${hit.name} is out of stock` : `Only ${hit.stock_quantity} of ${hit.name} in stock`);
+      return null;
+    }
     setTicket((t) => addToTicket(t, { item_id: hit.id, name: hit.name, price: hit.price }));
     return hit.name;
-  }, [items]);
+  }, [items, ticket]);
 
   const base = computeTicketTotals(ticket, discount, taxRate);
   const tip = tipMode === "none" ? 0 : tipMode === "custom" ? Math.max(parseFloat(customTip) || 0, 0) : tipFromPercent(base.subtotal, base.discount, tipMode);
