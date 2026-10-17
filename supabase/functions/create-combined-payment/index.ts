@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
+import { sendPosReceipts } from "../_shared/pos-receipts.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { z } from "https://esm.sh/zod@3.22.4";
@@ -592,6 +593,12 @@ serve(async (req) => {
           .update({ status: 'completed', transaction_id: transaction.id, paid_at: new Date().toISOString() })
           .eq('id', posSaleId).eq('status', 'awaiting_payment');
         if (linkErr) logStep('POS sale link failed (non-fatal)', { error: linkErr.message });
+        if (!linkErr) {
+          try {
+            const receipts = await sendPosReceipts(supabaseAdmin, posSaleId, { email: user.email });
+            if (!receipts.success) logStep('POS receipt delivery incomplete', { receipts });
+          } catch (error) { logStep('POS receipt delivery failed', { error: String(error) }); }
+        }
       }
       // Persist line items (best-effort; non-fatal)
       if (transaction?.id && lineItems.length > 0) {
@@ -634,7 +641,7 @@ serve(async (req) => {
 
       // Send receipt email for full PawBucks payment
       const customerEmail = userProfile?.email || user.email;
-      if (customerEmail) {
+      if (customerEmail && !posSaleId) {
         await sendReceiptEmail({
           email: customerEmail,
           customerName: userProfile?.full_name || undefined,

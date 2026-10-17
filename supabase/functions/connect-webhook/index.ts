@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import { insertTransactionItems } from "../_shared/transaction-items.ts";
+import { sendPosReceipts } from "../_shared/pos-receipts.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import {
@@ -842,6 +843,20 @@ serve(async (req) => {
             } catch (e) { logStep("Line item save failed (non-fatal)", { error: String(e) }); }
           }
 
+          // POS receipts are independent of rewards and fee bookkeeping.
+          const { data: posSale } = await supabaseAdmin.from('merchant_pos_sales')
+            .select('id').eq('stripe_payment_intent_id', paymentIntent.id).eq('merchant_id', merchantId).maybeSingle();
+          if (posSale && transaction?.id) {
+            try {
+              const { error: posError } = await supabaseAdmin.from('merchant_pos_sales')
+                .update({ status: 'completed', transaction_id: transaction.id, paid_at: new Date().toISOString() })
+                .eq('id', posSale.id).eq('status', 'awaiting_payment');
+              if (posError) throw posError;
+              const receipts = await sendPosReceipts(supabaseAdmin, posSale.id);
+              if (!receipts.success) logStep('POS receipt delivery incomplete', { saleId: posSale.id, receipts });
+            } catch (error) { logStep('POS receipt delivery failed', { saleId: posSale.id, error: String(error) }); }
+          }
+
           // Pet Pro referral credit offsets the Success Fee on this payment.
           referralCreditApplied = await applyReferralCreditToCollectedFee(stripe, supabaseAdmin, {
             merchantId: resolvedMerchantId,
@@ -1123,7 +1138,7 @@ serve(async (req) => {
             }
           } catch (_) { /* fall back to generic line */ }
 
-          if (userProfile?.email) {
+          if (userProfile?.email && !posSale) {
             await sendReceiptEmail({
               email: userProfile.email,
               customerName: userProfile.full_name || undefined,
@@ -1169,7 +1184,7 @@ serve(async (req) => {
                   .eq('id', merchantForNotif.user_id)
                   .single();
 
-                if (merchantProfile?.email) {
+                if (merchantProfile?.email && !posSale) {
                   const supabaseUrl = Deno.env.get('SUPABASE_URL');
                   const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
 
