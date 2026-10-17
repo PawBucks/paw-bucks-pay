@@ -17,6 +17,9 @@ interface ReceiptItem {
 
 interface ReceiptEmailParams {
   email: string;
+  audience?: "merchant" | "customer";
+  idempotencyKey?: string;
+  paymentLabel?: string;
   customerName?: string;
   transactionDate: string;
   receiptId: string;
