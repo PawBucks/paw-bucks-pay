@@ -1,0 +1,3 @@
+- [ ] Share itemized POS receipts across merchant and customer delivery.
+- [ ] Connect cash/outside-card, Tap to Pay, and QR payment receipt delivery.
+- [ ] Deploy and verify receipt rules and failure handling.
