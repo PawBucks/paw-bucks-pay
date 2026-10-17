@@ -1,8 +1,11 @@
-import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { posReceiptItems } from "./pos-receipt-data.ts";
 
+// Structural client type keeps this shared, server-only helper testable in Vitest.
+type ReceiptClient = { from: (table: string) => any };
+const env = (name: string) => (globalThis as unknown as { Deno: { env: { get: (name: string) => string | undefined } } }).Deno.env.get(name);
+
 /** Saved sale data is authoritative; recipients are delivered independently. */
-export async function sendPosReceipts(admin: SupabaseClient, saleId: string, options: { email?: string; merchantOnly?: boolean } = {}) {
+export async function sendPosReceipts(admin: ReceiptClient, saleId: string, options: { email?: string; merchantOnly?: boolean } = {}) {
   const { data: sale, error } = await admin.from("merchant_pos_sales")
     .select("id,merchant_id,discount,tax,tip,total,payment_method,customer_name,status,created_at,paid_at,transaction_id")
     .eq("id", saleId).maybeSingle();
@@ -44,9 +47,9 @@ export async function sendPosReceipts(admin: SupabaseClient, saleId: string, opt
   const deliver = async (email: string | undefined, audience: "merchant" | "customer") => {
     if (!email) return { status: "missing_email" };
     try {
-      const response = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-receipt-email`, {
+      const response = await fetch(`${env("SUPABASE_URL")}/functions/v1/send-receipt-email`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`, "x-internal-secret": Deno.env.get("INTERNAL_TRIGGER_SECRET") ?? "" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${env("SUPABASE_SERVICE_ROLE_KEY")}`, "x-internal-secret": env("INTERNAL_TRIGGER_SECRET") ?? "" },
         body: JSON.stringify({ ...base, email, audience, idempotencyKey: `pos-receipt-${sale.id}-${audience}-${email.toLowerCase()}` }),
       });
       const result = await response.json();
