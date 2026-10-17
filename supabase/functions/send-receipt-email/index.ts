@@ -125,7 +125,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
 
   if (pawbucksApplied > 0) {
     summaryRowsHtml += `
-    <tr><td style="padding:6px 0;font-size:14px;color:#16a34a;font-weight:500;">🐾 PawBucks Applied</td>
+    <tr><td style="padding:6px 0;font-size:14px;color:#16a34a;font-weight:500;">${params.audience === 'merchant' ? '' : '🐾 '}PawBucks Applied</td>
         <td align="right" style="padding:6px 0;font-size:14px;color:#16a34a;font-weight:600;">−${Math.floor(pawbucksApplied).toLocaleString('en-US')} PB</td></tr>`;
   }
   if (surcharge && surcharge > 0) {
@@ -134,7 +134,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
         <td align="right" style="padding:6px 0;font-size:14px;color:#0f172a;">$${surcharge.toFixed(2)}</td></tr>`;
   }
   summaryRowsHtml += `
-    <tr><td style="padding:6px 0;font-size:14px;color:#475569;">Card Charged</td>
+    <tr><td style="padding:6px 0;font-size:14px;color:#475569;">${escapeHtml(params.paymentLabel || 'Card Charged')}</td>
         <td align="right" style="padding:6px 0;font-size:14px;color:#0f172a;font-weight:500;">$${cardAmount.toFixed(2)}</td></tr>`;
 
   const paymentMethodText = cardBrand && cardLast4 ? `${cardBrand} ending in ${cardLast4}` : '';
@@ -199,7 +199,7 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr>
           <td width="44" valign="top" style="width:44px;">
             <table cellpadding="0" cellspacing="0" role="presentation" style="background:#e8f9fa;border:1px solid #99f0ea;border-radius:10px;">
-              <tr><td style="width:44px;height:44px;text-align:center;font-size:20px;line-height:44px;">🏪</td></tr>
+              <tr><td style="width:44px;height:44px;text-align:center;font-size:20px;line-height:44px;">${params.audience === 'merchant' ? '▤' : '🏪'}</td></tr>
             </table>
           </td>
           <td valign="top" style="padding-left:12px;">
@@ -227,13 +227,13 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
       <table width="480" cellpadding="0" cellspacing="0" role="presentation" style="max-width:480px;width:100%;">
 
         <!-- HERO -->
-        <tr><td style="background:#0a1f26;padding:36px 24px 28px;text-align:center;">
-          <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png" alt="PawBucks" width="60" height="60" style="display:block;margin:0 auto 16px;width:60px;height:60px;">
+        <tr><td style="background:${params.audience ? '#ffffff' : '#0a1f26'};padding:36px 24px 28px;text-align:center;">
+          <img src="https://yxpnkipcoxksmnsvpvwi.supabase.co/storage/v1/object/public/email-assets/pawbucks-logo-email.png" alt="PawBucks" width="${params.audience ? 120 : 60}" height="${params.audience ? 120 : 60}" style="display:block;margin:0 auto 16px;width:${params.audience ? 120 : 60}px;height:${params.audience ? 120 : 60}px;">
           <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto 12px;background:rgba(22,163,74,0.15);border:1px solid rgba(22,163,74,0.3);border-radius:999px;">
             <tr><td style="padding:4px 14px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#4ade80;">✓ Payment Successful</td></tr>
           </table>
-          <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#ffffff;">Your receipt is below.</p>
-          <p style="margin:0;font-size:13px;color:#6ab8c0;">Thanks for supporting a local pet business!</p>
+          <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:${params.audience ? '#0f172a' : '#ffffff'};">${params.audience === 'merchant' ? 'Payment received' : 'Your receipt is below.'}</p>
+          <p style="margin:0;font-size:13px;color:${params.audience ? '#64748b' : '#6ab8c0'};">${params.audience === 'merchant' ? `${escapeHtml(params.customerName || 'A customer')} paid ${escapeHtml(merchantName)}.` : 'Thanks for supporting a local pet business!'}</p>
         </td></tr>
 
         <!-- AMOUNT PILL -->
@@ -312,11 +312,11 @@ function generateReceiptHtml(params: ReceiptEmailParams): string {
         <tr><td style="padding:12px 16px 0;">
           <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#ffffff;border-radius:14px;">
             <tr><td style="padding:18px 20px;text-align:center;">
-              <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#0f172a;">Keep earning PawBucks</p>
-              <p style="margin:0 0 14px;font-size:12px;color:#64748b;">Discover more trusted local pet businesses and earn rewards on every visit.</p>
+              <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#0f172a;">${params.audience === 'merchant' ? 'Your POS sales' : 'Keep earning PawBucks'}</p>
+              <p style="margin:0 0 14px;font-size:12px;color:#64748b;">${params.audience === 'merchant' ? 'View your completed sale tickets.' : 'Discover more trusted local pet businesses and earn rewards on every visit.'}</p>
               <table cellpadding="0" cellspacing="0" role="presentation" align="center" style="margin:0 auto;">
                 <tr><td style="background:#12a8b3;border-radius:10px;">
-                  <a href="https://pawbucks.app/directory" style="display:block;padding:12px 24px;font-size:13px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.01em;">Explore PawBucks Merchants →</a>
+                  <a href="https://pawbucks.app/${params.audience === 'merchant' ? 'merchant/pos' : 'directory'}" style="display:block;padding:12px 24px;font-size:13px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.01em;">${params.audience === 'merchant' ? 'View POS sales →' : 'Explore PawBucks Merchants →'}</a>
                 </td></tr>
               </table>
             </td></tr>
@@ -378,9 +378,9 @@ serve(async (req) => {
     const { data, error } = await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",
       to: [params.email],
-      subject: `Receipt - ${params.merchantName} - $${params.totalPaid.toFixed(2)}`,
+      subject: `${params.audience === 'merchant' ? 'Payment Received' : 'Receipt'} - ${params.merchantName} - $${params.totalPaid.toFixed(2)}`,
       html,
-    });
+    }, params.idempotencyKey ? { idempotencyKey: params.idempotencyKey } : undefined);
 
     if (error) {
       console.error('[RECEIPT] Failed to send receipt email:', error);

@@ -129,7 +129,7 @@ export default function MerchantPOSTerminal() {
     const email = receiptEmail.trim();
     let receiptNote = "";
     try {
-      const { data: r, error: re } = await supabase.functions.invoke("send-pos-receipt", { body: { saleId, email } });
+      const { data: r, error: re } = await supabase.functions.invoke("send-pos-receipt", { body: { saleId, ...(email ? { email } : {}) } });
       if (re || r?.success !== true) toast.error("Sale saved, but one or more receipt emails couldn't be sent.");
       else receiptNote = email ? ` · receipts sent` : ` · merchant receipt sent`;
     } catch {
