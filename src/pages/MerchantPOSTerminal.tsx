@@ -128,10 +128,12 @@ export default function MerchantPOSTerminal() {
     if (payMethod === "pawbucks_card") { setCheckingOut(false); setPending({ id: saleId as string, total: totals.total, tip: totals.tip }); return; }
     const email = receiptEmail.trim();
     let receiptNote = "";
-    if (email) {
-      const { data: r, error: re } = await supabase.functions.invoke("send-pos-receipt", { body: { saleId, email } });
-      if (re || (r as any)?.error) toast.error(`Sale saved, but the receipt email didn't send to ${email}.`);
-      else receiptNote = ` · receipt sent to ${email}`;
+    try {
+      const { data: r, error: re } = await supabase.functions.invoke("send-pos-receipt", { body: { saleId, ...(email ? { email } : {}) } });
+      if (re || r?.success !== true) toast.error("Sale saved, but one or more receipt emails couldn't be sent.");
+      else receiptNote = email ? ` · receipts sent` : ` · merchant receipt sent`;
+    } catch {
+      toast.error("Sale saved, but receipt emails couldn't be sent.");
     }
     setCheckingOut(false);
     toast.success(`Sale completed — ${money(totals.total)}${receiptNote}`);

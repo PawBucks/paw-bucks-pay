@@ -1,0 +1,4 @@
+- [x] Share itemized POS receipts across merchant and customer delivery.
+- [x] Connect cash/outside-card, Tap to Pay, and QR payment receipt delivery.
+- [x] Deploy and verify receipt rules and failure handling (9 tests passed; unauthorized requests rejected; application checks passed).
+- [ ] Verify real inbox delivery after a completed POS purchase — requires a real sale and customer email; native Tap to Pay must supply email to confirm-terminal-payment.
