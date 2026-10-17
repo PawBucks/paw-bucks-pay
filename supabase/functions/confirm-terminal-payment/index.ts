@@ -18,8 +18,13 @@ Deno.serve(async (req) => {
     const { stripe, stripeAccount } = await resolveTerminalMerchant(req, sale.merchant_id);
 
     if (sale.status === "completed") {
-      const receipts = await sendPosReceipts(admin, sale.id, { email: parsed.data.email });
-      return json({ status: "completed", receipts });
+      try {
+        const receipts = await sendPosReceipts(admin, sale.id, { email: parsed.data.email });
+        return json({ status: "completed", receipts });
+      } catch (error) {
+        console.error("[TERMINAL-RECEIPTS]", error);
+        return json({ status: "completed", receipts: { success: false }, warning: "Payment received, but receipt emails could not be sent" });
+      }
     }
     if (!sale.stripe_payment_intent_id) throw new HttpError(409, "No card payment started for this sale");
 
