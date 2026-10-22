@@ -7315,6 +7315,8 @@ export type Database = {
           name: string
           no_show_fee_amount: number | null
           payment_type: Database["public"]["Enums"]["payment_type"]
+          pet_breeds: string[]
+          pet_sizes: string[]
           price: number
           require_deposit: boolean | null
           requires_pet: boolean
@@ -7347,6 +7349,8 @@ export type Database = {
           name: string
           no_show_fee_amount?: number | null
           payment_type?: Database["public"]["Enums"]["payment_type"]
+          pet_breeds?: string[]
+          pet_sizes?: string[]
           price?: number
           require_deposit?: boolean | null
           requires_pet?: boolean
@@ -7379,6 +7383,8 @@ export type Database = {
           name?: string
           no_show_fee_amount?: number | null
           payment_type?: Database["public"]["Enums"]["payment_type"]
+          pet_breeds?: string[]
+          pet_sizes?: string[]
           price?: number
           require_deposit?: boolean | null
           requires_pet?: boolean

@@ -1,0 +1,1 @@
+ALTER TABLE public.merchant_services ADD COLUMN IF NOT EXISTS pet_sizes text[] NOT NULL DEFAULT '{}', ADD COLUMN IF NOT EXISTS pet_breeds text[] NOT NULL DEFAULT '{}';
