@@ -38,6 +38,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useExternalBooking } from "@/hooks/useExternalBooking";
 import { ExternalBookingCard } from "./ExternalBookingCard";
+import { useSpecialHours } from '@/hooks/useSpecialHours';
+import { specialWindowsForDate } from '@/lib/specialHours';
 
 // ── Earn multiplier per tier (PB earned per $1 spent) ────────────────────────
 const TIER_MULTIPLIER: Record<string, number> = {
@@ -141,6 +143,7 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
 
   const { spendableBalance } = useSpendablePawBucks(user?.id);
   const { data: externalBooking } = useExternalBooking(merchantId);
+  const { data: specialHours = [], isPending: specialHoursLoading, isError: specialHoursError } = useSpecialHours(merchantId);
 
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -298,18 +301,20 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
   }, [user?.id, spendableBalance, effectivePrice, autoRedeemPrefs]);
 
   const availableSlots = useMemo(() => {
-    if (!selectedDate || !selectedServiceData) return [];
+    if (!selectedDate || !selectedServiceData || specialHoursLoading || specialHoursError) return [];
     const dayOfWeek = selectedDate.getDay();
     const dateStr = format(selectedDate, "yyyy-MM-dd");
     const override = overrides.find((o) => o.override_date === dateStr);
-    if (override && !override.is_available) return [];
+    const special = specialWindowsForDate(specialHours, dateStr);
+    if (special !== null && special.length === 0) return [];
+    if (special === null && override && !override.is_available) return [];
     const dayAvailability = availability.filter((a) => a.day_of_week === dayOfWeek && a.is_active);
-    if (dayAvailability.length === 0 && !override?.is_available) return [];
+    if (special === null && dayAvailability.length === 0 && !override?.is_available) return [];
 
     const slots: string[] = [];
-    const serviceDuration = selectedServiceData.duration_minutes;
-    (override?.is_available
-      ? [{ start_time: override.start_time!, end_time: override.end_time!, slot_duration_minutes: 30 }]
+    const serviceDuration = effectiveDuration;
+    (special !== null ? special.map(w => ({ ...w, slot_duration_minutes: 30 })) : override?.is_available && override.start_time && override.end_time
+      ? [{ start_time: override.start_time, end_time: override.end_time, slot_duration_minutes: 30 }]
       : dayAvailability
     ).forEach((avail) => {
       const [sH, sM] = avail.start_time.split(":").map(Number);
@@ -342,12 +347,19 @@ export const BookingWidget = ({ merchantId, merchantName, cashbackRate = 10, pre
         cur += avail.slot_duration_minutes || 30;
       }
     });
-    return slots;
-  }, [selectedDate, selectedServiceData, availability, overrides, existingBookings, merchantTz]);
+    return [...new Set(slots)];
+  }, [selectedDate, selectedServiceData, effectiveDuration, availability, overrides, existingBookings, merchantTz, specialHours, specialHoursLoading, specialHoursError]);
+
+  useEffect(() => {
+    if (selectedSlot && !availableSlots.includes(selectedSlot)) setSelectedSlot(null);
+  }, [availableSlots, selectedSlot]);
 
   const isDateAvailable = (date: Date) => {
     const dayOfWeek = date.getDay();
     const dateStr = format(date, "yyyy-MM-dd");
+    if (specialHoursLoading || specialHoursError) return false;
+    const special = specialWindowsForDate(specialHours, dateStr);
+    if (special !== null) return special.length > 0;
     const override = overrides.find((o) => o.override_date === dateStr);
     if (override) return override.is_available;
     return availability.some((a) => a.day_of_week === dayOfWeek && a.is_active);

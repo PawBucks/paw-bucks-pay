@@ -18,6 +18,7 @@ import { Calendar as CalendarIcon, Clock, Plus, X } from "lucide-react";
 import { format } from"date-fns";
 import { parseLocalDate } from'@/utils/formatters';
 import { toast } from"sonner";
+import { SpecialHoursEditor } from './SpecialHoursEditor';
 import { 
  schedulingService,
  type MerchantAvailability, 
@@ -148,6 +149,7 @@ export function AvailabilityManager({
 
  return (
  <div className="space-y-6">
+  <SpecialHoursEditor merchantId={merchantId} />
  {/* Weekly Schedule */}
  <GradientCard className="p-4">
  <div className="flex items-center justify-between mb-4">

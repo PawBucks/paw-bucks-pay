@@ -1,4 +1,6 @@
 import { supabase } from"@/integrations/supabase/client";
+import { format } from 'date-fns';
+import { specialWindowsForDate, type SpecialHours } from '@/lib/specialHours';
 
 // Types based on database schema
 export type ServiceCategory = 
@@ -426,23 +428,27 @@ export const schedulingService = {
  overrides: AvailabilityOverride[],
  existingBookings: ServiceBooking[],
  date: Date,
- serviceDuration: number
+ serviceDuration: number,
+ specialHours: SpecialHours[] = []
  ): string[] {
  const dayOfWeek = date.getDay();
- const dateStr = date.toISOString().split('T')[0];
+ const dateStr = format(date, 'yyyy-MM-dd');
+ if (serviceDuration <= 0) return [];
 
  // Check for override on this date
  const override = overrides.find(o => o.override_date === dateStr);
  
- let startTime: string;
- let endTime: string;
+ const special = specialWindowsForDate(specialHours, dateStr);
+ let windows: { start_time: string; end_time: string }[];
 
- if (override) {
+ if (special !== null) {
+ windows = special;
+ } else if (override) {
  if (!override.is_available) {
  return []; // Date is blocked
  }
- startTime = override.start_time!;
- endTime = override.end_time!;
+ if (!override.start_time || !override.end_time) return [];
+ windows = [{ start_time: override.start_time, end_time: override.end_time }];
  } else {
  // Use regular weekly availability
  const dayAvailability = availability.find(
@@ -453,16 +459,16 @@ export const schedulingService = {
  return []; // Not available this day
  }
  
- startTime = dayAvailability.start_time;
- endTime = dayAvailability.end_time;
+ windows = [{ start_time: dayAvailability.start_time, end_time: dayAvailability.end_time }];
  }
 
  // Generate slots
  const slots: string[] = [];
  const slotDuration = serviceDuration;
  
- const [startHour, startMin] = startTime.split(':').map(Number);
- const [endHour, endMin] = endTime.split(':').map(Number);
+ for (const window of windows) {
+ const [startHour, startMin] = window.start_time.split(':').map(Number);
+ const [endHour, endMin] = window.end_time.split(':').map(Number);
  
  let currentMinutes = startHour * 60 + startMin;
  const endMinutes = endHour * 60 + endMin;
@@ -476,7 +482,8 @@ export const schedulingService = {
  const isBooked = existingBookings.some(b => {
  const bookingStart = b.start_time;
  const bookingEnd = b.end_time;
- return timeStr >= bookingStart && timeStr < bookingEnd;
+ const slotEnd = `${String(Math.floor((currentMinutes + slotDuration) / 60)).padStart(2, '0')}:${String((currentMinutes + slotDuration) % 60).padStart(2, '0')}:00`;
+ return timeStr < bookingEnd && slotEnd > bookingStart;
  });
 
  if (!isBooked) {
@@ -486,6 +493,7 @@ export const schedulingService = {
  currentMinutes += slotDuration;
  }
 
- return slots;
+ }
+ return [...new Set(slots)];
  },
 };

@@ -11,6 +11,7 @@ import { schedulingService } from "@/services/api/scheduling.service";
 import { toast } from "sonner";
 import { Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSpecialHours } from '@/hooks/useSpecialHours';
 
 type Booking = {
   id: string;
@@ -64,13 +65,14 @@ export function RescheduleBookingDialog({ open, onOpenChange, booking, initiator
   }, [open, booking?.id]);
 
   const merchantId = booking?.merchant_id;
+  const { data: specialHours = [], isPending: specialLoading, isError: specialError } = useSpecialHours(merchantId);
   const serviceId = booking?.service_id;
   const duration = booking?.merchant_services?.duration_minutes ?? 30;
   const minNoticeHours = booking?.merchant_services?.min_notice_hours ?? 0;
 
   const { data: availability = [] } = useQuery({
     queryKey: ["reschedule-availability", merchantId],
-    queryFn: () => schedulingService.getAvailability(merchantId!),
+    queryFn: () => merchantId ? schedulingService.getAvailability(merchantId) : Promise.resolve([]),
     enabled: open && !!merchantId,
   });
 
@@ -78,7 +80,7 @@ export function RescheduleBookingDialog({ open, onOpenChange, booking, initiator
     queryKey: ["reschedule-overrides", merchantId],
     queryFn: () =>
       schedulingService.getPublicOverrides(
-        merchantId!,
+        merchantId || '',
         format(new Date(), "yyyy-MM-dd"),
         format(addDays(new Date(), 60), "yyyy-MM-dd"),
       ),
@@ -97,9 +99,11 @@ export function RescheduleBookingDialog({ open, onOpenChange, booking, initiator
   });
 
   const slots = useMemo(() => {
-    if (!date) return [] as string[];
-    return schedulingService.generateTimeSlots(availability, overrides, dayBookings as any, date, duration);
-  }, [availability, overrides, dayBookings, date, duration]);
+    if (!date || specialLoading || specialError) return [] as string[];
+    return schedulingService.generateTimeSlots(availability, overrides, dayBookings as any, date, duration, specialHours);
+  }, [availability, overrides, dayBookings, date, duration, specialHours, specialLoading, specialError]);
+
+  useEffect(() => { if (slot && !slots.includes(slot)) setSlot(null); }, [slots, slot]);
 
   const reschedule = useMutation({
     mutationFn: async () => {
