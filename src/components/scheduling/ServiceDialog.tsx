@@ -35,6 +35,9 @@ import {
  CATEGORY_LABELS 
 } from"@/services/api/scheduling.service";
 import { BrandSelector } from "@/components/brand/BrandSelector";
+import { BREED_LIBRARY } from "@/lib/groomingBreedLibrary";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
 const serviceSchema = z.object({
  name: z.string().min(1,"Name is required").max(100),
@@ -54,7 +57,20 @@ const serviceSchema = z.object({
  no_show_fee_amount: z.coerce.number().min(0).max(10000),
  is_mobile_service: z.boolean(),
  brand_id: z.string().uuid().nullable().optional(),
+ pet_sizes: z.array(z.enum(['small','medium','large'])).default([]),
+ pet_breeds: z.array(z.string().max(60)).max(60).default([]),
 });
+
+const SIZE_OPTIONS = [
+ { value: 'small', label: 'Small' },
+ { value: 'medium', label: 'Medium' },
+ { value: 'large', label: 'Large' },
+] as const;
+
+const BREED_OPTIONS = Array.from(new Set([
+ 'Chihuahua', 'Siberian Husky', 'Bernese Mountain Dog', 'Labrador Retriever',
+ ...BREED_LIBRARY.map((b) => b.name),
+])).sort();
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
