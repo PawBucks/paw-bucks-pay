@@ -1681,6 +1681,71 @@ export type Database = {
         }
         Relationships: []
       }
+      business_special_hours: {
+        Row: {
+          created_at: string
+          id: string
+          is_closed: boolean
+          label: string
+          merchant_id: string | null
+          repeat_annually: boolean
+          special_date: string
+          vet_id: string | null
+          windows: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          label?: string
+          merchant_id?: string | null
+          repeat_annually?: boolean
+          special_date: string
+          vet_id?: string | null
+          windows?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          label?: string
+          merchant_id?: string | null
+          repeat_annually?: boolean
+          special_date?: string
+          vet_id?: string | null
+          windows?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_special_hours_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_special_hours_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_special_hours_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_special_hours_vet_id_fkey"
+            columns: ["vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checkin_followups: {
         Row: {
           answered_at: string | null
@@ -17476,6 +17541,16 @@ export type Database = {
           invited: number
           skipped: number
         }[]
+      }
+      business_special_hours_allows: {
+        Args: {
+          _date: string
+          _end: string
+          _merchant_id: string
+          _start: string
+          _vet_id: string
+        }
+        Returns: boolean
       }
       cancel_pos_sale: { Args: { _sale_id: string }; Returns: undefined }
       check_pos_sale_payment: { Args: { _sale_id: string }; Returns: string }

@@ -2,6 +2,9 @@ import { Button } from"@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
 import { FileText, Edit, Store, PlugZap, CalendarDays, Vault, ArrowRight, Receipt, Wallet, Megaphone } from "lucide-react";
 import { useNavigate } from"react-router-dom";
+import { useState } from 'react';
+import { BusinessHoursEditor } from '@/components/merchant/BusinessHoursEditor';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 type VetQuickActionsTabProps = {
  vetId: string;
@@ -15,6 +18,7 @@ export function VetQuickActionsTab({
  onEditProfile,
 }: VetQuickActionsTabProps) {
  const navigate = useNavigate();
+ const [scheduleOpen, setScheduleOpen] = useState(false);
 
  const quickActions = [
  {
@@ -29,7 +33,7 @@ export function VetQuickActionsTab({
  title:"Scheduling",
  description:"Manage appointments & bookings",
  icon: CalendarDays,
- onClick: () => navigate("/merchant/scheduling"),
+ onClick: () => setScheduleOpen(true),
  color:"text-accent",
  bgColor:"bg-accent/10",
  },
@@ -94,6 +98,12 @@ export function VetQuickActionsTab({
 
  return (
  <div className="space-y-6">
+ <Dialog open={scheduleOpen} onOpenChange={setScheduleOpen}>
+   <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+     <DialogHeader><DialogTitle>Practice Availability</DialogTitle></DialogHeader>
+     <BusinessHoursEditor vetId={vetId} />
+   </DialogContent>
+ </Dialog>
  <div>
  <h2 className="text-3xl font-bold">Quick Actions</h2>
  <p className="text-muted-foreground">Access all practice tools and features</p>

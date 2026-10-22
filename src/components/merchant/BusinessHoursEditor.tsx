@@ -6,6 +6,7 @@ import { Switch } from"@/components/ui/switch";
 import { Button } from"@/components/ui/button";
 import { toast } from"sonner";
 import { Clock } from "lucide-react";
+import { SpecialHoursEditor } from '@/components/scheduling/SpecialHoursEditor';
 
 const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
@@ -60,7 +61,7 @@ export const BusinessHoursEditor = forwardRef<BusinessHoursEditorHandle, Props>(
  }
  if (data && data.length > 0) {
  const merged = DEFAULT_HOURS.map((def) => {
- const existing = data!.find((d: any) => d.day_of_week === def.day_of_week);
+  const existing = data?.find((d: any) => d.day_of_week === def.day_of_week);
  return existing
  ? { ...def, open_time: existing.open_time?.substring(0, 5), close_time: existing.close_time?.substring(0, 5), is_closed: existing.is_closed }
  : def;
@@ -162,6 +163,7 @@ export const BusinessHoursEditor = forwardRef<BusinessHoursEditorHandle, Props>(
      {saving ?"Saving..." :"Save Hours"}
     </Button>
    )}
- </div>
- );
+  <SpecialHoursEditor merchantId={merchantId} vetId={vetId} />
+  </div>
+  );
 });
