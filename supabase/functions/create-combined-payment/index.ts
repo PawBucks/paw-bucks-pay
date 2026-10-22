@@ -206,6 +206,9 @@ serve(async (req) => {
     let pawbucksAmount = manualPawbucksAmount;
     const baseAmount = totalAmount - tipAmount; // Base amount excluding tip
 
+    // POS sales tax: never subject to the Success Fee or PawBucks earning;
+    // remitted to the PawBucks platform account via application_fee_amount.
+    let posTaxUsd = 0;
     // --- POS sale link: build itemized lines server-side from the register ticket ---
     if (posSaleId) {
       const { data: sale } = await supabaseAdmin
@@ -235,6 +238,7 @@ serve(async (req) => {
         built.push({ source_type: 'custom', name: 'Sales tax', quantity: 1, unit_price: Number(sale.tax), sku: 'POS-TAX' });
       }
       lineItems = built;
+      posTaxUsd = Math.max(0, Number(sale.tax) || 0);
     }
     const spendableSources = await getSpendableSources(supabaseAdmin, effectiveUserId);
     const petFundEligibleForBase =
@@ -782,7 +786,8 @@ serve(async (req) => {
 
     // Calculate amounts - PawBucks earned on Stripe portion only, never on sales tax
     const stripeAmountInCents = Math.round(stripeAmount * 100);
-    const earnableStripeAmount = Math.max(0, stripeAmount - taxUsd);
+    const posTaxOnCard = Math.min(posTaxUsd, Math.max(0, stripeAmount - tipAmount - taxUsd));
+    const earnableStripeAmount = Math.max(0, stripeAmount - taxUsd - posTaxOnCard);
     let pawbucksEarned = Math.round(earnableStripeAmount * cashbackRate);
 
     // Global kill-switch: SuperAdmin can disable PawBucks earning for pet owners platform-wide
@@ -802,8 +807,11 @@ serve(async (req) => {
     // Success Fee: 3% applies ONLY to the non-tip, non-tax Stripe portion.
     // Tips are always passed through 100% to the merchant, and sales tax is
     // never subject to a Success Fee.
-    const feeableStripeAmount = Math.max(0, stripeAmount - tipAmount - taxUsd);
-    const platformFeeInCents = Math.round(feeableStripeAmount * PLATFORM_FEE_PERCENT * 100);
+    const feeableStripeAmount = Math.max(0, stripeAmount - tipAmount - taxUsd - posTaxOnCard);
+    const successFeeInCents = Math.round(feeableStripeAmount * PLATFORM_FEE_PERCENT * 100);
+    const posTaxRemitCents = Math.round(posTaxOnCard * 100);
+    // Application fee = Success Fee + POS sales tax remitted to PawBucks' main account.
+    const platformFeeInCents = Math.min(stripeAmountInCents, successFeeInCents + posTaxRemitCents);
 
 
     logStep('Stripe payment calculation', {
@@ -845,6 +853,8 @@ serve(async (req) => {
           total_amount: totalAmount.toString(),
           tip_amount: tipAmount.toString(),
           tax_amount: taxUsd.toFixed(2),
+          pos_tax_remitted_cents: String(posTaxRemitCents),
+          success_fee_cents: String(successFeeInCents),
           tax_calculation_id: taxResult?.taxCalculationId ?? '',
           pawbucks_earned: String(pawbucksEarned),
           platform: "pawbucks",
