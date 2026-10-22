@@ -1,6 +1,8 @@
 import { Clock } from "lucide-react";
 import { useQuery } from"@tanstack/react-query";
 import { supabase } from"@/integrations/supabase/client";
+import { useSpecialHours } from '@/hooks/useSpecialHours';
+import { formatDateOnly, todayDateOnly } from '@/lib/timezone';
 
 const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const SHORT_DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -19,6 +21,7 @@ type Props = {
 };
 
 export function BusinessHoursDisplay({ merchantId, vetId }: Props) {
+  const { data: special = [] } = useSpecialHours(merchantId, vetId);
  const { data: hours } = useQuery({
  queryKey: ["business-hours", merchantId, vetId],
  queryFn: async () => {
@@ -41,13 +44,13 @@ export function BusinessHoursDisplay({ merchantId, vetId }: Props) {
  enabled: !!(merchantId || vetId),
  });
 
- if (!hours || hours.length === 0) return null;
+  if ((!hours || hours.length === 0) && special.length === 0) return null;
 
  const today = new Date().getDay();
 
  // Build a map for all 7 days
  const hoursMap = new Map<number, { open_time: string; close_time: string; is_closed: boolean }>();
- hours.forEach((h: any) => hoursMap.set(h.day_of_week, h));
+  hours?.forEach((h: any) => hoursMap.set(h.day_of_week, h));
 
  return (
  <div className="rounded-md border bg-card p-4">
@@ -79,7 +82,14 @@ export function BusinessHoursDisplay({ merchantId, vetId }: Props) {
  </div>
  );
  })}
- </div>
- </div>
- );
+  </div>
+  {special.filter(s => s.repeat_annually || s.special_date >= todayDateOnly()).length > 0 && <div className="border-t mt-3 pt-3 space-y-2">
+    <h4 className="text-sm font-semibold">Holiday & Special Hours</h4>
+    {special.filter(s => s.repeat_annually || s.special_date >= todayDateOnly()).map(s => <div key={s.id} className="text-sm space-y-1">
+      <p className="font-medium">{s.label || 'Special date'} · {formatDateOnly(s.special_date, { month: 'short', day: 'numeric', ...(s.repeat_annually ? {} : { year: 'numeric' as const }) })}{s.repeat_annually ? ' (annually)' : ''}</p>
+      <p className="text-muted-foreground">{s.is_closed ? 'Closed all day' : s.windows.map(w => `${formatTime(w.start_time)} – ${formatTime(w.end_time)}`).join(' · ')}</p>
+    </div>)}
+  </div>}
+  </div>
+  );
 }
