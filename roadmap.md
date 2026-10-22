@@ -2,3 +2,5 @@
 - [x] Connect cash/outside-card, Tap to Pay, and QR payment receipt delivery.
 - [x] Deploy and verify receipt rules and failure handling (9 tests passed; unauthorized requests rejected; application checks passed).
 - [ ] Verify real inbox delivery after a completed POS purchase — requires a real sale and customer email; native Tap to Pay must supply email to confirm-terminal-payment.
+- [ ] Add shared merchant/vet holiday closures, multiple special-hour windows and annual repeat.
+- [ ] Enforce holiday rules in booking slots and booking creation/rescheduling; test and verify.
