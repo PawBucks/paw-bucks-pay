@@ -130,6 +130,8 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit, merchantI
  no_show_fee_amount: 0,
  is_mobile_service: false,
   brand_id: null,
+  pet_sizes: [],
+  pet_breeds: [],
  },
  });
 
@@ -153,6 +155,8 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit, merchantI
  no_show_fee_amount: (service as any).no_show_fee_amount || 0,
  is_mobile_service: (service as any).is_mobile_service || false,
   brand_id: (service as any).brand_id ?? null,
+  pet_sizes: (service as any).pet_sizes ?? [],
+  pet_breeds: (service as any).pet_breeds ?? [],
  });
  } else {
  form.reset({
@@ -168,6 +172,8 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit, merchantI
  buffer_minutes: 0,
  min_notice_hours: 2,
  cancellation_policy_hours: 24,
+ pet_sizes: [],
+ pet_breeds: [],
  });
  }
  }, [service, form]);
