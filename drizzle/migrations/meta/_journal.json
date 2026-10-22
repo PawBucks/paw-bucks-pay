@@ -120,6 +120,13 @@
       "when": 1792673273694,
       "tag": "0016_service_pet_size_breeds",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792688077812,
+      "tag": "0017_business_holiday_special_hours",
+      "breakpoints": true
     }
   ]
 }
