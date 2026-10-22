@@ -35,6 +35,9 @@ import {
  CATEGORY_LABELS 
 } from"@/services/api/scheduling.service";
 import { BrandSelector } from "@/components/brand/BrandSelector";
+import { BREED_LIBRARY } from "@/lib/groomingBreedLibrary";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
 const serviceSchema = z.object({
  name: z.string().min(1,"Name is required").max(100),
@@ -54,7 +57,20 @@ const serviceSchema = z.object({
  no_show_fee_amount: z.coerce.number().min(0).max(10000),
  is_mobile_service: z.boolean(),
  brand_id: z.string().uuid().nullable().optional(),
+ pet_sizes: z.array(z.enum(['small','medium','large'])).default([]),
+ pet_breeds: z.array(z.string().max(60)).max(60).default([]),
 });
+
+const SIZE_OPTIONS = [
+ { value: 'small', label: 'Small' },
+ { value: 'medium', label: 'Medium' },
+ { value: 'large', label: 'Large' },
+] as const;
+
+const BREED_OPTIONS = Array.from(new Set([
+ 'Chihuahua', 'Siberian Husky', 'Bernese Mountain Dog', 'Labrador Retriever',
+ ...BREED_LIBRARY.map((b) => b.name),
+])).sort();
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
@@ -114,6 +130,8 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit, merchantI
  no_show_fee_amount: 0,
  is_mobile_service: false,
   brand_id: null,
+  pet_sizes: [],
+  pet_breeds: [],
  },
  });
 
@@ -137,6 +155,8 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit, merchantI
  no_show_fee_amount: (service as any).no_show_fee_amount || 0,
  is_mobile_service: (service as any).is_mobile_service || false,
   brand_id: (service as any).brand_id ?? null,
+  pet_sizes: (service as any).pet_sizes ?? [],
+  pet_breeds: (service as any).pet_breeds ?? [],
  });
  } else {
  form.reset({
@@ -152,6 +172,8 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit, merchantI
  buffer_minutes: 0,
  min_notice_hours: 2,
  cancellation_policy_hours: 24,
+ pet_sizes: [],
+ pet_breeds: [],
  });
  }
  }, [service, form]);
@@ -225,7 +247,65 @@ export function ServiceDialog({ open, onOpenChange, service, onSubmit, merchantI
  )}
  />
 
- <div className="grid grid-cols-2 gap-4">
+{form.watch('category') === 'grooming' && (
+ <div className="space-y-4 rounded-lg border p-4 bg-muted/30">
+  <FormField
+   control={form.control}
+   name="pet_sizes"
+   render={({ field }) => (
+    <FormItem>
+     <FormLabel>Pet Size</FormLabel>
+     <div className="flex gap-2">
+      {SIZE_OPTIONS.map((s) => {
+       const on = field.value?.includes(s.value);
+       return (
+        <Button key={s.value} type="button" size="sm" variant={on ? 'default' : 'outline'} className="flex-1"
+         onClick={() => field.onChange(on ? field.value.filter((v) => v !== s.value) : [...(field.value ?? []), s.value])}>
+         {s.label}
+        </Button>
+       );
+      })}
+     </div>
+     <FormDescription>Leave blank to accept all sizes</FormDescription>
+    </FormItem>
+   )}
+  />
+  <FormField
+   control={form.control}
+   name="pet_breeds"
+   render={({ field }) => (
+    <FormItem>
+     <FormLabel>Breeds</FormLabel>
+     <Select value="" onValueChange={(v) => { if (!field.value?.includes(v)) field.onChange([...(field.value ?? []), v]); }}>
+      <FormControl>
+       <SelectTrigger><SelectValue placeholder="Add a breed..." /></SelectTrigger>
+      </FormControl>
+      <SelectContent>
+       {BREED_OPTIONS.filter((b) => !field.value?.includes(b)).map((b) => (
+        <SelectItem key={b} value={b}>{b}</SelectItem>
+       ))}
+      </SelectContent>
+     </Select>
+     {field.value?.length > 0 && (
+      <div className="flex flex-wrap gap-1.5 pt-1">
+       {field.value.map((b) => (
+        <Badge key={b} variant="secondary" className="gap-1">
+         {b}
+         <button type="button" aria-label={`Remove ${b}`} onClick={() => field.onChange(field.value.filter((x) => x !== b))}>
+          <X className="h-3 w-3" />
+         </button>
+        </Badge>
+       ))}
+      </div>
+     )}
+     <FormDescription>Leave blank to accept all breeds</FormDescription>
+    </FormItem>
+   )}
+  />
+ </div>
+)}
+
+<div className="grid grid-cols-2 gap-4">
  <FormField
  control={form.control}
  name="duration_minutes"
