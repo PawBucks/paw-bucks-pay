@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
 
     const { admin } = await resolveTerminalMerchant(req).catch((e) => { throw e; });
     const { data: sale } = await admin.from("merchant_pos_sales")
-      .select("id, merchant_id, total, tip, status, stripe_payment_intent_id").eq("id", posSaleId).maybeSingle();
+      .select("id, merchant_id, total, tip, tax, status, stripe_payment_intent_id").eq("id", posSaleId).maybeSingle();
     if (!sale) throw new HttpError(404, "Sale not found");
 
     const { stripe, merchant, stripeAccount } = await resolveTerminalMerchant(req, sale.merchant_id);
@@ -35,22 +35,29 @@ Deno.serve(async (req) => {
     const { data: items } = await admin.from("merchant_pos_sale_items")
       .select("name, quantity, unit_price").eq("sale_id", sale.id);
     const tipCents = Math.round(Number(sale.tip ?? 0) * 100);
+    // Sales tax and tips are never subject to the Success Fee. Sales tax is
+    // remitted to the PawBucks platform account via the application fee.
+    const taxCents = Math.round(Number(sale.tax ?? 0) * 100);
+    const successFeeCents = Math.round(Math.max(0, amount - tipCents - taxCents) * SUCCESS_FEE);
+    const applicationFee = Math.min(amount, successFeeCents + taxCents);
 
     const pi = await stripe.paymentIntents.create({
       amount,
       currency: "usd",
       payment_method_types: ["card_present"],
       capture_method: "automatic",
-      application_fee_amount: Math.round(amount * SUCCESS_FEE),
+      application_fee_amount: applicationFee,
       description: `${merchant.business_name ?? "PawBucks"} POS sale`,
       metadata: {
         source: "pos_terminal",
         pos_sale_id: sale.id,
         merchant_id: merchant.id,
         tip_cents: String(tipCents),
+        tax_remitted_cents: String(taxCents),
+        success_fee_cents: String(successFeeCents),
         items: JSON.stringify((items ?? []).map((i) => ({ n: i.name, q: i.quantity, p: i.unit_price }))).slice(0, 500),
       },
-    }, { ...opts, idempotencyKey: `pos-terminal-${sale.id}-${amount}` });
+    }, { ...opts, idempotencyKey: `pos-terminal-v2-${sale.id}-${amount}` });
 
     await admin.from("merchant_pos_sales").update({ stripe_payment_intent_id: pi.id }).eq("id", sale.id);
     return json({ clientSecret: pi.client_secret, paymentIntentId: pi.id, amount });
