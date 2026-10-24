@@ -1,3 +1,4 @@
+import { csvSafeCell } from "@/lib/csv";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,7 +123,7 @@ export function PromotionInvitationsLog() {
       formatEST(r.responded_at),
     ]);
     const csv = [header, ...lines]
-      .map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .map((row) => row.map(csvSafeCell).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);

@@ -1,3 +1,4 @@
+import { csvSafeCell } from "@/lib/csv";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,8 +38,7 @@ const RANGES = [
 ];
 
 const csvCell = (value: unknown) => {
-  const s = value === null || value === undefined ? "" : String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  return csvSafeCell(value);
 };
 
 const AdminPetFestRsvps = () => {
