@@ -45,7 +45,7 @@ export default function DirectCheckout() {
   })();
   const prefilledTip = (() => {
     const v = parseFloat(searchParams.get("tip") || "");
-    return Number.isFinite(v) && v > 0 ? v : undefined;
+    return Number.isFinite(v) && v >= 0 && v <= 10000 ? v : undefined;
   })();
 
   const posSaleId = searchParams.get("pos_sale");
@@ -60,6 +60,8 @@ export default function DirectCheckout() {
   useEffect(() => {
     const fetchMerchant = async () => {
       if (!merchantId) return;
+      // Guest POS checkout loads its safe public ticket itself; never call signed-in merchant context here.
+      if (authLoading || (posSaleId && (!user || searchParams.get("guest_session")))) return;
       try {
         // Display fields come from the safe public view.
         const { data: publicData, error: publicError } = await supabase
@@ -95,7 +97,7 @@ export default function DirectCheckout() {
       }
     };
     fetchMerchant();
-  }, [merchantId]);
+  }, [merchantId, authLoading, user, posSaleId, searchParams]);
 
   // Redirect unauthenticated users to login, returning to /pay/:id afterward.
   // POS tickets let signed-out customers choose sign-in or guest checkout instead.
@@ -115,11 +117,12 @@ export default function DirectCheckout() {
       merchant.onboarding_complete &&
       merchant.stripe_account_id &&
       merchant.stripe_account_status === "active" &&
+      (!posSaleId || posSale) &&
       !success
     ) {
       setDialogOpen(true);
     }
-  }, [user, merchant, success]);
+  }, [user, merchant, success, posSaleId, posSale]);
 
   if (posSaleId && !authLoading && (!user || searchParams.get("guest_session"))) {
     return <PosGuestCheckout saleId={posSaleId} guestSession={searchParams.get("guest_session")} />;
@@ -254,7 +257,7 @@ export default function DirectCheckout() {
           acceptsPawbucks={merchant.accepts_pawbucks}
           userId={user.id}
           initialAmount={posSale ? Number(posSale.total) - Number(posSale.tip || 0) : prefilledAmount}
-          initialTip={posSale ? Number(posSale.tip || 0) : prefilledTip}
+          initialTip={prefilledTip ?? (posSale ? Number(posSale.tip || 0) : undefined)}
           posSale={posSale ?? undefined}
           onSuccess={(details) => {
             setDialogOpen(false);

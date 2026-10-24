@@ -4,14 +4,14 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { corsHeaders, json, HttpError } from "../_shared/terminal-merchant.ts";
 import { safeOrigin } from "../_shared/safe-origin.ts";
 import { sendPosReceipts } from "../_shared/pos-receipts.ts";
+import { posCheckoutTotals } from "../_shared/pos-checkout-totals.ts";
 
 // Guest (signed-out) card checkout for a POS sale ticket. No PawBucks are earned.
 // Totals always come from the saved sale; the sale id is the only client input.
 const Body = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("create"), posSaleId: z.string().uuid() }),
+  z.object({ action: z.literal("create"), posSaleId: z.string().uuid(), tipAmount: z.number().finite().min(0).max(10000).optional() }),
   z.object({ action: z.literal("verify"), posSaleId: z.string().uuid(), sessionId: z.string().startsWith("cs_").max(255) }),
 ]);
-const SUCCESS_FEE = 0.03;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new HttpError(500, "Payments are not configured");
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const admin = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
 
     const { data: sale } = await admin.from("merchant_pos_sales")
       .select("id, merchant_id, total, tip, tax, status").eq("id", body.posSaleId).maybeSingle();
@@ -36,31 +36,34 @@ Deno.serve(async (req) => {
       const session = await stripe.checkout.sessions.retrieve(body.sessionId, { stripeAccount });
       if (session.metadata?.pos_sale_id !== sale.id) throw new HttpError(409, "Payment does not match this sale");
       if (session.payment_status !== "paid") return json({ status: "awaiting_payment" });
+      const totals = posCheckoutTotals(sale, Number(session.metadata?.tip_amount ?? sale.tip ?? 0));
+      if (session.amount_total !== totals.amountCents) throw new HttpError(409, "Payment total does not match this sale");
+      if (!["awaiting_payment", "completed"].includes(sale.status)) throw new HttpError(409, "This sale is no longer payable");
       if (sale.status === "awaiting_payment") {
         const piId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
-        await admin.from("merchant_pos_sales")
-          .update({ status: "completed", paid_at: new Date().toISOString(), stripe_payment_intent_id: piId ?? null })
+        const { error: saveError } = await admin.from("merchant_pos_sales")
+          .update({ status: "completed", tip: totals.tip, total: totals.total, paid_at: new Date().toISOString(), stripe_payment_intent_id: piId ?? null })
           .eq("id", sale.id).eq("status", "awaiting_payment");
-        try {
-          await sendPosReceipts(admin, sale.id, { email: session.customer_details?.email || undefined });
-        } catch (e) { console.error("[POS-GUEST-RECEIPTS]", e); }
+        if (saveError) throw new HttpError(500, "Payment received, but the sale could not be updated. Please try again.");
       }
-      return json({ status: "completed", total: Number(sale.total) });
+      try {
+        await sendPosReceipts(admin, sale.id, { email: session.customer_details?.email || undefined });
+      } catch (e) { console.error("[POS-GUEST-RECEIPTS]", e); }
+      return json({ status: "completed", total: totals.total, tip: totals.tip });
     }
 
     if (sale.status !== "awaiting_payment") throw new HttpError(409, "This sale is not waiting for payment");
-    const amount = Math.round(Number(sale.total) * 100);
+    const totals = posCheckoutTotals(sale, body.tipAmount ?? Number(sale.tip || 0));
+    const amount = totals.amountCents;
     if (amount < 50) throw new HttpError(400, "Minimum card charge is $0.50");
-    const tipCents = Math.round(Number(sale.tip ?? 0) * 100);
-    const taxCents = Math.round(Number(sale.tax ?? 0) * 100);
+    const { tipCents, taxCents, successFeeCents } = totals;
     // Success Fee never applies to tax or tips; tax is remitted to PawBucks via the application fee.
-    const successFeeCents = Math.round(Math.max(0, amount - tipCents - taxCents) * SUCCESS_FEE);
     const applicationFee = Math.min(amount, successFeeCents + taxCents);
     const { data: items } = await admin.from("merchant_pos_sale_items").select("name, quantity").eq("sale_id", sale.id);
     const summary = (items ?? []).map((i) => `${i.quantity}x ${i.name}`).join(", ").slice(0, 400);
     const origin = safeOrigin(req);
     const back = `${origin}/pay/${merchant.id}?pos_sale=${sale.id}`;
-    const metadata = { source: "pos_guest_checkout", pos_sale_id: sale.id, merchant_id: merchant.id };
+    const metadata = { source: "pos_guest_checkout", pos_sale_id: sale.id, merchant_id: merchant.id, tip_amount: totals.tip.toFixed(2), total_amount: totals.total.toFixed(2) };
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",

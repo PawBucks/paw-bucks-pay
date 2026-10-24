@@ -1,3 +1,5 @@
+- [x] Add customer-selected tips to guest and signed-in POS QR checkout; save confirmed totals; 28 financial/receipt tests passed and guest controls checked at desktop/mobile sizes.
+- [ ] Verify a new POS QR purchase with a customer tip through card payment and both receipt inboxes — no awaiting real sale is available; no live charge was made.
 - [x] Share itemized POS receipts across merchant and customer delivery.
 - [x] Connect cash/outside-card, Tap to Pay, and QR payment receipt delivery.
 - [x] Deploy and verify receipt rules and failure handling (9 tests passed; unauthorized requests rejected; application checks passed).

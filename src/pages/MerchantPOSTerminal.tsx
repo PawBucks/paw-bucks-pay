@@ -49,7 +49,8 @@ export default function MerchantPOSTerminal() {
     const t = setInterval(async () => {
       const { data } = await supabase.rpc("check_pos_sale_payment", { _sale_id: pending.id });
       if (data === "completed") {
-        toast.success(`Card payment received — ${money(pending.total)}`);
+        const { data: paidSale } = await supabase.from("merchant_pos_sales").select("total").eq("id", pending.id).maybeSingle();
+        toast.success(`Card payment received — ${money(Number(paidSale?.total ?? pending.total))}`);
         if (navigator.vibrate) navigator.vibrate(60);
         setPending(null); resetTicket(); load();
       }
@@ -111,7 +112,7 @@ export default function MerchantPOSTerminal() {
   }, [items, ticket]);
 
   const base = computeTicketTotals(ticket, discount, taxRate);
-  const tip = tipMode === "none" ? 0 : tipMode === "custom" ? Math.max(parseFloat(customTip) || 0, 0) : tipFromPercent(base.subtotal, base.discount, tipMode);
+  const tip = payMethod === "pawbucks_card" || tipMode === "none" ? 0 : tipMode === "custom" ? Math.max(parseFloat(customTip) || 0, 0) : tipFromPercent(base.subtotal, base.discount, tipMode);
   const totals = computeTicketTotals(ticket, discount, taxRate, tip);
   const resetTicket = () => { setTicket([]); setDiscount(0); setCustomer(""); setReceiptEmail(""); setTipMode("none"); setCustomTip(""); };
 
@@ -246,7 +247,7 @@ export default function MerchantPOSTerminal() {
                     {receiptEmailInvalid && <p className="text-xs text-destructive">Enter a valid email or leave it blank.</p>}
                   </div>
                 )}
-                <div className="space-y-1.5">
+                {payMethod === "pawbucks_card" ? <p className="text-sm text-muted-foreground">Tip: customer selects on phone</p> : <div className="space-y-1.5">
                   <Label className="text-xs">Tip (USD only, never PawBucks)</Label>
                   <div className="grid grid-cols-5 gap-1">
                     <Button type="button" size="sm" variant={tipMode === "none" ? "default" : "outline"} onClick={() => setTipMode("none")}>None</Button>
@@ -258,7 +259,7 @@ export default function MerchantPOSTerminal() {
                   {tipMode === "custom" && (
                     <Input type="number" min={0} step="0.01" placeholder="Tip amount ($)" value={customTip} onChange={(e) => setCustomTip(e.target.value)} />
                   )}
-                </div>
+                </div>}
                 <div className="text-sm space-y-1 border-t pt-2">
                   <div className="flex justify-between"><span>Subtotal</span><span>{money(totals.subtotal)}</span></div>
                   {totals.discount > 0 && <div className="flex justify-between"><span>Discount</span><span>-{money(totals.discount)}</span></div>}
@@ -316,7 +317,7 @@ export default function MerchantPOSTerminal() {
           {pending && merchantId && (
             <div className="flex flex-col items-center gap-3">
               <div className="bg-card p-3 rounded-lg border">
-                <QRCodeSVG value={`https://pawbucks.app/pay/${merchantId}?pos_sale=${pending.id}&amount=${(pending.total - pending.tip).toFixed(2)}&tip=${pending.tip.toFixed(2)}`} size={220} />
+                <QRCodeSVG value={`https://pawbucks.app/pay/${merchantId}?pos_sale=${pending.id}`} size={220} />
               </div>
               <p className="text-sm text-muted-foreground">The customer pays by card in the PawBucks app. Their PawBucks are applied automatically and they earn PawBucks on the purchase.</p>
               <p className="text-sm flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Waiting for payment…</p>

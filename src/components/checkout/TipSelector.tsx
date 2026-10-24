@@ -17,6 +17,7 @@ interface TipSelectorProps {
  tipAmount: number; // Current tip in USD
  onTipChange: (tip: number) => void;
  className?: string;
+ presets?: readonly number[];
 }
 
 export const TipSelector = ({
@@ -24,12 +25,14 @@ export const TipSelector = ({
  tipAmount,
  onTipChange,
  className,
+ presets,
 }: TipSelectorProps) => {
  const [showCustom, setShowCustom] = useState(false);
  const [customValue, setCustomValue] = useState("");
 
  // Determine which preset is active
- const activePreset = TIP_PRESETS.find(
+ const choices = presets ? presets.map((pct) => ({ label: `${pct}%`, multiplier: pct / 100 })) : TIP_PRESETS;
+ const activePreset = choices.find(
  (p) => baseAmount > 0 && Math.abs(tipAmount - baseAmount * p.multiplier) < 0.01
  );
 
@@ -53,7 +56,7 @@ export const TipSelector = ({
 
  const handleCustomChange = (val: string) => {
  setCustomValue(val);
- onTipChange(parseFloat(val) || 0);
+ onTipChange(Math.round(Math.min(10000, Math.max(0, parseFloat(val) || 0)) * 100) / 100);
  };
 
  return (
@@ -75,12 +78,12 @@ export const TipSelector = ({
  >
  No tip
  </Button>
- {TIP_PRESETS.map((preset) => (
+ {choices.map((preset) => (
  <Button
  key={preset.label}
  type="button"
  size="sm"
- variant={activePreset?.label === preset.label ?"default" :"outline"}
+ variant={!showCustom && activePreset?.label === preset.label ?"default" :"outline"}
  onClick={() => handlePresetClick(preset.multiplier)}
  className="text-xs"
  disabled={baseAmount <= 0}
@@ -110,6 +113,8 @@ export const TipSelector = ({
  type="number"
  step="0.01"
  min="0"
+ max="10000"
+ aria-label="Custom tip amount"
  placeholder="0.00"
  value={customValue}
  onChange={(e) => handleCustomChange(e.target.value)}

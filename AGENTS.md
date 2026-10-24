@@ -1,5 +1,6 @@
 - Push alerts: AFTER INSERT trigger on notifications calls notify-push via pg_net, which relays to the push server with PUSH_WEBHOOK_SECRET — keeps the secret out of the database.
 - POS sales are finalized only via the complete_pos_sale DB function (prices/stock/totals computed server-side); clients never insert merchant_pos_sales directly — why: prevents tampered totals.
 - POS completion paths use the shared POS receipt dispatcher with saved ticket data and recipient-specific email idempotency keys — why: keeps itemization consistent and retries from duplicating merchant/customer copies.
+- POS QR checkout replaces the saved tip with a validated customer USD tip and persists confirmed payment totals before receipt delivery — why: tips must match the card charge and itemized receipt without changing the ticket base.
 - Store merchant/vet holiday windows in business_special_hours; use shared date resolution for public availability and a database booking trigger for enforcement — why: clients cannot bypass closures or book across closed gaps.
 - Community uses existing post/like/comment/save tables, private signed media, symmetric server-enforced blocks and a role-checked moderation RPC; guide contributions remain separate from official verified facts — why: social safety and source credibility must not rely on client filtering.
