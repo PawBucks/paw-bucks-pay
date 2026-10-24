@@ -2,10 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import {
-import { safeOrigin, safeRedirectUrl } from "../_shared/safe-origin.ts";
   getSpendableSources,
   planPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
+import { safeOrigin } from "../_shared/safe-origin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
