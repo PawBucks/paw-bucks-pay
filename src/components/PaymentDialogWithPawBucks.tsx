@@ -36,6 +36,7 @@ import { Formatters } from "@/utils/formatters";
 import { PawBucksLogo } from "@/components/PawBucksLogo";
 import { useUserEarnRate } from "@/hooks/useUserEarnRate";
 import { ManualChargeItemsEditor, itemsToPayload, type LineItem } from "@/components/payment/ManualChargeItemsEditor";
+import { POS_TIP_PRESETS } from "@/lib/posTicket";
 
 /**
  * Poll the `direct_payments` row (written by `create-combined-payment` and
@@ -355,7 +356,7 @@ export const PaymentDialogWithPawBucks = ({
     if (initialAmount && initialAmount > 0) {
       setAmount(initialAmount.toFixed(2));
     }
-    if (initialTip && initialTip > 0) {
+    if (initialTip !== undefined && initialTip >= 0) {
       setTipAmount(initialTip);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -844,7 +845,8 @@ export const PaymentDialogWithPawBucks = ({
  {totalAmount > 0 && (
   <div className="bg-card rounded-2xl shadow-sm p-4">
  <TipSelector
- baseAmount={totalAmount}
+ baseAmount={posSale ? Math.max(0, Number(posSale.subtotal) - Number(posSale.discount)) : totalAmount}
+ presets={posSale ? POS_TIP_PRESETS : undefined}
  tipAmount={tipAmount}
  onTipChange={setTipAmount}
  />

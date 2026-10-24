@@ -1,3 +1,4 @@
+- [ ] Add customer-selected tips to guest and signed-in POS QR checkout, save confirmed totals, and verify tipping rules.
 - [x] Share itemized POS receipts across merchant and customer delivery.
 - [x] Connect cash/outside-card, Tap to Pay, and QR payment receipt delivery.
 - [x] Deploy and verify receipt rules and failure handling (9 tests passed; unauthorized requests rejected; application checks passed).
