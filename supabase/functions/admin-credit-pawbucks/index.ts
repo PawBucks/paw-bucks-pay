@@ -248,7 +248,7 @@ serve(async (req) => {
         if (!notifyResult.success) {
           console.error('Email notification failed:', notifyResult.error);
         } else {
-          console.log(`Credit notification email sent to ${profile.email}`);
+          console.log(`Credit notification email sent`);
         }
       }
     } catch (emailErr) {

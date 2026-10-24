@@ -161,7 +161,7 @@ async function sendInvoiceEmail(invoice: any, merchant: any, items: any[]): Prom
       return false;
     }
 
-    console.log(`Email sent for invoice ${invoice.invoice_number} to ${invoice.client_email}`);
+    console.log(`Email sent for invoice ${invoice.invoice_number}`);
     return true;
   } catch (err) {
     console.error(`Failed to send email for ${invoice.invoice_number}:`, err);

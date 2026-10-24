@@ -109,7 +109,7 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Password reset requested for:", email);
+    console.log("Password reset requested");
 
     // SECURITY: redirect URL is hardcoded server-side to prevent open-redirect
     // phishing attacks. Never accept caller-controlled redirect URLs.
@@ -153,7 +153,7 @@ serve(async (req: Request): Promise<Response> => {
     const userName = data.user?.user_metadata?.full_name || "";
     const resetLink = data.properties.action_link;
 
-    console.log("Generated reset link for:", email);
+    console.log("Generated reset link");
 
     // Send the email via Resend
     // IMPORTANT: The 'from' address must use a verified domain in Resend

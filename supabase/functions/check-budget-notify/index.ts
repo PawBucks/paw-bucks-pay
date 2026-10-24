@@ -190,7 +190,7 @@ serve(async (req) => {
                 </div>
               `,
             });
-            console.log('Email notification sent to:', profile.email);
+            console.log('Email notification sent');
           } catch (emailError) {
             console.error('Error sending email:', emailError);
           }

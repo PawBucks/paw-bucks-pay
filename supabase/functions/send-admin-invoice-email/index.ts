@@ -280,7 +280,7 @@ serve(async (req) => {
       throw new Error("Failed to send email");
     }
 
-    console.log(`Admin invoice ${invoice.invoice_number} sent to ${invoice.recipient_email}`);
+    console.log(`Admin invoice ${invoice.invoice_number} sent`);
 
     // Update status to sent
     await supabase

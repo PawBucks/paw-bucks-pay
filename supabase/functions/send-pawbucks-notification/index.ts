@@ -381,7 +381,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`PawBucks ${type} notification sent to ${recipientEmail}`);
+    console.log(`PawBucks ${type} notification sent`);
 
     return new Response(
       JSON.stringify({ success: true }),

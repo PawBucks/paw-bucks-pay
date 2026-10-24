@@ -50,7 +50,7 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
-    console.log('User authenticated:', { userId: user.id, email: user.email });
+    console.log('User authenticated:', { userId: user.id });
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {

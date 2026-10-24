@@ -288,14 +288,14 @@ serve(async (req: Request) => {
           });
 
           if (error) {
-            console.error(`Failed to send to ${email}:`, error);
+            console.error(`Failed to send to recipient:`, error);
             results.failed++;
             results.errors.push(`${email}: ${error.message}`);
           } else {
             results.success++;
           }
         } catch (err: any) {
-          console.error(`Error sending to ${email}:`, err);
+          console.error(`Error sending to recipient:`, err);
           results.failed++;
           results.errors.push(`${email}: ${err.message}`);
         }

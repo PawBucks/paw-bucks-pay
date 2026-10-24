@@ -151,7 +151,7 @@ serve(async (req) => {
       .single();
 
     if (petEmailError || !petEmail) {
-      console.error("Pet email not found:", recipientEmail, petEmailError);
+      console.error("Pet email not found for inbound recipient", petEmailError);
       return new Response(JSON.stringify({ error: "Unknown recipient" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

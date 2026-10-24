@@ -455,7 +455,7 @@ serve(async (req: Request) => {
       console.error(`Failed to send ${type} booking email:`, emailResponse.error);
       failures.push(`Customer email failed: ${emailResponse.error.message}`);
     } else {
-      console.log(`Booking ${type} email sent to ${customerEmail}`);
+      console.log(`Booking ${type} email sent`);
     }
 
     // Fall back to the business owner's account email when no business email is saved.
@@ -607,7 +607,7 @@ serve(async (req: Request) => {
           console.error("Failed to send merchant email:", merchantResponse.error);
           failures.push(`Business email failed: ${merchantResponse.error.message}`);
         } else {
-          console.log(`Merchant ${type} email sent to ${merchantEmail}`);
+          console.log(`Merchant ${type} email sent`);
         }
       } catch (e) {
         console.error("Merchant email send threw:", e);

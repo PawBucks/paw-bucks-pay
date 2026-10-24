@@ -110,7 +110,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Geocoding address: ${address.substring(0, 100)}...`);
+    console.log(`Geocoding address (length ${address.length})`);
 
     // Call Mapbox Geocoding API
     const encodedAddress = encodeURIComponent(address.trim());

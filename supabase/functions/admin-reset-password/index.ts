@@ -23,7 +23,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Processing password reset request for: ${email}`);
+    console.log(`Processing password reset request`);
 
     // Create Supabase client with service role for admin operations
     const supabaseAdmin = createClient(
@@ -45,7 +45,7 @@ serve(async (req) => {
       .single();
 
     if (profileError || !profile) {
-      console.log("Profile not found for email:", email);
+      console.log("Profile not found for reset request");
       // Return success to prevent email enumeration attacks
       return new Response(
         JSON.stringify({ success: true, message: "If an admin account exists with this email, a password reset link has been sent." }),
@@ -68,7 +68,7 @@ serve(async (req) => {
     }
 
     if (!hasAdminRole) {
-      console.log("User is not an admin:", email);
+      console.log("Reset requested for non-admin account");
       // Return success to prevent role enumeration attacks
       return new Response(
         JSON.stringify({ success: true, message: "If an admin account exists with this email, a password reset link has been sent." }),
@@ -93,7 +93,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Password reset email sent successfully for:", email);
+    console.log("Password reset email sent successfully");
 
     return new Response(
       JSON.stringify({ success: true, message: "Password reset email sent successfully" }),

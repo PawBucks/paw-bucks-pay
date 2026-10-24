@@ -92,7 +92,7 @@ async function sendBrandInvoiceEmail(params: {
     throw new Error("Failed to send invoice email");
   }
 
-  console.log(`Brand invoice ${params.invoiceNumber} emailed to ${params.recipientEmail}`);
+  console.log(`Brand invoice ${params.invoiceNumber} emailed`);
 }
 
 Deno.serve(async (req) => {

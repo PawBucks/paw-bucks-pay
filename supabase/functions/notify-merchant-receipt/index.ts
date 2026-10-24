@@ -214,7 +214,7 @@ serve(async (req: Request) => {
       );
     }
 
-    console.log(`Merchant receipt notification sent to ${recipientEmail}`);
+    console.log(`Merchant receipt notification sent`);
 
     return new Response(
       JSON.stringify({ success: true }),

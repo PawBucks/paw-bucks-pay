@@ -86,7 +86,7 @@ async function sendReceiptEmail(params: {
       const errorText = await response.text();
       console.error("[EMAIL] Failed to send receipt email:", errorText);
     } else {
-      console.log(`[EMAIL] ✅ Receipt email sent to ${params.email}`);
+      console.log(`[EMAIL] ✅ Receipt email sent`);
     }
   } catch (error) {
     console.error("[EMAIL] Error sending receipt email:", error);
@@ -160,7 +160,7 @@ async function sendInvoicePaidNotification(params: {
       const errorText = await response.text();
       console.error("[INVOICE_PAID] Failed to send merchant notification:", errorText);
     } else {
-      console.log(`[INVOICE_PAID] ✅ Merchant notification sent to ${params.merchantEmail}`);
+      console.log(`[INVOICE_PAID] ✅ Merchant notification sent`);
     }
   } catch (error) {
     console.error("[INVOICE_PAID] Error sending merchant notification:", error);
@@ -1695,7 +1695,7 @@ serve(async (req) => {
                     .maybeSingle();
                   if (profile?.id) {
                     enrichedUserId = profile.id;
-                    console.log('[PAYMENT_INTENT] Enriched orphan PI via customer email lookup', { paymentIntentId: paymentIntent.id, email: (cust as any).email });
+                    console.log('[PAYMENT_INTENT] Enriched orphan PI via customer email lookup', { paymentIntentId: paymentIntent.id });
                   }
                 }
               } catch (e) {

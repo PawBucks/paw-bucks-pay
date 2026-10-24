@@ -120,7 +120,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`[Admin Create User] User ${email} created by admin ${requestingUser.email}`);
+    console.log(`[Admin Create User] User created by admin ${requestingUser.id}`);
 
     // Log the admin action
     await serviceClient
