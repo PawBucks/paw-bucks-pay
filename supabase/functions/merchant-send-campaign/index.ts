@@ -100,6 +100,22 @@ serve(async (req) => {
       );
     }
 
+    if (channel === "sms") {
+      const linkPattern = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|io|co|app|ly|me|link|info|biz|xyz|us)\b)/i;
+      if (typeof message !== "string" || message.length > 300) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Text messages must be 300 characters or fewer." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (linkPattern.test(message)) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Text messages can't include links." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Hard cap blast radius
     const MAX_RECIPIENTS = 5000;
     if (recipients.length > MAX_RECIPIENTS) {
