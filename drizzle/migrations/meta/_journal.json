@@ -134,6 +134,13 @@
       "when": 1792857092945,
       "tag": "0018_security_hardening_tokens_and_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792857184635,
+      "tag": "0019_relay_triggers_internal_secret",
+      "breakpoints": true
     }
   ]
 }
