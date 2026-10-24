@@ -83,7 +83,7 @@ export const TipSelector = ({
  key={preset.label}
  type="button"
  size="sm"
- variant={activePreset?.label === preset.label ?"default" :"outline"}
+ variant={!showCustom && activePreset?.label === preset.label ?"default" :"outline"}
  onClick={() => handlePresetClick(preset.multiplier)}
  className="text-xs"
  disabled={baseAmount <= 0}

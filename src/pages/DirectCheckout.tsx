@@ -60,6 +60,8 @@ export default function DirectCheckout() {
   useEffect(() => {
     const fetchMerchant = async () => {
       if (!merchantId) return;
+      // Guest POS checkout loads its safe public ticket itself; never call signed-in merchant context here.
+      if (authLoading || (posSaleId && (!user || searchParams.get("guest_session")))) return;
       try {
         // Display fields come from the safe public view.
         const { data: publicData, error: publicError } = await supabase
@@ -95,7 +97,7 @@ export default function DirectCheckout() {
       }
     };
     fetchMerchant();
-  }, [merchantId]);
+  }, [merchantId, authLoading, user, posSaleId, searchParams]);
 
   // Redirect unauthenticated users to login, returning to /pay/:id afterward.
   // POS tickets let signed-out customers choose sign-in or guest checkout instead.
