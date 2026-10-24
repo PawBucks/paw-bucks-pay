@@ -5,3 +5,7 @@
 - [x] Add shared merchant/vet holiday closures, multiple special-hour windows and annual repeat.
 - [x] Enforce holiday rules in service-booking slots and database creation/rescheduling; six rule tests passed.
 - [ ] Verify saved holiday settings through a business account — current testing session is a pet owner.
+- [ ] Build pet social feed with media, pet tags, profiles and engagement.
+- [ ] Add report, block, delete and an administrator moderation queue.
+- [ ] Expand LA guide with rules, amenities, freshness and community photos/tips.
+- [ ] Verify Community publishing and safety flows.
