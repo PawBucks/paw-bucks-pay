@@ -118,8 +118,8 @@ serve(async (req) => {
     }
 
     console.log("Received inbound email:", {
-      from: emailData.from,
-      to: emailData.to,
+      hasFrom: !!emailData.from,
+      hasTo: !!emailData.to,
       subject: emailData.subject,
     });
 
