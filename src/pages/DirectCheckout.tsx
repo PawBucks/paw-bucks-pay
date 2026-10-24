@@ -41,11 +41,11 @@ export default function DirectCheckout() {
   // doesn't have to retype it on this page.
   const prefilledAmount = (() => {
     const v = parseFloat(searchParams.get("amount") || "");
-    return Number.isFinite(v) && v >= 0 && v <= 10000 ? v : undefined;
+    return Number.isFinite(v) && v > 0 ? v : undefined;
   })();
   const prefilledTip = (() => {
     const v = parseFloat(searchParams.get("tip") || "");
-    return Number.isFinite(v) && v > 0 ? v : undefined;
+    return Number.isFinite(v) && v >= 0 && v <= 10000 ? v : undefined;
   })();
 
   const posSaleId = searchParams.get("pos_sale");

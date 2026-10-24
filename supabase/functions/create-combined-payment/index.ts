@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import { sendPosReceipts } from "../_shared/pos-receipts.ts";
+import { posCheckoutTotals } from "../_shared/pos-checkout-totals.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { z } from "https://esm.sh/zod@3.22.4";
@@ -51,7 +52,7 @@ const combinedPaymentSchema = z.object({
   totalAmount: z.number().positive({ message: "Amount must be greater than 0" }),
   pawbucksAmount: z.number().min(0).default(0),
   storeLockedPawbucks: z.number().min(0).default(0), // PB redeemed from this merchant's store-locked balance
-  tipAmount: z.number().min(0).default(0), // Tip in USD, always charged to card
+  tipAmount: z.number().finite().min(0).max(10000).default(0), // Tip in USD, always charged to card
   merchantId: z.string().uuid({ message: "Invalid merchant ID" }),
   description: z.string().max(500).optional(),
   autoRedeem: z.boolean().optional().default(false),
@@ -209,6 +210,7 @@ serve(async (req) => {
     // POS sales tax: never subject to the Success Fee or PawBucks earning;
     // remitted to the PawBucks platform account via application_fee_amount.
     let posTaxUsd = 0;
+    let posTotals: ReturnType<typeof posCheckoutTotals> | undefined;
     // --- POS sale link: build itemized lines server-side from the register ticket ---
     if (posSaleId) {
       const { data: sale } = await supabaseAdmin
@@ -220,6 +222,7 @@ serve(async (req) => {
         throw new Error('This sale is no longer awaiting payment');
       }
       const saleBase = Number(sale.total) - Number(sale.tip || 0);
+      posTotals = posCheckoutTotals(sale, tipAmount);
       if (Math.abs(saleBase - baseAmount) > 0.01) {
         throw new Error('Payment amount does not match the sale total');
       }
@@ -594,7 +597,7 @@ serve(async (req) => {
 
       if (posSaleId && transaction?.id) {
         const { error: linkErr } = await supabaseAdmin.from('merchant_pos_sales')
-          .update({ status: 'completed', transaction_id: transaction.id, paid_at: new Date().toISOString() })
+          .update({ status: 'completed', transaction_id: transaction.id, paid_at: new Date().toISOString(), ...(posTotals ? { tip: posTotals.tip, total: posTotals.total } : {}) })
           .eq('id', posSaleId).eq('status', 'awaiting_payment');
         if (linkErr) logStep('POS sale link failed (non-fatal)', { error: linkErr.message });
         if (!linkErr) {
@@ -787,7 +790,7 @@ serve(async (req) => {
     // Calculate amounts - PawBucks earned on Stripe portion only, never on sales tax
     const stripeAmountInCents = Math.round(stripeAmount * 100);
     const posTaxOnCard = Math.min(posTaxUsd, Math.max(0, stripeAmount - tipAmount - taxUsd));
-    const earnableStripeAmount = Math.max(0, stripeAmount - taxUsd - posTaxOnCard);
+    const earnableStripeAmount = Math.max(0, stripeAmount - taxUsd - posTaxOnCard - (posSaleId ? tipAmount : 0));
     let pawbucksEarned = Math.round(earnableStripeAmount * cashbackRate);
 
     // Global kill-switch: SuperAdmin can disable PawBucks earning for pet owners platform-wide
@@ -852,6 +855,7 @@ serve(async (req) => {
           store_locked_pawbucks: storeLockedPawbucks.toString(),
           total_amount: totalAmount.toString(),
           tip_amount: tipAmount.toString(),
+          pos_sale_id: posSaleId ?? '',
           tax_amount: taxUsd.toFixed(2),
           pos_tax_remitted_cents: String(posTaxRemitCents),
           success_fee_cents: String(successFeeInCents),
@@ -904,6 +908,7 @@ serve(async (req) => {
           tax_amount: taxUsd,
           items: lineItems,
           pos_sale_id: posSaleId ?? null,
+          tip_amount: tipAmount,
         },
       });
 

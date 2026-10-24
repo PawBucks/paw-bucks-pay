@@ -12,6 +12,7 @@ import {
   type IncomingTransactionItem,
 } from "../_shared/transaction-items.ts";
 import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
+import { sendPosReceipts } from "../_shared/pos-receipts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -192,7 +193,7 @@ serve(async (req) => {
     }
 
     const amountInDollars = paymentIntent.amount / 100;
-    const platformFee = amountInDollars * 0.03; // 3% fee
+    const platformFee = metadata.pos_sale_id ? Number(metadata.success_fee_cents || 0) / 100 : amountInDollars * 0.03;
     const pawbucksUsdValue = pawbucksAmount * 0.001;
 
     // CRITICAL: Determine PawBucks multiplier based on user's subscription tier
@@ -219,7 +220,8 @@ serve(async (req) => {
     }
 
     // Calculate PawBucks earned based on Stripe amount and user's tier
-    let pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
+    const posEarnableAmount = Math.max(0, amountInDollars - Number(metadata.tip_amount || 0) - Number(metadata.tax_amount || 0) - Number(metadata.pos_tax_remitted_cents || 0) / 100);
+    let pawbucksEarned = Math.floor((metadata.pos_sale_id ? posEarnableAmount : amountInDollars) * pawbucksMultiplier);
 
     // Global kill switch: SuperAdmin can pause pet-owner PawBucks earning platform-wide
     {
@@ -312,6 +314,15 @@ serve(async (req) => {
     }
 
     logStep("Transaction record created", { transactionId: transaction.id });
+    if (metadata.pos_sale_id) {
+      try {
+        const { error: posError } = await supabaseAdmin.from('merchant_pos_sales')
+          .update({ status: 'completed', tip: Number(metadata.tip_amount || 0), total: totalAmount, transaction_id: transaction.id, paid_at: new Date().toISOString() })
+          .eq('id', metadata.pos_sale_id).eq('merchant_id', merchantId).eq('stripe_payment_intent_id', paymentIntentId).eq('status', 'awaiting_payment');
+        if (posError) throw posError;
+        await sendPosReceipts(supabaseAdmin, metadata.pos_sale_id, { email: user.email });
+      } catch (e) { logStep('POS receipt delivery failed', { error: String(e) }); }
+    }
 
     // Load line items stashed by create-combined-payment in direct_payments.metadata
     let lineItems: IncomingTransactionItem[] = [];

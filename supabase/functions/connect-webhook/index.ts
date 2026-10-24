@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { resolveWalletUserId } from "../_shared/wallet-owner.ts";
 import { insertTransactionItems } from "../_shared/transaction-items.ts";
 import { sendPosReceipts } from "../_shared/pos-receipts.ts";
+import { posCheckoutTotals } from "../_shared/pos-checkout-totals.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import {
@@ -187,6 +188,21 @@ serve(async (req) => {
       case "payment_intent.succeeded": {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         const metadata = paymentIntent.metadata || {};
+        // Guest POS payments have no reward wallet. Complete from verified Stripe data even if the customer never returns.
+        if (metadata.source === 'pos_guest_checkout' && metadata.pos_sale_id && connectedAccountId) {
+          const { data: sale } = await supabaseAdmin.from('merchant_pos_sales')
+            .select('id,merchant_id,total,tip,tax,status').eq('id', metadata.pos_sale_id).eq('merchant_id', metadata.merchant_id).maybeSingle();
+          if (!sale || !['awaiting_payment', 'completed'].includes(sale.status)) throw new Error('Guest POS sale unavailable');
+          const totals = posCheckoutTotals(sale, Number(metadata.tip_amount ?? sale.tip));
+          if (totals.amountCents !== paymentIntent.amount) throw new Error('Guest POS payment total mismatch');
+          const { error: saveError } = await supabaseAdmin.from('merchant_pos_sales')
+            .update({ status: 'completed', tip: totals.tip, total: totals.total, stripe_payment_intent_id: paymentIntent.id, paid_at: new Date().toISOString() })
+            .eq('id', sale.id).eq('status', 'awaiting_payment');
+          if (saveError) throw saveError;
+          const sessions = await stripe.checkout.sessions.list({ payment_intent: paymentIntent.id, limit: 1 }, { stripeAccount: connectedAccountId });
+          await sendPosReceipts(supabaseAdmin, sale.id, { email: sessions.data[0]?.customer_details?.email || undefined });
+          break;
+        }
         
         logStep("Processing payment_intent.succeeded", { 
           paymentIntentId: paymentIntent.id,
@@ -762,7 +778,7 @@ serve(async (req) => {
 
         // Calculate amounts
         const amountInDollars = paymentIntent.amount / 100;
-        const platformFee = amountInDollars * 0.03; // 3% platform fee
+        const platformFee = metadata.pos_sale_id ? Number(metadata.success_fee_cents || 0) / 100 : amountInDollars * 0.03;
         // Referral credit refunded back out of the collected Success Fee, in cents.
         let referralCreditApplied = 0;
 
@@ -790,7 +806,8 @@ serve(async (req) => {
         }
 
         // PawBucks earned on Stripe amount only
-        let pawbucksEarned = Math.floor(amountInDollars * pawbucksMultiplier);
+        const posEarnableAmount = Math.max(0, amountInDollars - Number(metadata.tip_amount || 0) - Number(metadata.tax_amount || 0) - Number(metadata.pos_tax_remitted_cents || 0) / 100);
+        let pawbucksEarned = Math.floor((metadata.pos_sale_id ? posEarnableAmount : amountInDollars) * pawbucksMultiplier);
         {
           const { isPetOwnerPawBucksEarningEnabled } = await import("../_shared/pet-owner-earning-kill-switch.ts");
           const earnEnabled = await isPetOwnerPawBucksEarningEnabled(supabaseAdmin);
@@ -849,7 +866,7 @@ serve(async (req) => {
           if (posSale && transaction?.id) {
             try {
               const { error: posError } = await supabaseAdmin.from('merchant_pos_sales')
-                .update({ status: 'completed', transaction_id: transaction.id, paid_at: new Date().toISOString() })
+                .update({ status: 'completed', transaction_id: transaction.id, paid_at: new Date().toISOString(), ...(metadata.pos_sale_id ? { tip: Number(metadata.tip_amount || 0), total: Number(metadata.total_amount) } : {}) })
                 .eq('id', posSale.id).eq('status', 'awaiting_payment');
               if (posError) throw posError;
               const receipts = await sendPosReceipts(supabaseAdmin, posSale.id);
