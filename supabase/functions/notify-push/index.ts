@@ -1,5 +1,6 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { checkInternalSecret } from "../_shared/internal-auth.ts";
 
 const PUSH_URL = "https://pawbucks-backend.rork.app/push/webhook";
 const json = (b: unknown, status = 200) =>
@@ -8,6 +9,8 @@ const json = (b: unknown, status = 200) =>
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ ok: false, error: "method not allowed" }, 405);
+  const denied = await checkInternalSecret(req, corsHeaders);
+  if (denied) return denied;
 
   let notificationId: unknown;
   try {

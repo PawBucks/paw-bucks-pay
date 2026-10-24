@@ -1,3 +1,4 @@
+import { csvSafeCell } from "@/lib/csv";
 import React, { useState, useEffect, useMemo } from"react";
 import { useNavigate } from"react-router-dom";
 import { useAuth } from"@/hooks/useAuth";
@@ -204,7 +205,7 @@ const MerchantTransactions = () => { const { user, loading, signOut } = useAuth(
  t.status,
  ]);
 
- const csv = [headers, ...csvData].map(row => row.join(",")).join("\n");
+ const csv = [headers, ...csvData].map(row => row.map(csvSafeCell).join(",")).join("\n");
  const blob = new Blob([csv], { type:"text/csv" });
  const url = window.URL.createObjectURL(blob);
  const a = document.createElement("a");

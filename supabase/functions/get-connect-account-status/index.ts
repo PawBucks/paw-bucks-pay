@@ -156,6 +156,30 @@ serve(async (req) => {
 
     console.log('Account status retrieved successfully');
 
+    // Only the owning merchant (or an admin) may see full Stripe account details.
+    const ownerCheckClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+    const [{ data: ownedMerchant }, { data: adminRole }] = await Promise.all([
+      ownerCheckClient.from('merchants').select('id').eq('stripe_account_id', account.id).eq('user_id', user.id).maybeSingle(),
+      ownerCheckClient.from('user_roles').select('role').eq('user_id', user.id).in('role', ['admin', 'superadmin']).limit(1).maybeSingle(),
+    ]);
+    if (!ownedMerchant && !adminRole) {
+      return new Response(
+        JSON.stringify({
+          charges_enabled: account.charges_enabled,
+          payouts_enabled: account.payouts_enabled,
+          details_submitted: account.details_submitted,
+          accountId: account.id,
+          merchantId: resolvedMerchantId,
+          merchantName,
+          acceptsPawBucks,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+    }
+
     // STEP 7: Return the account status with merchant info
     return new Response(
       JSON.stringify({

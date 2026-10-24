@@ -65,7 +65,7 @@ serve(async (req) => {
       const errText = await tokenRes.text();
       console.error("[CLOVER][oauth] token exchange failed", tokenRes.status, errText);
       return new Response(
-        JSON.stringify({ error: "Token exchange failed", detail: errText.slice(0, 500) }),
+        JSON.stringify({ error: "Token exchange failed" }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -80,6 +80,26 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: "Clover did not return an access token" }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Confirm the issued token is actually scoped to the claimed Clover merchant
+    // before overwriting any stored integration.
+    if (!/^[A-Za-z0-9]{6,32}$/.test(cloverMerchantId)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid merchant_id" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const verifyRes = await fetch(`${CLOVER_OAUTH_BASE}/v3/merchants/${cloverMerchantId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const verifyJson = verifyRes.ok ? await verifyRes.json().catch(() => null) : null;
+    if (!verifyRes.ok || !verifyJson || verifyJson.id !== cloverMerchantId) {
+      console.error("[CLOVER][oauth] token does not match merchant", verifyRes.status);
+      return new Response(
+        JSON.stringify({ error: "Authorization does not match this Clover merchant" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 

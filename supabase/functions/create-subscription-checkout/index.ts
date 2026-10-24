@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { safeOrigin, safeRedirectUrl } from "../_shared/safe-origin.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -50,7 +51,7 @@ serve(async (req) => {
       throw new Error('User not authenticated');
     }
 
-    console.log('User authenticated:', { userId: user.id, email: user.email });
+    console.log('User authenticated:', { userId: user.id });
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
@@ -189,8 +190,8 @@ serve(async (req) => {
           subscription_purpose: 'pawpass_subscription',
         },
       },
-      success_url: `${req.headers.get('origin')}/subscription-success`,
-      cancel_url: `${req.headers.get('origin')}/profile`,
+      success_url: `${safeOrigin(req)}/subscription-success`,
+      cancel_url: `${safeOrigin(req)}/profile`,
       metadata: {
         user_id: user.id,
         tier: tier,

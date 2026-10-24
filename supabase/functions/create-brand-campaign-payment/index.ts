@@ -1,5 +1,6 @@
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { safeOrigin, safeRedirectUrl } from "../_shared/safe-origin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -60,7 +61,7 @@ Deno.serve(async (req) => {
         })).id;
     }
 
-    const origin = req.headers.get("origin") || "https://pawbucks.app";
+    const origin = safeOrigin(req);
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

@@ -189,13 +189,19 @@ serve(async (req) => {
 
     // Mark cart as converted if cartId provided
     if (cartId) {
-      await supabaseAdmin.from('shopping_carts')
-        .update({ status: 'converted', converted_at: new Date().toISOString() })
-        .eq('id', cartId);
-      
-      await supabaseAdmin.from('shopping_cart_items')
-        .delete()
-        .eq('cart_id', cartId);
+      const { data: ownedCart } = await supabaseAdmin.from('shopping_carts')
+        .select('id')
+        .eq('id', cartId)
+        .in('user_id', Array.from(new Set([user.id, effectiveUserId])))
+        .maybeSingle();
+      if (ownedCart) {
+        await supabaseAdmin.from('shopping_carts')
+          .update({ status: 'converted', converted_at: new Date().toISOString() })
+          .eq('id', ownedCart.id);
+        await supabaseAdmin.from('shopping_cart_items')
+          .delete()
+          .eq('cart_id', ownedCart.id);
+      }
     }
 
     // In-app notification

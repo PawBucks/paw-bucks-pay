@@ -7,6 +7,7 @@ import {
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
 import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
+import { safeOrigin, safeRedirectUrl } from "../_shared/safe-origin.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -404,7 +405,7 @@ serve(async (req) => {
               paid_with_pawbucks: true,
               pawbucks_used: pawbucksUsed,
               duplicate: true,
-              redirect_url: successUrl || `${req.headers.get('origin')}/checkout-success`,
+              redirect_url: safeRedirectUrl(successUrl) || `${safeOrigin(req)}/checkout-success`,
             }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
           );
@@ -505,7 +506,7 @@ serve(async (req) => {
           pawbucks_used: pawbucksUsed,
           pawbucks_usd_value: pawbucksUsdValue,
           message: `Purchase paid with ${pawbucksUsed} PawBucks ($${pawbucksUsdValue.toFixed(2)})`,
-          redirect_url: successUrl || `${req.headers.get('origin')}/checkout-success`,
+          redirect_url: safeRedirectUrl(successUrl) || `${safeOrigin(req)}/checkout-success`,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
       );
@@ -579,8 +580,8 @@ serve(async (req) => {
       {
         line_items: stripeLineItems,
         mode: 'payment',
-        success_url: successUrl || `${req.headers.get('origin')}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
-        cancel_url: cancelUrl || `${req.headers.get('origin')}/checkout-canceled`,
+        success_url: safeRedirectUrl(successUrl) || `${safeOrigin(req)}/checkout-success?session_id={CHECKOUT_SESSION_ID}&store=${accountId}`,
+        cancel_url: safeRedirectUrl(cancelUrl) || `${safeOrigin(req)}/checkout-canceled`,
         customer_email: user.email,
         metadata,
         payment_intent_data: {

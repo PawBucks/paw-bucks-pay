@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { escapeHtml } from "../_shared/escape-html.ts";
+import { checkInternalSecret } from "../_shared/internal-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,6 +49,8 @@ async function geocode(address: string): Promise<{ lat: number; lng: number } | 
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const denied = await checkInternalSecret(req, corsHeaders);
+  if (denied) return denied;
   if (req.method !== "POST") return json({ ok: false, error: "method not allowed" }, 405);
 
   let postId: unknown;

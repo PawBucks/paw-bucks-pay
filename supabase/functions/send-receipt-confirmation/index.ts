@@ -194,7 +194,7 @@ serve(async (req: Request) => {
       );
     }
 
-    console.log(`Receipt confirmation sent to ${recipientEmail}`);
+    console.log(`Receipt confirmation sent`);
 
     return new Response(
       JSON.stringify({ success: true }),

@@ -310,7 +310,7 @@ serve(async (req) => {
           if (!notifyResult.success) {
             console.error('Email notification failed:', notifyResult.error);
           } else {
-            console.log(`Debit notification email sent to ${profile.email}`);
+            console.log(`Debit notification email sent`);
           }
         }
       } catch (emailErr) {

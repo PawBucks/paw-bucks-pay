@@ -365,7 +365,7 @@ serve(async (req) => {
     const resend = new Resend(resendApiKey);
     const params: ReceiptEmailParams = await req.json();
 
-    console.log('[RECEIPT] Sending receipt email to:', params.email);
+    console.log('[RECEIPT] Sending receipt email');
     console.log('[RECEIPT] Receipt details:', {
       receiptId: params.receiptId,
       merchantName: params.merchantName,

@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
       matchedUserId = petOwnerProfile.id;
       console.log(`[record-manual-invoice-payment] Found pet owner: ${petOwnerProfile.id} (${petOwnerProfile.email})`);
     } else {
-      console.log(`[record-manual-invoice-payment] No matching user profile found for ${invoice.client_email}`);
+      console.log(`[record-manual-invoice-payment] No matching user profile found for invoice client`);
     }
 
     // ALWAYS create a transaction record for merchant dashboard visibility

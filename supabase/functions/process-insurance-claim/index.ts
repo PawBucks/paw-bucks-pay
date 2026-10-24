@@ -118,6 +118,30 @@ serve(async (req) => {
 
     if (policyError || !policy) throw new Error("Insurance policy not found");
     if (!policy.is_active) throw new Error("Insurance policy is not active");
+
+    // Authorization: the invoice must belong to a business owned by this vet,
+    // and the policy's pet must belong to the invoice's client.
+    const { data: ownedMerchant } = await supabaseClient
+      .from("merchants")
+      .select("id")
+      .eq("id", invoice.merchant_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!ownedMerchant) throw new Error("Not authorized to process claims for this invoice");
+
+    const { data: policyPet } = await supabaseClient
+      .from("pet_profiles")
+      .select("user_id")
+      .eq("id", policy.pet_id)
+      .maybeSingle();
+    const { data: petOwner } = policyPet?.user_id
+      ? await supabaseClient.from("profiles").select("email").eq("id", policyPet.user_id).maybeSingle()
+      : { data: null };
+    const ownerEmail = String(petOwner?.email ?? "").trim().toLowerCase();
+    const clientEmail = String(invoice.client_email ?? "").trim().toLowerCase();
+    if (!ownerEmail || !clientEmail || ownerEmail !== clientEmail) {
+      throw new Error("Insurance policy does not belong to this invoice's client");
+    }
     logStep("Policy retrieved", { 
       policyNumber: policy.policy_number, 
       provider: policy.vet_insurance_providers?.name 

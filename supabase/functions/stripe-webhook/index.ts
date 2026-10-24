@@ -86,7 +86,7 @@ async function sendReceiptEmail(params: {
       const errorText = await response.text();
       console.error("[EMAIL] Failed to send receipt email:", errorText);
     } else {
-      console.log(`[EMAIL] ✅ Receipt email sent to ${params.email}`);
+      console.log(`[EMAIL] ✅ Receipt email sent`);
     }
   } catch (error) {
     console.error("[EMAIL] Error sending receipt email:", error);
@@ -160,7 +160,7 @@ async function sendInvoicePaidNotification(params: {
       const errorText = await response.text();
       console.error("[INVOICE_PAID] Failed to send merchant notification:", errorText);
     } else {
-      console.log(`[INVOICE_PAID] ✅ Merchant notification sent to ${params.merchantEmail}`);
+      console.log(`[INVOICE_PAID] ✅ Merchant notification sent`);
     }
   } catch (error) {
     console.error("[INVOICE_PAID] Error sending merchant notification:", error);
@@ -311,6 +311,35 @@ serve(async (req) => {
       
       // Get metadata - could be from session or subscription_data
       const metadata = session.metadata || {};
+
+      // ADMIN (platform) INVOICE PAYMENT — record only after Stripe confirms
+      if (metadata.type === 'admin_invoice_payment' && metadata.admin_invoice_id) {
+        try {
+          if (session.payment_status === 'paid') {
+            const { data: existingPay } = await supabaseAdmin
+              .from('admin_invoice_payments')
+              .select('id')
+              .eq('stripe_payment_id', session.id)
+              .maybeSingle();
+            if (!existingPay) {
+              await supabaseAdmin.from('admin_invoice_payments').insert({
+                invoice_id: metadata.admin_invoice_id,
+                amount: (session.amount_total ?? 0) / 100,
+                payment_method: 'stripe',
+                stripe_payment_id: session.id,
+                notes: 'Online payment via Stripe Checkout',
+                recorded_by: 'system',
+              });
+            }
+          }
+        } catch (e) {
+          console.error('[ADMIN_INVOICE] Failed to record payment:', (e as Error).message);
+        }
+        return new Response(JSON.stringify({ received: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
 
       // ========================================
       // STORE REWARDS PRO — funding wallet top-up
@@ -1695,7 +1724,7 @@ serve(async (req) => {
                     .maybeSingle();
                   if (profile?.id) {
                     enrichedUserId = profile.id;
-                    console.log('[PAYMENT_INTENT] Enriched orphan PI via customer email lookup', { paymentIntentId: paymentIntent.id, email: (cust as any).email });
+                    console.log('[PAYMENT_INTENT] Enriched orphan PI via customer email lookup', { paymentIntentId: paymentIntent.id });
                   }
                 }
               } catch (e) {

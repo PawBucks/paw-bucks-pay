@@ -232,7 +232,7 @@ Deno.serve(async (req) => {
           console.warn(`[send-lost-pet-deletion-warning] Failed to update warning flag for post ${post.id}:`, updateError);
         }
 
-        console.log(`[send-lost-pet-deletion-warning] Sent warning email to ${profile.email} for ${post.pet_name}`);
+        console.log(`[send-lost-pet-deletion-warning] Sent warning email for post ${post.id}`);
         results.push({ postId: post.id, petName: post.pet_name, success: true });
         emailsSent++;
 

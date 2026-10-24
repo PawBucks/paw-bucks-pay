@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { safeOrigin, safeRedirectUrl } from "../_shared/safe-origin.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -175,8 +176,8 @@ serve(async (req) => {
             quantity: 1,
           }],
           mode: 'subscription',
-          success_url: `${req.headers.get("origin")}/merchant-dashboard?analytics_success=true`,
-          cancel_url: `${req.headers.get("origin")}/merchant-dashboard?analytics_cancelled=true`,
+          success_url: `${safeOrigin(req)}/merchant-dashboard?analytics_success=true`,
+          cancel_url: `${safeOrigin(req)}/merchant-dashboard?analytics_cancelled=true`,
           metadata: {
             merchant_id: merchant.id,
             product_id: product.id,
@@ -205,8 +206,8 @@ serve(async (req) => {
             quantity: 1,
           }],
           mode: 'payment',
-          success_url: `${req.headers.get("origin")}/merchant-dashboard?analytics_success=true`,
-          cancel_url: `${req.headers.get("origin")}/merchant-dashboard?analytics_cancelled=true`,
+          success_url: `${safeOrigin(req)}/merchant-dashboard?analytics_success=true`,
+          cancel_url: `${safeOrigin(req)}/merchant-dashboard?analytics_cancelled=true`,
           metadata: {
             merchant_id: merchant.id,
             product_id: product.id,

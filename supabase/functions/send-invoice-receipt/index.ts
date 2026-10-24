@@ -439,7 +439,7 @@ serve(async (req) => {
       throw new Error("Merchant not found");
     }
 
-    console.log('[INVOICE_RECEIPT] Sending receipt email to:', invoice.client_email);
+    console.log('[INVOICE_RECEIPT] Sending receipt email');
 
     const resend = new Resend(resendApiKey);
     const html = generateReceiptHtml({

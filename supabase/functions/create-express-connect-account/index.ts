@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { safeOrigin, safeRedirectUrl } from "../_shared/safe-origin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -88,8 +89,8 @@ serve(async (req) => {
         // Account exists but needs more onboarding - create new link
         const accountLink = await stripe.accountLinks.create({
           account: merchant.stripe_account_id,
-          refresh_url: `${req.headers.get("origin")}/merchant/dashboard?stripe_refresh=true`,
-          return_url: `${req.headers.get("origin")}/merchant/dashboard?stripe_return=true`,
+          refresh_url: `${safeOrigin(req)}/merchant/dashboard?stripe_refresh=true`,
+          return_url: `${safeOrigin(req)}/merchant/dashboard?stripe_return=true`,
           type: "account_onboarding",
         });
 
@@ -118,7 +119,7 @@ serve(async (req) => {
       },
       business_profile: {
         name: merchant.business_name,
-        url: merchant.storefront_slug ? `${req.headers.get("origin")}/store/${merchant.storefront_slug}` : undefined,
+        url: merchant.storefront_slug ? `${safeOrigin(req)}/store/${merchant.storefront_slug}` : undefined,
       },
       metadata: {
         merchant_id: merchant.id,
@@ -141,8 +142,8 @@ serve(async (req) => {
     // Create account link for onboarding (Stripe-hosted)
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: `${req.headers.get("origin")}/merchant/dashboard?stripe_refresh=true`,
-      return_url: `${req.headers.get("origin")}/merchant/dashboard?stripe_return=true`,
+      refresh_url: `${safeOrigin(req)}/merchant/dashboard?stripe_refresh=true`,
+      return_url: `${safeOrigin(req)}/merchant/dashboard?stripe_return=true`,
       type: "account_onboarding",
     });
 

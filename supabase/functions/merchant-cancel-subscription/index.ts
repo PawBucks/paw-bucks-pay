@@ -68,9 +68,11 @@ serve(async (req) => {
     if (merchantUserId !== user.id) {
       // Also check if user is a vet with a linked merchant
       const { data: vetData } = await supabaseAdmin
-        .from("partner_vets")
+        .from("user_roles")
         .select("id")
         .eq("user_id", user.id)
+        .in("role", ["admin", "superadmin"])
+        .limit(1)
         .maybeSingle();
 
       if (!vetData) {

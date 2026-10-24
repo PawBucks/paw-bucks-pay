@@ -266,7 +266,7 @@ serve(async (req) => {
         if (emailError) {
           console.error('[Admin Approve] Email send error:', emailError);
         } else {
-          console.log(`[Admin Approve] ${action} email sent to ${entityEmail}`);
+          console.log(`[Admin Approve] ${action} email sent`);
         }
       } catch (emailErr) {
         console.error('[Admin Approve] Email exception:', emailErr);
@@ -359,7 +359,7 @@ serve(async (req) => {
       console.error('[Admin Approve] Audit log exception:', e);
     }
 
-    console.log(`[Admin Approve] ${action} ${entityType} ${entityId} by admin ${user.email}`);
+    console.log(`[Admin Approve] ${action} ${entityType} ${entityId} by admin ${user.id}`);
 
     return new Response(
       JSON.stringify({

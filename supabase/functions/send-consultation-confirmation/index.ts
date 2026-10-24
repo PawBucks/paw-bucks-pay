@@ -190,7 +190,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Sending ${type} consultation email:`, { recipientEmail, bookingDate, timeSlot });
+    console.log(`Sending ${type} consultation email:`, { bookingDate, timeSlot });
 
     let subject = "";
     let html = "";

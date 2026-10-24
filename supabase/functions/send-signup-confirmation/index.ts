@@ -63,9 +63,16 @@ serve(async (req: Request) => {
     }
 
     const APP_BASE_URL = Deno.env.get("APP_BASE_URL") || "https://pawbucks.app";
-    const redirectTo = body.redirectUrl?.startsWith("https://pawbucks.app")
-      ? body.redirectUrl
-      : `${APP_BASE_URL}/`;
+    const redirectTo = (() => {
+      try {
+        if (!body.redirectUrl) return `${APP_BASE_URL}/`;
+        const u = new URL(body.redirectUrl);
+        const okHost = u.hostname === "pawbucks.app" || u.hostname === "www.pawbucks.app";
+        return u.protocol === "https:" && okHost ? u.toString() : `${APP_BASE_URL}/`;
+      } catch {
+        return `${APP_BASE_URL}/`;
+      }
+    })();
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",

@@ -1,3 +1,4 @@
+import { csvSafeCell } from "@/lib/csv";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -223,7 +224,7 @@ export default function MerchantCustomers() {
       c.marketingOptOut ? "yes" : "no",
     ]);
     const csv = [header, ...rows]
-      .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .map((r) => r.map(csvSafeCell).join(","))
       .join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     const a = document.createElement("a");

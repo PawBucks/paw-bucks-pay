@@ -138,6 +138,16 @@ serve(async (req) => {
       }
     }
 
+    // Only accept events for real, existing merchants.
+    const uniqueMerchantIds = Array.from(new Set(events.map((e: { merchant_id: string }) => e.merchant_id)));
+    const { data: knownMerchants } = await supabase.from('merchants').select('id').in('id', uniqueMerchantIds);
+    if ((knownMerchants?.length ?? 0) !== uniqueMerchantIds.length) {
+      return new Response(
+        JSON.stringify({ error: 'Unknown merchant' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     if (type === 'search_ranking') {
       // Validate and sanitize search ranking events
       const validEvents = events.map((event: SearchRankingEvent) => ({

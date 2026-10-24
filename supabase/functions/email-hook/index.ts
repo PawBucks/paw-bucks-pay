@@ -366,7 +366,7 @@ serve(async (req: Request): Promise<Response> => {
         html = generateMagicLinkEmail(userName, confirmationUrl);
     }
 
-    console.log(`Sending ${email_action_type} email to ${user.email}`);
+    console.log(`Sending ${email_action_type} email to user ${user.id}`);
 
     const emailResponse = await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",

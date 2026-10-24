@@ -9,6 +9,7 @@ import {
   applyPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
 import { resolveUserEarnTier } from "../_shared/resolve-tier.ts";
+import { escapeHtml } from "../_shared/escape-html.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -70,7 +71,7 @@ const sendAdminNotification = async (
     await resend.emails.send({
       from: "PawBucks <noreply@pawbucks.app>",
       to: ["admin@pawbucks.app"],
-      subject: `Pet Store Purchase Order #${orderNumber}: ${purchase.item.name}`,
+      subject: `Pet Store Purchase Order #${orderNumber}: ${escapeHtml(purchase.item.name)}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; border: 1px solid #e0e0e0;">
           <div style="background: linear-gradient(135deg, #7DD4D4, #5BC0C0); padding: 25px; text-align: center;">
@@ -91,19 +92,19 @@ const sendAdminNotification = async (
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 8px 0; color: #666; width: 140px; vertical-align: top;"><strong>Customer Name:</strong></td>
-                  <td style="padding: 8px 0; color: #333;">${customer.full_name || 'N/A'}</td>
+                  <td style="padding: 8px 0; color: #333;">${escapeHtml(customer.full_name || 'N/A')}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Email Address:</strong></td>
-                  <td style="padding: 8px 0; color: #333;"><a href="mailto:${customer.email}" style="color: #7DD4D4;">${customer.email}</a></td>
+                  <td style="padding: 8px 0; color: #333;"><a href="mailto:${escapeHtml(customer.email)}" style="color: #7DD4D4;">${escapeHtml(customer.email)}</a></td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Phone Number:</strong></td>
-                  <td style="padding: 8px 0; color: #333;">${customer.phone || 'N/A'}</td>
+                  <td style="padding: 8px 0; color: #333;">${escapeHtml(customer.phone || 'N/A')}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Address:</strong></td>
-                  <td style="padding: 8px 0; color: #333;">${customer.address || 'N/A'}</td>
+                  <td style="padding: 8px 0; color: #333;">${escapeHtml(customer.address || 'N/A')}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #666; vertical-align: top;"><strong>Customer ID:</strong></td>
@@ -127,9 +128,9 @@ const sendAdminNotification = async (
                 <tbody>
                   <tr>
                     <td style="padding: 15px 12px; border-bottom: 1px solid #e0e0e0;">
-                      <strong style="color: #333;">${purchase.item.name}</strong>
-                      ${purchase.item.category ? `<br><span style="color: #888; font-size: 12px;">Category: ${purchase.item.category}</span>` : ''}
-                      ${purchase.item.description ? `<br><span style="color: #666; font-size: 12px; font-style: italic;">${purchase.item.description.substring(0, 100)}${purchase.item.description.length > 100 ? '...' : ''}</span>` : ''}
+                      <strong style="color: #333;">${escapeHtml(purchase.item.name)}</strong>
+                      ${purchase.item.category ? `<br><span style="color: #888; font-size: 12px;">Category: ${escapeHtml(purchase.item.category)}</span>` : ''}
+                      ${purchase.item.description ? `<br><span style="color: #666; font-size: 12px; font-style: italic;">${escapeHtml(purchase.item.description.substring(0, 100))}${purchase.item.description.length > 100 ? '...' : ''}</span>` : ''}
                       <br><span style="color: #999; font-size: 11px;">Item ID: ${purchase.item.id}</span>
                     </td>
                     <td style="padding: 15px 12px; text-align: center; border-bottom: 1px solid #e0e0e0; color: #333; font-weight: bold;">${purchase.quantity}</td>
@@ -431,8 +432,11 @@ serve(async (req) => {
 
       // Mark cart converted if cartId provided
       if (body.cartId) {
-        await supabaseAdmin.from('shopping_carts').update({ status: 'converted', converted_at: new Date().toISOString() }).eq('id', body.cartId);
-        await supabaseAdmin.from('shopping_cart_items').delete().eq('cart_id', body.cartId);
+        const { data: ownedCart } = await supabaseAdmin.from('shopping_carts').select('id').eq('id', body.cartId).eq('user_id', user.id).maybeSingle();
+        if (ownedCart) {
+          await supabaseAdmin.from('shopping_carts').update({ status: 'converted', converted_at: new Date().toISOString() }).eq('id', ownedCart.id);
+          await supabaseAdmin.from('shopping_cart_items').delete().eq('cart_id', ownedCart.id);
+        }
       }
 
       // Send notifications — PawBucks-only purchase is fully completed at this point

@@ -440,7 +440,7 @@ serve(async (req) => {
           if (emailError) {
             console.error(`Email to ${email.to} failed:`, emailError);
           } else {
-            console.log(`Email sent to ${email.to}`);
+            console.log(`Support notification email sent`);
           }
         } catch (emailErr) {
           console.error(`Email send error:`, emailErr instanceof Error ? emailErr.message : emailErr);

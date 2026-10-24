@@ -29,7 +29,8 @@ var search_merchants_default = defineTool({
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
     const sb = supabaseFor(ctx);
-    const { data, error } = await sb.from("merchants_public").select("id, business_name, business_type, city, state").or(`business_name.ilike.%${query}%,business_type.ilike.%${query}%`).limit(limit ?? 10);
+    const safeQuery = String(query).replace(/[^\p{L}\p{N}\s'&.-]/gu, "").slice(0, 100);
+    const { data, error } = await sb.from("merchants_public").select("id, business_name, business_type, city, state").or(`business_name.ilike.%${safeQuery}%,business_type.ilike.%${safeQuery}%`).limit(limit ?? 10);
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     return {
       content: [{ type: "text", text: JSON.stringify(data ?? []) }],

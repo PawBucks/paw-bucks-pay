@@ -5,6 +5,7 @@ import {
   getSpendableSources,
   planPawBucksDebit,
 } from "../_shared/pet-fund-debit.ts";
+import { safeOrigin } from "../_shared/safe-origin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -151,7 +152,7 @@ serve(async (req) => {
     }
 
     // Create checkout session for subscription
-    const origin = req.headers.get("origin") || "https://pawbucks.app";
+    const origin = safeOrigin(req);
     
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,

@@ -84,15 +84,7 @@ serve(async (req) => {
       billing_address_collection: "auto",
     });
 
-    // Record payment as pending
-    await supabase.from("admin_invoice_payments").insert({
-      invoice_id: invoiceId,
-      amount: amountDue,
-      payment_method: "stripe",
-      stripe_payment_id: session.id,
-      notes: "Online payment via Stripe Checkout",
-      recorded_by: "system",
-    });
+    // The payment row is recorded by stripe-webhook only after Stripe confirms payment.
 
     return new Response(
       JSON.stringify({ url: session.url, sessionId: session.id }),

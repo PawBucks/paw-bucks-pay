@@ -346,7 +346,7 @@ async function sendSecurityEmailAlert(
       `,
     });
 
-    console.log(`[Security Email] Sent ${payload.event_type} alert to ${payload.email}`);
+    console.log(`[Security Email] Sent ${payload.event_type} alert`);
   } catch (error) {
     console.error("Failed to send security email alert:", error);
     // Don't throw - email failure shouldn't break the auth event logging

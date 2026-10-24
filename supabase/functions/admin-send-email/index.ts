@@ -192,7 +192,17 @@ serve(async (req: Request) => {
     let emails: string[] = [];
 
     if (recipientType === "individual" && individualEmails && individualEmails.length > 0) {
-      emails = individualEmails;
+      // Only send to addresses that belong to registered members.
+      const requested = Array.from(new Set(individualEmails
+        .filter((e) => typeof e === "string")
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean))).slice(0, 500);
+      const { data: memberRows } = await supabase
+        .from("profiles")
+        .select("email")
+        .in("email", requested);
+      const members = new Set((memberRows || []).map((p: { email: string | null }) => (p.email || "").toLowerCase()));
+      emails = requested.filter((e) => members.has(e));
     } else if (recipientType === "all") {
       const { data: allProfiles } = await supabase
         .from("profiles")
@@ -288,14 +298,14 @@ serve(async (req: Request) => {
           });
 
           if (error) {
-            console.error(`Failed to send to ${email}:`, error);
+            console.error(`Failed to send to recipient:`, error);
             results.failed++;
             results.errors.push(`${email}: ${error.message}`);
           } else {
             results.success++;
           }
         } catch (err: any) {
-          console.error(`Error sending to ${email}:`, err);
+          console.error(`Error sending to recipient:`, err);
           results.failed++;
           results.errors.push(`${email}: ${err.message}`);
         }
