@@ -193,6 +193,8 @@ serve(async (req) => {
           const { data: sale } = await supabaseAdmin.from('merchant_pos_sales')
             .select('id,merchant_id,total,tip,tax,status').eq('id', metadata.pos_sale_id).eq('merchant_id', metadata.merchant_id).maybeSingle();
           if (!sale || !['awaiting_payment', 'completed'].includes(sale.status)) throw new Error('Guest POS sale unavailable');
+          const { data: saleMerchant } = await supabaseAdmin.from('merchants').select('stripe_account_id').eq('id', sale.merchant_id).maybeSingle();
+          if (saleMerchant?.stripe_account_id !== connectedAccountId) throw new Error('Guest POS connected account mismatch');
           const totals = posCheckoutTotals(sale, Number(metadata.tip_amount ?? sale.tip));
           if (totals.amountCents !== paymentIntent.amount) throw new Error('Guest POS payment total mismatch');
           const { error: saveError } = await supabaseAdmin.from('merchant_pos_sales')

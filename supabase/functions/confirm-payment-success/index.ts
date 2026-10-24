@@ -639,7 +639,7 @@ serve(async (req) => {
 
     // 7. Send receipt email
     const customerEmail = userProfile?.email || user.email;
-    if (customerEmail) {
+    if (customerEmail && !metadata.pos_sale_id) {
       // Get card details if available
       let cardBrand: string | undefined;
       let cardLast4: string | undefined;
@@ -701,7 +701,7 @@ serve(async (req) => {
             .eq('id', merchantForNotif.user_id)
             .single();
 
-          if (merchantProfile?.email) {
+          if (merchantProfile?.email && !metadata.pos_sale_id) {
             const supabaseUrl = Deno.env.get('SUPABASE_URL');
             const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
 
