@@ -129,8 +129,8 @@ const sendAdminNotification = async (
                   <tr>
                     <td style="padding: 15px 12px; border-bottom: 1px solid #e0e0e0;">
                       <strong style="color: #333;">${escapeHtml(purchase.item.name)}</strong>
-                      ${purchase.item.category ? `<br><span style="color: #888; font-size: 12px;">Category: ${purchase.item.category}</span>` : ''}
-                      ${purchase.item.description ? `<br><span style="color: #666; font-size: 12px; font-style: italic;">${purchase.item.description.substring(0, 100)}${purchase.item.description.length > 100 ? '...' : ''}</span>` : ''}
+                      ${purchase.item.category ? `<br><span style="color: #888; font-size: 12px;">Category: ${escapeHtml(purchase.item.category)}</span>` : ''}
+                      ${purchase.item.description ? `<br><span style="color: #666; font-size: 12px; font-style: italic;">${escapeHtml(purchase.item.description.substring(0, 100))}${purchase.item.description.length > 100 ? '...' : ''}</span>` : ''}
                       <br><span style="color: #999; font-size: 11px;">Item ID: ${purchase.item.id}</span>
                     </td>
                     <td style="padding: 15px 12px; text-align: center; border-bottom: 1px solid #e0e0e0; color: #333; font-weight: bold;">${purchase.quantity}</td>
