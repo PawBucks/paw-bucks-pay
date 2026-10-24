@@ -39,7 +39,7 @@ import { Formatters } from "@/utils/formatters";
 import { formatDateOnly } from "@/lib/timezone";
 import { toast } from "sonner";
 import { CustomerDetailDrawer } from '@/components/merchant/customers/CustomerDetailDrawer';
-import { customerPets, type MerchantPet } from '@/lib/merchantPets';
+import { customerPets, type MerchantPet, type BookedPetProfile } from '@/lib/merchantPets';
 
 type Customer = {
   key: string;
@@ -88,6 +88,7 @@ export default function MerchantCustomers() {
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("recent");
   const [pets, setPets] = useState<MerchantPet[]>([]);
+  const [profiles, setProfiles] = useState<BookedPetProfile[]>([]);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const selectedCustomer = customers.find(c => c.key === selectedKey);
   const loadPets = useCallback(async () => {
@@ -95,6 +96,10 @@ export default function MerchantCustomers() {
     const {data,error} = await supabase.from('merchant_client_pets').select('*').eq('merchant_id',merchantId).order('created_at');
     if (error) { toast.error('Could not load pet records'); return; }
     setPets(data ?? []);
+    const {data:booked} = await supabase.from('service_bookings').select('user_id, pet_profiles(id,name,type,breed)').eq('merchant_id',merchantId).not('pet_id','is',null);
+    const seen = new Set<string>(); const list: BookedPetProfile[] = [];
+    for (const b of (booked ?? []) as any[]) { const p = b.pet_profiles; if (p && b.user_id && !seen.has(p.id)) { seen.add(p.id); list.push({id:p.id,name:p.name,type:p.type,breed:p.breed,user_id:b.user_id}); } }
+    setProfiles(list);
   }, [merchantId]);
   useEffect(() => { void loadPets(); }, [loadPets]);
 
@@ -377,7 +382,7 @@ export default function MerchantCustomers() {
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="font-semibold truncate">{c.name}</p>
-                            <Badge variant="outline" className="text-xs"><PawPrint className="h-3 w-3 mr-1" />{customerPets(pets,c).length} pets</Badge>
+                            <Badge variant="outline" className="text-xs"><PawPrint className="h-3 w-3 mr-1" />{(customerPets(pets,c).length + profiles.filter(p=>p.user_id===c.userId && !pets.some(x=>x.pet_profile_id===p.id)).length)} pets</Badge>
                             {c.sources.map((s) => (
                               <Badge key={s} variant="secondary" className="text-[10px]">
                                 {SOURCE_LABELS[s] || s}
@@ -490,7 +495,7 @@ export default function MerchantCustomers() {
           </Tabs>
         </div>
       </MerchantWorkspaceLayout>
-      {selectedCustomer && merchantId && <CustomerDetailDrawer key={selectedCustomer.key} customer={selectedCustomer} merchantId={merchantId} pets={customerPets(pets,selectedCustomer)} onClose={()=>setSelectedKey(null)} onRefresh={loadPets} onSaveContact={()=>void saveAsContact(selectedCustomer)} />}
+      {selectedCustomer && merchantId && <CustomerDetailDrawer key={selectedCustomer.key} customer={selectedCustomer} merchantId={merchantId} pets={customerPets(pets,selectedCustomer)} profiles={profiles.filter(p=>p.user_id===selectedCustomer.userId)} onClose={()=>setSelectedKey(null)} onRefresh={loadPets} onSaveContact={()=>void saveAsContact(selectedCustomer)} />}
     </>
   );
 }
