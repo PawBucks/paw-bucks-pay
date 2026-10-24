@@ -6389,6 +6389,7 @@ export type Database = {
           merchant_id: string
           microchip_number: string | null
           name: string
+          pet_profile_id: string | null
           photo_url: string | null
           sex: string | null
           size: string | null
@@ -6423,6 +6424,7 @@ export type Database = {
           merchant_id: string
           microchip_number?: string | null
           name: string
+          pet_profile_id?: string | null
           photo_url?: string | null
           sex?: string | null
           size?: string | null
@@ -6457,6 +6459,7 @@ export type Database = {
           merchant_id?: string
           microchip_number?: string | null
           name?: string
+          pet_profile_id?: string | null
           photo_url?: string | null
           sex?: string | null
           size?: string | null
