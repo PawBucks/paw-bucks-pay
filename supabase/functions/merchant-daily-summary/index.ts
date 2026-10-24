@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { currentHourInTz } from "../_shared/tz.ts";
+import { checkInternalSecret } from "../_shared/internal-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,6 +50,30 @@ serve(async (req: Request) => {
       forceRun = body?.force === true || body?.manual === true;
     } catch {
       // No body or invalid JSON — run for all merchants (cron mode)
+    }
+
+    // On-demand runs require either the internal secret, or a signed-in owner
+    // requesting their own merchant's summary.
+    if (singleMerchantId || forceRun) {
+      const internalDenied = await checkInternalSecret(req, corsHeaders);
+      if (internalDenied) {
+        const authHeader = req.headers.get("Authorization") || "";
+        const token = authHeader.replace("Bearer ", "");
+        const { data: userData } = token ? await supabase.auth.getUser(token) : { data: { user: null } } as any;
+        const caller = userData?.user;
+        let owns = false;
+        if (caller && singleMerchantId) {
+          const { data: m } = await supabase.from("merchants").select("id").eq("id", singleMerchantId).eq("user_id", caller.id).maybeSingle();
+          owns = !!m;
+        }
+        if (!owns) {
+          return new Response(JSON.stringify({ error: "unauthorized" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        forceRun = false; // owners may only run their own summary
+      }
     }
 
     // Platform rule: this digest must arrive at 9:00 PM Eastern, regardless
