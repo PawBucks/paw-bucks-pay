@@ -6369,6 +6369,147 @@ export type Database = {
           },
         ]
       }
+      merchant_client_pets: {
+        Row: {
+          age_estimate: string | null
+          allergies: string | null
+          birthdate: string | null
+          breed: string | null
+          client_id: string | null
+          color_markings: string | null
+          created_at: string
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          grooming_coat_type: string | null
+          grooming_preferences: string | null
+          handling_cautions: string | null
+          id: string
+          medical_conditions: string | null
+          medications: string | null
+          merchant_id: string
+          microchip_number: string | null
+          name: string
+          photo_url: string | null
+          sex: string | null
+          size: string | null
+          spayed_neutered: boolean | null
+          special_instructions: string | null
+          species: string
+          temperament_notes: string | null
+          updated_at: string
+          user_id: string | null
+          vaccinations: Json
+          vet_clinic_name: string | null
+          vet_doctor_name: string | null
+          vet_phone: string | null
+          weight_lbs: number | null
+        }
+        Insert: {
+          age_estimate?: string | null
+          allergies?: string | null
+          birthdate?: string | null
+          breed?: string | null
+          client_id?: string | null
+          color_markings?: string | null
+          created_at?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          grooming_coat_type?: string | null
+          grooming_preferences?: string | null
+          handling_cautions?: string | null
+          id?: string
+          medical_conditions?: string | null
+          medications?: string | null
+          merchant_id: string
+          microchip_number?: string | null
+          name: string
+          photo_url?: string | null
+          sex?: string | null
+          size?: string | null
+          spayed_neutered?: boolean | null
+          special_instructions?: string | null
+          species?: string
+          temperament_notes?: string | null
+          updated_at?: string
+          user_id?: string | null
+          vaccinations?: Json
+          vet_clinic_name?: string | null
+          vet_doctor_name?: string | null
+          vet_phone?: string | null
+          weight_lbs?: number | null
+        }
+        Update: {
+          age_estimate?: string | null
+          allergies?: string | null
+          birthdate?: string | null
+          breed?: string | null
+          client_id?: string | null
+          color_markings?: string | null
+          created_at?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          grooming_coat_type?: string | null
+          grooming_preferences?: string | null
+          handling_cautions?: string | null
+          id?: string
+          medical_conditions?: string | null
+          medications?: string | null
+          merchant_id?: string
+          microchip_number?: string | null
+          name?: string
+          photo_url?: string | null
+          sex?: string | null
+          size?: string | null
+          spayed_neutered?: boolean | null
+          special_instructions?: string | null
+          species?: string
+          temperament_notes?: string | null
+          updated_at?: string
+          user_id?: string | null
+          vaccinations?: Json
+          vet_clinic_name?: string | null
+          vet_doctor_name?: string | null
+          vet_phone?: string | null
+          weight_lbs?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_client_pets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_client_pets_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_client_pets_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_client_pets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_client_pets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "reviewer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_customer_analytics: {
         Row: {
           average_order_value: number | null
