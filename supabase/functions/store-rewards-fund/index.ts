@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { safeOrigin, safeRedirectUrl } from "../_shared/safe-origin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -87,7 +88,7 @@ serve(async (req) => {
       (await stripe.customers.create({ email: user.email!, metadata: { user_id: user.id } })).id;
 
     // Create a Checkout Session on the platform account
-    const origin = req.headers.get("origin") ?? "https://pawbucks.app";
+    const origin = safeOrigin(req);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer: customerId,

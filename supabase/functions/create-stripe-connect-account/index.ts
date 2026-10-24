@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import { safeOrigin, safeRedirectUrl } from "../_shared/safe-origin.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -78,8 +79,8 @@ serve(async (req) => {
       // Create a new account link for existing account to re-onboard
       const accountLink = await stripe.accountLinks.create({
         account: merchant.stripe_account_id,
-        refresh_url: `${req.headers.get('origin')}/merchant-dashboard?refresh=true`,
-        return_url: `${req.headers.get('origin')}/merchant-dashboard?success=true`,
+        refresh_url: `${safeOrigin(req)}/merchant-dashboard?refresh=true`,
+        return_url: `${safeOrigin(req)}/merchant-dashboard?success=true`,
         type: 'account_onboarding',
       });
 
@@ -159,9 +160,9 @@ serve(async (req) => {
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
       // URL to redirect if link expires or user clicks "refresh"
-      refresh_url: `${req.headers.get('origin')}/merchant-dashboard?refresh=true`,
+      refresh_url: `${safeOrigin(req)}/merchant-dashboard?refresh=true`,
       // URL to redirect after successful onboarding
-      return_url: `${req.headers.get('origin')}/merchant-dashboard?success=true`,
+      return_url: `${safeOrigin(req)}/merchant-dashboard?success=true`,
       type: 'account_onboarding',
     });
 
