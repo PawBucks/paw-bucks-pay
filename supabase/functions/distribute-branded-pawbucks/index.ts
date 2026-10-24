@@ -128,7 +128,38 @@ Deno.serve(async (req) => {
     }
 
     const triggerType: "checkin" | "checkout" = trigger === "checkout" ? "checkout" : "checkin";
-    const txAmountUsd = Number(transaction_amount_usd) || 0;
+    let txAmountUsd = Number(transaction_amount_usd) || 0;
+
+    // End-user calls must reference a real qualifying event they own.
+    if (!isInternal) {
+      const deny = (message: string) => new Response(
+        JSON.stringify({ distributed: false, message }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 },
+      );
+      if (triggerType === "checkin") {
+        if (!checkin_id) return deny("A verified check-in is required");
+        const { data: ci } = await supabase
+          .from("checkins")
+          .select("id, user_id, merchant_id, checked_in_at, created_at")
+          .eq("id", checkin_id)
+          .maybeSingle();
+        const ciTime = ci ? new Date(ci.checked_in_at ?? ci.created_at).getTime() : 0;
+        if (!ci || ci.user_id !== user_id || ci.merchant_id !== merchant_id || Date.now() - ciTime > 60 * 60 * 1000) {
+          return deny("A verified check-in is required");
+        }
+      } else {
+        if (!transaction_id) return deny("A completed purchase is required");
+        const { data: tx } = await supabase
+          .from("transactions")
+          .select("id, user_id, merchant_id, amount, status")
+          .eq("id", transaction_id)
+          .maybeSingle();
+        if (!tx || tx.user_id !== user_id || tx.merchant_id !== merchant_id || tx.status !== "completed") {
+          return deny("A completed purchase is required");
+        }
+        txAmountUsd = Number(tx.amount) || 0;
+      }
+    }
 
     console.log("[distribute-branded-pawbucks] invoked", {
       user_id,
