@@ -314,8 +314,45 @@ serve(async (req) => {
           continue;
         }
 
+        // Validate size/type and confine the filename before storing
+        const MAX_ATTACHMENT_BYTES = 15 * 1024 * 1024;
+        const ALLOWED_TYPES = new Set([
+          "application/pdf", "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp",
+          "image/heic", "image/heif", "text/plain", "text/csv",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "application/vnd.ms-excel",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ]);
+        const EXT_TYPES: Record<string, string> = {
+          pdf: "application/pdf", jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif",
+          webp: "image/webp", heic: "image/heic", heif: "image/heif", txt: "text/plain", csv: "text/csv",
+          doc: "application/msword", docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          xls: "application/vnd.ms-excel", xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        };
+        const actualSize = fileBuffer ? (fileBuffer as ArrayBuffer).byteLength : 0;
+        if (!fileBuffer || actualSize === 0 || actualSize > MAX_ATTACHMENT_BYTES) {
+          console.warn("Skipping attachment: invalid size", actualSize);
+          continue;
+        }
+        const safeBase = String(fileName || "attachment")
+          .split(/[\\/]/).pop()!
+          .replace(/[^A-Za-z0-9._-]/g, "_")
+          .replace(/^\.+/, "")
+          .slice(0, 120) || "attachment";
+        const ext = (safeBase.split(".").pop() || "").toLowerCase();
+        let normalizedType = String(fileType || "").toLowerCase().split(";")[0].trim();
+        if (!ALLOWED_TYPES.has(normalizedType)) normalizedType = EXT_TYPES[ext] ?? "";
+        if (!normalizedType || !ALLOWED_TYPES.has(normalizedType)) {
+          console.warn("Skipping attachment: disallowed type", fileType);
+          continue;
+        }
+        fileName = safeBase;
+        fileType = normalizedType;
+        fileSize = actualSize;
+
         // Upload to storage
-        const storagePath = `${petEmail.pet_id}/${inboundEmail.id}/${Date.now()}-${fileName}`;
+        const storagePath = `${petEmail.pet_id}/${inboundEmail.id}/${Date.now()}-${safeBase}`;
         const { error: uploadError } = await supabase.storage
           .from("pet-email-attachments")
           .upload(storagePath, fileBuffer, {
