@@ -18069,6 +18069,7 @@ export type Database = {
         }[]
       }
       get_pos_sale_for_checkout: { Args: { _sale_id: string }; Returns: Json }
+      get_pos_sale_public: { Args: { _sale_id: string }; Returns: Json }
       get_reviewer_display_name: {
         Args: { reviewer_id: string }
         Returns: string

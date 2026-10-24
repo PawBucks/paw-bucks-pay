@@ -169,6 +169,13 @@
       "when": 1792866019819,
       "tag": "0023_community_media_and_reports_validation",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792867281302,
+      "tag": "0024_pos_sale_public_checkout",
+      "breakpoints": true
     }
   ]
 }

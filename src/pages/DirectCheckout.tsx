@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
 import { useAuth } from "@/hooks/useAuth";
 import { PaymentDialogWithPawBucks, type PosSaleSummary } from "@/components/PaymentDialogWithPawBucks";
+import { PosGuestCheckout } from "@/components/checkout/PosGuestCheckout";
 
 interface Merchant {
   id: string;
@@ -96,14 +97,15 @@ export default function DirectCheckout() {
     fetchMerchant();
   }, [merchantId]);
 
-  // Redirect unauthenticated users to login, returning to /pay/:id afterward
+  // Redirect unauthenticated users to login, returning to /pay/:id afterward.
+  // POS tickets let signed-out customers choose sign-in or guest checkout instead.
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || posSaleId) return;
     if (!user && merchantId) {
       const redirectTo = encodeURIComponent(`/pay/${merchantId}${window.location.search}`);
       navigate(`/auth?redirect=${redirectTo}`, { replace: true });
     }
-  }, [user, authLoading, merchantId, navigate]);
+  }, [user, authLoading, merchantId, navigate, posSaleId]);
 
   // Auto-open the dialog once merchant + user are ready
   useEffect(() => {
@@ -118,6 +120,10 @@ export default function DirectCheckout() {
       setDialogOpen(true);
     }
   }, [user, merchant, success]);
+
+  if (posSaleId && !authLoading && (!user || searchParams.get("guest_session"))) {
+    return <PosGuestCheckout saleId={posSaleId} guestSession={searchParams.get("guest_session")} />;
+  }
 
   if (success) {
     return (
