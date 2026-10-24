@@ -3,6 +3,7 @@ import { todayDateOnly } from '@/lib/timezone';
 
 export type MerchantPet = Tables<'merchant_client_pets'>;
 export type PetCustomer = { key: string; userId?: string; clientId?: string; name: string; email?: string; phone?: string; company?: string; saved: boolean; totalSpent: number; bookings: number; transactions: number };
+export type BookedPetProfile = { id: string; name: string; type: string | null; breed: string | null; user_id: string };
 export type Vaccination = { name: string; date_administered: string; expiration_date: string; verified: boolean };
 export function customerPets(pets: MerchantPet[], customer: PetCustomer) {
   return pets.filter(p => customer.userId ? p.user_id === customer.userId || (!!customer.clientId && p.client_id === customer.clientId) : !!customer.clientId && p.client_id === customer.clientId);

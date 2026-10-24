@@ -13,13 +13,13 @@ import { Loader2, Plus, Trash2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { BREED_LIBRARY } from '@/lib/groomingBreedLibrary';
 import { todayDateOnly } from '@/lib/timezone';
-import { type MerchantPet, type PetCustomer, type Vaccination, vaccinationsOf, vaccineStatus } from '@/lib/merchantPets';
+import { type MerchantPet, type PetCustomer, type BookedPetProfile, type Vaccination, vaccinationsOf, vaccineStatus } from '@/lib/merchantPets';
 
 const textFields = ['name','breed','birthdate','age_estimate','color_markings','microchip_number','vet_clinic_name','vet_doctor_name','vet_phone','medical_conditions','allergies','medications','grooming_coat_type','grooming_preferences','temperament_notes','handling_cautions','special_instructions','emergency_contact_name','emergency_contact_phone'] as const;
 type TextField = typeof textFields[number];
-export function PetDetailDialog({ pet, customer, merchantId, onClose, onSaved }: { pet: MerchantPet | null; customer: PetCustomer; merchantId: string; onClose: () => void; onSaved: () => Promise<void> }) {
-  const [form, setForm] = useState<Record<TextField,string>>(() => Object.fromEntries(textFields.map(k => [k,pet?.[k] ?? ''])) as Record<TextField,string>);
-  const [species,setSpecies] = useState(pet?.species ?? 'dog');
+export function PetDetailDialog({ pet, profile, customer, merchantId, onClose, onSaved }: { pet: MerchantPet | null; profile?: BookedPetProfile; customer: PetCustomer; merchantId: string; onClose: () => void; onSaved: () => Promise<void> }) {
+  const [form, setForm] = useState<Record<TextField,string>>(() => Object.fromEntries(textFields.map(k => [k,pet?.[k] ?? (k==='name' ? profile?.name : k==='breed' ? profile?.breed : '') ?? ''])) as Record<TextField,string>);
+  const [species,setSpecies] = useState(pet?.species ?? (profile?.type==='cat'||profile?.type==='other' ? profile.type : 'dog'));
   const [sex,setSex] = useState(pet?.sex ?? 'unknown');
   const [neutered,setNeutered] = useState(pet?.spayed_neutered === null || !pet ? 'unknown' : pet.spayed_neutered ? 'yes' : 'no');
   const [size,setSize] = useState(pet?.size ?? 'unknown');
@@ -49,7 +49,7 @@ export function PetDetailDialog({ pet, customer, merchantId, onClose, onSaved }:
         photoUrl = supabase.storage.from('pet-photos').getPublicUrl(uploadedPath).data.publicUrl;
       }
       const values = { ...form, name: form.name.trim(), birthdate: form.birthdate || null, species, sex, spayed_neutered: neutered==='unknown' ? null : neutered==='yes', size: size==='unknown' ? null : size, weight_lbs: weight ? Number(weight) : null, photo_url: photoUrl, vaccinations: vaccines.map(v => ({...v,name:v.name.trim()})) };
-      const result = pet ? await supabase.from('merchant_client_pets').update(values).eq('id',pet.id).eq('merchant_id',merchantId).select('id').single() : await supabase.from('merchant_client_pets').insert({...values,merchant_id:merchantId,user_id:customer.userId ?? null,client_id:customer.userId ? null : customer.clientId ?? null}).select('id').single();
+      const result = pet ? await supabase.from('merchant_client_pets').update(values).eq('id',pet.id).eq('merchant_id',merchantId).select('id').single() : await supabase.from('merchant_client_pets').insert({...values,merchant_id:merchantId,user_id:customer.userId ?? null,client_id:customer.userId ? null : customer.clientId ?? null,pet_profile_id:profile?.id ?? null}).select('id').single();
       if (result.error) throw result.error;
       toast.success('Pet record saved');
       await onSaved(); onClose();
