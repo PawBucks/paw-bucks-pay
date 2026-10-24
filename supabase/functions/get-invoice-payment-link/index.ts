@@ -62,7 +62,8 @@ serve(async (req) => {
 
     const userEmail = (user.email ?? "").toLowerCase();
     const clientEmail = (invoice.client_email ?? "").toLowerCase();
-    const authorized = Boolean(merchant) || (Boolean(userEmail) && userEmail === clientEmail);
+    const emailConfirmed = Boolean(user.email_confirmed_at || (user as any).confirmed_at);
+    const authorized = Boolean(merchant) || (emailConfirmed && Boolean(userEmail) && userEmail.trim() === clientEmail.trim());
 
     if (!authorized) {
       return new Response(JSON.stringify({ error: "Not authorized for this invoice" }), {
