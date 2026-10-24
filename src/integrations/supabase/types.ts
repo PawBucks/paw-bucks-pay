@@ -17727,6 +17727,10 @@ export type Database = {
         Args: { action: string; report_id: string }
         Returns: undefined
       }
+      community_report_content: {
+        Args: { report_uuid: string }
+        Returns: string
+      }
       complete_brand_setup: {
         Args: { p_brand_id: string; p_payload: Json }
         Returns: Json
