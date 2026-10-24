@@ -176,6 +176,13 @@
       "when": 1792867281302,
       "tag": "0024_pos_sale_public_checkout",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792877614594,
+      "tag": "0025_merchant_customer_private_pet_records",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,6 @@
+- [x] Add merchant customer detail drawer and private multi-pet records with health, vaccination and grooming fields; schema applied and app checks passed.
+- [x] Verify customer matching and vaccination rules (8 tests), owner-only policies and rejection of non-business access.
+- [ ] Verify saving, editing, searching and removing pet records through a business account — requesting user's testing account is a pet owner, so business-page access is unavailable.
 - [x] Add customer-selected tips to guest and signed-in POS QR checkout; save confirmed totals; 28 financial/receipt tests passed and guest controls checked at desktop/mobile sizes.
 - [ ] Verify a new POS QR purchase with a customer tip through card payment and both receipt inboxes — no awaiting real sale is available; no live charge was made.
 - [x] Share itemized POS receipts across merchant and customer delivery.

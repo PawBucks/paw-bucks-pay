@@ -14,6 +14,7 @@ import {
   BookmarkPlus,
   Trash2,
   Pencil,
+  PawPrint,
 } from "lucide-react";
 import { MerchantWorkspaceLayout } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SEO } from "@/components/SEO";
@@ -37,6 +38,8 @@ import { invoicingService, type InvoiceClient } from "@/services/api/invoicing.s
 import { Formatters } from "@/utils/formatters";
 import { formatDateOnly } from "@/lib/timezone";
 import { toast } from "sonner";
+import { CustomerDetailDrawer } from '@/components/merchant/customers/CustomerDetailDrawer';
+import { customerPets, type MerchantPet } from '@/lib/merchantPets';
 
 type Customer = {
   key: string;
@@ -84,6 +87,16 @@ export default function MerchantCustomers() {
   const [search, setSearch] = useState("");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("recent");
+  const [pets, setPets] = useState<MerchantPet[]>([]);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const selectedCustomer = customers.find(c => c.key === selectedKey);
+  const loadPets = useCallback(async () => {
+    if (!merchantId) return;
+    const {data,error} = await supabase.from('merchant_client_pets').select('*').eq('merchant_id',merchantId).order('created_at');
+    if (error) { toast.error('Could not load pet records'); return; }
+    setPets(data ?? []);
+  }, [merchantId]);
+  useEffect(() => { void loadPets(); }, [loadPets]);
 
   const [clients, setClients] = useState<InvoiceClient[]>([]);
   const [clientsLoading, setClientsLoading] = useState(true);
@@ -122,6 +135,7 @@ export default function MerchantCustomers() {
     setRefreshing(true);
     loadCustomers();
     loadClients();
+    void loadPets();
   };
 
   const handleCreateClient = async (data: Partial<InvoiceClient>) => {
@@ -186,7 +200,8 @@ export default function MerchantCustomers() {
         c.name.toLowerCase().includes(term) ||
         (c.email || "").toLowerCase().includes(term) ||
         (c.phone || "").toLowerCase().includes(term) ||
-        (c.company || "").toLowerCase().includes(term)
+        (c.company || "").toLowerCase().includes(term) ||
+        customerPets(pets,c).some(p => `${p.name} ${p.breed ?? ''} ${p.species}`.toLowerCase().includes(term))
       );
     });
     rows = [...rows].sort((a, b) => {
@@ -196,7 +211,7 @@ export default function MerchantCustomers() {
       return (b.lastActivity || "").localeCompare(a.lastActivity || "");
     });
     return rows;
-  }, [customers, search, sourceFilter, sortBy]);
+  }, [customers, pets, search, sourceFilter, sortBy]);
 
   const exportCsv = () => {
     const header = [
@@ -305,7 +320,7 @@ export default function MerchantCustomers() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by name, email, phone, or company..."
+                    placeholder="Search customers, pets, or breeds..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="pl-9"
@@ -357,11 +372,12 @@ export default function MerchantCustomers() {
               ) : (
                 <div className="space-y-3">
                   {filtered.map((c) => (
-                    <Card key={c.key}>
+                    <Card key={c.key} onClick={() => setSelectedKey(c.key)} className="cursor-pointer">
                       <CardContent className="p-4 flex flex-col lg:flex-row lg:items-center gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="font-semibold truncate">{c.name}</p>
+                            <Badge variant="outline" className="text-xs"><PawPrint className="h-3 w-3 mr-1" />{customerPets(pets,c).length} pets</Badge>
                             {c.sources.map((s) => (
                               <Badge key={s} variant="secondary" className="text-[10px]">
                                 {SOURCE_LABELS[s] || s}
@@ -410,7 +426,8 @@ export default function MerchantCustomers() {
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2" onClick={e => e.stopPropagation()}>
+                          <Button size="sm" onClick={() => setSelectedKey(c.key)}><PawPrint className="h-4 w-4 mr-1.5" />View details</Button>
                           {c.saved ? (
                             <Button
                               variant="outline"
@@ -473,6 +490,7 @@ export default function MerchantCustomers() {
           </Tabs>
         </div>
       </MerchantWorkspaceLayout>
+      {selectedCustomer && merchantId && <CustomerDetailDrawer key={selectedCustomer.key} customer={selectedCustomer} merchantId={merchantId} pets={customerPets(pets,selectedCustomer)} onClose={()=>setSelectedKey(null)} onRefresh={loadPets} onSaveContact={()=>void saveAsContact(selectedCustomer)} />}
     </>
   );
 }
