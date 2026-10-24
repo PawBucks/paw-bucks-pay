@@ -2022,6 +2022,24 @@ export type Database = {
         }
         Relationships: []
       }
+      community_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       community_comments: {
         Row: {
           author_id: string
@@ -2030,6 +2048,7 @@ export type Database = {
           author_role: Database["public"]["Enums"]["community_author_role"]
           created_at: string
           id: string
+          is_hidden: boolean
           post_id: string
           text: string
         }
@@ -2040,6 +2059,7 @@ export type Database = {
           author_role?: Database["public"]["Enums"]["community_author_role"]
           created_at?: string
           id?: string
+          is_hidden?: boolean
           post_id: string
           text: string
         }
@@ -2050,6 +2070,7 @@ export type Database = {
           author_role?: Database["public"]["Enums"]["community_author_role"]
           created_at?: string
           id?: string
+          is_hidden?: boolean
           post_id?: string
           text?: string
         }
@@ -2099,9 +2120,15 @@ export type Database = {
           comments_count: number
           created_at: string
           id: string
+          is_hidden: boolean
           likes_count: number
+          location_label: string | null
+          media_path: string | null
           media_type: string | null
           media_url: string | null
+          pet_id: string | null
+          pet_name: string | null
+          post_kind: string
           shares_count: number
           text: string
           updated_at: string
@@ -2115,9 +2142,15 @@ export type Database = {
           comments_count?: number
           created_at?: string
           id?: string
+          is_hidden?: boolean
           likes_count?: number
+          location_label?: string | null
+          media_path?: string | null
           media_type?: string | null
           media_url?: string | null
+          pet_id?: string | null
+          pet_name?: string | null
+          post_kind?: string
           shares_count?: number
           text: string
           updated_at?: string
@@ -2131,12 +2164,72 @@ export type Database = {
           comments_count?: number
           created_at?: string
           id?: string
+          is_hidden?: boolean
           likes_count?: number
+          location_label?: string | null
+          media_path?: string | null
           media_type?: string | null
           media_url?: string | null
+          pet_id?: string | null
+          pet_name?: string | null
+          post_kind?: string
           shares_count?: number
           text?: string
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_posts_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_booking_pet_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_posts_pet_id_fkey"
+            columns: ["pet_id"]
+            isOneToOne: false
+            referencedRelation: "pet_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_reports: {
+        Row: {
+          created_at: string
+          details: string
+          id: string
+          reason: string
+          reporter_id: string
+          resolved_at: string | null
+          status: string
+          target_author_id: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          resolved_at?: string | null
+          status?: string
+          target_author_id: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolved_at?: string | null
+          status?: string
+          target_author_id?: string
+          target_id?: string
+          target_type?: string
         }
         Relationships: []
       }
@@ -4093,15 +4186,60 @@ export type Database = {
         }
         Relationships: []
       }
+      guide_place_tips: {
+        Row: {
+          author_id: string
+          author_name: string
+          created_at: string
+          id: string
+          is_hidden: boolean
+          media_path: string | null
+          place_id: string
+          text: string
+        }
+        Insert: {
+          author_id: string
+          author_name?: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          media_path?: string | null
+          place_id: string
+          text: string
+        }
+        Update: {
+          author_id?: string
+          author_name?: string
+          created_at?: string
+          id?: string
+          is_hidden?: boolean
+          media_path?: string | null
+          place_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_place_tips_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "guide_places"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guide_places: {
         Row: {
+          access_restrictions: string | null
+          amenities: string[]
           area: string
           created_at: string
           description: string
           guide_slug: string
           id: string
           is_active: boolean
+          leash_rules: string | null
           name: string
+          official_url: string | null
           section: string
           sort_order: number
           tag: string | null
@@ -4109,15 +4247,20 @@ export type Database = {
           tip: string | null
           tip_icon: string | null
           updated_at: string
+          verified_at: string | null
         }
         Insert: {
+          access_restrictions?: string | null
+          amenities?: string[]
           area: string
           created_at?: string
           description: string
           guide_slug: string
           id?: string
           is_active?: boolean
+          leash_rules?: string | null
           name: string
+          official_url?: string | null
           section: string
           sort_order?: number
           tag?: string | null
@@ -4125,15 +4268,20 @@ export type Database = {
           tip?: string | null
           tip_icon?: string | null
           updated_at?: string
+          verified_at?: string | null
         }
         Update: {
+          access_restrictions?: string | null
+          amenities?: string[]
           area?: string
           created_at?: string
           description?: string
           guide_slug?: string
           id?: string
           is_active?: boolean
+          leash_rules?: string | null
           name?: string
+          official_url?: string | null
           section?: string
           sort_order?: number
           tag?: string | null
@@ -4141,6 +4289,7 @@ export type Database = {
           tip?: string | null
           tip_icon?: string | null
           updated_at?: string
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -17573,6 +17722,15 @@ export type Database = {
       checkin_date: { Args: { ts: string }; Returns: string }
       claim_brand_account: { Args: { p_token: string }; Returns: Json }
       claim_pet_fund_spot: { Args: { p_cluster_id: string }; Returns: string }
+      community_is_blocked: { Args: { other_id: string }; Returns: boolean }
+      community_moderate_report: {
+        Args: { action: string; report_id: string }
+        Returns: undefined
+      }
+      community_report_content: {
+        Args: { report_uuid: string }
+        Returns: string
+      }
       complete_brand_setup: {
         Args: { p_brand_id: string; p_payload: Json }
         Returns: Json

@@ -141,6 +141,34 @@
       "when": 1792857184635,
       "tag": "0019_relay_triggers_internal_secret",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792865628033,
+      "tag": "0020_community_social_safety_and_guide_contributions",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792865790751,
+      "tag": "0021_community_preserve_engagement_counter_updates",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1792865864958,
+      "tag": "0022_community_validate_table_specific_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792866019819,
+      "tag": "0023_community_media_and_reports_validation",
+      "breakpoints": true
     }
   ]
 }

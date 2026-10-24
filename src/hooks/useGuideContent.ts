@@ -14,6 +14,11 @@ export type GuidePlace = {
   tip_icon: string | null;
   sort_order: number;
   is_active: boolean;
+  leash_rules?: string | null;
+  amenities?: string[];
+  access_restrictions?: string | null;
+  official_url?: string | null;
+  verified_at?: string | null;
 };
 
 export type GuideEvent = Omit<GuidePlace, "section"> & { section?: never };

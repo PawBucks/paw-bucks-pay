@@ -1,3 +1,4 @@
+import { ModerationQueue } from "@/components/community/ModerationQueue";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,11 @@ const FIELDS: Record<Table, { key: string; label: string; type: "text" | "textar
     { key: "description", label: "Description", type: "textarea" },
     { key: "tag", label: "Tag (off-leash, leashed, partner, monthly)", type: "text" },
     { key: "tag_label", label: "Tag Label", type: "text" },
+    { key: "leash_rules", label: "Leash rules", type: "text" },
+    { key: "amenities", label: "Amenities (comma-separated)", type: "text" },
+    { key: "access_restrictions", label: "Access restrictions", type: "textarea" },
+    { key: "official_url", label: "Official source URL (https)", type: "text" },
+    { key: "verified_at", label: "Verified date (YYYY-MM-DD, only after checking official source)", type: "text" },
     { key: "tip", label: "Tip (optional)", type: "textarea" },
     { key: "tip_icon", label: "Tip Icon (emoji)", type: "text" },
     { key: "sort_order", label: "Sort Order", type: "number" },
@@ -70,12 +76,18 @@ function RowEditor({
   const [form, setForm] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
   useEffect(() => {
-    setForm(row ?? {});
+    setForm(row ? { ...row, amenities: Array.isArray(row.amenities) ? row.amenities.join(", ") : row.amenities, verified_at: row.verified_at?.slice(0,10) ?? "" } : {});
   }, [row]);
 
   const save = async () => {
     setSaving(true);
     const payload: Record<string, any> = { ...form };
+    if (table === "guide_places") {
+      payload.amenities = String(payload.amenities ?? "").split(",").map((v: string) => v.trim()).filter(Boolean);
+      if (payload.official_url && !/^https:\/\//.test(payload.official_url)) { setSaving(false); toast.error("Use an https official source URL"); return; }
+      if (payload.verified_at && (!/^\d{4}-\d{2}-\d{2}$/.test(payload.verified_at) || !payload.official_url)) { setSaving(false); toast.error("Add an official source and valid verified date"); return; }
+      payload.verified_at = payload.verified_at ? `${payload.verified_at}T12:00:00-07:00` : null;
+    }
     // normalize empty strings for nullable fields
     for (const k of ["tag", "tag_label", "tip", "tip_icon"]) if (payload[k] === "") payload[k] = null;
     let error;
@@ -253,6 +265,7 @@ export default function AdminGuides() {
           <TabsTrigger value="places">Places</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
           <TabsTrigger value="faqs">FAQs</TabsTrigger>
+          <TabsTrigger value="moderation">Community reports</TabsTrigger>
         </TabsList>
         <TabsContent value="places" className="mt-4">
           <GuideTableManager table="guide_places" guideSlug={guideSlug} />
@@ -263,6 +276,7 @@ export default function AdminGuides() {
         <TabsContent value="faqs" className="mt-4">
           <GuideTableManager table="guide_faqs" guideSlug={guideSlug} />
         </TabsContent>
+        <TabsContent value="moderation" className="mt-4"><ModerationQueue /></TabsContent>
       </Tabs>
     </div>
   );

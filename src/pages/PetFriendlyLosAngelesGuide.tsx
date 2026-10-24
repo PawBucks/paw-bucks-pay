@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { SEO, createFAQSchema } from "@/components/SEO";
+import { GuidePlaces } from "@/components/community/GuidePlaceCommunity";
 import { MapPin } from "lucide-react";
 import "./PetFriendlyLosAngelesGuide.css";
 import pawbucksLogo from "@/assets/logo.png";
@@ -131,8 +132,8 @@ const PetFriendlyLosAngelesGuide = () => {
             <div className="section-icon">🌳</div>
             <h2>Best Off-Leash Dog Parks in LA</h2>
           </div>
-          <div className="place-list">
-            {loading && parks.length === 0 ? <div className="place-desc">Loading…</div> : parks.map((p) => <PlaceCard key={p.id} p={p} />)}
+          <div>
+            {loading && parks.length === 0 ? <div className="place-desc">Loading…</div> : <GuidePlaces places={parks} />}
           </div>
         </section>
 
@@ -141,8 +142,8 @@ const PetFriendlyLosAngelesGuide = () => {
             <div className="section-icon">🏖️</div>
             <h2>Beaches &amp; Hiking Trails</h2>
           </div>
-          <div className="place-list">
-            {beaches.map((p) => <PlaceCard key={p.id} p={p} />)}
+          <div>
+            <GuidePlaces places={beaches} />
           </div>
         </section>
 
@@ -194,8 +195,8 @@ const PetFriendlyLosAngelesGuide = () => {
             <div className="section-icon">☕</div>
             <h2>Dog-Friendly Cafes &amp; Patios</h2>
           </div>
-          <div className="place-list">
-            {cafes.map((p) => <PlaceCard key={p.id} p={p} />)}
+          <div>
+            <GuidePlaces places={cafes} />
           </div>
         </section>
 
