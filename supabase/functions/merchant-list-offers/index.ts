@@ -56,7 +56,7 @@ serve(async (req) => {
     }
 
     if (search) {
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+      { const safe = String(search).replace(/[^\p{L}\p{N}\s'&.-]/gu, "").slice(0, 100); if (safe) query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%`); }
     }
 
     const { data: offers, error: offersError, count } = await query;
