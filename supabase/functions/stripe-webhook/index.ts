@@ -312,6 +312,35 @@ serve(async (req) => {
       // Get metadata - could be from session or subscription_data
       const metadata = session.metadata || {};
 
+      // ADMIN (platform) INVOICE PAYMENT — record only after Stripe confirms
+      if (metadata.type === 'admin_invoice_payment' && metadata.admin_invoice_id) {
+        try {
+          if (session.payment_status === 'paid') {
+            const { data: existingPay } = await supabaseAdmin
+              .from('admin_invoice_payments')
+              .select('id')
+              .eq('stripe_payment_id', session.id)
+              .maybeSingle();
+            if (!existingPay) {
+              await supabaseAdmin.from('admin_invoice_payments').insert({
+                invoice_id: metadata.admin_invoice_id,
+                amount: (session.amount_total ?? 0) / 100,
+                payment_method: 'stripe',
+                stripe_payment_id: session.id,
+                notes: 'Online payment via Stripe Checkout',
+                recorded_by: 'system',
+              });
+            }
+          }
+        } catch (e) {
+          console.error('[ADMIN_INVOICE] Failed to record payment:', (e as Error).message);
+        }
+        return new Response(JSON.stringify({ received: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
+
       // ========================================
       // STORE REWARDS PRO — funding wallet top-up
       // Branches off completely; no other handlers should run.
