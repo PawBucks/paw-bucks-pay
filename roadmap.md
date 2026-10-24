@@ -1,3 +1,5 @@
+- [ ] Add merchant customer detail drawer and private multi-pet records with health, vaccination and grooming fields.
+- [ ] Verify saving, editing, searching and removing merchant pet records and ownership restrictions.
 - [x] Add customer-selected tips to guest and signed-in POS QR checkout; save confirmed totals; 28 financial/receipt tests passed and guest controls checked at desktop/mobile sizes.
 - [ ] Verify a new POS QR purchase with a customer tip through card payment and both receipt inboxes — no awaiting real sale is available; no live charge was made.
 - [x] Share itemized POS receipts across merchant and customer delivery.
