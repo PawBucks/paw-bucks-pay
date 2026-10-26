@@ -144,6 +144,6 @@ export function buildImport(rows: Record<string, string>[], mapping: Record<stri
 }
 
 /** Finds an existing saved customer that matches by email or phone. */
-export function findExisting<T extends { id: string; email: string | null; phone: string | null }>(c: ImportCustomer, existing: T[]): T | undefined {
+export function findExisting<T extends { id: string; email?: string | null; phone?: string | null }>(c: ImportCustomer, existing: T[]): T | undefined {
   return existing.find(e => (c.email && emailKey(e.email ?? '') === c.email) || (phoneKey(c.phone) && phoneKey(e.phone ?? '') === phoneKey(c.phone)));
 }

@@ -12,7 +12,7 @@ import { csvSafeCell } from '@/lib/csv';
 import { toast } from 'sonner';
 import { IMPORT_FIELDS, PRESETS, TEMPLATE_HEADERS, TEMPLATE_SAMPLE, autoMap, buildImport, findExisting, type ImportField, type PresetId } from '@/lib/customerImport';
 
-type Existing = { id: string; email: string | null; phone: string | null };
+type Existing = { id: string; email?: string | null; phone?: string | null };
 type Props = { open: boolean; onOpenChange: (o: boolean) => void; merchantId: string; existing: Existing[]; onDone: () => void };
 const MAX_ROWS = 5000;
 
