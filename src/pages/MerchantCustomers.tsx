@@ -15,6 +15,7 @@ import {
   Trash2,
   Pencil,
   PawPrint,
+  Upload,
 } from "lucide-react";
 import { MerchantWorkspaceLayout } from "@/components/merchant/workspace/MerchantWorkspaceLayout";
 import { SEO } from "@/components/SEO";
@@ -39,6 +40,7 @@ import { Formatters } from "@/utils/formatters";
 import { formatDateOnly } from "@/lib/timezone";
 import { toast } from "sonner";
 import { CustomerDetailDrawer } from '@/components/merchant/customers/CustomerDetailDrawer';
+import { CustomerImportDialog } from '@/components/merchant/customers/CustomerImportDialog';
 import { customerPets, type MerchantPet, type BookedPetProfile } from '@/lib/merchantPets';
 
 type Customer = {
@@ -104,6 +106,7 @@ export default function MerchantCustomers() {
   useEffect(() => { void loadPets(); }, [loadPets]);
 
   const [clients, setClients] = useState<InvoiceClient[]>([]);
+  const [importOpen, setImportOpen] = useState(false);
   const [clientsLoading, setClientsLoading] = useState(true);
 
   const loadCustomers = useCallback(async () => {
@@ -292,7 +295,12 @@ export default function MerchantCustomers() {
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
+              <Button size="sm" onClick={() => setImportOpen(true)} disabled={!merchantId}>
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
             </div>
+            {merchantId && <CustomerImportDialog open={importOpen} onOpenChange={setImportOpen} merchantId={merchantId} existing={clients} onDone={() => { void loadClients(); void loadPets(); void loadCustomers(); }} />}
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
