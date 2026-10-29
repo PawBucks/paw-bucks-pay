@@ -1,3 +1,4 @@
+import { CareLoopAdminMetrics } from "@/components/analytics/CareLoopPanels";
 import { useEffect, useState, useMemo, useCallback } from"react";
 import { useNavigate } from"react-router-dom";
 import { useAuth } from"@/hooks/useAuth";
@@ -360,7 +361,7 @@ const AdminDashboard = () => {
  case"overview":
  return <OverviewTab />;
  case"analytics":
- return <AnalyticsTab />;
+ return <><CareLoopAdminMetrics /><AnalyticsTab /></>;
  case"approvals":
  return <ApprovalsTab />;
  case"users":
