@@ -1,3 +1,4 @@
+import { trackCareAction } from "@/lib/careActions";
 import { useState, useMemo, useCallback, useEffect, memo, useRef } from "react";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -540,7 +541,7 @@ const MerchantProfile = memo(() => {
                 )}
                 {merchant.phone && (
                   <a
-                    href={`tel:${merchant.phone}`}
+                    onClick={() => trackCareAction("call","merchant",merchant.id,{merchantId:merchant.id,source:"profile"})} href={`tel:${merchant.phone}`}
                     className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 active:scale-95 transition"
                   >
                     <Phone className="w-5 h-5" />
@@ -549,7 +550,7 @@ const MerchantProfile = memo(() => {
                 )}
                 {merchant.address && (
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
+                    onClick={() => trackCareAction("directions","merchant",merchant.id,{merchantId:merchant.id,source:"profile"})} href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex flex-col items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] text-white py-3 px-1 active:scale-95 transition"
                   >
@@ -773,7 +774,7 @@ const MerchantProfile = memo(() => {
                     <CardContent className="p-0 divide-y">
                       {merchant.address && (
                         <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
+                          onClick={() => trackCareAction("directions","merchant",merchant.id,{merchantId:merchant.id,source:"profile"})} href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
                           target="_blank" rel="noopener noreferrer"
                           className="flex items-center gap-3 group p-4"
                         >
@@ -782,7 +783,7 @@ const MerchantProfile = memo(() => {
                         </a>
                       )}
                       {merchant.phone && (
-                        <a href={`tel:${merchant.phone}`} className="flex items-center gap-3 group p-4">
+                        <a onClick={() => trackCareAction("call","merchant",merchant.id,{merchantId:merchant.id,source:"profile"})} href={`tel:${merchant.phone}`} className="flex items-center gap-3 group p-4">
                           <Phone className="w-5 h-5 text-foreground/70 flex-shrink-0" />
                           <p className="text-sm font-medium group-hover:text-primary transition-colors flex-1">{merchant.phone}</p>
                         </a>
@@ -827,7 +828,7 @@ const MerchantProfile = memo(() => {
                             <p className="text-xs text-muted-foreground truncate">{merchant.address}</p>
                           </div>
                           <a
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
+                            onClick={() => trackCareAction("directions","merchant",merchant.id,{merchantId:merchant.id,source:"profile"})} href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(merchant.address)}`}
                             target="_blank" rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-sm hover:opacity-90"
                           >
