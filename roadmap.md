@@ -19,3 +19,5 @@
 
 - [x] Priority 1: 4-tab menu (Feed, Discover, Care, Wallet), Care Hub page, place/business tagging on community posts with tap-through cards.
 - [ ] Verify publishing a tagged post end-to-end (not posted during check to avoid public test content).
+- [x] Priority 2: Discover tabs (Care providers, Places, Events), event interest/directions tracking, bookings, completed visits, inquiries and PetFest RSVPs recorded by the database.
+- [ ] Verify a real booking/message produces a recorded outcome (no live booking made).

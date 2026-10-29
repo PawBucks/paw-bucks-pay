@@ -1,7 +1,7 @@
 export interface CareEvent { user_id: string; action: string; created_at: string }
 
 const DAY = 86_400_000;
-const INTENT = new Set(["call", "contact", "inquire", "book", "rsvp", "directions", "website"]);
+const INTENT = new Set(["call", "contact", "inquire", "book", "attend", "rsvp", "directions", "website"]);
 
 /** Activity metrics from care-action events, relative to `now`. */
 export function computeCareLoopMetrics(events: CareEvent[], now = Date.now()) {

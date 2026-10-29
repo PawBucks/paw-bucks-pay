@@ -31,4 +31,13 @@ describe("care loop metrics", () => {
     ], now);
     expect(m.conversion).toBe(25);
   });
+  it("a page view alone never counts as a care outcome; a completed visit does", () => {
+    const viewsOnly = computeCareLoopMetrics([{ user_id: "a", action: "view", created_at: ago(1) }], now);
+    expect(viewsOnly.conversion).toBe(0);
+    const attended = computeCareLoopMetrics([
+      { user_id: "a", action: "view", created_at: ago(1) },
+      { user_id: "a", action: "attend", created_at: ago(1) },
+    ], now);
+    expect(attended.conversion).toBe(100);
+  });
 });
