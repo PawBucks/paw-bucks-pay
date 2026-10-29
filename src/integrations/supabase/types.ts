@@ -2163,6 +2163,9 @@ export type Database = {
           pet_name: string | null
           post_kind: string
           shares_count: number
+          tagged_id: string | null
+          tagged_label: string | null
+          tagged_type: string | null
           text: string
           updated_at: string
         }
@@ -2185,6 +2188,9 @@ export type Database = {
           pet_name?: string | null
           post_kind?: string
           shares_count?: number
+          tagged_id?: string | null
+          tagged_label?: string | null
+          tagged_type?: string | null
           text: string
           updated_at?: string
         }
@@ -2207,6 +2213,9 @@ export type Database = {
           pet_name?: string | null
           post_kind?: string
           shares_count?: number
+          tagged_id?: string | null
+          tagged_label?: string | null
+          tagged_type?: string | null
           text?: string
           updated_at?: string
         }
