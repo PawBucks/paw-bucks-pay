@@ -3,19 +3,21 @@ import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { title: "Home", to: "/home", emoji: "🏠", ariaLabel: "Home" },
+  { title: "Feed", to: "/community", emoji: "🐾", ariaLabel: "Community feed" },
   { title: "Discover", to: "/discover", emoji: "🧭", ariaLabel: "Discover places, events and care" },
-  { title: "Connect", to: "/community", emoji: "💬", ariaLabel: "Connect with nearby pet parents" },
-  { title: "Deals", to: "/my-deals", emoji: "🏷️", ariaLabel: "My deals" },
-  { title: "Activity", to: "/activity", emoji: "🧾", ariaLabel: "Your activity" },
+  { title: "Care", to: "/care", emoji: "❤️", ariaLabel: "Care Hub: pets, bookings and saved places" },
+  { title: "Wallet", to: "/wallet", emoji: "💰", ariaLabel: "PawBucks wallet" },
 ];
 
 const BottomNavComponent = () => {
   const location = useLocation();
 
   const isActiveRoute = useCallback((path: string) => {
-    if (path === "/home") {
-      return location.pathname === "/home" || location.pathname === "/home" || location.pathname === "/";
+    if (path === "/community") {
+      return location.pathname.startsWith("/community") || location.pathname === "/home" || location.pathname === "/";
+    }
+    if (path === "/care") {
+      return ["/care", "/my-bookings", "/activity", "/my-deals", "/pet-health", "/pet-id"].some((p) => location.pathname.startsWith(p));
     }
     return location.pathname.startsWith(path);
   }, [location.pathname]);

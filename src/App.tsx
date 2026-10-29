@@ -42,6 +42,7 @@ const SimpleSuccess = lazyWithRetry(() => import("./pages/SimpleSuccess"),"Simpl
 const CreatePetProfile = lazyWithRetry(() => import("./pages/CreatePetProfile"),"CreatePetProfile");
 const Discover = lazyWithRetry(() => import("./pages/Discover"),"Discover");
 const Wallet = lazyWithRetry(() => import("./pages/Wallet"),"Wallet");
+const CareHub = lazyWithRetry(() => import("./pages/CareHub"),"CareHub");
 const Referrals = lazyWithRetry(() => import("./pages/Referrals"),"Referrals");
 const Profile = lazyWithRetry(() => import("./pages/Profile"),"Profile");
 const SubscriptionSuccess = lazyWithRetry(() => import("./pages/SubscriptionSuccess"),"SubscriptionSuccess");
@@ -245,6 +246,7 @@ const AppRoutes = () => {
  </PageTransition>
  }
  />
+ <Route path="/care" element={<ProtectedRoute allowedRoles={['pet_owner']}><PageTransition><CareHub /></PageTransition></ProtectedRoute>} />
  <Route path="/wallet" element={<ProtectedRoute><PageTransition><Wallet /></PageTransition></ProtectedRoute>} />
  <Route path="/referrals" element={<ProtectedRoute><PageTransition><Referrals /></PageTransition></ProtectedRoute>} />
  <Route path="/profile" element={<ProtectedRoute><PageTransition><Profile /></PageTransition></ProtectedRoute>} />
