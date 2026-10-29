@@ -16,3 +16,6 @@
 - [x] Verify signed-in publishing, photo display, reactions, comments, tips, deletion, block checks and denied unauthorized moderation; 16 tests passed.
 - [ ] Verify report review/removal through an administrator account — current test session is a pet owner.- [x] Care Loop phase 1: Discover/Connect menu order and care-action logging (views, saves, calls, directions on business pages).
 - [x] Care Loop phases 2-4: guide directions/website tracking, business "Pet parent interest" summary, admin retention and conversion panel (3 tests).
+
+- [x] Priority 1: 4-tab menu (Feed, Discover, Care, Wallet), Care Hub page, place/business tagging on community posts with tap-through cards.
+- [ ] Verify publishing a tagged post end-to-end (not posted during check to avoid public test content).
