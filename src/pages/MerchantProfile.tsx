@@ -95,6 +95,7 @@ const MerchantProfile = memo(() => {
 
   useEffect(() => {
     if (merchantId) setSaved(getSavedSet().has(merchantId));
+    if (merchantId) trackCareAction("view", "merchant", merchantId, { merchantId, source: "profile" });
   }, [merchantId]);
 
   // Services & ROI tracking
