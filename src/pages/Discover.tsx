@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
+import { DiscoverTabs, DiscoverGuidePanel, type DiscoverTab } from "@/components/discover/DiscoverGuidePanel";
 
 type MerchantWithRating = {
   id: string;
@@ -110,6 +111,8 @@ const Discover = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
+  const discoverTab = (["places", "events"].includes(searchParams.get("tab") || "") ? searchParams.get("tab") : "providers") as DiscoverTab;
+  const setDiscoverTab = (t: DiscoverTab) => { const next = new URLSearchParams(searchParams); if (t === "providers") next.delete("tab"); else next.set("tab", t); setSearchParams(next, { replace: true }); };
   const bookingPetId = searchParams.get("petId");
   const bookingIntent = searchParams.get("intent");
 
@@ -415,6 +418,25 @@ const Discover = () => {
     );
   };
 
+  if (discoverTab !== "providers") {
+    return (
+      <>
+        <SEO title={seoMeta.discover.title} description={seoMeta.discover.description} canonical={seoMeta.discover.canonical} />
+        <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
+        <div className="min-h-screen bg-background pb-24 md:pb-12">
+          <div className="bg-card border-b border-border px-4 py-3 sticky top-0 z-20">
+            <div className="max-w-7xl mx-auto">
+              <h1 className="text-lg font-extrabold tracking-tight mb-3">Discover</h1>
+              <DiscoverTabs tab={discoverTab} onChange={setDiscoverTab} />
+            </div>
+          </div>
+          <DiscoverGuidePanel tab={discoverTab} />
+        </div>
+        {user && <BottomNav />}
+      </>
+    );
+  }
+
   return (
     <>
       <SEO
@@ -442,6 +464,7 @@ const Discover = () => {
         {/* Top nav: title + view toggles + search */}
         <div className="bg-card border-b border-border px-4 py-3 sticky top-0 z-20">
           <div className="max-w-7xl mx-auto">
+            <DiscoverTabs tab={discoverTab} onChange={setDiscoverTab} />
             <div className="flex items-center justify-between mb-3">
               <h1 className="text-lg font-extrabold tracking-tight">Discover</h1>
               <div className="flex gap-1.5">
