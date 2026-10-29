@@ -42,7 +42,9 @@ export function CareIntentSummary() {
         <Stat icon={Phone} label="Calls" value={(c.call ?? 0) + (c.contact ?? 0)} />
         <Stat icon={Navigation} label="Directions" value={c.directions ?? 0} />
         <Stat icon={Globe} label="Website" value={c.website ?? 0} />
-        <Stat icon={CalendarCheck} label="Bookings / inquiries" value={(c.book ?? 0) + (c.inquire ?? 0)} />
+        <Stat icon={CalendarCheck} label="Bookings" value={c.book ?? 0} />
+        <Stat icon={CalendarCheck} label="Inquiries" value={c.inquire ?? 0} />
+        <Stat icon={CalendarCheck} label="Completed visits" value={c.attend ?? 0} />
       </CardContent>
     </Card>
   );
