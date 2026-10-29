@@ -7,3 +7,4 @@
 - Merchant customer pet records are independent business-maintained notes in merchant_client_pets, with owner-only RLS and server-validated customer links; never mirror owner or veterinary clinical records — why: customer management must not expand access to private clinical data.
 - Discovery-to-action analytics go through trackCareAction into care_action_events (insert-own RLS, merchants read their own) — why: one fire-and-forget funnel source that never blocks UX.
 - Community post place/business tags store only type+id from clients; a DB trigger validates the target and sets tagged_label — why: labels cannot be spoofed.
+- Booking, completed-visit, inquiry and PetFest RSVP outcomes are logged into care_action_events by database triggers, not client calls — why: every creation path is counted exactly once and clients cannot fake outcomes.
