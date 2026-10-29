@@ -36,7 +36,7 @@ export function CareIntentSummary() {
         <CardTitle className="text-lg">Pet parent interest</CardTitle>
         <CardDescription>How pet parents engaged with your business in the last 30 days</CardDescription>
       </CardHeader>
-      <CardContent className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Stat icon={Eye} label="Profile views" value={c.view ?? 0} />
         <Stat icon={Bookmark} label="Saves" value={c.save ?? 0} />
         <Stat icon={Phone} label="Calls" value={(c.call ?? 0) + (c.contact ?? 0)} />
