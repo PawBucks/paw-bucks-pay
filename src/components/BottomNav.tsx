@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { title: "Home", to: "/home", emoji: "🏠", ariaLabel: "Home" },
+  { title: "Discover", to: "/discover", emoji: "🧭", ariaLabel: "Discover places, events and care" },
+  { title: "Connect", to: "/community", emoji: "💬", ariaLabel: "Connect with nearby pet parents" },
   { title: "Deals", to: "/my-deals", emoji: "🏷️", ariaLabel: "My deals" },
-  { title: "Discover", to: "/discover", emoji: "🧭", ariaLabel: "Discover places" },
-  { title: "Community", to: "/community", emoji: "💬", ariaLabel: "Community forum" },
   { title: "Activity", to: "/activity", emoji: "🧾", ariaLabel: "Your activity" },
 ];
 

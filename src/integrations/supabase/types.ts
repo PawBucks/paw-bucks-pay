@@ -1746,6 +1746,39 @@ export type Database = {
           },
         ]
       }
+      care_action_events: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          merchant_id: string | null
+          source: string | null
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          merchant_id?: string | null
+          source?: string | null
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          merchant_id?: string | null
+          source?: string | null
+          target_id?: string
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       checkin_followups: {
         Row: {
           answered_at: string | null

@@ -14,4 +14,5 @@
 - [x] Add report, block, delete and an administrator moderation queue.
 - [x] Expand LA guide with rules, amenities, freshness and community photos/tips; official access facts verified for four places, others explicitly unverified.
 - [x] Verify signed-in publishing, photo display, reactions, comments, tips, deletion, block checks and denied unauthorized moderation; 16 tests passed.
-- [ ] Verify report review/removal through an administrator account — current test session is a pet owner.
+- [ ] Verify report review/removal through an administrator account — current test session is a pet owner.- [x] Care Loop phase 1: Discover/Connect menu order and care-action logging (views, saves, calls, directions on business pages).
+- [ ] Care Loop phases 2-4: guide/event actions, provider insight summary, admin retention dashboard.
