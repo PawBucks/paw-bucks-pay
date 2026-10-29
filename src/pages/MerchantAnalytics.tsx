@@ -141,6 +141,7 @@ export default function MerchantAnalytics() {
  </TabsList>
 
  <TabsContent value="dashboard">
+ <CareIntentSummary />
  <PremiumAnalyticsDashboard />
  </TabsContent>
 
