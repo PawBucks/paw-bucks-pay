@@ -21,3 +21,5 @@
 - [ ] Verify publishing a tagged post end-to-end (not posted during check to avoid public test content).
 - [x] Priority 2: Discover tabs (Care providers, Places, Events), event interest/directions tracking, bookings, completed visits, inquiries and PetFest RSVPs recorded by the database.
 - [ ] Verify a real booking/message produces a recorded outcome (no live booking made).
+- [x] Priority 3: free business listing tools — profile completeness checklist, business updates (shown on profile and community feed), interest-to-visit funnel; 3 tests.
+- [ ] Verify posting an update through a business account (test session is a pet owner).

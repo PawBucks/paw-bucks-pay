@@ -8360,6 +8360,57 @@ export type Database = {
           },
         ]
       }
+      merchant_updates: {
+        Row: {
+          body: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_hidden: boolean
+          link_url: string | null
+          merchant_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_hidden?: boolean
+          link_url?: string | null
+          merchant_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_hidden?: boolean
+          link_url?: string | null
+          merchant_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_updates_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merchant_updates_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_vehicle_expenses: {
         Row: {
           amount: number
