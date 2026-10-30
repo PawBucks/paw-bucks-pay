@@ -1,6 +1,7 @@
 import { trackCareAction } from "@/lib/careActions";
 import { useState, useMemo, useCallback, useEffect, memo, useRef } from "react";
 import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
+import { BusinessUpdates } from "@/components/business/BusinessUpdates";
 import { useAuth } from "@/hooks/useAuth";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { supabase } from "@/integrations/supabase/client";
@@ -579,6 +580,8 @@ const MerchantProfile = memo(() => {
               </div>
             </div>
           </section>
+
+          {merchantId && <div className="px-4 pt-4"><BusinessUpdates merchantId={merchantId} /></div>}
 
           {/* ══════ Acquisition-only notice ══════ */}
           {acquisitionOnly && (
