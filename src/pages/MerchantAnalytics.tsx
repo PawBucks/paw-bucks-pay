@@ -142,6 +142,7 @@ export default function MerchantAnalytics() {
  </TabsList>
 
  <TabsContent value="dashboard">
+ <div className="mb-6"><BusinessPresencePanel /></div>
  <CareIntentSummary />
  <PremiumAnalyticsDashboard />
  </TabsContent>
