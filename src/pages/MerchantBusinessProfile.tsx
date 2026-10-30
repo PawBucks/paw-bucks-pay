@@ -10,6 +10,7 @@ import { merchantsService } from "@/services/api/merchants.service";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { BusinessPresencePanel } from "@/components/business/BusinessPresencePanel";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Merchant = Tables<"merchants">;
@@ -148,6 +149,7 @@ export default function MerchantBusinessProfile() {
             <Card><CardContent className="p-8 text-center text-muted-foreground">No merchant profile found.</CardContent></Card>
           ) : (
             <>
+              <BusinessPresencePanel />
               {/* Intro Video — prominent placement at the top */}
               <Card className="overflow-hidden border-2 border-primary/30">
                 <CardHeader className="pb-3 bg-gradient-to-r from-primary/10 to-accent/10">
