@@ -17887,6 +17887,10 @@ export type Database = {
           reference_id: string
         }[]
       }
+      admin_set_merchant_pause: {
+        Args: { _merchant_id: string; _paused: boolean; _reason?: string }
+        Returns: undefined
+      }
       admin_set_user_ban: {
         Args: { _banned: boolean; _reason?: string; _target_user_id: string }
         Returns: Json
