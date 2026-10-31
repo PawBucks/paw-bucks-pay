@@ -181,16 +181,11 @@ export function MerchantsTab() {
 
  setLoading(true);
  try {
- const updates: any = {
- is_paused: isPausing,
- paused_at: isPausing ? new Date().toISOString() : null,
- pause_reason: isPausing ? (pauseReason || null) : null,
- };
-
- const { error } = await supabase
- .from('merchants')
- .update(updates)
- .eq('id', merchantToPause.id);
+      const { error } = await supabase.rpc('admin_set_merchant_pause' as any, {
+        _merchant_id: merchantToPause.id,
+        _paused: isPausing,
+        _reason: isPausing ? (pauseReason || null) : null,
+      });
 
  if (error) throw error;
 
