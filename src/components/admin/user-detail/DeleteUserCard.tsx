@@ -16,6 +16,9 @@ import {
  AlertDialogTitle,
 } from"@/components/ui/alert-dialog";
 import { toast } from"sonner";
+import { useQuery } from '@tanstack/react-query';
+import { BusinessAccountControls } from './BusinessAccountControls';
+import type { BusinessAccount } from '@/lib/businessAccountStatus';
 
 interface DeleteUserCardProps {
  userId: string;
@@ -28,6 +31,21 @@ export function DeleteUserCard({ userId, userEmail, userType }: DeleteUserCardPr
  const [open, setOpen] = useState(false);
  const [confirmText, setConfirmText] = useState("");
  const [loading, setLoading] = useState(false);
+ const { data: accounts, isPending, error: accountError, refetch } = useQuery({
+   queryKey: ['admin-business-accounts', userId],
+   queryFn: async (): Promise<BusinessAccount[]> => {
+     const [merchants, vets] = await Promise.all([
+       supabase.from('merchants').select('id,business_name,is_paused').eq('user_id', userId),
+       supabase.from('partner_vets').select('id,name,clinic_name,is_paused').eq('user_id', userId),
+     ]);
+     if (merchants.error) throw merchants.error;
+     if (vets.error) throw vets.error;
+     return [
+       ...(merchants.data || []).map(m => ({ id: m.id, kind: 'merchant' as const, name: m.business_name, is_paused: m.is_paused })),
+       ...(vets.data || []).map(v => ({ id: v.id, kind: 'vet' as const, name: v.clinic_name || v.name, is_paused: v.is_paused })),
+     ];
+   },
+ });
 
  const isMerchant = userType === "merchant";
  const isVet = userType === "vet" || userType === "veterinarian";
@@ -53,6 +71,11 @@ export function DeleteUserCard({ userId, userEmail, userType }: DeleteUserCardPr
  setLoading(false);
  }
  };
+
+ if (isPending) return <p className="text-sm text-muted-foreground">Loading account status…</p>;
+ if (accountError) return <p className="text-sm text-destructive">Unable to load business account status.</p>;
+ if (accounts?.length) return <BusinessAccountControls accounts={accounts} onChange={() => { void refetch(); }} />;
+ if (isMerchant || isVet) return <p className="text-sm text-muted-foreground">No business profile found.</p>;
 
  return (
  <Card className="border-destructive">

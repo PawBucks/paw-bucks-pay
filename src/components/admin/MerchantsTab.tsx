@@ -189,14 +189,8 @@ export function MerchantsTab() {
 
  if (error) throw error;
 
- await supabase.rpc('log_admin_action', {
- _action: isPausing ?'PAUSE_MERCHANT' :'UNPAUSE_MERCHANT',
- _entity_type:'merchant',
- _entity_id: merchantToPause.id,
- _changes: { is_paused: isPausing, pause_reason: isPausing ? pauseReason : null },
- });
-
- toast.success(isPausing ?'Merchant account paused' :'Merchant account resumed');
+ toast.success(isPausing ?'Merchant disabled and hidden' :'Merchant account restored');
+ queryClient.invalidateQueries();
  setPauseDialogOpen(false);
  setMerchantToPause(null);
  setPauseReason('');
@@ -278,7 +272,7 @@ export function MerchantsTab() {
  <TableCell className="font-medium">
  {merchant.business_name}
  {merchant.is_paused && (
- <Badge variant="destructive" className="ml-2 text-xs">Paused</Badge>
+ <Badge variant="destructive" className="ml-2 text-xs">Disabled</Badge>
  )}
  </TableCell>
  <TableCell>
@@ -303,7 +297,7 @@ export function MerchantsTab() {
  </TableCell>
  <TableCell>
  {merchant.is_paused ? (
- <Badge variant="destructive">Paused</Badge>
+ <Badge variant="destructive">Disabled</Badge>
  ) : merchant.approval_status ==='pending' ? (
  <Badge variant="secondary" className="bg-warning/15 text-warning border-warning/30">
  Pending
@@ -341,7 +335,7 @@ export function MerchantsTab() {
  setPauseReason('');
  setPauseDialogOpen(true);
  }}
- title={merchant.is_paused ?'Resume merchant' :'Pause merchant'}
+ title={merchant.is_paused ?'Restore merchant' :'Disable & hide merchant'}
  >
  {merchant.is_paused ? (
  <PlayCircle className="w-4 h-4 text-success" />
@@ -473,18 +467,18 @@ export function MerchantsTab() {
  <AlertDialogContent>
  <AlertDialogHeader>
  <AlertDialogTitle>
- {merchantToPause?.is_paused ?'Resume Merchant Account' :'Pause Merchant Account'}
+ {merchantToPause?.is_paused ?'Restore Merchant Account' :'Disable & Hide Merchant Account'}
  </AlertDialogTitle>
  <AlertDialogDescription>
  {merchantToPause?.is_paused
- ? `Are you sure you want to resume"${merchantToPause?.business_name}"? They will regain access to their dashboard and become visible to pet owners again.`
- : `Are you sure you want to pause"${merchantToPause?.business_name}"? This will hide them from the platform and block their dashboard access. They will need to contact support to resume.`
+ ? `Restore "${merchantToPause?.business_name}"? The approved business will become publicly visible again.`
+ : `Disable "${merchantToPause?.business_name}"? The business will be hidden from public listings and profiles. All financial history, bookings and customer records are preserved, and the owner retains account access. You can restore it later.`
  }
  </AlertDialogDescription>
  </AlertDialogHeader>
  {!merchantToPause?.is_paused && (
  <div className="space-y-2 py-2">
- <Label>Reason for pausing (optional)</Label>
+ <Label>Reason for disabling (optional)</Label>
  <Textarea
  placeholder="e.g. Compliance review, customer complaints, etc."
  value={pauseReason}
@@ -500,7 +494,7 @@ export function MerchantsTab() {
  disabled={loading}
  className={merchantToPause?.is_paused ?'' :'bg-destructive text-destructive-foreground hover:bg-destructive/90'}
  >
- {loading ?'Processing...' : merchantToPause?.is_paused ?'Resume Account' :'Pause Account'}
+ {loading ?'Processing...' : merchantToPause?.is_paused ?'Restore Account' :'Disable & Hide Account'}
  </AlertDialogAction>
  </AlertDialogFooter>
  </AlertDialogContent>
