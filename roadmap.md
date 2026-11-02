@@ -23,3 +23,6 @@
 - [ ] Verify a real booking/message produces a recorded outcome (no live booking made).
 - [x] Priority 3: free business listing tools — profile completeness checklist, business updates (shown on profile and community feed), interest-to-visit funnel; 3 tests.
 - [ ] Verify posting an update through a business account (test session is a pet owner).
+- [x] Replace merchant/vet deletion with admin disable/restore; apply public-view, marketplace, service and offer filtering while preserving records.
+- [x] Verify disable/restore calls and error propagation (4 tests); confirm non-admin denial in signed-in app and live public-view predicates.
+- [ ] Verify successful disable/restore and historical-record readback through an administrator account — requesting user's testing account has only the user role.

@@ -225,6 +225,20 @@
       "when": 1793469978935,
       "tag": "0031_admin_set_merchant_pause",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793580119769,
+      "tag": "0032_disable_business_accounts_preserve_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1793580205178,
+      "tag": "0033_hide_disabled_business_services_and_offers",
+      "breakpoints": true
     }
   ]
 }

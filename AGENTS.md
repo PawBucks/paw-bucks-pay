@@ -9,3 +9,4 @@
 - Community post place/business tags store only type+id from clients; a DB trigger validates the target and sets tagged_label — why: labels cannot be spoofed.
 - Booking, completed-visit, inquiry and PetFest RSVP outcomes are logged into care_action_events by database triggers, not client calls — why: every creation path is counted exactly once and clients cannot fake outcomes.
 - Business updates live in merchant_updates (owner-write RLS, public read only for approved, unpaused businesses; moderator hide can't be undone by owners) — why: free participation without payment setup, safe public display.
+- Business disable/restore uses role-checked pause RPCs and central public-view filtering; administrator user-detail controls resolve both merchant and vet records before offering deletion — why: preserve history and prevent accidental business deletion regardless of profile persona.
