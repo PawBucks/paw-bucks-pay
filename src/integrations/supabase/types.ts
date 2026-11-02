@@ -9121,6 +9121,7 @@ export type Database = {
           emergency_protocol: string | null
           id: string
           insurance_partners: string[] | null
+          is_paused: boolean
           is_verified: boolean | null
           last_notified_status: string | null
           license_number: string | null
@@ -9130,6 +9131,9 @@ export type Database = {
           medical_director_name: string | null
           name: string
           npi_number: string | null
+          pause_reason: string | null
+          paused_at: string | null
+          paused_by: string | null
           pims_software: string | null
           practice_type: string | null
           preferred_referrals: string | null
@@ -9175,6 +9179,7 @@ export type Database = {
           emergency_protocol?: string | null
           id?: string
           insurance_partners?: string[] | null
+          is_paused?: boolean
           is_verified?: boolean | null
           last_notified_status?: string | null
           license_number?: string | null
@@ -9184,6 +9189,9 @@ export type Database = {
           medical_director_name?: string | null
           name: string
           npi_number?: string | null
+          pause_reason?: string | null
+          paused_at?: string | null
+          paused_by?: string | null
           pims_software?: string | null
           practice_type?: string | null
           preferred_referrals?: string | null
@@ -9229,6 +9237,7 @@ export type Database = {
           emergency_protocol?: string | null
           id?: string
           insurance_partners?: string[] | null
+          is_paused?: boolean
           is_verified?: boolean | null
           last_notified_status?: string | null
           license_number?: string | null
@@ -9238,6 +9247,9 @@ export type Database = {
           medical_director_name?: string | null
           name?: string
           npi_number?: string | null
+          pause_reason?: string | null
+          paused_at?: string | null
+          paused_by?: string | null
           pims_software?: string | null
           practice_type?: string | null
           preferred_referrals?: string | null
@@ -17894,6 +17906,10 @@ export type Database = {
       admin_set_user_ban: {
         Args: { _banned: boolean; _reason?: string; _target_user_id: string }
         Returns: Json
+      }
+      admin_set_vet_pause: {
+        Args: { _paused: boolean; _reason?: string; _vet_id: string }
+        Returns: undefined
       }
       admin_update_brand_campaign: {
         Args: { p_campaign_id: string; p_updates: Json }
