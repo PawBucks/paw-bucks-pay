@@ -40,6 +40,7 @@ import {
 import { useUserLocation } from "@/hooks/useUserLocation";
 import { calculateDistance } from "@/lib/geo";
 import { DiscoverTabs, DiscoverGuidePanel, type DiscoverTab } from "@/components/discover/DiscoverGuidePanel";
+import { PetProDirectory } from "@/components/pros/PetProDirectory";
 
 type MerchantWithRating = {
   id: string;
@@ -436,6 +437,18 @@ const Discover = () => {
       </>
     );
   }
+
+  return (
+    <>
+      <SEO title={seoMeta.discover.title} description={seoMeta.discover.description} canonical={seoMeta.discover.canonical} />
+      <Header isAuthenticated={!!user} onLogout={user ? handleLogout : undefined} />
+      <main className="min-h-screen bg-background pb-24">
+        <div className="max-w-7xl mx-auto px-4 pt-4"><DiscoverTabs tab={discoverTab} onChange={setDiscoverTab} /></div>
+        <PetProDirectory />
+      </main>
+      {user && <BottomNav />}
+    </>
+  );
 
   return (
     <>

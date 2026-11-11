@@ -26,3 +26,7 @@
 - [x] Replace merchant/vet deletion with admin disable/restore; apply public-view, marketplace, service and offer filtering while preserving records.
 - [x] Verify disable/restore calls and error propagation (4 tests); confirm non-admin denial in signed-in app and live public-view predicates.
 - [ ] Verify successful disable/restore and historical-record readback through an administrator account — requesting user's testing account has only the user role.
+- [x] Build unified public Pet Pro directory with existing providers, search/category/network filters, map and listing claims.
+- [x] Build admin public-web research, reviewed CSV import, visibility controls, claim review and CSV export; deploy search and public map token functions.
+- [x] Verify public/signed-in directory browsing, search, phone layout and denial of non-admin research; check Firecrawl credentials.
+- [ ] Verify admin ingestion and claim approval end-to-end — requesting user's testing account has only the user role; no external listings published without source-rights confirmation.

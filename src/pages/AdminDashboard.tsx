@@ -1,4 +1,5 @@
 import { CareLoopAdminMetrics } from "@/components/analytics/CareLoopPanels";
+import { AdminPetPros } from "@/components/pros/AdminPetPros";
 import { useEffect, useState, useMemo, useCallback } from"react";
 import { useNavigate } from"react-router-dom";
 import { useAuth } from"@/hooks/useAuth";
@@ -78,6 +79,7 @@ const NAV_SECTIONS = [
  {
  title:"User Management",
  items: [
+ { id:"public-pet-pros", label:"Public Pet Pros", icon: MapPin, description:"Research, import, review and export public business listings" },
  {
  id:"approvals",
  label:"Pending Approvals",
@@ -358,6 +360,8 @@ const AdminDashboard = () => {
  // Render tab content
  const renderTabContent = useCallback(() => {
  switch (activeTab) {
+ case"public-pet-pros":
+ return <AdminPetPros />;
  case"overview":
  return <OverviewTab />;
  case"analytics":

@@ -239,6 +239,13 @@
       "when": 1793580205178,
       "tag": "0033_hide_disabled_business_services_and_offers",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1794430817166,
+      "tag": "0034_public_pet_pro_directory_and_claims",
+      "breakpoints": true
     }
   ]
 }

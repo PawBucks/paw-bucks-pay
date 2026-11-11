@@ -95,7 +95,7 @@ const MerchantOfferRedemptions = lazyWithRetry(() => import("./pages/MerchantOff
 const MerchantOfferCodes = lazyWithRetry(() => import("./pages/MerchantOfferCodes"),"MerchantOfferCodes");
 const MerchantAnalytics = lazyWithRetry(() => import("./pages/MerchantAnalytics"),"MerchantAnalytics");
 const MerchantProfile = lazyWithRetry(() => import("./pages/MerchantProfile"),"MerchantProfile");
-const MerchantDirectory = lazyWithRetry(() => import("./pages/MerchantDirectory"),"MerchantDirectory");
+const MerchantDirectory = lazyWithRetry(() => import("./pages/PetProDirectory"),"PetProDirectory");
 const MerchantMarket = lazyWithRetry(() => import("./pages/MerchantMarket"),"MerchantMarket");
 const NotificationPreferences = lazyWithRetry(() => import("./pages/NotificationPreferences"),"NotificationPreferences");
 const NotificationHistory = lazyWithRetry(() => import("./pages/NotificationHistory"),"NotificationHistory");

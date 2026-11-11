@@ -10698,6 +10698,53 @@ export type Database = {
         }
         Relationships: []
       }
+      pet_pro_claims: {
+        Row: {
+          contact_email: string
+          contact_name: string
+          created_at: string
+          evidence: string
+          id: string
+          listing_id: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          contact_email: string
+          contact_name: string
+          created_at?: string
+          evidence: string
+          id?: string
+          listing_id: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          contact_email?: string
+          contact_name?: string
+          created_at?: string
+          evidence?: string
+          id?: string
+          listing_id?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pet_pro_claims_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "public_pet_pros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pet_pro_referral_credit_usage: {
         Row: {
           amount_cents: number
@@ -10749,6 +10796,24 @@ export type Database = {
           lifetime_earned_cents?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      pet_pro_search_cache: {
+        Row: {
+          created_at: string
+          results: Json
+          search_key: string
+        }
+        Insert: {
+          created_at?: string
+          results: Json
+          search_key: string
+        }
+        Update: {
+          created_at?: string
+          results?: Json
+          search_key?: string
         }
         Relationships: []
       }
@@ -12358,6 +12423,95 @@ export type Database = {
           welcome_email_sent_at?: string | null
         }
         Relationships: []
+      }
+      public_pet_pros: {
+        Row: {
+          address: string | null
+          business_name: string
+          category: string
+          created_at: string
+          email: string | null
+          id: string
+          is_hidden: boolean
+          latitude: number | null
+          linked_merchant_id: string | null
+          linked_vet_id: string | null
+          longitude: number | null
+          phone: string | null
+          reuse_confirmed: boolean
+          source_key: string
+          source_url: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_name: string
+          category?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_hidden?: boolean
+          latitude?: number | null
+          linked_merchant_id?: string | null
+          linked_vet_id?: string | null
+          longitude?: number | null
+          phone?: string | null
+          reuse_confirmed?: boolean
+          source_key: string
+          source_url: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_name?: string
+          category?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_hidden?: boolean
+          latitude?: number | null
+          linked_merchant_id?: string | null
+          linked_vet_id?: string | null
+          longitude?: number | null
+          phone?: string | null
+          reuse_confirmed?: boolean
+          source_key?: string
+          source_url?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_pet_pros_linked_merchant_id_fkey"
+            columns: ["linked_merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_pet_pros_linked_merchant_id_fkey"
+            columns: ["linked_merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchants_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_pet_pros_linked_vet_id_fkey"
+            columns: ["linked_vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_pet_pros_linked_vet_id_fkey"
+            columns: ["linked_vet_id"]
+            isOneToOne: false
+            referencedRelation: "partner_vets_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       punch_card_events: {
         Row: {
@@ -18559,6 +18713,15 @@ export type Database = {
       }
       restore_transaction_inventory: {
         Args: { p_transaction_id: string }
+        Returns: undefined
+      }
+      review_pet_pro_claim: {
+        Args: {
+          _approve: boolean
+          _claim_id: string
+          _merchant_id?: string
+          _vet_id?: string
+        }
         Returns: undefined
       }
       revoke_pet_digital_id_token: { Args: { p_pet_id: string }; Returns: Json }
