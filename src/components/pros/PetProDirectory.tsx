@@ -26,8 +26,15 @@ export async function loadDirectoryPros(): Promise<DirectoryPro[]> {
     ...(external.data ?? []).map((p) => ({ id: p.id, name: p.business_name, category: p.category, address: p.address, phone: p.phone, website: p.website_url, latitude: p.latitude, longitude: p.longitude, network: "public" as const, sourceUrl: p.source_url })),
   ].sort((a, b) => a.name.localeCompare(b.name));
 }
-export function PetProDirectory() {
+export function PetProDirectory({ bookingPetId, bookingIntent }: { bookingPetId?: string | null; bookingIntent?: string | null } = {}) {
   const { user } = useAuth();
+  // Keep "Book for my pet" context when navigating from the directory to a PawBucks merchant profile.
+  const withBooking = (href?: string) => {
+    if (!href || !bookingPetId) return href;
+    const sp = new URLSearchParams({ petId: bookingPetId });
+    if (bookingIntent) sp.set("intent", bookingIntent);
+    return `${href}?${sp.toString()}`;
+  };
   const { data: pros = [], isLoading, error, refetch } = useQuery({ queryKey: ["public-pet-pro-directory"], queryFn: loadDirectoryPros });
   const [q, setQ] = useState(""); const [category, setCategory] = useState("all"); const [network, setNetwork] = useState<"all" | "pawbucks" | "public">("all");
   const [map, setMap] = useState(false); const [claim, setClaim] = useState<DirectoryPro | null>(null); const [selected, setSelected] = useState<DirectoryPro | null>(null);
@@ -38,7 +45,7 @@ export function PetProDirectory() {
     <div className="flex gap-3"><div className="bg-muted text-primary rounded-md h-11 w-11 flex shrink-0 items-center justify-center">{p.logo ? <img src={p.logo} alt="" className="h-11 w-11 object-contain rounded-md" /> : <Store className="h-5 w-5" />}</div><div className="min-w-0"><h3 className="font-semibold break-words">{p.name}</h3><p className="text-sm capitalize text-muted-foreground">{p.category.replace(/_/g, " ")}</p></div></div>
     <Badge variant="outline">{p.network === "pawbucks" ? "PawBucks network" : "Public listing · Unclaimed"}</Badge>
     {p.address && <p className="text-sm text-muted-foreground flex gap-2"><MapPin className="h-4 w-4 shrink-0 mt-0.5" />{p.address}</p>}
-    <div className="flex flex-wrap gap-2">{p.phone && <Button size="sm" variant="outline" asChild><a href={`tel:${p.phone.replace(/[^+\d]/g, "")}`}><Phone className="h-3 w-3 mr-1" />Call</a></Button>}{p.address && <Button size="sm" variant="outline" asChild><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.address)}`} target="_blank" rel="noopener noreferrer"><MapPin className="h-3 w-3 mr-1" />Directions</a></Button>}{p.website && <Button size="sm" variant="outline" asChild><a href={p.website} target="_blank" rel="noopener noreferrer"><Globe className="h-3 w-3 mr-1" />Website</a></Button>}{p.href && <Button size="sm" asChild><Link to={p.href}>View profile<ArrowUpRight className="h-3 w-3 ml-1" /></Link></Button>}</div>
+    <div className="flex flex-wrap gap-2">{p.phone && <Button size="sm" variant="outline" asChild><a href={`tel:${p.phone.replace(/[^+\d]/g, "")}`}><Phone className="h-3 w-3 mr-1" />Call</a></Button>}{p.address && <Button size="sm" variant="outline" asChild><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.address)}`} target="_blank" rel="noopener noreferrer"><MapPin className="h-3 w-3 mr-1" />Directions</a></Button>}{p.website && <Button size="sm" variant="outline" asChild><a href={p.website} target="_blank" rel="noopener noreferrer"><Globe className="h-3 w-3 mr-1" />Website</a></Button>}{p.href && <Button size="sm" asChild><Link to={withBooking(p.href)!}>View profile<ArrowUpRight className="h-3 w-3 ml-1" /></Link></Button>}</div>
     {p.sourceUrl && <a className="text-xs text-muted-foreground underline" href={p.sourceUrl} target="_blank" rel="noopener noreferrer">Public source</a>}
     {p.network === "public" && <Button className="w-full" variant="ghost" onClick={() => { setClaim(p); setEmail(user?.email ?? ""); }}><ShieldCheck className="h-4 w-4 mr-2" />Claim this listing</Button>}
   </article>;
